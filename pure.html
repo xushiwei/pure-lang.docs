@@ -3743,44 +3743,46 @@ command, see <a class="reference internal" href="#interactive-commands">Interact
 installed for that. By default, the <tt class="docutils literal"><span class="pre">help</span></tt> command uses w3m(1), but you can
 change this by setting either the PURE_HELP or the BROWSER environment
 variable accordingly.</p>
-<p>When invoked without arguments, the <tt class="docutils literal"><span class="pre">help</span></tt> command displays this manual:</p>
+<p>As of Pure 0.46, the interpreter provides a much improved <tt class="docutils literal"><span class="pre">help</span></tt> command
+which gives you access to all the available documentation in html format,
+which includes this manual, the <a class="reference external" href="purelib.html">Pure Library Manual</a>, as well as all manuals
+of the addon modules available from the Pure website.</p>
+<p>When invoked without arguments, the <tt class="docutils literal"><span class="pre">help</span></tt> command displays an overview of
+the available documentation, from which you can follow the links to the
+provided manuals:</p>
 <div class="highlight-python"><pre>&gt; help</pre>
 </div>
-<p>The <tt class="docutils literal"><span class="pre">help</span></tt> command also accepts a parameter which lets you specify a topic
-to show in the accompanying Pure Library manual, e.g.:</p>
+<p>(If your browser gives you an error message when you do this then you haven&#8217;t
+installed the documentation yet. The complete set of manuals is provided as a
+separate package at the Pure website, please see the Pure installation
+instructions for details.)</p>
+<p>The <tt class="docutils literal"><span class="pre">help</span></tt> command also accepts a parameter which lets you specify a search
+term which is looked up in the global index, e.g.:</p>
 <div class="highlight-python"><pre>&gt; help foldl</pre>
 </div>
-<p>The help files distributed with the Pure interpreter are located in the Pure
-library directory (/usr/local/lib/pure by default). You can install additional
-documentation in html format in this directory, and look up topics in those
-help files with a command like the following:</p>
-<div class="highlight-python"><pre>&gt; help mydoc#foo</pre>
+<p>If the search term doesn&#8217;t appear in the index, it is assumed to be a topic (a
+link target) in the Pure manual. Note that the <a class="reference external" href="http://docutils.sourceforge.net/">docutils</a> tools used to
+generate the html source of the Pure documentation mangle the section titles
+so that they are in lowercase and blanks are replaced with hyphens. So to look
+up the present section in this manual you&#8217;d have to type:</p>
+<div class="highlight-python"><pre>&gt; help online-help</pre>
 </div>
-<p>Here <tt class="docutils literal"><span class="pre">mydoc</span></tt> is the basename of your help file (library path and .html
-suffix are supplied automatically), and <tt class="docutils literal"><span class="pre">foo</span></tt> can be any link target in the
-document (as specified with a <tt class="docutils literal"><span class="pre">&lt;a</span> <span class="pre">name=...&gt;</span></tt> tag or an <tt class="docutils literal"><span class="pre">id</span></tt> attribute in
-the html source). To just read the mydoc.html file without specifying a
-target, type the following:</p>
-<div class="highlight-python"><pre>&gt; help mydoc#</pre>
+<p>The help files are in html format and located in the docs subdirectory of the
+Pure library directory (i.e., /usr/local/lib/pure/docs by default). You can
+look up topics in any of the help files with a command like the following:</p>
+<div class="highlight-python"><pre>&gt; help pure-gsl#matrices</pre>
 </div>
-<p>Note that just <tt class="docutils literal"><span class="pre">help</span> <span class="pre">mydoc</span></tt> wouldn&#8217;t work, since it would look for an entry
-<tt class="docutils literal"><span class="pre">mydoc</span></tt> in the standard library documentation.</p>
-<p>If the basename of the help file is missing, it defaults to the library
-manual, so <tt class="docutils literal"><span class="pre">help</span> <span class="pre">#foldl</span></tt> does the same as <tt class="docutils literal"><span class="pre">help</span> <span class="pre">foldl</span></tt>, and just <tt class="docutils literal"><span class="pre">help</span>
-<span class="pre">#</span></tt> is a convenient shorthand to bring up the library manual without a
-specific topic. Of course, this syntax also works for looking up sections in
-the Pure manual:</p>
-<div class="highlight-python"><pre>&gt; help pure#declarations</pre>
+<p>Here <tt class="docutils literal"><span class="pre">pure-gsl</span></tt> is the basename of the help file (library path and .html
+suffix are supplied automatically), and <tt class="docutils literal"><span class="pre">matrices</span></tt> is a link target in that
+document. To just read the pure-gsl.html file without specifying a target,
+type the following:</p>
+<div class="highlight-python"><pre>&gt; help pure-gsl#</pre>
 </div>
-<p>Note that the <a class="reference external" href="http://docutils.sourceforge.net/">docutils</a> tools used to generate the html source of the Pure
-manual mangle the section titles so that they are in lowercase and blanks are
-replaced with hyphens. So to look up the present section in this manual you&#8217;d
-have to type:</p>
-<div class="highlight-python"><pre>&gt; help pure#online-help</pre>
-</div>
-<p>You can also point the help browser to a proper URL, either a local file or
-some website (provided that your browser program can handle these). For
-instance:</p>
+<p>(Note that just <tt class="docutils literal"><span class="pre">help</span> <span class="pre">pure-gsl</span></tt> won&#8217;t work, since it would look for a search
+term in the index or a topic in the Pure manual.)</p>
+<p>Last but not least, you can also point the help browser to any html document
+(either a local file or some website) denoted by a proper URL, provided that
+your browser program can handle these. For instance:</p>
 <div class="highlight-python"><pre>&gt; help file:mydoc.html#foo
 &gt; help http://pure-lang.googlecode.com</pre>
 </div>
@@ -3847,10 +3849,11 @@ point for an ordinary script or a .purerc file, or you can just run the
 file with the <tt class="docutils literal"><span class="pre">run</span></tt> command (see below) to restore the definitions in a
 subsequent interpreter session.</p>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">help</span> <span class="pre">[target]</span></tt></dt>
-<dd>Display the Pure manual or some other bit of documentation. In particular,
-<tt class="docutils literal"><span class="pre">help</span> <span class="pre">foo</span></tt> looks up the symbol <tt class="docutils literal"><span class="pre">foo</span></tt> in the Pure Library manual. See
-<a class="reference internal" href="#online-help">Online Help</a> above for details.</dd>
+<dt><tt class="docutils literal"><span class="pre">help</span> <span class="pre">[topic]</span></tt></dt>
+<dd>Display online documentation. If a topic is given, it is looked up in the
+index. Alternatively, you can also specify a link target in any of the
+installed help files, or any other html document denoted by a proper URL.
+Please see <a class="reference internal" href="#online-help">Online Help</a> above for details.</dd>
 <dt><tt class="docutils literal"><span class="pre">ls</span> <span class="pre">[args]</span></tt></dt>
 <dd>List files (shell ls(1) command).</dd>
 <dt><tt class="docutils literal"><span class="pre">mem</span></tt></dt>

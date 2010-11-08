@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pure-doc &mdash; Pure Language and Library Documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.45',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="top" title="Pure Language and Library Documentation" href="index.html" />
+    <link rel="next" title="pure-ffi" href="pure-ffi.html" />
+    <link rel="prev" title="Pure Library Manual" href="purelib.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="pure-ffi.html" title="pure-ffi"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="purelib.html" title="Pure Library Manual"
+             accesskey="P">previous</a> |</li>
+        <li><a href="puredoc.html">Pure Language and Library Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pure-doc">
+<h1>pure-doc<a class="headerlink" href="#pure-doc" title="Permalink to this headline">¶</a></h1>
+<p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
+<p>pure-doc is a simple utility for literate programming and documenting source
+code written in the Pure programming language. It is designed to be used with
+the excellent <a class="reference external" href="http://docutils.sourceforge.net">docutils</a> tools and the gentle markup format supported by these,
+called <a class="reference external" href="http://docutils.sourceforge.net/rst.html">RST</a> a.k.a. &#8220;reStructuredText&#8221;, usually pronounced &#8220;rest&#8221;.</p>
+<p>The basic idea is that you just comment your code as usual, but using RST
+markup instead of plain text. In addition, you can also designate literate
+programming fragments in your code, which will be translated to RST literal
+blocks automatically. You then run pure-doc on your source files to extract
+all marked up comments and the literate code blocks. The resulting RST source
+can then be processed with the docutils utilities like rst2html.py and
+rst2latex.py to create the documentation in a variety of formats.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#copying" id="id1">Copying</a></li>
+<li><a class="reference internal" href="#installation" id="id2">Installation</a></li>
+<li><a class="reference internal" href="#usage" id="id3">Usage</a></li>
+<li><a class="reference internal" href="#literate-programming" id="id4">Literate Programming</a></li>
+<li><a class="reference internal" href="#hyperlink-targets-and-index-generation" id="id5">Hyperlink Targets and Index Generation</a></li>
+<li><a class="reference internal" href="#generating-documentation" id="id6">Generating Documentation</a></li>
+<li><a class="reference internal" href="#installing-documentation" id="id7">Installing Documentation</a></li>
+<li><a class="reference internal" href="#formatting-tips" id="id8">Formatting Tips</a></li>
+</ul>
+</div>
+<div class="section" id="copying">
+<h2><a class="toc-backref" href="#id1">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2009 by Albert Graef.</p>
+<p>pure-doc is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.</p>
+<p>pure-doc is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</p>
+<p>You should have received a copy of the GNU General Public License along with
+this program.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
+</div>
+<div class="section" id="installation">
+<h2><a class="toc-backref" href="#id2">Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Just do the customary <tt class="docutils literal"><span class="pre">make</span> <span class="pre">&amp;&amp;</span> <span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></tt>. This only needs flex and
+a standards-compliant C++ compiler.</p>
+</div>
+<div class="section" id="usage">
+<h2><a class="toc-backref" href="#id3">Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>First, see the description of the <a class="reference external" href="http://docutils.sourceforge.net/rst.html">RST</a> format. RST is a very simple markup
+format, almost like plain text (in fact, you&#8217;re looking at RST right now, this
+document is written in it!). You can learn enough of it to start marking up
+your source in about five minutes.</p>
+<p>Second, you&#8217;ll have to mark up your source comments. pure-doc recognizes
+comments in RST format by looking at the first non-empty line of the
+comment. A comment (either <tt class="docutils literal"><span class="pre">/*</span> <span class="pre">...</span> <span class="pre">*/</span></tt> or a contiguous sequence of <tt class="docutils literal"><span class="pre">//</span></tt>
+line comments) is assumed to contain RST format if the first non-empty line
+starts with <tt class="docutils literal"><span class="pre">:</span></tt>, <tt class="docutils literal"><span class="pre">..</span></tt> or <tt class="docutils literal"><span class="pre">__</span></tt>. Other comments are taken to be plain text
+and are ignored by pure-doc.</p>
+<p>Notes:</p>
+<ul class="simple">
+<li>pure-doc makes no other assumption about the contents of marked up comments,
+so you can include whatever you want: titles, section headers, fields,
+admonitions, plain text, whatever. Just make sure that the comment starts
+with one of the special tokens listed above. (You can always put just <tt class="docutils literal"><span class="pre">..</span></tt>
+at the beginning of the comment to force it to be recognized, this will be
+treated as a comment by the docutils tools.)</li>
+<li>Also, pure-doc makes very few assumptions about the source; in fact, any
+source files with a C/C++-like comment and string syntax should work. So you
+could also use it to document your C/C++ programs, or even plain text files
+like this one, as long as they adhere to these standards.</li>
+<li>Indentation in extracted comments is preserved (assuming tabs = 8 spaces
+by default, you can change this with the <tt class="docutils literal"><span class="pre">-t</span></tt> option).  This is important
+because indentation conveys document structure in RST.</li>
+</ul>
+<p>For instance, here is a sample RST-formatted comment:</p>
+<div class="highlight-python"><pre>/* :Name: ``rand`` - compute random numbers
+   :Synopsis: ``rand``
+   :Description: Computes a (pseudo) random number. Takes no parameters.
+   :Example: Here is how you can call ``rand`` in Pure:
+     ::
+
+       &gt; extern int rand();
+       &gt; rand;
+       1804289383
+
+   :See Also: rand(3) */</pre>
+</div>
+<p>This will be rendered as follows:</p>
+<blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Name:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">rand</span></tt> - compute random numbers</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Synopsis:</th><td class="field-body"><p class="first"><tt class="docutils literal"><span class="pre">rand</span></tt></p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Description:</th><td class="field-body"><p class="first">Computes a (pseudo) random number. Takes no parameters.</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Example:</th><td class="field-body"><p class="first">Here is how you can call <tt class="docutils literal"><span class="pre">rand</span></tt> in Pure:</p>
+<div class="highlight-python"><pre>&gt; extern int rand();
+&gt; rand;
+1804289383</pre>
+</div>
+</td>
+</tr>
+<tr class="field"><th class="field-name">See Also:</th><td class="field-body"><p class="first last">rand(3)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p>Finally, to extract the documentation you run pure-doc on your source files as
+follows:</p>
+<div class="highlight-python"><pre>pure-doc source-files ...</pre>
+</div>
+<p>If no input files are specfied then the source is read from standard
+input. Otherwise all input files are read and processed in the indicated
+order. The output is written to stdout, so that you can directly pipe it into
+one of the docutils programs:</p>
+<div class="highlight-python"><pre>pure-doc source-files ... | rst2html.py</pre>
+</div>
+<p>If you prefer to write the output to a file, you can do that as follows:</p>
+<div class="highlight-python"><pre>pure-doc source-files ... &gt; rst-file</pre>
+</div>
+<p>pure-doc also understands the following options. These must come before any
+file arguments.</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-h</span></kbd></td>
+<td>Print a short help message.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-s</span></kbd></td>
+<td>Generate Sphinx-compatible output.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-t<var>width</var></span></kbd></td>
+<td>Set the tab width to the given number of spaces.</td></tr>
+</tbody>
+</table>
+<p>There are no other options. By its design pure-doc is just a plain simple
+&#8220;docstring scraping&#8221; utility with no formatting knowledge of its own. All
+actual formatting is handled by the docutils programs which offer plenty of
+options to change the appearance of the generated output; please refer to the
+<a class="reference external" href="http://docutils.sourceforge.net">docutils</a> documentation for details.</p>
+<p>If docutils isn&#8217;t enough for you, then you should consider one of the other
+available RST-based documentation frameworks. In particular, pure-doc can be
+run with the -s option which makes its output compatible with <a class="reference external" href="http://sphinx.pocoo.org">Sphinx</a>, the RST
+formatter used by the Python project. Sphinx provides cross-document indexing
+and referencing, and even more elaborate formatting options and much prettier
+output. (However, you should take into account that many Pure users read
+documentation in a text-based browser while running the interpreter, so
+including all the latest html gizmos is not going to do them much good and
+might in fact impair readability.)</p>
+</div>
+<div class="section" id="literate-programming">
+<h2><a class="toc-backref" href="#id4">Literate Programming</a><a class="headerlink" href="#literate-programming" title="Permalink to this headline">¶</a></h2>
+<p>pure-doc also recognizes literate code delimited by comments which, besides
+the comment delimiters and whitespace, contain nothing but the special start
+and end &#8220;tags&#8221; <tt class="docutils literal"><span class="pre">&gt;&gt;&gt;</span></tt> and <tt class="docutils literal"><span class="pre">&lt;&lt;&lt;</span></tt>. Code between these delimiters (including
+all comments) is extracted from the source and output as a RST literal code
+block.</p>
+<p>For instance:</p>
+<div class="highlight-python"><pre>/* ..
+
+   pure-doc supports literate programming, too. */
+
+// &gt;&gt;&gt;
+
+// This is a literate comment.
+/* .. This too! */
+
+extern int rand();
+rand;
+
+// &lt;&lt;&lt;</pre>
+</div>
+<p>This will be rendered as follows:</p>
+<blockquote>
+<p>pure-doc supports literate programming, too.</p>
+<div class="highlight-python"><pre>// This is a literate comment.
+/* .. This too! */
+
+extern int rand();
+rand;</pre>
+</div>
+</blockquote>
+<p>Try it now! You can scrape all the sample &#8220;documentation&#8221; from this file and
+format it as html, as follows:</p>
+<div class="highlight-python"><pre>pure-doc README | rst2html.py --no-doc-title --no-doc-info &gt; test.html</pre>
+</div>
+<p>As already mentioned, this document itself is also in RST format, so you can
+also do the following to get nicely formatted documentation:</p>
+<div class="highlight-python"><pre>rst2html.py README pure-doc.html</pre>
+</div>
+<p>(You can also just type <tt class="docutils literal"><span class="pre">make</span> <span class="pre">html</span></tt> to get this.)</p>
+</div>
+<div class="section" id="hyperlink-targets-and-index-generation">
+<h2><a class="toc-backref" href="#id5">Hyperlink Targets and Index Generation</a><a class="headerlink" href="#hyperlink-targets-and-index-generation" title="Permalink to this headline">¶</a></h2>
+<p>To supplement the normal hyperlink target processing by the docutils tools,
+pure-doc recognizes explicit hyperlink targets of the form:</p>
+<div class="highlight-python"><pre>.. _target:</pre>
+</div>
+<p>pure-doc automatically creates raw html targets (<tt class="docutils literal"><span class="pre">&lt;a</span> <span class="pre">name=...&gt;</span></tt>) for those.
+This works around the docutils name mangling (which is undesirable if you&#8217;re
+indexing, say, function names). It also resolves a quirk with w3m which
+doesn&#8217;t pick up all <tt class="docutils literal"><span class="pre">id</span></tt> attributes in the docutils-generated html source.</p>
+<p>In addition, you can also have pure-doc generate an index from all explicit
+targets. To these ends, just add the following special directive at the place
+where you want the index to appear:</p>
+<div class="highlight-python"><pre>.. makeindex::</pre>
+</div>
+<p>The directive will be replaced with a list of references to all targets
+collected <em>up to that point</em>, sorted alphabetically. This also resets the list
+of collected targets, so that you can have multiple smaller indices in your
+document instead of one big one.</p>
+<p>Please note that docutils doesn&#8217;t allow multiple explicit targets with the
+same name, so you should take that into consideration when devising your index
+terms.</p>
+<p>Also note that in Sphinx compatibility mode (-s), pure-doc will generate the
+appropriate Sphinx markup for index entries (<tt class="docutils literal"><span class="pre">index::</span></tt>) instead, and the
+<tt class="docutils literal"><span class="pre">makeindex::</span></tt> directive will be ignored. You should then use Sphinx to
+generate the index.</p>
+</div>
+<div class="section" id="generating-documentation">
+<h2><a class="toc-backref" href="#id6">Generating Documentation</a><a class="headerlink" href="#generating-documentation" title="Permalink to this headline">¶</a></h2>
+<p>If you&#8217;re generating some library documentation for which you have to process
+a bigger collection of source files, then it is often convenient to have a few
+Makefile rules to automatize the process. To these ends, simply add rules
+similar to the following to your Makefile:</p>
+<div class="highlight-python"><pre># The sources. Order matters here. The generated documentation will have the
+# comments from each source file in the indicated order.
+sources = foo.pure bar.pure
+
+# The basename of the documentation files to be generated.
+target = foo
+
+.PHONY: html tex pdf
+
+html: $(target).html
+tex: $(target).tex
+pdf: $(target).pdf
+
+$(target).txt: $(sources)
+        pure-doc $(sources) &gt; $@
+
+# This requires that you have docutils installed.
+
+%.html: %.txt
+        rst2html.py $&lt; $@
+
+%.tex: %.txt
+        rst2latex.py $&lt; $@
+
+# This also requires that you have TeX installed.
+
+%.pdf: %.tex
+        pdflatex $&lt;
+        rm -f *.aux *.log *.out
+
+clean:
+        rm -f *.html *.tex *.pdf</pre>
+</div>
+<p>(This assumes GNU make. If you use some other make utility then you will have
+to adapt the pattern rules accordingly.)</p>
+<p>Now you can just type <tt class="docutils literal"><span class="pre">make</span></tt> or <tt class="docutils literal"><span class="pre">make</span> <span class="pre">html</span></tt> to generate the documentation
+in html format, and <tt class="docutils literal"><span class="pre">make</span> <span class="pre">tex</span></tt> or <tt class="docutils literal"><span class="pre">make</span> <span class="pre">pdf</span></tt> to generate the other
+formats. The <tt class="docutils literal"><span class="pre">clean</span></tt> target removes the generated files.</p>
+</div>
+<div class="section" id="installing-documentation">
+<h2><a class="toc-backref" href="#id7">Installing Documentation</a><a class="headerlink" href="#installing-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Now that you generated the documentation for your Pure library, you might want
+to make the Pure interpreter know about it, so that you can read your
+documentation with the <tt class="docutils literal"><span class="pre">help</span></tt> command of the interpreter. This isn&#8217;t
+difficult either. You just install the html files on the Pure library
+path. The following Makefile rule automatizes this process. Add this to the
+Makefile in the previous section:</p>
+<div class="highlight-python"><pre># Try to guess the installation prefix (this needs GNU make):
+prefix = $(patsubst %/bin/pure,%,$(shell which pure 2&gt;/dev/null))
+ifeq ($(strip $(prefix)),)
+# Fall back to /usr/local.
+prefix = /usr/local
+endif
+
+libdir = $(prefix)/lib
+datadir = $(libdir)/pure
+
+install:
+        test -d "$(DESTDIR)$(datadir)" || mkdir -p "$(DESTDIR)$(datadir)"
+        cp $(target).html "$(DESTDIR)$(datadir)"</pre>
+</div>
+<p>After a <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> your documentation should now end up in the Pure
+library directory, and you can read it in the Pure interpreter using a
+command like the following:</p>
+<div class="highlight-python"><pre>&gt; help foo#</pre>
+</div>
+<p>For a concrete example, you can find all this and more in pure-doc&#8217;s own
+Makefile. In fact, after installation this document ends up as pure-doc.html
+in the Pure library directory, so that you can read it with:</p>
+<div class="highlight-python"><pre>&gt; help pure-doc#</pre>
+</div>
+<p>Note the hash character. This tells the <tt class="docutils literal"><span class="pre">help</span></tt> command that this is an
+auxiliary documentation file, rather than a function name to be looked up in
+the Pure Library Manual. You can also look up a specific section in the
+pure-doc manual as follows:</p>
+<div class="highlight-python"><pre>&gt; help pure-doc#literate-programming</pre>
+</div>
+<p>Please also refer to the <a class="reference external" href="pure.html">Pure Manual</a> for more information on how to use the
+interpreter&#8217;s online help.</p>
+</div>
+<div class="section" id="formatting-tips">
+<h2><a class="toc-backref" href="#id8">Formatting Tips</a><a class="headerlink" href="#formatting-tips" title="Permalink to this headline">¶</a></h2>
+<p>If you&#8217;re generating documentation in pdf format via LaTeX, you might have to
+fiddle with the formatting to get results suitable for publication purposes.
+Newer versions of the rts2latex.py program provide some options which let you
+adjust the formatting of various document elements. Here are the options that
+the author found particularly helpful:</p>
+<ul class="simple">
+<li>The table of contents that RST produces isn&#8217;t all that useful in printed
+documentation, since it lacks page numbers. As a remedy, you can invoke
+rst2latex with <tt class="docutils literal"><span class="pre">--use-latex-toc</span></tt> to have LaTeX handle the formatting
+of the table of contents, which looks much nicer.</li>
+<li>Similarly, <tt class="docutils literal"><span class="pre">--use-latex-docinfo</span></tt> can be used to tell rst2latex that you
+want the title information (author and date) to be formatted the LaTeX way.</li>
+<li>If you need specific LaTeX document options, these can be specified with
+<tt class="docutils literal"><span class="pre">--documentoptions</span></tt>, e.g.: <tt class="docutils literal"><span class="pre">--documentoptions=&quot;11pt&quot;</span></tt>.</li>
+<li>For more comprehensive formatting changes which require special LaTeX
+code and/or packages, you can use the <tt class="docutils literal"><span class="pre">--stylesheet</span></tt> option. E.g.,
+<tt class="docutils literal"><span class="pre">--stylesheet=preamble.tex</span></tt> will cause a preamble.tex file with your own
+definitions to be included in the preamble of the generated document.</li>
+<li>To format literal code blocks using an alternative environment instead of
+the default verbatim environment, use the <tt class="docutils literal"><span class="pre">--literal-block-env</span></tt> option.
+E.g., <tt class="docutils literal"><span class="pre">--literal-block-env=lstlisting</span></tt> will use the highlighted code
+environment from the listings package. (Note that in this case you&#8217;ll also
+need a preamble which loads the corresponding package.).</li>
+</ul>
+<p>To learn more about this, please consult the rts2latex.py documentation at the
+docutils website, or have a look at how the LaTeX version of the Pure manual
+included in the Pure main distribution is formatted.</p>
+<p>In addition, the pure-doc package contains a little GNU awk script called
+fixdoc, which attempts to improve the LaTeX output produced by older svn
+versions of rst2latex in various ways. (This shouldn&#8217;t be necessary for the
+latest rst2latex versions.)</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="puredoc.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pure-doc</a><ul>
+<li><a class="reference internal" href="#copying">Copying</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#literate-programming">Literate Programming</a></li>
+<li><a class="reference internal" href="#hyperlink-targets-and-index-generation">Hyperlink Targets and Index Generation</a></li>
+<li><a class="reference internal" href="#generating-documentation">Generating Documentation</a></li>
+<li><a class="reference internal" href="#installing-documentation">Installing Documentation</a></li>
+<li><a class="reference internal" href="#formatting-tips">Formatting Tips</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="purelib.html"
+                        title="previous chapter">Pure Library Manual</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pure-ffi.html"
+                        title="next chapter">pure-ffi</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pure-doc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="pure-ffi.html" title="pure-ffi"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="purelib.html" title="Pure Library Manual"
+             >previous</a> |</li>
+        <li><a href="puredoc.html">Pure Language and Library Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Albert Gräf, Kay-Uwe Kirstein, Eddie Rucker, Jiri Spitz, Peter Summerland.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1032 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Gnumeric/Pure: A Pure Plugin for Gnumeric &mdash; Pure Language and Library Documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.45',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="top" title="Pure Language and Library Documentation" href="index.html" />
+    <link rel="next" title="Pure-GLPK - GLPK interface for the Pure programming language" href="pure-glpk.html" />
+    <link rel="prev" title="pure-sockets: Pure Sockets Interface" href="pure-sockets.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="pure-glpk.html" title="Pure-GLPK - GLPK interface for the Pure programming language"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pure-sockets.html" title="pure-sockets: Pure Sockets Interface"
+             accesskey="P">previous</a> |</li>
+        <li><a href="puredoc.html">Pure Language and Library Documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gnumeric-pure-a-pure-plugin-for-gnumeric">
+<h1>Gnumeric/Pure: A Pure Plugin for Gnumeric<a class="headerlink" href="#gnumeric-pure-a-pure-plugin-for-gnumeric" title="Permalink to this headline">¶</a></h1>
+<p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
+<p>Gnumeric/Pure is a <a class="reference external" href="http://www.gnumeric.org/">Gnumeric</a> extension which lets you use <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> functions in
+Gnumeric, the Gnome spreadsheet. It offers better execution speed than the
+existing Perl and Python plugins, and provides some powerful features not
+found in other Gnumeric scripting plugins, such as asynchronous data sources
+created from Pure streams and OpenGL rendering in Gnumeric frame widgets via
+Pure&#8217;s OpenGL module.</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><a class="reference internal" href="#introduction" id="id1">Introduction</a></li>
+<li><a class="reference internal" href="#installation" id="id2">Installation</a></li>
+<li><a class="reference internal" href="#setup" id="id3">Setup</a></li>
+<li><a class="reference internal" href="#basic-usage" id="id4">Basic Usage</a></li>
+<li><a class="reference internal" href="#interactive-pure-shell" id="id5">Interactive Pure Shell</a></li>
+<li><a class="reference internal" href="#defining-your-own-functions" id="id6">Defining Your Own Functions</a></li>
+<li><a class="reference internal" href="#gnumeric-pure-interface" id="id7">Gnumeric/Pure Interface</a><ul>
+<li><a class="reference internal" href="#function-descriptions" id="id8">Function Descriptions</a></li>
+<li><a class="reference internal" href="#conversions-between-pure-and-gnumeric-values" id="id9">Conversions Between Pure and Gnumeric Values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-features" id="id10">Advanced Features</a><ul>
+<li><a class="reference internal" href="#calling-gnumeric-from-pure" id="id11">Calling Gnumeric from Pure</a></li>
+<li><a class="reference internal" href="#accessing-spreadsheet-cells" id="id12">Accessing Spreadsheet Cells</a></li>
+<li><a class="reference internal" href="#asynchronous-data-sources" id="id13">Asynchronous Data Sources</a></li>
+<li><a class="reference internal" href="#triggers" id="id14">Triggers</a></li>
+<li><a class="reference internal" href="#sheet-objects" id="id15">Sheet Objects</a></li>
+<li><a class="reference internal" href="#opengl-interface" id="id16">OpenGL Interface</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#copying" id="id17">Copying</a></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h2><a class="toc-backref" href="#id1">Introduction</a><a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This package provides a <a class="reference external" href="http://www.gnumeric.org/">Gnumeric</a> extension which gives you access to the
+<a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> programming language in Gnumeric. It works pretty much like the Perl and
+Python plugin loaders which are distributed with Gnumeric, but Gnumeric/Pure
+offers some powerful features which aren&#8217;t found in other Gnumeric scripting
+plugins:</p>
+<ul class="simple">
+<li>Pure is a functional programming language which fits the computational model
+of spreadsheet programs very well.</li>
+<li>Pure is based on term rewriting and thus enables you to do symbolic
+computations in addition to the usual numeric calculations.</li>
+<li>Pure has a built-in <a class="reference external" href="http://www.mathworks.com/">MATLAB</a>/<a class="reference external" href="http://www.octave.org/">Octave</a>-like matrix data structure which makes
+it easy to deal with cell ranges in a spreadsheet in an efficient manner.</li>
+<li>Pure also provides a bridge to <a class="reference external" href="http://www.octave.org/">Octave</a> so that you can call arbitrary Octave
+functions using this extension.</li>
+<li>Gnumeric/Pure offers support for rendering <a class="reference external" href="http://www.opengl.org/">OpenGL</a> scenes in Gnumeric frame
+widgets, via Pure&#8217;s own OpenGL interface.</li>
+<li>Pure also has built-in support for lazy data structures and thus allows you
+to handle potentially infinite amounts of data such as the list of all prime
+numbers. Gnumeric/Pure lets you turn such lazy values into asynchronous data
+sources computed in the background, which update the spreadsheet
+automatically as results become available.</li>
+<li>Last but not least, Pure is compiled to native code on the fly. This means
+that, while startup times are a bit longer due to Pure&#8217;s JIT compiler
+kicking in (you&#8217;ll notice this if you open a spreadsheet with Pure
+functions), the resulting compiled code then typically executes <em>much</em>
+faster than equivalent interpreted Perl and Python code.</li>
+</ul>
+<p>Adding Pure functions to Gnumeric is quite easy. Once the plugin is installed
+and enabled, you can simply start adding Pure functions to the provided
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script, or you can create your own Pure plugin folders.
+Gnumeric/Pure also provides a programming interface for use in Pure which
+gives you access to various advanced features, such as modifying entire ranges
+of cells with one Pure call, calling Gnumeric functions from Pure, and setting
+up asynchronous data sources and OpenGL frames. This is all explained in
+detail below.</p>
+</div>
+<div class="section" id="installation">
+<h2><a class="toc-backref" href="#id2">Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Obviously, you need to have both Pure and Gnumeric installed. Pure 0.36 and
+Gnumeric 1.9.13 are known to work. We recommend Gnumeric 1.9.14 or later since
+it has improved support for GUI widgets. (Older Gnumeric versions probably
+work as well if you&#8217;re willing to fiddle with the Makefile and/or the
+sources. See the beginning of the Makefile for related information.)</p>
+<p>As shipped, the Makefile is set up to build Gnumeric/Pure with OpenGL support,
+which requires that you have the OpenGL libraries as well as <a class="reference external" href="http://gtkglext.sourceforge.net">GtkGLExt</a> (the
+Gtk OpenGL extension) installed. These should be readily available on most
+systems, but you can also disable this feature by invoking <tt class="docutils literal"><span class="pre">make</span></tt> as <tt class="docutils literal"><span class="pre">make</span>
+<span class="pre">GLDEPS=</span></tt>.</p>
+<p>Run <tt class="docutils literal"><span class="pre">make</span></tt> to compile the software. You might have to adjust the settings at
+the beginning of the Makefile to make this work. If you&#8217;re lucky and the
+compile goes through, you should now have a <tt class="docutils literal"><span class="pre">pure_loader.so</span></tt> file in the
+<tt class="docutils literal"><span class="pre">pure-loader</span></tt> subdirectory. You can install the plugin and related stuff
+with <tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></tt> in the global Gnumeric plugin directory, or if you
+prefer to install it into your personal plugin directory then run <tt class="docutils literal"><span class="pre">make</span>
+<span class="pre">install-local</span></tt> instead.  (We recommend the latter since it lets you adjust
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> for your purposes more easily.) Optionally, you might also
+want to copy the <tt class="docutils literal"><span class="pre">gnumeric-pure.html</span></tt> file to your Pure library directory so
+that you can read it with the <tt class="docutils literal"><span class="pre">help</span></tt> command of the Pure interpreter or in
+Emacs Pure mode.</p>
+<p>Typically, <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> and <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install-local</span></tt> will install the
+plugins into the following directories by default:</p>
+<ul class="simple">
+<li>System-wide installations go into <tt class="docutils literal"><span class="pre">/usr/local/gnumeric/1.9.13/plugins</span></tt> or
+similar, depending on where Gnumeric is installed.</li>
+<li>User-specific installations go into <tt class="docutils literal"><span class="pre">~/.gnumeric/1.9.13/plugins</span></tt>.</li>
+</ul>
+<p>The Makefile tries to guess the installation path and version number of
+Gnumeric on its own. If it guesses wrong, you can change these using the
+Makefile variables <tt class="docutils literal"><span class="pre">prefix</span></tt> and <tt class="docutils literal"><span class="pre">gnmversion</span></tt>, respectively. For instance:</p>
+<div class="highlight-python"><pre>$ make prefix=/usr gnmversion=1.9.13</pre>
+</div>
+<p>If <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> doesn&#8217;t work for some reason, you can also just copy the
+<tt class="docutils literal"><span class="pre">pure-func</span></tt>, <tt class="docutils literal"><span class="pre">pure-glfunc</span></tt> and <tt class="docutils literal"><span class="pre">pure-loader</span></tt> directories manually to
+your Gnumeric plugin directory.</p>
+</div>
+<div class="section" id="setup">
+<h2><a class="toc-backref" href="#id3">Setup</a><a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>Once Gnumeric/Pure has been properly installed, you should see it in
+Gnumeric&#8217;s Tools/Plug-ins dialog. There are actually two main entries, one
+labelled &#8220;Pure functions&#8221; and the other one labelled &#8220;Pure plugin loader&#8221;. You
+need to enable both before you can start using Pure functions in your Gnumeric
+spreadsheets. There&#8217;s also a third entry labelled &#8220;Pure OpenGL functions&#8221;
+which you might want to enable if you want to try the OpenGL capabilities
+(this will only work if you built Gnumeric/Pure with OpenGL support and have
+Pure&#8217;s OpenGL module installed; see <a class="reference internal" href="#opengl-interface">OpenGL Interface</a> for details).</p>
+<p>Gnumeric doesn&#8217;t provide much in the way of GUI customization options right
+now, but at least it&#8217;s possible for plugins to install and configure
+additional menu and toolbar options. Gnumeric/Pure adds three additional
+options to the Tools menu which allow you to stop asynchronous data sources,
+reload Pure scripts and edit them. After installation, the definitions of
+these items can be found in the <tt class="docutils literal"><span class="pre">pure-loader/pure-ui.xml</span></tt> file in your
+Gnumeric plugin directory. Have a look at this file and edit is as
+desired. E.g., if you want to put the Pure-related options into a submenu and
+enable toolbar buttons for these options, then your <tt class="docutils literal"><span class="pre">pure-ui.xml</span></tt> file
+should look as follows:</p>
+<div class="highlight-python"><pre>&lt;ui&gt;
+  &lt;menubar&gt;
+    &lt;menu name="Tools" action="MenuTools"&gt;
+      &lt;separator/&gt;
+      &lt;menu name="Pure" action="PureMenu"&gt;
+        &lt;menuitem action="PureStop"/&gt;
+        &lt;menuitem action="PureReload"/&gt;
+        &lt;menuitem action="PureEdit"/&gt;
+      &lt;/menu&gt;
+    &lt;/menu&gt;
+  &lt;/menubar&gt;
+  &lt;toolbar name="StandardToolbar"&gt;
+    &lt;separator/&gt;
+    &lt;toolitem action="PureStop"/&gt;
+    &lt;toolitem action="PureReload"/&gt;
+    &lt;toolitem action="PureEdit"/&gt;
+  &lt;/toolbar&gt;
+&lt;/ui&gt;</pre>
+</div>
+</div>
+<div class="section" id="basic-usage">
+<h2><a class="toc-backref" href="#id4">Basic Usage</a><a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h2>
+<p>With Pure/Gnumeric installed and enabled, you should be ready to join the fun
+now. Start up Gnumeric, click on a cell and invoke the &#8220;f(x)&#8221; dialog. The Pure
+functions available for use are shown in the &#8220;Pure&#8221; category. E.g., click on
+<tt class="docutils literal"><span class="pre">pure_hello</span></tt>. Now the Pure interpreter will be loaded and the function
+description displayed. Click &#8220;Insert&#8221; and then &#8220;Ok&#8221;. You should now be able to
+read the friendly greeting returned by the <tt class="docutils literal"><span class="pre">pure_hello</span></tt> function.</p>
+<p>Of course, you can also enter the function call directly as a formula into a
+cell as usual. Click on a cell, then enter the following:</p>
+<div class="highlight-python"><pre>=pure_hello(getenv("USER"))</pre>
+</div>
+<p>The greeting should now be displayed with your login name in it.</p>
+<p>Play around a bit with the other Pure functions. These functions are nothing
+special; they are just ordinary Pure functions which are defined by the
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script in the <tt class="docutils literal"><span class="pre">pure-func</span></tt> subdirectory of your Gnumeric
+plugin directory. You can have a look at them by invoking the &#8220;Edit Pure
+Script&#8221; option which gets added to the Tools/Pure menu once the Pure plugin
+loader is enabled. (This will invoke the emacs editor by default, or the
+editor named by the <tt class="docutils literal"><span class="pre">EDITOR</span></tt> environment variable. You can set this
+environment variable in your shell&#8217;s startup files.) The Tools/Pure menu
+contains a second Pure-related option, &#8220;Reload Pure Scripts&#8221; which can be used
+to quickly reload all loaded Pure scripts after edits; more about that later.</p>
+<p>Please note that most of the functions in <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> are rather
+useless, they are only provided for illustrative purposes. However, there are
+some useful examples in there, too, in particular:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">pure_eval</span></tt> lets you evaluate any Pure expression, given as a string in
+its first argument. E.g., try something like <tt class="docutils literal"><span class="pre">=pure_eval(&quot;foldl</span> <span class="pre">(+)</span> <span class="pre">0</span>
+<span class="pre">(1..100)&quot;)</span></tt>. Additional parameters are accessible as <tt class="docutils literal"><span class="pre">x!0</span></tt>, <tt class="docutils literal"><span class="pre">x!1</span></tt>,
+etc. For instance: <tt class="docutils literal"><span class="pre">=pure_eval(&quot;x!0+x!1&quot;,A1,B1)</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">pure_echo</span></tt> just displays its arguments as a string in Pure syntax, as the
+interpreter sees them. This is useful for debugging purposes. E.g.,
+<tt class="docutils literal"><span class="pre">=pure_echo(A1:B10)</span></tt> shows the given range as a Pure matrix.</li>
+<li><tt class="docutils literal"><span class="pre">pure_shell</span></tt> is a variation of <tt class="docutils literal"><span class="pre">pure_eval</span></tt> which executes arbitrary Pure
+code and returns the last evaluated expression (if any) as a string. This is
+mainly provided as a convenience to create an &#8220;interactive Pure shell&#8221; which
+lets you evaluate Pure code inside Gnumeric. To these ends, simply prepare a
+text cell for entering the code to be evaluated, and then apply
+<tt class="docutils literal"><span class="pre">pure_shell</span></tt> on this text cell in another cell to display the result.</li>
+</ul>
+<p>A spreadsheet showing most of the predefined functions in action can be found
+in <tt class="docutils literal"><span class="pre">pure-examples.gnumeric</span></tt> example distributed with Gnumeric/Pure.</p>
+</div>
+<div class="section" id="interactive-pure-shell">
+<h2><a class="toc-backref" href="#id5">Interactive Pure Shell</a><a class="headerlink" href="#interactive-pure-shell" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="docutils literal"><span class="pre">pure-examples.gnumeric</span></tt> spreadsheet also includes an instance of
+<tt class="docutils literal"><span class="pre">pure_shell</span></tt> which lets you evaluate arbitrary Pure code in the same
+interpreter instance that executes Gnumeric/Pure functions. This is very
+helpful if you&#8217;re developing new Pure functions to be used in Gnumeric. It
+also lets you use Gnumeric as a kind of GUI frontend to the Pure
+interpreter. You can try this now. Open the <tt class="docutils literal"><span class="pre">pure-examples</span></tt> spreadsheet in
+Gnumeric and enter the following into the input cell of the Pure shell:</p>
+<div class="highlight-python"><pre>&gt; scanl (+) 0 (1..20)
+  [0,1,3,6,10,15,21,28,36,45,55,66,78,91,105,120,136,153,171,190,210]</pre>
+</div>
+<p>Note that here and in the following the prompt <tt class="docutils literal"><span class="pre">&gt;</span></tt> indicates a Pure
+expression to be evaluated in <em>Gnumeric</em> (rather than the standalone Pure
+interpreter), which is followed by another line indicating the result (printed
+in the output cell below the input cell of the Pure shell). You can find the
+Pure shell at the bottom of the first sheet in <tt class="docutils literal"><span class="pre">pure-examples</span></tt>, see the
+screenshot below. For your convenience, there&#8217;s also a second, bigger one on
+the second sheet. You might want to copy this over to a separate spreadsheet
+which you can use as a scratchpad for experimentation purposes.</p>
+<div class="figure">
+<img alt="_images/shell.png" src="_images/shell.png" />
+<p class="caption">The Pure shell.</p>
+</div>
+<p>Also note that this is in fact <em>Pure code</em> (not a Gnumeric formula) being
+evaluated there. You can execute any Pure code, including Pure declarations,
+so you can type:</p>
+<div class="highlight-python"><pre>&gt; using system; puts "Hello, world!";
+  14</pre>
+</div>
+<p>This prints the string <tt class="docutils literal"><span class="pre">&quot;Hello,</span> <span class="pre">world!&quot;</span></tt> on standard output, visible in the
+terminal window where you launched Gnumeric. Here is another example, showing
+how you can invoke any function from the C library, by declaring it as a Pure
+<tt class="docutils literal"><span class="pre">extern</span></tt> function:</p>
+<div class="highlight-python"><pre>&gt; extern int rand(); [rand | i = 1..5];
+  [1810821799,2106746672,1436605662,1363610028,695042099]</pre>
+</div>
+<p>All functions in the Pure prelude are readily available in the Gnumeric Pure
+shell, as well as the functions defined in <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> and its imports,
+including the programming interface described in <a class="reference internal" href="#advanced-features">Advanced Features</a>. For
+instance, here&#8217;s how you can retrieve a cell value from the current sheet:</p>
+<div class="highlight-python"><pre>&gt; get_cell "A1"
+  "Gnumeric/Pure Examples"</pre>
+</div>
+<p>Using <tt class="docutils literal"><span class="pre">call</span></tt> (see <a class="reference internal" href="#calling-gnumeric-from-pure">Calling Gnumeric from Pure</a>), you can also invoke any
+Gnumeric function:</p>
+<div class="highlight-python"><pre>&gt; call "product" (1..10)
+  3628800.0</pre>
+</div>
+</div>
+<div class="section" id="defining-your-own-functions">
+<h2><a class="toc-backref" href="#id6">Defining Your Own Functions</a><a class="headerlink" href="#defining-your-own-functions" title="Permalink to this headline">¶</a></h2>
+<p>After playing around with <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> and the interactive Pure shell
+for a while, of course you will want to write your own functions, that&#8217;s what
+this plugin is about after all! For the beginning, you can just add your
+definitions to the existing <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script. Use the &#8220;Edit Pure
+Script&#8221; option to edit the script in your favourite editor, and see the
+comments and the examples in the script for guidance. (This document assumes
+that you&#8217;re already familiar with Pure, if not then you should consult the
+available Pure documentation.)</p>
+<p>Note that if you delete or rename any functions in this file, or add new ones
+to it, then you also have to change the list of function names in the
+plugin.xml file in the same directory accordingly. This file tells Gnumeric
+which functions are provided by the script. Unfortunately, you&#8217;ll have to
+restart Gnumeric to make changes in this file take effect. If you only change
+the definition of an existing function then it&#8217;s usually sufficient to just
+invoke &#8220;Reload Pure Scripts&#8221; afterwards, and maybe run &#8220;Recalculate&#8221; (<tt class="docutils literal"><span class="pre">F9</span></tt>)
+to recompute the spreadsheet. However, if you also made changes to the
+function descriptions provided via <tt class="docutils literal"><span class="pre">gnm_info</span></tt> (see the following section for
+explanation), then you&#8217;ll also have to restart Gnumeric so that it picks up
+the changes.</p>
+<p>Once you understand how this works, you can also create your own plugin
+directories with your personal collections of Gnumeric/Pure functions, using
+the <tt class="docutils literal"><span class="pre">pure-func</span></tt> directory as a template. For instance, let&#8217;s assume that
+your Gnumeric/Pure stuff is in a script named <tt class="docutils literal"><span class="pre">gnumeric.pure</span></tt> under
+<tt class="docutils literal"><span class="pre">/some/path/pure/gnumeric</span></tt>. The plugin.xml file in that directory might look
+as follows:</p>
+<div class="highlight-python"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;plugin id="Gnumeric_MyPureFunc"&gt;
+  &lt;information&gt;
+    &lt;name&gt;My Pure functions&lt;/name&gt;
+    &lt;description&gt;My Pure functions for use in Gnumeric.&lt;/description&gt;
+    &lt;require_explicit_enabling/&gt;
+  &lt;/information&gt;
+  &lt;loader type="Gnumeric_PureLoader:pure"&gt;
+    &lt;attribute value="gnumeric" name="module_name"/&gt;
+  &lt;/loader&gt;
+  &lt;services&gt;
+    &lt;service type="function_group" id="my_pure_func"&gt;
+      &lt;category&gt;Pure&lt;/category&gt;
+      &lt;functions&gt;
+        &lt;!-- My Pure functions go here, e.g.: --&gt;
+        &lt;function name="my_pure_func"/&gt;
+      &lt;/functions&gt;
+    &lt;/service&gt;
+  &lt;/services&gt;
+&lt;/plugin&gt;</pre>
+</div>
+<p>The following steps are needed to tell Gnumeric about your new Pure plugin:</p>
+<ul class="simple">
+<li>Open the Directories tab in the Tools/Plug-ins dialog and check that the
+<tt class="docutils literal"><span class="pre">/some/path/pure</span></tt> directory is in your plugin search path. Add it if
+necessary, and restart Gnumeric after that. (Note that you really have to
+add the <em>parent</em> directory <tt class="docutils literal"><span class="pre">/some/path/pure</span></tt>, not
+<tt class="docutils literal"><span class="pre">/some/path/pure/gnumeric</span></tt> itself.)</li>
+<li>The new plugin should now be listed as &#8220;My Pure functions&#8221; on the Plugin
+List tab in the Tools/Plug-ins dialog. Check it to enable it.</li>
+</ul>
+<p>The Pure loader can load multiple Pure plugins. You only need to tell Gnumeric
+about them after creating the scripts and plugin.xml files and placing them
+into corresponding plugin directories. Just enable the ones that you want in
+Tools/Plug-ins. All scripts are loaded in the same Pure interpreter (and thus
+are treated like one big script) so that functions in one script can use the
+function and variable definitions in another. If you need to access the
+definitions in the <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> &#8220;mother script&#8221;, you can also just
+import it into your scripts with a <tt class="docutils literal"><span class="pre">using</span></tt> clause, i.e.: <tt class="docutils literal"><span class="pre">using</span> <span class="pre">pure_func;</span></tt></p>
+</div>
+<div class="section" id="gnumeric-pure-interface">
+<h2><a class="toc-backref" href="#id7">Gnumeric/Pure Interface</a><a class="headerlink" href="#gnumeric-pure-interface" title="Permalink to this headline">¶</a></h2>
+<p>By default, when a Pure function is called from Gnumeric, it receives its
+arguments in a list. However, it is possible to tell Gnumeric about the
+expected arguments of the function and also specify a help text to be
+displayed in the &#8220;f(x)&#8221; dialog, by giving a definition of the special
+<tt class="docutils literal"><span class="pre">gnm_info</span></tt> function as explained below.</p>
+<div class="section" id="function-descriptions">
+<h3><a class="toc-backref" href="#id8">Function Descriptions</a><a class="headerlink" href="#function-descriptions" title="Permalink to this headline">¶</a></h3>
+<p>To describe a given function to Gnumeric, define <tt class="docutils literal"><span class="pre">gnm_info</span> <span class="pre">&quot;&lt;name&gt;&quot;</span></tt> (where
+<tt class="docutils literal"><span class="pre">&lt;name&gt;</span></tt> is the name of the function) as a pair with the following elements:</p>
+<ul class="simple">
+<li>The first element, a string, gives the signature of the function. E.g.,
+<tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt> denotes a function without arguments, <tt class="docutils literal"><span class="pre">&quot;f&quot;</span></tt> a function taking a
+single float parameter, <tt class="docutils literal"><span class="pre">&quot;fs&quot;</span></tt> a function taking a float and a string
+argument (in that order), etc. Optional parameters can be indicated using
+<tt class="docutils literal"><span class="pre">|</span></tt>, as in <tt class="docutils literal"><span class="pre">&quot;ff|s&quot;</span></tt> (two non-optional floats, followed by an optional
+string). See below for a complete list of the supported parameter types.</li>
+<li>The second element is a list of hash pairs <tt class="docutils literal"><span class="pre">key=&gt;text</span></tt> which together make
+up the help text shown in Gnumeric&#8217;s &#8220;f(x)&#8221; dialog. You should at least
+specify the function name along with a short synopsis here, e.g.
+<tt class="docutils literal"><span class="pre">GNM_FUNC_HELP_NAME</span> <span class="pre">=&gt;</span> <span class="pre">&quot;frob:the</span> <span class="pre">frob</span> <span class="pre">function&quot;</span></tt>. Parameter descriptions
+take the form <tt class="docutils literal"><span class="pre">GNM_FUNC_HELP_ARG</span> <span class="pre">=&gt;</span> <span class="pre">&quot;x:integer&quot;</span></tt>. There are a number of
+other useful elements, see below for details.</li>
+</ul>
+<p>Both the signature and the function description are optional. That is,
+<tt class="docutils literal"><span class="pre">gnm_info</span></tt> may return either just a signature string, or a list of hash
+pairs with the function description, or both. The signature defaults to a
+variadic function which takes any number of parameters of any type (see
+below), and the description defaults to some boilerplate text which says that
+the function hasn&#8217;t been documented yet.</p>
+<p>Note that if no signature is given, then the function accepts any number of
+parameters of any type. In that case, or if there are optional parameters, the
+function becomes variadic and the (optional) parameters are passed as a Pure
+list (in addition to the non-optional parameters).</p>
+<p>Here&#8217;s the list of valid parameter types, as they are documented in the
+Gnumeric sources:</p>
+<div class="highlight-python"><pre>f : float           no errors, string conversion attempted
+b : boolean         identical to f
+s : string          no errors
+S : scalar          any non-error scalar
+E : scalar          any scalar, including errors
+
+r : cell range      content may not be evaluated yet
+A : area            array, range (as above), or scalar
+? : anything        any value (scalars, non-scalars, errors, whatever)</pre>
+</div>
+<p>The keys used in the function description may be any of the following, along
+with sample text for each type of field:</p>
+<div class="highlight-python"><pre>GNM_FUNC_HELP_NAME         =&gt; "name:synopsis"
+GNM_FUNC_HELP_ARG          =&gt; "name:parameter description"
+GNM_FUNC_HELP_DESCRIPTION  =&gt; "Long description."
+GNM_FUNC_HELP_NOTE         =&gt; "Note."
+GNM_FUNC_HELP_EXAMPLES     =&gt; "=sample_formula()"
+GNM_FUNC_HELP_SEEALSO      =&gt; "foo,bar,..."</pre>
+</div>
+<p>The following keys are only supported in the latest Gnumeric versions:</p>
+<div class="highlight-python"><pre>GNM_FUNC_HELP_EXTREF       =&gt; "wiki:en:Trigonometric_functions"
+GNM_FUNC_HELP_EXCEL        =&gt; "Excel compatibility information."
+GNM_FUNC_HELP_ODF          =&gt; "OpenOffice compatibility information."</pre>
+</div>
+<p>Note that inside the descriptions, the notation <tt class="docutils literal"><span class="pre">&#64;{arg}</span></tt> (<tt class="docutils literal"><span class="pre">&#64;arg</span></tt> in older
+Gnumeric versions) can be used to refer to a parameter value. For instance,
+here&#8217;s a sample description for a binary function which also includes a help
+text:</p>
+<div class="highlight-python"><pre>gnm_info "pure_max" = "ff",
+[GNM_FUNC_HELP_NAME     =&gt; "pure_max:maximum of two numbers",
+ GNM_FUNC_HELP_ARG      =&gt; "x:number",
+ GNM_FUNC_HELP_ARG      =&gt; "y:number",
+ GNM_FUNC_HELP_DESCRIPTION =&gt;
+ "Computes the maximum of two numbers @{x} and @{y}.",
+ GNM_FUNC_HELP_EXAMPLES =&gt; "=pure_max(17,22)"];</pre>
+</div>
+<p>As you can see, the function descriptions are a bit unwieldy, so it&#8217;s
+convenient to construct them using this little helper function defined in
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt>:</p>
+<div class="highlight-python"><pre>gnm_help name::string args descr::string notes examples see_also =
+  [GNM_FUNC_HELP_NAME         =&gt; name] +
+  [GNM_FUNC_HELP_ARG          =&gt; x | x::string = args ] +
+  [GNM_FUNC_HELP_DESCRIPTION  =&gt; descr ] +
+  [GNM_FUNC_HELP_NOTE         =&gt; x | x::string = notes ] +
+  [GNM_FUNC_HELP_EXAMPLES     =&gt; x | x::string = examples ] +
+  (if null see_also then [] else
+   [GNM_FUNC_HELP_SEEALSO     =&gt; join "," see_also]);</pre>
+</div>
+<p>Now the description can be written simply as follows:</p>
+<div class="highlight-python"><pre>gnm_info "pure_max" = "ff", gnm_help "pure_max:maximum of two numbers"
+  ["x:number", "y:number"]
+  "Computes the maximum of two numbers @{x} and @{y}."
+  [] ["=pure_max(17,22)"] [];</pre>
+</div>
+<p>Since this function only has fixed arguments, it will be called in curried
+form, i.e., as <tt class="docutils literal"><span class="pre">pure_max</span> <span class="pre">x</span> <span class="pre">y</span></tt>. For instance, the actual definition of
+<tt class="docutils literal"><span class="pre">pure_max</span></tt> may look as follows:</p>
+<div class="highlight-python"><pre>pure_max x y = max x y;</pre>
+</div>
+<p>Conversely, if no signature is given, then the function accepts any number of
+parameters of any type, which are passed as a list. For instance:</p>
+<div class="highlight-python"><pre>gnm_info "pure_sum" = gnm_help "pure_sum:sum of a collection of numbers"
+  [] "Computes the sum of a collection of numbers."
+  [] ["=pure_sum(1,2,3,4,5,6)"] ["pure_sums"];</pre>
+</div>
+<p>Here the function will be called as <tt class="docutils literal"><span class="pre">pure_sum</span> <span class="pre">[x1,x2,...]</span></tt>, where <tt class="docutils literal"><span class="pre">x1</span></tt>,
+<tt class="docutils literal"><span class="pre">x2</span></tt>, etc. are the arguments the function is invoked with. Note that in this
+case there may be any number of arguments (including zero) of any type, so
+your function definition must be prepared to handle this. If a function does
+not have a <tt class="docutils literal"><span class="pre">gnm_info</span></tt> description at all then it is treated in the same
+fashion. The <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script contains some examples showing how to
+write functions which can deal with any numbers of scalars, arrays or ranges,
+see the <tt class="docutils literal"><span class="pre">pure_sum</span></tt> and <tt class="docutils literal"><span class="pre">pure_sums</span></tt> examples. These employ the following
+<tt class="docutils literal"><span class="pre">ranges</span></tt> function to &#8220;flatten&#8221; a parameter list to a list holding all
+denoted values:</p>
+<div class="highlight-python"><pre>ranges xs = cat [ case x of _::matrix = list x; _ = [x] end | x = xs ];</pre>
+</div>
+<p>E.g., the <tt class="docutils literal"><span class="pre">pure_sum</span></tt> function can now be defined as follows:</p>
+<div class="highlight-python"><pre>pure_sum xs = foldl (+) 0 (ranges xs);</pre>
+</div>
+<p>A function may also have both fixed and optional arguments (note that in what
+follows we&#8217;re going to omit the detailed function descriptions for brevity):</p>
+<div class="highlight-python"><pre>gnm_info "foo" = "ff|ff";</pre>
+</div>
+<p>In this case the fixed arguments are passed in curried form as usual, while
+the optional parameters are passed as a list. That is, <tt class="docutils literal"><span class="pre">foo</span></tt> may be called
+as <tt class="docutils literal"><span class="pre">foo</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">[]</span></tt>, <tt class="docutils literal"><span class="pre">foo</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">[z]</span></tt> or <tt class="docutils literal"><span class="pre">foo</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">[z,t]</span></tt>, depending on whether
+it is invoked with two, three or four arguments.</p>
+</div>
+<div class="section" id="conversions-between-pure-and-gnumeric-values">
+<h3><a class="toc-backref" href="#id9">Conversions Between Pure and Gnumeric Values</a><a class="headerlink" href="#conversions-between-pure-and-gnumeric-values" title="Permalink to this headline">¶</a></h3>
+<p>The marshalling of types between Gnumeric and Pure is pretty straightforward;
+basically, Pure numbers, strings and matrices map to Gnumeric numbers, strings
+and arrays, respectively. The following table summarizes the available
+conversions:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Pure</th>
+<th class="head">Gnumeric</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="docutils literal"><span class="pre">gnm_error</span> <span class="pre">&quot;#N/A&quot;</span></tt></td>
+<td>error</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">4711</span></tt>, <tt class="docutils literal"><span class="pre">4711L</span></tt>, <tt class="docutils literal"><span class="pre">4711.0</span></tt></td>
+<td>scalar (number)</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">&quot;Hello</span> <span class="pre">world&quot;</span></tt></td>
+<td>string</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">()</span></tt></td>
+<td>empty</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">(1,2,3)</span></tt></td>
+<td>array</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">[1,2,3]</span></tt></td>
+<td>array</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">{1,2,3;4,5,6}</span></tt></td>
+<td>array (or cell range)</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">&quot;A1:B10&quot;</span></tt></td>
+<td>cell range (<tt class="docutils literal"><span class="pre">&quot;r&quot;</span></tt> conversion)</td>
+</tr>
+</tbody>
+</table>
+<p>These conversions mostly work both ways. Note that on input, cell ranges are
+usually passed as matrices to Pure functions (i.e., they are passed &#8220;by
+value&#8221;), unless the function signature specifies a <tt class="docutils literal"><span class="pre">&quot;r&quot;</span></tt> conversion in which
+case the cell ranges themselves are passed to the function in string form.
+(Such values can also be passed on to Gnumeric functions which expect a cell
+range (<tt class="docutils literal"><span class="pre">&quot;r&quot;</span></tt> ) parameter, see <a class="reference internal" href="#calling-gnumeric-from-pure">Calling Gnumeric from Pure</a> below.)</p>
+<p>Conversely, matrices, lists and tuples all become Gnumeric arrays on output,
+so usually you&#8217;ll want to enter these as array functions (<tt class="docutils literal"><span class="pre">Ctrl-Shift-Enter</span></tt>
+in Gnumeric). As a special case, the empty tuple can be used to denote empty
+cell values (but note that empty Gnumeric values may become zeros when passed
+as float or array arguments to Pure functions).</p>
+<p>If a Pure function returns a value that doesn&#8217;t match any of the above then it
+is converted to a string in Pure expression syntax and that string is returned
+as the result of the function invocation in Gnumeric. This makes it possible
+to return any kind of symbolic Pure value, but note that if such a value is
+then fed into another Pure function, that function will have to convert the
+string value back to the internal representation if needed; this can be done
+very conveniently using Pure&#8217;s <tt class="docutils literal"><span class="pre">eval</span></tt> function, see the Pure documentation
+for details.</p>
+</div>
+</div>
+<div class="section" id="advanced-features">
+<h2><a class="toc-backref" href="#id10">Advanced Features</a><a class="headerlink" href="#advanced-features" title="Permalink to this headline">¶</a></h2>
+<p>This section explains various additional features provided by the
+Gnumeric/Pure interface that should be useful for writing your own functions.
+Note that, for your convenience all functions discussed in this section are
+declared in <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt>.</p>
+<div class="section" id="calling-gnumeric-from-pure">
+<h3><a class="toc-backref" href="#id11">Calling Gnumeric from Pure</a><a class="headerlink" href="#calling-gnumeric-from-pure" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to call Gnumeric functions from Pure using the <tt class="docutils literal"><span class="pre">call</span></tt>
+function which takes the name of the function (a string) as its first, and the
+parameters as the second (list) argument. For instance:</p>
+<div class="highlight-python"><pre>gnm_info "gnm_bitand" = "ff";
+gnm_bitand x y = call "bitand" [x,y];</pre>
+</div>
+<p>Note that <tt class="docutils literal"><span class="pre">call</span></tt> is an external C function provided by Gnumeric/Pure. If
+you want to use it, it must be declared in your Pure script as follows:</p>
+<div class="highlight-python"><pre>extern expr* pure_gnmcall(char* name, expr* args) = call;</pre>
+</div>
+<p>However, <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> already contains the above declaration, so you
+don&#8217;t have to do this yourself if you import <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> in your
+scripts.</p>
+<p>Also note that <tt class="docutils literal"><span class="pre">call</span></tt> doesn&#8217;t do any of Gnumeric&#8217;s automatic conversions on
+the parameters, so you have to pass the proper types of arguments as required
+by the function.</p>
+</div>
+<div class="section" id="accessing-spreadsheet-cells">
+<h3><a class="toc-backref" href="#id12">Accessing Spreadsheet Cells</a><a class="headerlink" href="#accessing-spreadsheet-cells" title="Permalink to this headline">¶</a></h3>
+<p>Gnumeric/Pure provides the following functions to retrieve and modify the
+contents of spreadsheet cells and ranges of such cells:</p>
+<div class="highlight-python"><pre>extern expr* pure_get_cell(char* s) = get_cell;
+extern expr* pure_get_cell_text(char* s) = get_cell_text;
+extern expr* pure_get_cell_format(char* s) = get_cell_format;
+extern expr* pure_set_cell(char* s, expr *x) = set_cell;
+extern expr* pure_set_cell_text(char* s, expr *x) = set_cell_text;
+extern expr* pure_set_cell_format(char* s, expr *x) = set_cell_format;
+extern expr* pure_get_range(char* s) = get_range;
+extern expr* pure_get_range_text(char* s) = get_range_text;
+extern expr* pure_get_range_format(char* s) = get_range_format;
+extern expr* pure_set_range(char* s, expr *x) = set_range;
+extern expr* pure_set_range_text(char* s, expr *x) = set_range_text;
+extern expr* pure_set_range_format(char* s, expr *x) = set_range_format;</pre>
+</div>
+<p>For instance, here&#8217;s how you use these functions to write and then read some
+cell values (try this in the interactive Pure shell):</p>
+<div class="highlight-python"><pre>&gt; set_cell "A14" 42
+  ()
+&gt; get_cell "A14"
+  42.0
+&gt; set_range "A14:G14" $ scanl (*) 1 (1..6)
+  ()
+&gt; get_range "A14:G14"
+  {1.0,1.0,2.0,6.0,24.0,120.0,720.0}
+&gt; set_cell_text "A14" "=sum(B14:G14)"
+  ()
+&gt; get_cell "A14"
+  873.0
+&gt; get_cell_text "A14"
+  "=sum(B14:G14)"
+&gt; get_range_text "A14:G14"
+  {"=sum(B14:G14)","1","2","6","24","120","720"}</pre>
+</div>
+<p>Note that while the <tt class="docutils literal"><span class="pre">set_cell</span></tt> function sets the given cell to a constant
+value, <tt class="docutils literal"><span class="pre">set_cell_text</span></tt> also allows you to store a formula in a cell which
+will then be evaluated as usual. Similarly, <tt class="docutils literal"><span class="pre">get_cell</span></tt> retrieves the cell
+value, while <tt class="docutils literal"><span class="pre">get_cell_text</span></tt> yields the text in the cell, as entered by the
+user (which will either be a formula or the textual representation of a
+constant value). The <tt class="docutils literal"><span class="pre">set_range</span></tt>, <tt class="docutils literal"><span class="pre">set_range_text</span></tt>, <tt class="docutils literal"><span class="pre">get_range</span></tt> and
+<tt class="docutils literal"><span class="pre">get_range_text</span></tt> functions work analogously, but are used to manipulate
+entire ranges of cells, which can be set from Pure tuples, lists or matrices,
+and retrieved as Pure matrices.</p>
+<p>Functions to retrieve and change the cell format are also provided (watch the
+contents of the cell <tt class="docutils literal"><span class="pre">A14</span></tt> change its color to blue on entering the first
+expression):</p>
+<div class="highlight-python"><pre>&gt; set_cell_format "A14" "[Blue]0.00"
+  ()
+&gt; get_range_format "A14:C14"
+  {"[Blue]0.00","General","General"}</pre>
+</div>
+<p>There are also functions to get the position of the &#8220;current&#8221; cell (i.e., the
+cell from which a Pure function was called), and to translate between cell
+ranges in Gnumeric syntax and the corresponding internal representation
+consisting of a pointer to a Gnumeric sheet and the cell or range
+coordinates:</p>
+<div class="highlight-python"><pre>extern expr* pure_this_cell() = this_cell;
+extern expr* pure_parse_range(char* s) = parse_range;
+extern expr* pure_make_range(expr* x) = make_range;</pre>
+</div>
+<p>Examples:</p>
+<div class="highlight-python"><pre>&gt; this_cell
+  "B4"
+&gt; parse_range this_cell
+  #&lt;pointer 0x875220&gt;,1,3
+&gt; make_range (NULL,0,0,10,10)
+  "Sheet2!A1:K11"</pre>
+</div>
+</div>
+<div class="section" id="asynchronous-data-sources">
+<h3><a class="toc-backref" href="#id13">Asynchronous Data Sources</a><a class="headerlink" href="#asynchronous-data-sources" title="Permalink to this headline">¶</a></h3>
+<p>Gnumeric/Pure makes it easy to set up asynchronous data sources which draw
+values from a Pure computation executed in a background process. This facility
+is useful to carry out lengthy computations in the background while you can
+continue to work with your spreadsheet. It also allows you to process incoming
+data and asynchronous events from special devices (MIDI, sensors, stock
+tickers, etc.) in (soft) realtime.</p>
+<p>To do this, you simply pass an expression to the <tt class="docutils literal"><span class="pre">datasource</span></tt> function. This
+is another external C function provided by Gnumeric/Pure, which is declared in
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> as follows:</p>
+<div class="highlight-python"><pre>extern expr* pure_datasource(expr* x) = datasource;</pre>
+</div>
+<p>The argument to <tt class="docutils literal"><span class="pre">datasource</span></tt> is typically a thunk or stream (lazy list)
+which is to be evaluated in the background. The call to <tt class="docutils literal"><span class="pre">datasource</span></tt>
+initially returns a <tt class="docutils literal"><span class="pre">#N/A</span></tt> value (<tt class="docutils literal"><span class="pre">gnm_error</span> <span class="pre">&quot;#N/A&quot;</span></tt>) while the
+computation is still in progress. The cell containing the data source then
+gets updated automatically as soon as the value becomes available, at which
+point the <tt class="docutils literal"><span class="pre">datasource</span></tt> call now returns the computed value. E.g., here&#8217;s how
+you would wrap up a lengthy calculation as a thunk and submit it to
+<tt class="docutils literal"><span class="pre">datasource</span></tt> which carries out the computation as a background task:</p>
+<div class="highlight-python"><pre>gnm_info "pure_frob" = "f";
+pure_frob x = datasource (lengthy_calculation x&amp;);
+lengthy_calculation x = sleep 3 $$ foldl (*) 1 (1..x);</pre>
+</div>
+<p>Note that a cell value may draw values from as many independent data sources
+as you want, so the definition of a cell may also involve multiple invocations
+of <tt class="docutils literal"><span class="pre">datasource</span></tt>:</p>
+<div class="highlight-python"><pre>gnm_info "pure_frob2" = "ff";
+pure_frob2 x y = datasource (lengthy_calculation x&amp;),
+  datasource (lengthy_calculation y&amp;);</pre>
+</div>
+<p>Special treatment is given to (lazy) lists, in this case <tt class="docutils literal"><span class="pre">datasource</span></tt>
+returns a new value each time a list element becomes available. For instance,
+the following function uses an infinite stream to count off the seconds
+starting from a given initial value:</p>
+<div class="highlight-python"><pre>gnm_info "pure_counter" = "f";
+pure_counter x = datasource [sleep (i&gt;x) $$ i | i = x..inf];</pre>
+</div>
+<p>You can also try this interactively in the Pure shell:</p>
+<div class="highlight-python"><pre>&gt; datasource [sleep (i&gt;0) $$ i | i = 0..inf]
+  0
+  1
+  ...</pre>
+</div>
+<p>Here&#8217;s another example for the Pure shell which prints the prime numbers:</p>
+<div class="highlight-python"><pre>&gt; datasource primes with primes = sieve (2..inf);
+    sieve (p:qs) = p : (sleep 1 $$ sieve [q | q = qs; q mod p])&amp; end
+  2
+  3
+  5
+  ...</pre>
+</div>
+<p>Note that when processing a lazy list, the cell containing the call will keep
+changing as long as new values are produced (i.e., forever in this
+example). The &#8220;Stop Data Sources&#8221; option in the Tools/Pure menu can be used to
+stop all active data sources. &#8220;Reload Pure Scripts&#8221; also does this. You can
+then restart the data sources at any time by using &#8220;Recalculate&#8221; (<tt class="docutils literal"><span class="pre">F9</span></tt>) to
+recompute the spreadsheet.</p>
+<p>Also note that because of the special way that <tt class="docutils literal"><span class="pre">datasource</span></tt> handles list
+values, you cannot return a list directly as the result of <tt class="docutils literal"><span class="pre">datasource</span></tt>, if
+it is to be treated as a single result. Instead, you&#8217;ll have to wrap the
+result in a singleton list (e.g., <tt class="docutils literal"><span class="pre">datasource</span> <span class="pre">[[lengthy_calculation</span>
+<span class="pre">x,lengthy_calculation</span> <span class="pre">y]&amp;]</span></tt>), or return another aggregate (i.e., a matrix or
+a tuple).</p>
+<p>Finally, note that when the arguments of a call involving <tt class="docutils literal"><span class="pre">datasource</span></tt>
+change (because they depend on other cells which may have been updated), the
+computation is automatically restarted with the new parameters. The default
+behaviour in this case is that the entire computation will be redone from
+scratch, but it&#8217;s also possible to wrap up calls to <tt class="docutils literal"><span class="pre">datasource</span></tt> in a manner
+which enables more elaborate communication between Gnumeric and background
+tasks initiated with <tt class="docutils literal"><span class="pre">datasource</span></tt>. This is beyond the scope of this manual,
+however, so we leave this as an exercise to the interested reader.</p>
+</div>
+<div class="section" id="triggers">
+<h3><a class="toc-backref" href="#id14">Triggers</a><a class="headerlink" href="#triggers" title="Permalink to this headline">¶</a></h3>
+<p>In addition to asynchronous data sources, the <tt class="docutils literal"><span class="pre">trigger</span></tt> function is provided
+to compute values or take actions depending on some external condition, such
+as the availability of data on a special device or the creation of some widget
+(see the next section):</p>
+<div class="highlight-python"><pre>extern expr* pure_trigger(int timeout, expr* cond, expr *val, expr *data)
+  = trigger;</pre>
+</div>
+<p>Thus a typical invocation of the function looks as follows:</p>
+<div class="highlight-python"><pre>trigger timeout condition value data</pre>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">condition</span></tt> and <tt class="docutils literal"><span class="pre">value</span></tt> arguments are callback functions which get
+invoked by <tt class="docutils literal"><span class="pre">trigger</span></tt>, passing them the given <tt class="docutils literal"><span class="pre">data</span></tt> argument. The trigger
+reevaluates the given condition in regular intervals (1 second in the current
+implementation) and, as soon as it becomes <tt class="docutils literal"><span class="pre">true</span></tt>, computes the given value
+and returns that value as the result of the <tt class="docutils literal"><span class="pre">trigger</span></tt> call. As long as the
+condition doesn&#8217;t hold, <tt class="docutils literal"><span class="pre">trigger</span></tt> returns a <tt class="docutils literal"><span class="pre">#N/A</span></tt> value (<tt class="docutils literal"><span class="pre">gnm_error</span>
+<span class="pre">&quot;#N/A&quot;</span></tt>). Note that, in difference to <tt class="docutils literal"><span class="pre">datasource</span></tt>, both the condition and
+the value are computed in Gnumeric (rather than a child process), so that it
+is possible to access the current information in the loaded spreadsheet.</p>
+<p>The <tt class="docutils literal"><span class="pre">timeout</span></tt> value determines how often the condition is checked. If it is
+positive, the condition will be reevaluated <tt class="docutils literal"><span class="pre">timeout+1</span></tt> times (once
+initially, and then once per second for a total duration of <tt class="docutils literal"><span class="pre">timeout</span></tt>
+seconds). If it is negative, the trigger never times out and the condition
+will be checked repeatedly until the trigger expression is removed (or
+Gnumeric is exited). In either case <tt class="docutils literal"><span class="pre">value</span> <span class="pre">data</span></tt> will be recomputed each
+time <tt class="docutils literal"><span class="pre">condition</span> <span class="pre">data</span></tt> yields <tt class="docutils literal"><span class="pre">true</span></tt>. (This is most useful if the computed
+value, as a side effect, arranges for the condition to become <tt class="docutils literal"><span class="pre">false</span></tt> again
+afterwards.) Finally, if <tt class="docutils literal"><span class="pre">timeout</span></tt> is zero then the trigger fires at most
+once, as soon as the condition becomes <tt class="docutils literal"><span class="pre">true</span></tt>, at which point <tt class="docutils literal"><span class="pre">value</span> <span class="pre">data</span></tt>
+is computed just once.</p>
+<p>Here&#8217;s a (rather useless) example of a trigger which fires exactly once, as
+soon as a certain cell goes to a certain value, and then modifies another cell
+value accordingly:</p>
+<div class="highlight-python"><pre>&gt; trigger 0 (\_-&gt;get_cell "A14"==="Hello") (\_-&gt;set_cell "A15" "World") ()</pre>
+</div>
+<p>Now, as soon as you type <tt class="docutils literal"><span class="pre">Hello</span></tt> in the cell A14, the trigger will print
+<tt class="docutils literal"><span class="pre">World</span></tt> in cell A15. Note that the <tt class="docutils literal"><span class="pre">data</span></tt> argument isn&#8217;t used here. A
+more useful example will be discussed in the following section.</p>
+</div>
+<div class="section" id="sheet-objects">
+<h3><a class="toc-backref" href="#id15">Sheet Objects</a><a class="headerlink" href="#sheet-objects" title="Permalink to this headline">¶</a></h3>
+<p>Gnumeric offers some kinds of special objects which can be placed on a
+sheet. This comprises the chart and image objects which can be found in the
+&#8220;Insert&#8221; menu, as well as a number of useful graphical elements and GUI
+widgets on the &#8220;Object&#8221; toolbar, accessible via &#8220;View/Toolbars&#8221;. The latter
+are also useful for providing control input to Pure functions.</p>
+<p>Gnumeric/Pure provides the following function to retrieve information about
+the special objects in a spreadsheet:</p>
+<div class="highlight-python"><pre>extern expr* pure_sheet_objects() = sheet_objects;</pre>
+</div>
+<p>For instance, with one button object in your spreadsheet, the output of
+<tt class="docutils literal"><span class="pre">sheet_objects</span></tt> might look like this:</p>
+<div class="highlight-python"><pre>&gt; sheet_objects
+  [("Sheet1","button","Push Me!","A11",[#&lt;pointer 0x2a1dcd0&gt;])]</pre>
+</div>
+<p>Each object is described by a tuple which lists the name of the sheet on which
+the object is located, the type of object, the object&#8217;s content or label (if
+applicable), the cell which the object is linked to (if applicable), and a
+list of pointers to the corresponding <tt class="docutils literal"><span class="pre">GtkWidgets</span></tt> (if any). Note that in
+general a GUI object may be associated with several widgets, as Gnumeric
+allows you to have multiple views on the same spreadsheet, so there will be
+one widget for each view an object is visible in. Also note that the
+content/label information depends on the particular type of object:</p>
+<ul class="simple">
+<li>List and combo widgets return the content link (referring to the cells in
+the spreadsheet holding the items shown in the list).</li>
+<li>Frame and button widgets return the label shown on the widget.</li>
+<li>Graphic objects like rectangles and ellipses return the text content of the
+object.</li>
+<li>Image objects (type <tt class="docutils literal"><span class="pre">&quot;image/xyz&quot;</span></tt>, where <tt class="docutils literal"><span class="pre">xyz</span></tt> is the type of image,
+such as <tt class="docutils literal"><span class="pre">svg</span></tt> or <tt class="docutils literal"><span class="pre">png</span></tt>) return a pointer to the image data in this
+field.</li>
+</ul>
+<p>The <tt class="docutils literal"><span class="pre">sheet_objects</span></tt> function is a bit tricky to use, since some of the
+objects or their associated widgets might not have been created yet when the
+spreadsheet is loaded. Therefore it is necessary to use a trigger to make sure
+that the information is updated once all objects are fully displayed. The
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script contains the following little wrapper around
+<tt class="docutils literal"><span class="pre">sheet_objects</span></tt> which does this:</p>
+<div class="highlight-python"><pre>pure_objects = trigger 0 (\_-&gt;all realized sheet_objects)
+  (\_-&gt;matrix$map list sheet_objects) ()
+with realized (_,_,_,_,w) = ~listp w || ~null w &amp;&amp; ~any null w end;</pre>
+</div>
+<p>See the <tt class="docutils literal"><span class="pre">widgets.gnumeric</span></tt> spreadsheet in the distribution for an example.</p>
+<p>Possible uses of this facility are left to your imagination. Using Gnumeric&#8217;s
+internal APIs and Pure&#8217;s Gtk interface, you might manipulate the GUI widgets
+in various ways (add icons to buttons or custom child widgets to frames,
+etc.). One particularly useful case, for which Gnumeric/Pure has built-in
+support, is rendering an OpenGL scene in a Gnumeric frame widget, see below.</p>
+</div>
+<div class="section" id="opengl-interface">
+<h3><a class="toc-backref" href="#id16">OpenGL Interface</a><a class="headerlink" href="#opengl-interface" title="Permalink to this headline">¶</a></h3>
+<p>Gnumeric/Pure provides special support for rendering OpenGL scenes into
+Gnumeric frame widgets. To actually use this, you must have Pure&#8217;s OpenGL
+module installed. The following function is provided to equip a Gnumeric frame
+with the OpenGL rendering capability:</p>
+<div class="highlight-python"><pre>extern expr *pure_gl_window(char *name, int timeout,
+                            expr *setup_cb, expr *config_cb,
+                            expr *display_cb, expr *timer_cb,
+                            expr *user_data) = gl_window;</pre>
+</div>
+<p>The meaning of the parameters is as follows:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">name</span></tt> is a string which specifies the label of the frame widget into
+which the scene is to be rendered.</li>
+<li><tt class="docutils literal"><span class="pre">timeout</span></tt> is a time value in milliseconds (an integer) which specifies the
+period for invocations of the <tt class="docutils literal"><span class="pre">timer_cb</span></tt> callback, see below. If this
+value is zero or negative then the timer callback is disabled.</li>
+<li><tt class="docutils literal"><span class="pre">setup_cb</span></tt>, <tt class="docutils literal"><span class="pre">config_cb</span></tt>, <tt class="docutils literal"><span class="pre">display_cb</span></tt> and <tt class="docutils literal"><span class="pre">timer_cb</span></tt> are the Pure
+callback functions which are invoked by <tt class="docutils literal"><span class="pre">gl_window</span></tt> to actually render the
+scene. The callbacks are all invoked with two arguments: the <tt class="docutils literal"><span class="pre">user_data</span></tt>
+parameter that <tt class="docutils literal"><span class="pre">gl_window</span></tt> was invoked with, and a second parameter with
+callback-specific information as described below.</li>
+<li><tt class="docutils literal"><span class="pre">user_data</span></tt> is any information that the caller wants to be passed as the
+first argument to the callback functions.</li>
+</ul>
+<p>The different callbacks are:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">setup_cb</span></tt> is called for initializing the scene. It receives the
+<tt class="docutils literal"><span class="pre">GtkDrawingArea</span></tt> widget as the second argument. Typically this is used to
+set the initial projection and modelview matrices, enable lighting, etc.</li>
+<li><tt class="docutils literal"><span class="pre">config_cb</span></tt> is called when width or height of the frame widget changes so
+that the rendering parameters (typically the viewport) can be adjusted
+accordingly. It is invoked with a pair of integers <tt class="docutils literal"><span class="pre">(w,h)</span></tt> as the second
+argument, which denotes the new dimension allocated to the drawing area.</li>
+<li><tt class="docutils literal"><span class="pre">display_cb</span></tt> is called whenever the contents of the drawing area needs to
+be redrawn. This typically does most of the work necessary to render the
+scene. The second callback argument is always <tt class="docutils literal"><span class="pre">()</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">timer_cb</span></tt> is called at regular intervals as specified with the
+<tt class="docutils literal"><span class="pre">timeout</span></tt> parameter (see above), unless the <tt class="docutils literal"><span class="pre">timeout</span></tt> value is zero or
+negative in which case this callback is disabled. The second callback
+argument is always <tt class="docutils literal"><span class="pre">()</span></tt>. The timer callback is typically used to
+incrementally adjust some parameters of the scene in order to render
+animations. When invoked, the callback automatically arranges for
+<tt class="docutils literal"><span class="pre">display_cb</span></tt> to be called afterwards, so you don&#8217;t have to do that
+manually in your callback definition.</li>
+</ul>
+<p>You&#8217;ll need at least either the <tt class="docutils literal"><span class="pre">display_cb</span></tt> or the <tt class="docutils literal"><span class="pre">timer_cb</span></tt> function to
+render anything, but typically all of these callbacks will be needed for
+animated scenes. Callback functions which aren&#8217;t needed can be specified as
+<tt class="docutils literal"><span class="pre">()</span></tt>.</p>
+<p>There&#8217;s also a related helper function which can be used as a trigger
+condition to defer rendering until the target frame widget has been realized:</p>
+<div class="highlight-python"><pre>extern bool pure_check_window(char *name) = check_window;</pre>
+</div>
+<p>This function returns <tt class="docutils literal"><span class="pre">true</span></tt> as soon as the named frame widget is ready to
+go, at wich time <tt class="docutils literal"><span class="pre">gl_windows</span></tt> can be called on the widget. So your call to
+<tt class="docutils literal"><span class="pre">gl_windows</span></tt> should usually be wrapped up like this:</p>
+<div class="highlight-python"><pre>trigger 0 check_window
+(\frame-&gt;gl_window frame timeout setup config display timer user_data) frame</pre>
+</div>
+<p>Here&#8217;s an example from <tt class="docutils literal"><span class="pre">pure_glfunc.pure</span></tt> which shows how these functions
+are to be used:</p>
+<div class="highlight-python"><pre>using pure_func, GL, GLU;
+extern void gdk_gl_draw_teapot(bool solid, double scale);
+gnm_info "gltest" = "sbfff";
+
+gltest frame m a b c = trigger 0 check_window
+  (\frame-&gt;gl_window frame (m*40) setup config display timer ()) frame
+with
+  setup _ _ = () when
+    // Initialize.
+    GL::ClearColor 0.1 0.1 0.3 1.0;
+    GL::ShadeModel GL::SMOOTH;
+    GL::Enable GL::DEPTH_TEST;
+    // Initial projection and modelview matrices.
+    GL::MatrixMode GL::PROJECTION;
+    GL::LoadIdentity;
+    GL::Rotatef 20.0 (-1.0) 0.0 0.0;
+    GL::MatrixMode GL::MODELVIEW;
+    GL::LoadIdentity;
+    // Lighting.
+    GL::Lightfv GL::LIGHT0 GL::DIFFUSE {1.0,0.0,0.0,1.0};
+    GL::Lightfv GL::LIGHT0 GL::POSITION {2.0,2.0,-5.0,1.0};
+    GL::Enable GL::LIGHTING;
+    GL::Enable GL::LIGHT0;
+  end;
+  config _ (w,h) = GL::Viewport 0 0 w h;
+  display _ _ = () when
+    GL::Clear (GL::DEPTH_BUFFER_BIT or GL::COLOR_BUFFER_BIT);
+    gdk_gl_draw_teapot true 0.5;
+  end if m;
+  display _ _ = () when
+    GL::Clear (GL::DEPTH_BUFFER_BIT or GL::COLOR_BUFFER_BIT);
+    GL::LoadIdentity;
+    GL::Rotatef (scale 360 a) 0.0 1.0 0.0;
+    GL::Rotatef (scale 360 b) 1.0 0.0 0.0;
+    GL::Rotatef (scale 360 c) 0.0 0.0 1.0;
+    gdk_gl_draw_teapot true 0.5;
+  end;
+  timer _ _ = () when
+    GL::Rotatef (scale 36 a) 0.0 1.0 0.0;
+    GL::Rotatef (scale 36 b) 1.0 0.0 0.0;
+    GL::Rotatef (scale 36 c) 0.0 0.0 1.0;
+  end;
+  scale step x = (x/100*step);
+end;</pre>
+</div>
+<p>Have a look at the <tt class="docutils literal"><span class="pre">gl-example.gnumeric</span></tt> spreadsheet included in the
+distribution to see this example in action. (You first need to enable the
+&#8220;Pure OpenGL functions&#8221; in the Plugin Manager to make this work.)  The
+screenshot below shows how the example looks like in Gnumeric.</p>
+<div class="figure">
+<img alt="_images/opengl.png" src="_images/opengl.png" />
+<p class="caption">Gnumeric/Pure OpenGL example.</p>
+</div>
+</div>
+</div>
+<div class="section" id="copying">
+<h2><a class="toc-backref" href="#id17">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
+<p>Copyright (c) 2009 by Albert Graef.</p>
+<p>Gnumeric/Pure is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 2 of the License, or (at your option) any later
+version.</p>
+<p>Gnumeric/Pure is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+details.</p>
+<p>You should have received a copy of the GNU General Public License along with
+this program.  If not, see &lt;<a class="reference external" href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="puredoc.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Gnumeric/Pure: A Pure Plugin for Gnumeric</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#setup">Setup</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#interactive-pure-shell">Interactive Pure Shell</a></li>
+<li><a class="reference internal" href="#defining-your-own-functions">Defining Your Own Functions</a></li>
+<li><a class="reference internal" href="#gnumeric-pure-interface">Gnumeric/Pure Interface</a><ul>
+<li><a class="reference internal" href="#function-descriptions">Function Descriptions</a></li>
+<li><a class="reference internal" href="#conversions-between-pure-and-gnumeric-values">Conversions Between Pure and Gnumeric Values</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-features">Advanced Features</a><ul>
+<li><a class="reference internal" href="#calling-gnumeric-from-pure">Calling Gnumeric from Pure</a></li>
+<li><a class="reference internal" href="#accessing-spreadsheet-cells">Accessing Spreadsheet Cells</a></li>
+<li><a class="reference internal" href="#asynchronous-data-sources">Asynchronous Data Sources</a></li>
+<li><a class="reference internal" href="#triggers">Triggers</a></li>
+<li><a class="reference internal" href="#sheet-objects">Sheet Objects</a></li>
+<li><a class="reference internal" href="#opengl-interface">OpenGL Interface</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#copying">Copying</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pure-sockets.html"
+                        title="previous chapter">pure-sockets: Pure Sockets Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pure-glpk.html"
+                        title="next chapter">Pure-GLPK - GLPK interface for the Pure programming language</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/gnumeric-pure.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="pure-glpk.html" title="Pure-GLPK - GLPK interface for the Pure programming language"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pure-sockets.html" title="pure-sockets: Pure Sockets Interface"
+             >previous</a> |</li>
+        <li><a href="puredoc.html">Pure Language and Library Documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Albert Gräf, Kay-Uwe Kirstein, Eddie Rucker, Jiri Spitz, Peter Summerland.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1pre.
+    </div>
+  </body>
+</html>

@@ -13,7 +13,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.46',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -51,7 +51,7 @@
             
   <div class="section" id="pure-csv-comma-separated-value-interface-for-the-pure-programming-language">
 <h1>Pure-CSV - Comma Separated Value Interface for the Pure Programming Language<a class="headerlink" href="#pure-csv-comma-separated-value-interface-for-the-pure-programming-language" title="Permalink to this headline">¶</a></h1>
-<p>Version 1.4, November 10, 2010</p>
+<p>Version 1.4, November 13, 2010</p>
 <p>Eddie Rucker &lt;<a class="reference external" href="mailto:erucker&#37;&#52;&#48;bmc&#46;edu">erucker<span>&#64;</span>bmc<span>&#46;</span>edu</a>&gt;</p>
 <div class="line-block">
 <div class="line">Copyright (c) 2008, 2009, 2010 by Eddie Rucker</div>
@@ -211,12 +211,13 @@ reading tab delimited files without quoted strings.</p>
 </dd>
 </dl>
 <p id="example-dialect">Example</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {delimiter=&gt;"\t", quote_flag=&gt;STRING};
-&gt; d;
-#&lt;pointer 0x9d75280&gt;
-&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {delimiter=&gt;<span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>, quote_flag=&gt;STRING}<span class="p">;</span>
+<span class="gp">&gt; </span>d<span class="p">;</span>
+<span class="kt">#&lt;pointer 0x9d75280&gt;</span>
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="opening-csv-files">
@@ -252,43 +253,46 @@ The header record may be accessed by <tt class="docutils literal"><span class="p
 </dd>
 </dl>
 <p id="examples-open">Examples</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {delimiter=&gt;"\t"};
-&gt; let f = open ("junk.csv", "w", d);
-&gt; putr f {"hello",123,"",3+:4,world};
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {delimiter=&gt;<span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;junk.csv&quot;</span>, <span class="s">&quot;w&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>putr f {<span class="s">&quot;hello&quot;</span>,<span class="mi">123</span>,<span class="s">&quot;&quot;</span>,<span class="mi">3</span>+:<span class="mi">4</span>,world}<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; let f = open ("junk.csv", "r", d);
-&gt; getr f;
-{"hello","123","","3+:4","world"}
-&gt;</pre>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;junk.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>getr f<span class="p">;</span>
+{<span class="s">&quot;hello&quot;</span>,<span class="s">&quot;123&quot;</span>,<span class="s">&quot;&quot;</span>,<span class="s">&quot;3+:4&quot;</span>,<span class="s">&quot;world&quot;</span>}
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>Suppose our file &#8220;test.csv&#8221; is as presented below.</p>
-<div class="highlight-python"><pre>ir$ more test.csv
+<div class="highlight-pure"><div class="highlight"><pre>ir$ more test.csv
 NAME,TEST1,TEST2
-"HOPE, BOB",90,95
-"JONES, SALLY",88,72
-"RED, FEEFEE",45,52</pre>
+<span class="s">&quot;HOPE, BOB&quot;</span>,<span class="mi">90</span>,<span class="mi">95</span>
+<span class="s">&quot;JONES, SALLY&quot;</span>,<span class="mi">88</span>,<span class="mi">72</span>
+<span class="s">&quot;RED, FEEFEE&quot;</span>,<span class="mi">45</span>,<span class="mi">52</span>
+</pre></div>
 </div>
 <p>Notice how the <tt class="docutils literal"><span class="pre">LIST</span></tt> option affects the return of <tt class="docutils literal"><span class="pre">getr</span></tt> and how the
 <tt class="docutils literal"><span class="pre">HEADER</span></tt> option may be used to index records.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {quote_flag=&gt;MINIMAL};
-&gt; let f = open ("test.csv", "r", d, [LIST,HEADER]);
-&gt; let r = getr f;
-&gt; r!0;
-"HOPE, BOB"
-&gt; let k = header f;
-&gt; k;
-["NAME"=&gt;0,"TEST1"=&gt;1,"TEST2"=&gt;2]
-&gt; r!(k!"NAME");
-"HOPE, BOB"
-&gt; r!!(k!!["NAME","TEST1"]);
-["HOPE, BOB",95]
-&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {quote_flag=&gt;MINIMAL}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d, [LIST,HEADER])<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> r = getr f<span class="p">;</span>
+<span class="gp">&gt; </span>r!<span class="mi">0</span><span class="p">;</span>
+<span class="s">&quot;HOPE, BOB&quot;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> k = header f<span class="p">;</span>
+<span class="gp">&gt; </span>k<span class="p">;</span>
+[<span class="s">&quot;NAME&quot;</span>=&gt;<span class="mi">0</span>,<span class="s">&quot;TEST1&quot;</span>=&gt;<span class="mi">1</span>,<span class="s">&quot;TEST2&quot;</span>=&gt;<span class="mi">2</span>]
+<span class="gp">&gt; </span>r!(k!<span class="s">&quot;NAME&quot;</span>)<span class="p">;</span>
+<span class="s">&quot;HOPE, BOB&quot;</span>
+<span class="gp">&gt; </span>r!!(k!![<span class="s">&quot;NAME&quot;</span>,<span class="s">&quot;TEST1&quot;</span>])<span class="p">;</span>
+[<span class="s">&quot;HOPE, BOB&quot;</span>,<span class="mi">95</span>]
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="file-reading-functions">
@@ -336,120 +340,129 @@ Writing to a file opened for reading invokes the <tt class="docutils literal"><s
 <div class="section" id="examples">
 <span id="id1"></span><h3><a class="toc-backref" href="#id9">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
 <p>The first example shows how to write and read a default CSV file.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let f = open ("testing.csv", "w");
-&gt; fputr f [{"bob",3.9,"",-2},{"fred",-11.8,"",0},{"mary",2.3,"$",11}];
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;testing.csv&quot;</span>, <span class="s">&quot;w&quot;</span>)<span class="p">;</span>
+<span class="gp">&gt; </span>fputr f [{<span class="s">&quot;bob&quot;</span>,<span class="mf">3.9</span>,<span class="s">&quot;&quot;</span>,-<span class="mi">2</span>},{<span class="s">&quot;fred&quot;</span>,-<span class="mf">11.8</span>,<span class="s">&quot;&quot;</span>,<span class="mi">0</span>},{<span class="s">&quot;mary&quot;</span>,<span class="mf">2.3</span>,<span class="s">&quot;$&quot;</span>,<span class="mi">11</span>}]<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; let f = open "testing.csv";
-&gt; fgetr f;
-[{"bob","3.9","","-2"},{"fred","-11.8","","0"},{"mary","2.3","$","11"}]
-&gt; close f;
-&gt;</pre>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open <span class="s">&quot;testing.csv&quot;</span><span class="p">;</span>
+<span class="gp">&gt; </span>fgetr f<span class="p">;</span>
+[{<span class="s">&quot;bob&quot;</span>,<span class="s">&quot;3.9&quot;</span>,<span class="s">&quot;&quot;</span>,<span class="s">&quot;-2&quot;</span>},{<span class="s">&quot;fred&quot;</span>,<span class="s">&quot;-11.8&quot;</span>,<span class="s">&quot;&quot;</span>,<span class="s">&quot;0&quot;</span>},{<span class="s">&quot;mary&quot;</span>,<span class="s">&quot;2.3&quot;</span>,<span class="s">&quot;$&quot;</span>,<span class="s">&quot;11&quot;</span>}]
+<span class="gp">&gt; </span>close f<span class="p">;</span>
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>The second example illustrates how to write and read a CSV file using
 automatic conversions.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {quote_flag=&gt;MINIMAL};
-&gt; let f = open ("test.csv", "w", d);
-&gt; putr f {"I","",-4,1.2,2%4,like};
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {quote_flag=&gt;MINIMAL}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;w&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>putr f {<span class="s">&quot;I&quot;</span>,<span class="s">&quot;&quot;</span>,-<span class="mi">4</span>,<span class="mf">1.2</span>,<span class="mi">2</span>%<span class="mi">4</span>,like}<span class="p">;</span>
 ()
-&gt; putr f {"playing","the",0,-0.2,1+:4,drums};
+<span class="gp">&gt; </span>putr f {<span class="s">&quot;playing&quot;</span>,<span class="s">&quot;the&quot;</span>,<span class="mi">0</span>,-<span class="mf">0.2</span>,<span class="mi">1</span>+:<span class="mi">4</span>,drums}<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; let f = open ("test.csv", "r", d);
-&gt; fgetr f;
-[{"I","",-4,1.2,"2%4","like"},{"playing","the",0,-0.2,"1+:4","drums"}]
-&gt; close f;
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>fgetr f<span class="p">;</span>
+[{<span class="s">&quot;I&quot;</span>,<span class="s">&quot;&quot;</span>,-<span class="mi">4</span>,<span class="mf">1.2</span>,<span class="s">&quot;2%4&quot;</span>,<span class="s">&quot;like&quot;</span>},{<span class="s">&quot;playing&quot;</span>,<span class="s">&quot;the&quot;</span>,<span class="mi">0</span>,-<span class="mf">0.2</span>,<span class="s">&quot;1+:4&quot;</span>,<span class="s">&quot;drums&quot;</span>}]
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt;</pre>
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>Records containing quotes, delimiters, and line breaks are also properly
 handled.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {quote_flag=&gt;STRING};
-&gt; let f = open ("test.csv", "w", d);
-&gt; fputr f [{"this\nis\n",1},{"a \"test\"",2}];
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {quote_flag=&gt;STRING}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;w&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>fputr f [{<span class="s">&quot;this</span><span class="se">\n</span><span class="s">is</span><span class="se">\n</span><span class="s">&quot;</span>,<span class="mi">1</span>},{<span class="s">&quot;a </span><span class="se">\&quot;</span><span class="s">test</span><span class="se">\&quot;</span><span class="s">&quot;</span>,<span class="mi">2</span>}]<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; let f = open ("test.csv", "r", d);
-&gt; fgetr f;
-[{"this\nis\n",1},{"a \"test\"",2}]
-&gt; close f;
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>fgetr f<span class="p">;</span>
+[{<span class="s">&quot;this</span><span class="se">\n</span><span class="s">is</span><span class="se">\n</span><span class="s">&quot;</span>,<span class="mi">1</span>},{<span class="s">&quot;a </span><span class="se">\&quot;</span><span class="s">test</span><span class="se">\&quot;</span><span class="s">&quot;</span>,<span class="mi">2</span>}]
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt;</pre>
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>Consider the following hand written CSV file. According to RFC4180, this is
 not a valid CSV file. However, by using the <tt class="docutils literal"><span class="pre">space_around_quoted_field</span></tt>, the
 file can still be read.</p>
-<div class="highlight-python"><pre>erucker:$ more test.csv
-  "this",   "is",  "not", "valid"</pre>
+<div class="highlight-pure"><div class="highlight"><pre>erucker:$ more test.csv
+  <span class="s">&quot;this&quot;</span>,   <span class="s">&quot;is&quot;</span>,  <span class="s">&quot;not&quot;</span>, <span class="s">&quot;valid&quot;</span>
+</pre></div>
 </div>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let f = open "test.csv";
-&gt; getr f;
-csv::error "parse error at line 1"
-&gt; let d = dialect {space_around_quoted_field=&gt;BOTH};
-&gt; let f = open ("test.csv", "r", d);
-&gt; getr f;
-{"this","is","not","valid"}
-&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open <span class="s">&quot;test.csv&quot;</span><span class="p">;</span>
+<span class="gp">&gt; </span>getr f<span class="p">;</span>
+csv<span class="p">::</span>error <span class="s">&quot;parse error at line 1&quot;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {space_around_quoted_field=&gt;BOTH}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>getr f<span class="p">;</span>
+{<span class="s">&quot;this&quot;</span>,<span class="s">&quot;is&quot;</span>,<span class="s">&quot;not&quot;</span>,<span class="s">&quot;valid&quot;</span>}
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">trim_space</span></tt> flag should be used with caution. A field with space in
 font of a number should be interpreted as a string, but consider the following
 file.</p>
-<div class="highlight-python"><pre>erucker:$ more test.csv
-"  this   ", 45 ,23,  hello</pre>
+<div class="highlight-pure"><div class="highlight"><pre>erucker:$ more test.csv
+<span class="s">&quot;  this   &quot;</span>, <span class="mi">45</span> ,<span class="mi">23</span>,  hello
+</pre></div>
 </div>
 <p>Now observe the differences for the two dialects below.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {trim_space=&gt;BOTH};
-&gt; let f = open ("test.csv","r",d);
-&gt; getr f;
-{"this","45","23","hello"}
-&gt; let d = dialect {trim_space=&gt;BOTH, quote_flag=&gt;MINIMAL};
-&gt; let f = open ("test.csv", "r", d);
-&gt; getr f;
-{"this",45,23,"hello"}
-&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {trim_space=&gt;BOTH}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>,<span class="s">&quot;r&quot;</span>,d)<span class="p">;</span>
+<span class="gp">&gt; </span>getr f<span class="p">;</span>
+{<span class="s">&quot;this&quot;</span>,<span class="s">&quot;45&quot;</span>,<span class="s">&quot;23&quot;</span>,<span class="s">&quot;hello&quot;</span>}
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {trim_space=&gt;BOTH, quote_flag=&gt;MINIMAL}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>getr f<span class="p">;</span>
+{<span class="s">&quot;this&quot;</span>,<span class="mi">45</span>,<span class="mi">23</span>,<span class="s">&quot;hello&quot;</span>}
+<span class="gp">&gt;</span>
+</pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">trim_space</span></tt> flag also affects writing.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {trim_space=&gt;BOTH};
-&gt; let f = open ("test.csv", "w", d);
-&gt; putr f {"   this   ","   45 "};
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {trim_space=&gt;BOTH}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;w&quot;</span>, d)<span class="p">;</span>
+<span class="gp">&gt; </span>putr f {<span class="s">&quot;   this   &quot;</span>,<span class="s">&quot;   45 &quot;</span>}<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; quit
+<span class="gp">&gt; </span>quit
 
 erucker:$ more test.csv
-"this","45"</pre>
+<span class="s">&quot;this&quot;</span>,<span class="s">&quot;45&quot;</span>
+</pre></div>
 </div>
 <p>For the last example a tab delimiter is used, automatic conversions is on,
 and records are represented as lists. Files are automatically closed when
 the script is finished.</p>
-<div class="highlight-python"><pre>&gt; using csv;
-&gt; using namespace csv;
-&gt; let d = dialect {quote_flag=&gt;MINIMAL, delimiter=&gt;"\t"};
-&gt; let f = open ("test.csv", "w", d, [LIST]);
-&gt; fputr f [["a","b",-4.5,""],["c","d",2.3,"-"]];
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> d = dialect {quote_flag=&gt;MINIMAL, delimiter=&gt;<span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;w&quot;</span>, d, [LIST])<span class="p">;</span>
+<span class="gp">&gt; </span>fputr f [[<span class="s">&quot;a&quot;</span>,<span class="s">&quot;b&quot;</span>,-<span class="mf">4.5</span>,<span class="s">&quot;&quot;</span>],[<span class="s">&quot;c&quot;</span>,<span class="s">&quot;d&quot;</span>,<span class="mf">2.3</span>,<span class="s">&quot;-&quot;</span>]]<span class="p">;</span>
 ()
-&gt; close f;
+<span class="gp">&gt; </span>close f<span class="p">;</span>
 ()
-&gt; let f = open ("test.csv", "r", d, [LIST]);
-&gt; fgetr f;
-[["a","b",-4.5,""],["c","d",2.3,"-"]]
-&gt; quit</pre>
+<span class="gp">&gt; </span><span class="kr">let</span> f = open (<span class="s">&quot;test.csv&quot;</span>, <span class="s">&quot;r&quot;</span>, d, [LIST])<span class="p">;</span>
+<span class="gp">&gt; </span>fgetr f<span class="p">;</span>
+[[<span class="s">&quot;a&quot;</span>,<span class="s">&quot;b&quot;</span>,-<span class="mf">4.5</span>,<span class="s">&quot;&quot;</span>],[<span class="s">&quot;c&quot;</span>,<span class="s">&quot;d&quot;</span>,<span class="mf">2.3</span>,<span class="s">&quot;-&quot;</span>]]
+<span class="gp">&gt; </span>quit
+</pre></div>
 </div>
 </div>
 </div>

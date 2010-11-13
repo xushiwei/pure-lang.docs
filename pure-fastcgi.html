@@ -13,7 +13,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.46',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -51,7 +51,7 @@
             
   <div class="section" id="pure-fastcgi-fastcgi-module-for-pure">
 <h1>pure-fastcgi: FastCGI module for Pure<a class="headerlink" href="#pure-fastcgi-fastcgi-module-for-pure" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, November 10, 2010</p>
+<p>Version 0.2, November 13, 2010</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This module lets you write <a class="reference external" href="http://www.fastcgi.com">FastCGI</a> scripts with Pure, to be run by web
 servers like <a class="reference external" href="http://www.apache.org/">Apache</a>. Compared to normal CGI scripts, this has the advantage
@@ -86,23 +86,24 @@ server that your script is ready to accept another request. It also overrides
 a number of standard I/O functions so that they talk to the server instead.
 These routines are all in the <tt class="docutils literal"><span class="pre">fastcgi</span></tt> namespace. In your Pure script, you
 can set up a simple loop to process requests as follows:</p>
-<div class="highlight-python"><pre>#!/usr/local/bin/pure -x
+<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#!/usr/local/bin/pure -x</span>
 
-using fastcgi;
-using namespace fastcgi;
+<span class="kr">using</span> fastcgi<span class="p">;</span>
+<span class="kr">using</span> <span class="kr">namespace</span> fastcgi<span class="p">;</span>
 
-extern char *getenv(char*);
+<span class="kr">extern</span> <span class="kt">char</span> *getenv(<span class="kt">char</span>*)<span class="p">;</span>
 
-main count = main count when
-  count = count+1;
-  printf "Content-type: text/html\n\n\
-&lt;title&gt;FastCGI Hello! (Pure, fcgi_stdio library)&lt;/title&gt;\
-&lt;h1&gt;FastCGI Hello! (Pure, fcgi_stdio library)&lt;/h1&gt;\
-Request number %d running on host &lt;i&gt;%s&lt;/i&gt;\n"
-  (count,getenv "SERVER_NAME");
-end if accept &gt;= 0;
+main count = main count <span class="kr">when</span>
+  count = count+<span class="mi">1</span><span class="p">;</span>
+  printf <span class="s">&quot;Content-type: text/html</span><span class="se">\n\n</span><span class="s">\</span>
+<span class="s">&lt;title&gt;FastCGI Hello! (Pure, fcgi_stdio library)&lt;/title&gt;\</span>
+<span class="s">&lt;h1&gt;FastCGI Hello! (Pure, fcgi_stdio library)&lt;/h1&gt;\</span>
+<span class="s">Request number %d running on host &lt;i&gt;%s&lt;/i&gt;</span><span class="se">\n</span><span class="s">&quot;</span>
+  (count,getenv <span class="s">&quot;SERVER_NAME&quot;</span>)<span class="p">;</span>
+<span class="kr">end</span> <span class="kr">if</span> accept &gt;= <span class="mi">0</span><span class="p">;</span>
 
-main 0;</pre>
+main <span class="mi">0</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>(You might have to adjust the &#8220;shebang&#8221; in the first line above, so that the
 shell finds the Pure interpreter. Also, remember to make the script executable.
@@ -131,13 +132,14 @@ elaborate examples.</p>
 the FastCGI module loaded and must also be set up to execute the
 scripts. E.g., when using Apache, the following configuration file entry will
 set up a directory for FastCGI scripts:</p>
-<div class="highlight-python"><pre>ScriptAlias /fastcgi-bin/ "/srv/www/fastcgi-bin/"
+<div class="highlight-pure"><div class="highlight"><pre>ScriptAlias /fastcgi-bin/ <span class="s">&quot;/srv/www/fastcgi-bin/&quot;</span>
 &lt;Location /fastcgi-bin/&gt;
     Options ExecCGI
     SetHandler fastcgi-script
     Order allow,deny
     Allow from all
-&lt;/Location&gt;</pre>
+&lt;/Location&gt;
+</pre></div>
 </div>
 <p>(Replace <tt class="docutils literal"><span class="pre">fastcgi-script</span></tt> with <tt class="docutils literal"><span class="pre">fcgid-script</span></tt> if you&#8217;re running
 <tt class="docutils literal"><span class="pre">mod_fcgid</span></tt> rather than <tt class="docutils literal"><span class="pre">mod_fastcgi</span></tt>.)</p>
@@ -147,12 +149,13 @@ can just throw your scripts into the <tt class="docutils literal"><span class="p
 executed via an URL like <tt class="docutils literal"><span class="pre">http://localhost/fastcgi-bin/myscript</span></tt>.</p>
 <p>You can also set up a handler for the <tt class="docutils literal"><span class="pre">.pure</span></tt> filename extension as
 follows:</p>
-<div class="highlight-python"><pre>&lt;IfModule mod_fastcgi.c&gt;
-&lt;FilesMatch "\.pure$"&gt;
+<div class="highlight-pure"><div class="highlight"><pre>&lt;IfModule mod_fastcgi.c&gt;
+&lt;FilesMatch <span class="s">&quot;\.pure$&quot;</span>&gt;
     AddHandler fastcgi-script .pure
     Options +ExecCGI
 &lt;/FilesMatch&gt;
-&lt;/IfModule&gt;</pre>
+&lt;/IfModule&gt;
+</pre></div>
 </div>
 <p>(Again, you&#8217;ll have to adjust the <tt class="docutils literal"><span class="pre">IfModule</span></tt> statement and replace
 <tt class="docutils literal"><span class="pre">fastcgi-script</span></tt> with <tt class="docutils literal"><span class="pre">fcgid-script</span></tt> if you&#8217;re running <tt class="docutils literal"><span class="pre">mod_fcgid</span></tt>.)

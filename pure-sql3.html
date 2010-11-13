@@ -13,7 +13,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.46',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -51,7 +51,7 @@
             
   <div class="section" id="pure-sql3">
 <h1>Pure-Sql3<a class="headerlink" href="#pure-sql3" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, November 10, 2010</p>
+<p>Version 0.1, November 13, 2010</p>
 <div class="line-block">
 <div class="line">Peter Summerland</div>
 <div class="line">Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</div>
@@ -125,27 +125,28 @@ that are not available through Pure&#8217;s generic ODBC interface.</p>
 <p>Here is a simple example that opens a database file &#8220;readme.db&#8221;
 (creating it if it does not exist), adds a table &#8220;RM&#8221;, populates &#8220;RM&#8221;
 and executes a query.</p>
-<div class="highlight-python"><pre>pure-sql3$&gt; pure -q
-&gt;
+<div class="highlight-pure"><div class="highlight"><pre>pure-sql3$&gt; pure -q
+<span class="gp">&gt;</span>
 
-&gt; using sql3; using namespace sql3;
+<span class="gp">&gt; </span><span class="kr">using</span> sql3<span class="p">;</span> <span class="kr">using</span> <span class="kr">namespace</span> sql3<span class="p">;</span>
 
-&gt; let dbp = open "readme.db";
+<span class="gp">&gt; </span><span class="kr">let</span> dbp = open <span class="s">&quot;readme.db&quot;</span><span class="p">;</span>
 
-&gt; exec dbp "create table if not exists RM (name text, age integer)";
+<span class="gp">&gt; </span>exec dbp <span class="s">&quot;create table if not exists RM (name text, age integer)&quot;</span><span class="p">;</span>
 
-&gt; exec dbp "delete from RM";
+<span class="gp">&gt; </span>exec dbp <span class="s">&quot;delete from RM&quot;</span><span class="p">;</span>
 
-&gt; let sp1 = prep dbp "ci" "insert into RM values (?,?)";
+<span class="gp">&gt; </span><span class="kr">let</span> sp1 = prep dbp <span class="s">&quot;ci&quot;</span> <span class="s">&quot;insert into RM values (?,?)&quot;</span><span class="p">;</span>
 
-&gt; exec sp1 ("Sam",20);
+<span class="gp">&gt; </span>exec sp1 (<span class="s">&quot;Sam&quot;</span>,<span class="mi">20</span>)<span class="p">;</span>
 
-&gt; exec sp1 ("Fred",22);
+<span class="gp">&gt; </span>exec sp1 (<span class="s">&quot;Fred&quot;</span>,<span class="mi">22</span>)<span class="p">;</span>
 
-&gt; let sp2 = prep dbp "ci:i" "select * from RM where age &gt; ?";
+<span class="gp">&gt; </span><span class="kr">let</span> sp2 = prep dbp <span class="s">&quot;ci:i&quot;</span> <span class="s">&quot;select * from RM where age &gt; ?&quot;</span><span class="p">;</span>
 
-&gt; exec sp2 18;
-[["Sam",20],["Fred",22]]</pre>
+<span class="gp">&gt; </span>exec sp2 <span class="mi">18</span><span class="p">;</span>
+[[<span class="s">&quot;Sam&quot;</span>,<span class="mi">20</span>],[<span class="s">&quot;Fred&quot;</span>,<span class="mi">22</span>]]
+</pre></div>
 </div>
 <p>The Sql3 functions, <tt class="docutils literal"><span class="pre">open</span></tt>, <tt class="docutils literal"><span class="pre">prep</span></tt> and <tt class="docutils literal"><span class="pre">exec</span></tt> encapsulate the
 core functionality of SQLite, and in many cases are all you need to
@@ -183,7 +184,7 @@ with Sql3 in the Pure interpreter in particular. For example, after
 entering the Pure statements from the Simple Example above, you could
 start a new terminal, cd to pure-sql3, type &#8220;sqlite3 readme.db&#8221; at the
 prompt, and see the effect the Pure statements had on the database:</p>
-<div class="highlight-python"><pre>pure-sql3$&gt; sqlite3 readme.db
+<div class="highlight-sql"><pre>pure-sql3$&gt; sqlite3 readme.db
 SQLite version 3.6.16
 Enter ".help" for instructions
 Enter SQL statements terminated with a ";"
@@ -263,8 +264,9 @@ argument and returns a db_ptr for the associated database connection
 object created by SQLite.</dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt;  let dbp2 = open "abc.db"; dbp2;
-#&lt;pointer 0x992dff8&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span> <span class="kr">let</span> dbp2 = open <span class="s">&quot;abc.db&quot;</span><span class="p">;</span> dbp2<span class="p">;</span>
+<span class="kt">#&lt;pointer 0x992dff8&gt;</span>
+</pre></div>
 </div>
 <p>If the filename is &#8221;:memory:&#8221; a private, temporary in-memory database
 is created for the connection.</p>
@@ -297,8 +299,9 @@ Prepared Statements</a>)</p>
 database connection object that must be closed. In this case, <tt class="docutils literal"><span class="pre">open</span></tt>
 automatically closes the the connection object and then throws an
 exception. E.g.,:</p>
-<div class="highlight-python"><pre>&gt; catch error (open ("RM_zyx.db",SQLITE_OPEN_READONLY));
-error (sql3::db_error 14 "unable to open database file [open RM_zyx.db]")</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="nb">catch</span> error (open (<span class="s">&quot;RM_zyx.db&quot;</span>,SQLITE_OPEN_READONLY))<span class="p">;</span>
+error (sql3<span class="p">::</span>db_error <span class="mi">14</span> <span class="s">&quot;unable to open database file [open RM_zyx.db]&quot;</span>)
+</pre></div>
 </div>
 <p>Apparently, SQLite does not verify that a file is a valid SQLite
 database when it opens a connection. However, if the file is corrupted
@@ -330,15 +333,16 @@ close it using sqlite3_close; otherwise do nothing.</dd>
 statements associated with the connection being closed. Sql3 will
 detect and throw a db_error if an attempt is subsequently made to
 execute a statement associated with the closed database connection.</p>
-<div class="highlight-python"><pre>&gt; let dbp2_sp = prep dbp2 "ci:" "select * from RM";
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> dbp2_sp = prep dbp2 <span class="s">&quot;ci:&quot;</span> <span class="s">&quot;select * from RM&quot;</span><span class="p">;</span>
 
-&gt; exec dbp2_sp ();
-[["Sam",20],["Fred",22]]
+<span class="gp">&gt; </span>exec dbp2_sp ()<span class="p">;</span>
+[[<span class="s">&quot;Sam&quot;</span>,<span class="mi">20</span>],[<span class="s">&quot;Fred&quot;</span>,<span class="mi">22</span>]]
 
-&gt; close dbp2;
+<span class="gp">&gt; </span>close dbp2<span class="p">;</span>
 
-&gt; catch error (exec dbp2_sp);
-error (sql3::db_error 0 "Attempt to exec on a closed db_ptr.")</pre>
+<span class="gp">&gt; </span><span class="nb">catch</span> error (exec dbp2_sp)<span class="p">;</span>
+error (sql3<span class="p">::</span>db_error <span class="mi">0</span> <span class="s">&quot;Attempt to exec on a closed db_ptr.&quot;</span>)
+</pre></div>
 </div>
 <p>If a db_ptr goes out of scope, Sql3 will automatically call
 <tt class="docutils literal"><span class="pre">sqlite3_close</span></tt> to close the referenced database connection, but
@@ -406,9 +410,10 @@ indicate that (a) a string and an int will be used to bind <tt class="docutils l
 an int will be used to bind <tt class="docutils literal"><span class="pre">sp2</span></tt> and (c) <tt class="docutils literal"><span class="pre">sp2</span></tt>, when executed,
 will return a result set in the form of a list of sublists each of
 which contains a string and an int.</p>
-<div class="highlight-python"><pre>&gt; let sp1 = prep dbp "ci" "insert into RM values (?,?)";
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> sp1 = prep dbp <span class="s">&quot;ci&quot;</span> <span class="s">&quot;insert into RM values (?,?)&quot;</span><span class="p">;</span>
 
-&gt; let sp2 = prep dbp "ci:i" "select * from RM where age &gt; ?";</pre>
+<span class="gp">&gt; </span><span class="kr">let</span> sp2 = prep dbp <span class="s">&quot;ci:i&quot;</span> <span class="s">&quot;select * from RM where age &gt; ?&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>In general, the characters in the type string before the &#8221;:&#8221;, if any,
 indicate the types in the result set. Those that occur after the &#8221;:&#8221;,
@@ -513,37 +518,41 @@ be a valid stmt_ptr or the rule will fail.</dd>
 number and type correspond to the bind parameter types specified in
 the call to <tt class="docutils literal"><span class="pre">prep</span></tt> that produced the first parameter <tt class="docutils literal"><span class="pre">sp</span></tt>.</p>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt; exec sp1 ("Tom",30);  //insert Tom
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>exec sp1 (<span class="s">&quot;Tom&quot;</span>,<span class="mi">30</span>)<span class="p">;</span>  <span class="c1">//insert Tom</span>
 []
 
-&gt; exec sp2 19;          //select age &gt; 19
-[["Sam",20],["Fred",22],["Tom",30]]
+<span class="gp">&gt; </span>exec sp2 <span class="mi">19</span><span class="p">;</span>          <span class="c1">//select age &gt; 19</span>
+[[<span class="s">&quot;Sam&quot;</span>,<span class="mi">20</span>],[<span class="s">&quot;Fred&quot;</span>,<span class="mi">22</span>],[<span class="s">&quot;Tom&quot;</span>,<span class="mi">30</span>]]
 
-&gt; exec dbp "delete from RM where name='Tom'";</pre>
+<span class="gp">&gt; </span>exec dbp <span class="s">&quot;delete from RM where name=&#39;Tom&#39;&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>An error is thrown if the args do not correspond to the specified types.</p>
-<div class="highlight-python"><pre>&gt; catch error (exec sp2 "a");
-error (sql3::db_error 0 "\"a\" does not have type int")</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="nb">catch</span> error (exec sp2 <span class="s">&quot;a&quot;</span>)<span class="p">;</span>
+error (sql3<span class="p">::</span>db_error <span class="mi">0</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">a</span><span class="se">\&quot;</span><span class="s"> does not have type int&quot;</span>)
+</pre></div>
 </div>
 <p>If a prepared statement does not have any binding parameters,
 the call to <tt class="docutils literal"><span class="pre">exec</span></tt> should use <tt class="docutils literal"><span class="pre">()</span></tt> as the binding argument.</p>
-<div class="highlight-python"><pre>&gt; let sp3 = prep dbp "c:" "select name from RM";
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> sp3 = prep dbp <span class="s">&quot;c:&quot;</span> <span class="s">&quot;select name from RM&quot;</span><span class="p">;</span>
 
-&gt; exec sp3 ();
-[["Sam"],["Fred"]]</pre>
+<span class="gp">&gt; </span>exec sp3 ()<span class="p">;</span>
+[[<span class="s">&quot;Sam&quot;</span>],[<span class="s">&quot;Fred&quot;</span>]]
+</pre></div>
 </div>
 <p>Extra care is required when executing prepared statements that take a
 blob argument because it must be a pair. In order to preserve the
 tuple as a pair, binding arguments that include a blob should passed
 to exec as a list. If passed as a member of a larger tuple, it will be
 treated as two arguments due to the nature of tuples.</p>
-<div class="highlight-python"><pre>&gt; let blb = (100,ptr);
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> blb = (<span class="mi">100</span>,ptr)<span class="p">;</span>
 
-&gt; (a,blb,c);
-a,100,ptr,c
+<span class="gp">&gt; </span>(a,blb,c)<span class="p">;</span>
+a,<span class="mi">100</span>,ptr,c
 
-&gt; [a,blb,c];
-[a,(100,ptr),c]</pre>
+<span class="gp">&gt; </span>[a,blb,c]<span class="p">;</span>
+[a,(<span class="mi">100</span>,ptr),c]
+</pre></div>
 </div>
 <p>Thus something like &#8220;<tt class="docutils literal"><span class="pre">exec</span> <span class="pre">stpx</span> <span class="pre">[a,blb,c]</span></tt>&#8221; would work fine, while &#8220;<tt class="docutils literal"><span class="pre">exec</span>
 <span class="pre">stpx</span> <span class="pre">(a,blb,c)</span></tt>&#8221; would produce a Sql3 binding exception.</p>
@@ -559,8 +568,9 @@ sets. In such cases it is preferable to use <tt class="docutils literal"><span c
 <dd>same as <tt class="docutils literal"><span class="pre">exec</span></tt> except that it returns a lazy list.</dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt; lexec sp2 19;
-["Sam",20]:#&lt;thunk 0xb6475ab0&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lexec sp2 <span class="mi">19</span><span class="p">;</span>
+[<span class="s">&quot;Sam&quot;</span>,<span class="mi">20</span>]:<span class="kt">#&lt;thunk 0xb6475ab0&gt;</span>
+</pre></div>
 </div>
 <p>Note that no changes to <tt class="docutils literal"><span class="pre">sp2</span></tt> were required. In addition, for most
 purposes the lazy list returned by <tt class="docutils literal"><span class="pre">lexec</span></tt> can be processed by the
@@ -577,7 +587,8 @@ cannot contain argument placeholders and cannot be a select
 statement.</dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt; exec dbp "create table if not exists RM (name varchar, age integer)";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>exec dbp <span class="s">&quot;create table if not exists RM (name varchar, age integer)&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 </div>
 <div class="section" id="executing-against-a-busy-database">
@@ -648,8 +659,9 @@ scope.</p>
 closed (which would have caused an exception to be thrown), an attempt
 to finalize it, including the automatic finalization can occur when
 stmt_ptr goes out of scope, will cause an exception to be thrown.</p>
-<div class="highlight-python"><pre>&gt; catch error (finalize dbp2_sp);
-error (sql3::db_error 0 "finalize: STMT attached to a closed db_ptr.")</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="nb">catch</span> error (finalize dbp2_sp)<span class="p">;</span>
+error (sql3<span class="p">::</span>db_error <span class="mi">0</span> <span class="s">&quot;finalize: STMT attached to a closed db_ptr.&quot;</span>)
+</pre></div>
 </div>
 <p>Multiple calls to <tt class="docutils literal"><span class="pre">finalize</span></tt> are fine. In contrast, the corresponding
 native C interface function, <tt class="docutils literal"><span class="pre">sqlite3_finalize</span></tt> will cause a seg
@@ -674,15 +686,16 @@ corresponding error message. If ec&gt;0, the error was detected by SQLite
 itself, and ec and msg are those returned by SQLite. If ec==0, the
 error was detected by Sql3 and msg is a Sql3 specific description of
 the error. E.g.,</p>
-<div class="highlight-python"><pre>&gt; db_error_handler (db_error ec msg) = ()
-&gt; when
-&gt;   source = if ec &gt; 0 then "SQLite" else "Sql3";
-&gt;   printf "%s db_error: ec %d, %s\n" (source,ec,msg);
-&gt; end;
-&gt; db_error_handler x = throw x;
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>db_error_handler (db_error ec msg) = ()
+<span class="gp">&gt; </span><span class="kr">when</span>
+<span class="gp">&gt; </span>  source = <span class="kr">if</span> ec &gt; <span class="mi">0</span> <span class="kr">then</span> <span class="s">&quot;SQLite&quot;</span> <span class="kr">else</span> <span class="s">&quot;Sql3&quot;</span><span class="p">;</span>
+<span class="gp">&gt; </span>  printf <span class="s">&quot;%s db_error: ec %d, %s</span><span class="se">\n</span><span class="s">&quot;</span> (source,ec,msg)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>db_error_handler x = <span class="nb">throw</span> x<span class="p">;</span>
 
-&gt; catch db_error_handler (exec dbp "select * from NO_TABLE");
-SQLite db_error: ec 1, no such table: NO_TABLE</pre>
+<span class="gp">&gt; </span><span class="nb">catch</span> db_error_handler (exec dbp <span class="s">&quot;select * from NO_TABLE&quot;</span>)<span class="p">;</span>
+SQLite db_error: ec <span class="mi">1</span>, no such table: NO_TABLE
+</pre></div>
 </div>
 </div>
 <div class="section" id="db-busy">
@@ -695,32 +708,33 @@ locked (See <a class="reference internal" href="#executing-against-a-busy-databa
 <div class="section" id="sqlite-error-codes">
 <h4><a class="toc-backref" href="#id31">SQLite Error Codes</a><a class="headerlink" href="#sqlite-error-codes" title="Permalink to this headline">¶</a></h4>
 <p>Here is a list, as of April 2, 2010, SQLite&#8217;s error codes.</p>
-<div class="highlight-python"><pre>SQLITE_ERROR        1   /* SQL error or missing database */
-SQLITE_INTERNAL     2   /* Internal logic error in SQLite */
-SQLITE_PERM         3   /* Access permission denied */
-SQLITE_ABORT        4   /* Callback routine requested an abort */
-SQLITE_BUSY         5   /* The database file is locked */
-SQLITE_LOCKED       6   /* A table in the database is locked */
-SQLITE_NOMEM        7   /* A malloc() failed */
-SQLITE_READONLY     8   /* Attempt to write a readonly database */
-SQLITE_INTERRUPT    9   /* Operation terminated by sqlite3_interrupt()*/
-SQLITE_IOERR       10   /* Some kind of disk I/O error occurred */
-SQLITE_CORRUPT     11   /* The database disk image is malformed */
-SQLITE_NOTFOUND    12   /* NOT USED. Table or record not found */
-SQLITE_FULL        13   /* Insertion failed because database is full */
-SQLITE_CANTOPEN    14   /* Unable to open the database file */
-SQLITE_PROTOCOL    15   /* NOT USED. Database lock protocol error */
-SQLITE_EMPTY       16   /* Database is empty */
-SQLITE_SCHEMA      17   /* The database schema changed */
-SQLITE_TOOBIG      18   /* String or BLOB exceeds size limit */
-SQLITE_CONSTRAINT  19   /* Abort due to constraint violation */
-SQLITE_MISMATCH    20   /* Data type mismatch */
-SQLITE_MISUSE      21   /* Library used incorrectly */
-SQLITE_NOLFS       22   /* Uses OS features not supported on host */
-SQLITE_AUTH        23   /* Authorization denied */
-SQLITE_FORMAT      24   /* Auxiliary database format error */
-SQLITE_RANGE       25   /* 2nd parameter to sqlite3_bind out of range */
-SQLITE_NOTADB      26   /* File opened that is not a database file */</pre>
+<div class="highlight-pure"><div class="highlight"><pre>SQLITE_ERROR        <span class="mi">1</span>   <span class="cm">/* SQL error or missing database */</span>
+SQLITE_INTERNAL     <span class="mi">2</span>   <span class="cm">/* Internal logic error in SQLite */</span>
+SQLITE_PERM         <span class="mi">3</span>   <span class="cm">/* Access permission denied */</span>
+SQLITE_ABORT        <span class="mi">4</span>   <span class="cm">/* Callback routine requested an abort */</span>
+SQLITE_BUSY         <span class="mi">5</span>   <span class="cm">/* The database file is locked */</span>
+SQLITE_LOCKED       <span class="mi">6</span>   <span class="cm">/* A table in the database is locked */</span>
+SQLITE_NOMEM        <span class="mi">7</span>   <span class="cm">/* A malloc() failed */</span>
+SQLITE_READONLY     <span class="mi">8</span>   <span class="cm">/* Attempt to write a readonly database */</span>
+SQLITE_INTERRUPT    <span class="mi">9</span>   <span class="cm">/* Operation terminated by sqlite3_interrupt()*/</span>
+SQLITE_IOERR       <span class="mi">10</span>   <span class="cm">/* Some kind of disk I/O error occurred */</span>
+SQLITE_CORRUPT     <span class="mi">11</span>   <span class="cm">/* The database disk image is malformed */</span>
+SQLITE_NOTFOUND    <span class="mi">12</span>   <span class="cm">/* NOT USED. Table or record not found */</span>
+SQLITE_FULL        <span class="mi">13</span>   <span class="cm">/* Insertion failed because database is full */</span>
+SQLITE_CANTOPEN    <span class="mi">14</span>   <span class="cm">/* Unable to open the database file */</span>
+SQLITE_PROTOCOL    <span class="mi">15</span>   <span class="cm">/* NOT USED. Database lock protocol error */</span>
+SQLITE_EMPTY       <span class="mi">16</span>   <span class="cm">/* Database is empty */</span>
+SQLITE_SCHEMA      <span class="mi">17</span>   <span class="cm">/* The database schema changed */</span>
+SQLITE_TOOBIG      <span class="mi">18</span>   <span class="cm">/* String or BLOB exceeds size limit */</span>
+SQLITE_CONSTRAINT  <span class="mi">19</span>   <span class="cm">/* Abort due to constraint violation */</span>
+SQLITE_MISMATCH    <span class="mi">20</span>   <span class="cm">/* Data type mismatch */</span>
+SQLITE_MISUSE      <span class="mi">21</span>   <span class="cm">/* Library used incorrectly */</span>
+SQLITE_NOLFS       <span class="mi">22</span>   <span class="cm">/* Uses OS features not supported on host */</span>
+SQLITE_AUTH        <span class="mi">23</span>   <span class="cm">/* Authorization denied */</span>
+SQLITE_FORMAT      <span class="mi">24</span>   <span class="cm">/* Auxiliary database format error */</span>
+SQLITE_RANGE       <span class="mi">25</span>   <span class="cm">/* 2nd parameter to sqlite3_bind out of range */</span>
+SQLITE_NOTADB      <span class="mi">26</span>   <span class="cm">/* File opened that is not a database file */</span>
+</pre></div>
 </div>
 <p>New error codes may be added in future versions of SQLite. Note that
 the SQLite names of the error codes are not exported by the Sql3
@@ -760,34 +774,38 @@ be passed to <tt class="docutils literal"><span class="pre">pure_fun</span></tt>
 <p>Here is an example of a scalar function that takes two parameters. Note
 that any kind of Pure &#8220;function&#8221; can be passed here; local functions,
 global functions, lambdas or partial applications all work.</p>
-<div class="highlight-python"><pre>&gt; create_function dbp "p_fn" 2 plus with plus x y = x + y; end;
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>create_function dbp <span class="s">&quot;p_fn&quot;</span> <span class="mi">2</span> plus <span class="kr">with</span> plus x y = x + y<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
 
-&gt; let sp4 = prep dbp "cii:"
-&gt;           "select p_fn('Hi ',name), age, p_fn(age,10) from RM";
+<span class="gp">&gt; </span><span class="kr">let</span> sp4 = prep dbp <span class="s">&quot;cii:&quot;</span>
+<span class="gp">&gt; </span>          <span class="s">&quot;select p_fn(&#39;Hi &#39;,name), age, p_fn(age,10) from RM&quot;</span><span class="p">;</span>
 
-&gt; exec sp4 ();
-[["Hi Sam",20,30],["Hi Fred",22,32]]</pre>
+<span class="gp">&gt; </span>exec sp4 ()<span class="p">;</span>
+[[<span class="s">&quot;Hi Sam&quot;</span>,<span class="mi">20</span>,<span class="mi">30</span>],[<span class="s">&quot;Hi Fred&quot;</span>,<span class="mi">22</span>,<span class="mi">32</span>]]
+</pre></div>
 </div>
 <p>Here is an example of a variadic function:</p>
-<div class="highlight-python"><pre>&gt; create_function dbp "p_qm" (-1) quasimodo with
-&gt;   quasimodo xs = "quasimodo: "+join ":" [str x | x=xs];
-&gt; end;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>create_function dbp <span class="s">&quot;p_qm&quot;</span> (-<span class="mi">1</span>) quasimodo <span class="kr">with</span>
+<span class="gp">&gt; </span>  quasimodo xs = <span class="s">&quot;quasimodo: &quot;</span>+join <span class="s">&quot;:&quot;</span> [str x | x=xs]<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>If the SQL function takes no arguments, the corresponding Pure
 function must, for technical reasons in Pure, take a single dummy
 argument. E.g.,</p>
-<div class="highlight-python"><pre>&gt; create_function dbp "p_count" 0 counter with
-&gt;   counter () = put r (get r+1);
-&gt; end when r = ref 0 end;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>create_function dbp <span class="s">&quot;p_count&quot;</span> <span class="mi">0</span> counter <span class="kr">with</span>
+<span class="gp">&gt; </span>  counter () = put r (get r+<span class="mi">1</span>)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span> <span class="kr">when</span> r = ref <span class="mi">0</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>Here is how <tt class="docutils literal"><span class="pre">count</span></tt> and <tt class="docutils literal"><span class="pre">quasimodo</span></tt> might be used:</p>
-<div class="highlight-python"><pre>&gt; let sp5 = prep dbp "ic:" "select p_count(), p_qm(name,age) from RM";
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> sp5 = prep dbp <span class="s">&quot;ic:&quot;</span> <span class="s">&quot;select p_count(), p_qm(name,age) from RM&quot;</span><span class="p">;</span>
 
-&gt; exec sp5 ();
-[[1,"quasimodo: \"Sam\":20"],[2,"quasimodo: \"Fred\":22"]]
+<span class="gp">&gt; </span>exec sp5 ()<span class="p">;</span>
+[[<span class="mi">1</span>,<span class="s">&quot;quasimodo: </span><span class="se">\&quot;</span><span class="s">Sam</span><span class="se">\&quot;</span><span class="s">:20&quot;</span>],[<span class="mi">2</span>,<span class="s">&quot;quasimodo: </span><span class="se">\&quot;</span><span class="s">Fred</span><span class="se">\&quot;</span><span class="s">:22&quot;</span>]]
 
-&gt; exec sp5 ();
-[[3,"quasimodo: \"Sam\":20"],[4,"quasimodo: \"Fred\":22"]]</pre>
+<span class="gp">&gt; </span>exec sp5 ()<span class="p">;</span>
+[[<span class="mi">3</span>,<span class="s">&quot;quasimodo: </span><span class="se">\&quot;</span><span class="s">Sam</span><span class="se">\&quot;</span><span class="s">:20&quot;</span>],[<span class="mi">4</span>,<span class="s">&quot;quasimodo: </span><span class="se">\&quot;</span><span class="s">Fred</span><span class="se">\&quot;</span><span class="s">:22&quot;</span>]]
+</pre></div>
 </div>
 <p>Multiple SQL functions can be registered with the same name if they
 have differing numbers of arguments. Built-in SQL functions may be
@@ -815,15 +833,16 @@ the accumulated result.</dd>
 <p>Note that for a single-argument step function, this works exactly as
 if the functions were invoked as &#8220;<tt class="docutils literal"><span class="pre">final</span> <span class="pre">(foldl</span> <span class="pre">step</span> <span class="pre">start</span> <span class="pre">values)</span></tt>&#8221;,
 where <tt class="docutils literal"><span class="pre">values</span></tt> is the list of aggregated values from the database.</p>
-<div class="highlight-python"><pre>&gt; create_function dbp "p_avg" 1 (step,final,(0,0.0)) with
-&gt;   step (n,a) x = n+1, a+x;
-&gt;   final (n,a) = a/n;
-&gt; end;
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>create_function dbp <span class="s">&quot;p_avg&quot;</span> <span class="mi">1</span> (step,final,(<span class="mi">0</span>,<span class="mf">0.0</span>)) <span class="kr">with</span>
+<span class="gp">&gt; </span>  step (n,a) x = n+<span class="mi">1</span>, a+x<span class="p">;</span>
+<span class="gp">&gt; </span>  final (n,a) = a/n<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
 
-&gt; let sp6 = prep dbp "id:" "select count(name), p_avg(age) from RM";
+<span class="gp">&gt; </span><span class="kr">let</span> sp6 = prep dbp <span class="s">&quot;id:&quot;</span> <span class="s">&quot;select count(name), p_avg(age) from RM&quot;</span><span class="p">;</span>
 
-&gt; exec sp6 ();
-[[2,21.0]]</pre>
+<span class="gp">&gt; </span>exec sp6 ()<span class="p">;</span>
+[[<span class="mi">2</span>,<span class="mf">21.0</span>]]
+</pre></div>
 </div>
 </div>
 </div>
@@ -839,9 +858,10 @@ same db_ptr or stmt_ptr that is passed to Sql3&#8217;s functions, such as
 <tt class="docutils literal"><span class="pre">prep</span></tt> or <tt class="docutils literal"><span class="pre">exec</span></tt>.</p>
 <p>For example, you can override SQLite&#8217;s default behavior with respect
 to a busy database as follows:</p>
-<div class="highlight-python"><pre>&gt; extern int sqlite3_busy_timeout(sqlite3*, int);
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">extern</span> <span class="kt">int</span> sqlite3_busy_timeout(sqlite3*, <span class="kt">int</span>)<span class="p">;</span>
 
-&gt; sqlite3_busy_timeout dbp 10;</pre>
+<span class="gp">&gt; </span>sqlite3_busy_timeout dbp <span class="mi">10</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>This sets a busy handler that will &#8220;sleep and retry&#8221; multiple times
 until at least 10 milliseconds of sleeping have accumulated.  Calling
@@ -850,22 +870,24 @@ busy handlers.</p>
 <p>Another example is to query the number of database rows that were
 changed, inserted or deleted by the most recently completed SQL
 statement executed on a given database connection:</p>
-<div class="highlight-python"><pre>&gt; extern int sqlite3_changes(sqlite3*);
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">extern</span> <span class="kt">int</span> sqlite3_changes(sqlite3*)<span class="p">;</span>
 
-&gt; exec sp1 ("Harvey",30);
+<span class="gp">&gt; </span>exec sp1 (<span class="s">&quot;Harvey&quot;</span>,<span class="mi">30</span>)<span class="p">;</span>
 
-&gt; sqlite3_changes dbp;
-1</pre>
+<span class="gp">&gt; </span>sqlite3_changes dbp<span class="p">;</span>
+<span class="mi">1</span>
+</pre></div>
 </div>
 <p>As a final example, in this case using a stmt_ptr, you can determine
 name assigned to a column in a result using <tt class="docutils literal"><span class="pre">sqlite3_column_name</span></tt>:</p>
-<div class="highlight-python"><pre>&gt; extern char *sqlite3_column_name(sqlite3_stmt*, int);
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">extern</span> <span class="kt">char</span> *sqlite3_column_name(sqlite3_stmt*, <span class="kt">int</span>)<span class="p">;</span>
 
-&gt; exec sp2 29;
-[["Harvey",30]]
+<span class="gp">&gt; </span>exec sp2 <span class="mi">29</span><span class="p">;</span>
+[[<span class="s">&quot;Harvey&quot;</span>,<span class="mi">30</span>]]
 
-&gt; sqlite3_column_name sp2 1;
-"age"</pre>
+<span class="gp">&gt; </span>sqlite3_column_name sp2 <span class="mi">1</span><span class="p">;</span>
+<span class="s">&quot;age&quot;</span>
+</pre></div>
 </div>
 <p>In order to call a native C function you must first make it accessible
 using an extern statement.</p>
@@ -897,27 +919,29 @@ script deals with dates and certain Pure expressions as bigints and
 native Pure expressions, while the database stores these as utf-8
 text. The following snippets show parts of the script that are
 relevant to this discussion:</p>
-<div class="highlight-python"><pre>const custom_binds = [
-  "t"=&gt;["c",day_to_str,str_to_day],
-  "s"=&gt;["c",str,eval]
-];
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">const</span> custom_binds = [
+  <span class="s">&quot;t&quot;</span>=&gt;[<span class="s">&quot;c&quot;</span>,day_to_str,str_to_day],
+  <span class="s">&quot;s&quot;</span>=&gt;[<span class="s">&quot;c&quot;</span>,str,eval]
+]<span class="p">;</span>
 
-d1 = str_to_day "2010-03-22";
+d1 = str_to_day <span class="s">&quot;2010-03-22&quot;</span><span class="p">;</span>
 
-db = open ("abc.db", SQLITE_OPEN, custom_binds);
-stm1 = prep db "cts" "insert into TC values(?,?,?)";
-exec stm1 ["Manny", d1, s_expr];
-stm3a = sql3::prep db "t:" "select t_date from TC";
-stm3b = sql3::prep db "c:" "select t_date from TC";</pre>
+db = open (<span class="s">&quot;abc.db&quot;</span>, SQLITE_OPEN, custom_binds)<span class="p">;</span>
+stm1 = prep db <span class="s">&quot;cts&quot;</span> <span class="s">&quot;insert into TC values(?,?,?)&quot;</span><span class="p">;</span>
+exec stm1 [<span class="s">&quot;Manny&quot;</span>, d1, s_expr]<span class="p">;</span>
+stm3a = sql3<span class="p">::</span>prep db <span class="s">&quot;t:&quot;</span> <span class="s">&quot;select t_date from TC&quot;</span><span class="p">;</span>
+stm3b = sql3<span class="p">::</span>prep db <span class="s">&quot;c:&quot;</span> <span class="s">&quot;select t_date from TC&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>Executing stm3a and stm3b from the interpreter shows that TC&#8217;s date
 field is stored as a string, but returned to the Pure script as a
 bigint.</p>
-<div class="highlight-python"><pre>&gt; sql3::exec stm3a ());
-[[14691L]]
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sql3<span class="p">::</span>exec stm3a ())<span class="p">;</span>
+[[<span class="mi">14691L</span>]]
 
-&gt; sql3::exec stm3b ());
-[["2010-03-22"]]</pre>
+<span class="gp">&gt; </span>sql3<span class="p">::</span>exec stm3b ())<span class="p">;</span>
+[[<span class="s">&quot;2010-03-22&quot;</span>]]
+</pre></div>
 </div>
 <p>The character designating the custom type must not be one of the
 letters used to designate Sql3 core binding types.</p>

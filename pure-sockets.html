@@ -13,7 +13,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.46',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -51,7 +51,7 @@
             
   <div class="section" id="pure-sockets-pure-sockets-interface">
 <h1>pure-sockets: Pure Sockets Interface<a class="headerlink" href="#pure-sockets-pure-sockets-interface" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, November 10, 2010</p>
+<p>Version 0.1, November 13, 2010</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This is an interface to the Berkeley socket functions. It provides most of the
 core functionality, so you can create sockets for both stream and datagram
@@ -76,11 +76,13 @@ other targets (mostly for maintainers), please see the Makefile for details.</p>
 <div class="section" id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <p>To use the operations of this module, put the following in your Pure script:</p>
-<div class="highlight-python"><pre>using sockets;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> sockets<span class="p">;</span>
+</pre></div>
 </div>
 <p>NOTE: On some systems you may also have to pull in a special system library to
 get the socket functions. E.g.:</p>
-<div class="highlight-python"><pre>using "lib:wsock32", sockets;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> <span class="s">&quot;lib:wsock32&quot;</span>, sockets<span class="p">;</span>
+</pre></div>
 </div>
 <p>With the <tt class="docutils literal"><span class="pre">sockets</span></tt> module loaded, all the standard socket functions are
 available and work pretty much like in C. The only real difference is that,
@@ -213,49 +215,50 @@ that parameter.</p>
 simple, this does no error checking whatsoever and just keeps sending strings
 back and forth. More elaborate examples can be found in the examples directory
 in the sources.</p>
-<div class="highlight-python"><pre>using sockets, system;
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> sockets, system<span class="p">;</span>
 
-const path = "server_socket";
-extern int unlink(char *name);
+<span class="kr">const</span> path = <span class="s">&quot;server_socket&quot;</span><span class="p">;</span>
+<span class="kr">extern</span> <span class="kt">int</span> unlink(<span class="kt">char</span> *name)<span class="p">;</span>
 
-server = loop with
-  loop = loop if ~null s &amp;&amp; ~response fp s when
-    // Connect to a client.
-    cfd = accept fd $ sockaddr ();
-    // Open the client socket as a FILE* and read a request.
-    fp = fdopen cfd "r+"; s = fgets fp;
-  end;
-  loop = puts "server is exiting" $$ closesocket fd $$
-         unlink path $$ () otherwise;
-  response fp s::string = s=="quit\n" when
-    // Process the request. (Here we just print the received
-    // message and echo it back to the client.)
-    printf "server&gt; %s" s;
-    fputs s fp;
-  end;
-end when
-  // Create the server socket and start listening.
-  unlink path;
-  fd = socket AF_UNIX SOCK_STREAM 0;
-  bind fd (sockaddr path); listen fd 5;
-  printf "server listening at '%s'\n" path;
-end;
+server = loop <span class="kr">with</span>
+  loop = loop <span class="kr">if</span> ~null s &amp;&amp; ~response fp s <span class="kr">when</span>
+    <span class="c1">// Connect to a client.</span>
+    cfd = accept fd $ sockaddr ()<span class="p">;</span>
+    <span class="c1">// Open the client socket as a FILE* and read a request.</span>
+    fp = fdopen cfd <span class="s">&quot;r+&quot;</span><span class="p">;</span> s = fgets fp<span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+  loop = puts <span class="s">&quot;server is exiting&quot;</span> $$ closesocket fd $$
+         unlink path $$ () <span class="kr">otherwise</span><span class="p">;</span>
+  response fp s<span class="p">::</span><span class="kt">string</span> = s==<span class="s">&quot;quit</span><span class="se">\n</span><span class="s">&quot;</span> <span class="kr">when</span>
+    <span class="c1">// Process the request. (Here we just print the received</span>
+    <span class="c1">// message and echo it back to the client.)</span>
+    printf <span class="s">&quot;server&gt; %s&quot;</span> s<span class="p">;</span>
+    fputs s fp<span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+<span class="kr">end</span> <span class="kr">when</span>
+  <span class="c1">// Create the server socket and start listening.</span>
+  unlink path<span class="p">;</span>
+  fd = socket AF_UNIX SOCK_STREAM <span class="mi">0</span><span class="p">;</span>
+  bind fd (sockaddr path)<span class="p">;</span> listen fd <span class="mi">5</span><span class="p">;</span>
+  printf <span class="s">&quot;server listening at &#39;%s&#39;</span><span class="se">\n</span><span class="s">&quot;</span> path<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
 
-client = loop with
-  // Keep reading requests from stdin.
-  loop = loop if ~null s &amp;&amp; ~request s when
-    fputs "client&gt; " stdout; s = fgets stdin;
-  end;
-  loop = puts "client is exiting" $$ () otherwise;
-  request s::string = s=="quit\n" when
-    fd = socket AF_UNIX SOCK_STREAM 0;
-    connect fd (sockaddr path);
-    // Send the request to the server.
-    fp = fdopen fd "r+"; fputs s fp;
-    // Get the reply.
-    s = fgets fp;
-  end;
-end;</pre>
+client = loop <span class="kr">with</span>
+  <span class="c1">// Keep reading requests from stdin.</span>
+  loop = loop <span class="kr">if</span> ~null s &amp;&amp; ~request s <span class="kr">when</span>
+    fputs <span class="s">&quot;client&gt; &quot;</span> stdout<span class="p">;</span> s = fgets stdin<span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+  loop = puts <span class="s">&quot;client is exiting&quot;</span> $$ () <span class="kr">otherwise</span><span class="p">;</span>
+  request s<span class="p">::</span><span class="kt">string</span> = s==<span class="s">&quot;quit</span><span class="se">\n</span><span class="s">&quot;</span> <span class="kr">when</span>
+    fd = socket AF_UNIX SOCK_STREAM <span class="mi">0</span><span class="p">;</span>
+    connect fd (sockaddr path)<span class="p">;</span>
+    <span class="c1">// Send the request to the server.</span>
+    fp = fdopen fd <span class="s">&quot;r+&quot;</span><span class="p">;</span> fputs s fp<span class="p">;</span>
+    <span class="c1">// Get the reply.</span>
+    s = fgets fp<span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>To use this example, run the <tt class="docutils literal"><span class="pre">server</span></tt> function in one instance of the Pure
 interpreter and the <tt class="docutils literal"><span class="pre">client</span></tt> function in another. Enter a line when the
@@ -266,20 +269,21 @@ client prompt terminates the client but keeps the server running, so that you
 can start another client and reconnect to the server. Entering just <tt class="docutils literal"><span class="pre">quit</span></tt>
 in the client terminates both server and client. Here is how a typical
 interaction may look like:</p>
-<div class="highlight-python"><pre>&gt; client;
-client&gt; 1+1
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>client<span class="p">;</span>
+client&gt; <span class="mi">1</span>+<span class="mi">1</span>
 client&gt; foo bar
 client&gt; quit
 client is exiting
 ()
 
-&gt; server;
-server listening at 'server_socket'
-server&gt; 1+1
+<span class="gp">&gt; </span>server<span class="p">;</span>
+server listening at &#39;server_socket&#39;
+server&gt; <span class="mi">1</span>+<span class="mi">1</span>
 server&gt; foo bar
 server&gt; quit
 server is exiting
-()</pre>
+()
+</pre></div>
 </div>
 <p>Note that while the server processes requests sequentially, it accepts
 connections from a new client after each request, so that you can run as many

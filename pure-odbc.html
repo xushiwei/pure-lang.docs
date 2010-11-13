@@ -13,7 +13,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '0.46',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -51,7 +51,7 @@
             
   <div class="section" id="pure-odbc-odbc-interface-for-the-pure-programming-language">
 <h1>Pure-ODBC - ODBC interface for the Pure programming language<a class="headerlink" href="#pure-odbc-odbc-interface-for-the-pure-programming-language" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.5, November 10, 2010</p>
+<p>Version 0.5, November 13, 2010</p>
 <div class="line-block">
 <div class="line">Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</div>
 <div class="line">Jiri Spitz &lt;<a class="reference external" href="mailto:jiri&#46;spitz&#37;&#52;&#48;bluetone&#46;cz">jiri<span>&#46;</span>spitz<span>&#64;</span>bluetone<span>&#46;</span>cz</a>&gt;</div>
@@ -130,8 +130,9 @@ the data source to be used with the <tt class="docutils literal"><span class="pr
 available data sources can be obtained with the <tt class="docutils literal"><span class="pre">odbc::sources</span></tt>
 function. For instance, on my Linux system running MySQL and PostgreSQL it
 shows the following:</p>
-<div class="highlight-python"><pre>&gt; odbc::sources;
-[("myodbc","MySQL ODBC 2.50"),("psqlodbc","PostgreSQL ODBC")]</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sources<span class="p">;</span>
+[(<span class="s">&quot;myodbc&quot;</span>,<span class="s">&quot;MySQL ODBC 2.50&quot;</span>),(<span class="s">&quot;psqlodbc&quot;</span>,<span class="s">&quot;PostgreSQL ODBC&quot;</span>)]
+</pre></div>
 </div>
 <p>The first component in each entry of the list is the name of the data source,
 which can be used as the value of the <tt class="docutils literal"><span class="pre">DSN</span></tt> option in the connect string,
@@ -146,14 +147,16 @@ the DRIVER attribute in the connect string, see below.</p>
 string, which is used to describe the data source and various other parameters
 such as user id and password. For instance, on my system I can connect to the
 local <tt class="docutils literal"><span class="pre">myodbc</span></tt> data source from above as follows:</p>
-<div class="highlight-python"><pre>&gt; let db = odbc::connect "DSN=myodbc";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> db = odbc<span class="p">::</span>connect <span class="s">&quot;DSN=myodbc&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">odbc::connect</span></tt> function returns a pointer to an <tt class="docutils literal"><span class="pre">ODBCHandle</span></tt> object
 which is used to refer to the database connection in the other routines
 provided by this module. An <tt class="docutils literal"><span class="pre">ODBCHandle</span></tt> object is closed automatically when
 it is no longer accessible. You can also close it explicitly with a call to
 the <tt class="docutils literal"><span class="pre">odbc::disconnect</span></tt> function:</p>
-<div class="highlight-python"><pre>&gt; odbc::disconnect db;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>disconnect db<span class="p">;</span>
+</pre></div>
 </div>
 <p>After <tt class="docutils literal"><span class="pre">odbc::disconnect</span></tt> has been invoked on a handle, any further
 operations on it will fail.</p>
@@ -161,7 +164,8 @@ operations on it will fail.</p>
 driver when opening the database connection. E.g., here&#8217;s how to specify a
 username and password; note that the different attributes are separated with a
 semicolon:</p>
-<div class="highlight-python"><pre>&gt; let db = odbc::connect "DSN=myodbc;UID=root;PWD=guess";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> db = odbc<span class="p">::</span>connect <span class="s">&quot;DSN=myodbc;UID=root;PWD=guess&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>The precise set of attributes in the connect string depends on your ODBC
 driver, but at least the following options should be available on most
@@ -183,19 +187,22 @@ or <tt class="docutils literal"><span class="pre">database</span></tt>.)</p>
 </ul>
 <p>Using the <tt class="docutils literal"><span class="pre">FILEDSN</span></tt> option you can establish a connection to a data source
 described in a .dsn file on Windows, as follows:</p>
-<div class="highlight-python"><pre>&gt; odbc::connect "FILEDSN=test.dsn";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>connect <span class="s">&quot;FILEDSN=test.dsn&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>On Windows it is also possible to directly connect to a driver and name a
 database file as the data source. For instance, using the MS Access ODBC
 driver you can connect to a database file test.mdb as follows:</p>
-<div class="highlight-python"><pre>&gt; odbc::connect "DRIVER=Microsoft Access Driver (*.mdb);DBQ=test.mdb";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>connect <span class="s">&quot;DRIVER=Microsoft Access Driver (*.mdb);DBQ=test.mdb&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>SQLite (<a class="reference external" href="http://www.sqlite.org">http://www.sqlite.org</a>) provides another way to get a database up and
 running quickly. For that you need the SQLite library and the SQLite ODBC
 driver available at <a class="reference external" href="http://www.ch-werner.de/sqliteodbc">http://www.ch-werner.de/sqliteodbc</a>. Then you can open an
 SQLite database as follows (the database file is named with the <tt class="docutils literal"><span class="pre">DATABASE</span></tt>
 attribute and is created automatically if it doesn&#8217;t exist):</p>
-<div class="highlight-python"><pre>&gt; odbc::connect "DSN=SQLite3 Datasource;Database=test.db";</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>connect <span class="s">&quot;DSN=SQLite3 Datasource;Database=test.db&quot;</span><span class="p">;</span>
+</pre></div>
 </div>
 <p>SQLite generally performs very well if you avoid some pitfalls (in particular,
 big batches of updates/inserts should be done within a transaction, otherwise
@@ -222,8 +229,9 @@ API reference for more information):</p>
 <li>ODBC_VER: the ODBC version of the driver manager</li>
 </ul>
 <p>E.g., here is what the connection to MySQL shows on my Linux system:</p>
-<div class="highlight-python"><pre>&gt; odbc::info db;
-"myodbc","test","MySQL","5.0.18","myodbc3.dll","03.51.12","03.51","03.52"</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>info db<span class="p">;</span>
+<span class="s">&quot;myodbc&quot;</span>,<span class="s">&quot;test&quot;</span>,<span class="s">&quot;MySQL&quot;</span>,<span class="s">&quot;5.0.18&quot;</span>,<span class="s">&quot;myodbc3.dll&quot;</span>,<span class="s">&quot;03.51.12&quot;</span>,<span class="s">&quot;03.51&quot;</span>,<span class="s">&quot;03.52&quot;</span>
+</pre></div>
 </div>
 <p>The odbc module also provides a number of operations to retrieve a bunch of
 additional meta information about the given database connection. In
@@ -231,34 +239,37 @@ particular, the <tt class="docutils literal"><span class="pre">odbc::getinfo</sp
 SQLGetInfo() routine. The result of <tt class="docutils literal"><span class="pre">odbc::getinfo</span></tt> is a pointer which can
 be converted to an integer or string value, depending on the type of
 information requested. For instance:</p>
-<div class="highlight-python"><pre>&gt; get_short $ odbc::getinfo db odbc::SQL_MAX_TABLES_IN_SELECT;
-31
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>get_short $ odbc<span class="p">::</span>getinfo db odbc<span class="p">::</span>SQL_MAX_TABLES_IN_SELECT<span class="p">;</span>
+<span class="mi">31</span>
 
-&gt; cstring_dup $ odbc::getinfo db odbc::SQL_IDENTIFIER_QUOTE_CHAR;
-"`"</pre>
+<span class="gp">&gt; </span>cstring_dup $ odbc<span class="p">::</span>getinfo db odbc<span class="p">::</span>SQL_IDENTIFIER_QUOTE_CHAR<span class="p">;</span>
+<span class="s">&quot;`&quot;</span>
+</pre></div>
 </div>
 <p>Information about supported SQL data types is available with the
 <tt class="docutils literal"><span class="pre">odbc::typeinfo</span></tt> routine (this returns a lot of data, see odbc.pure for an
 explanation):</p>
-<div class="highlight-python"><pre>&gt; odbc::typeinfo db odbc::SQL_ALL_TYPES;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>typeinfo db odbc<span class="p">::</span>SQL_ALL_TYPES<span class="p">;</span>
+</pre></div>
 </div>
 <p>Moreover, information about the tables in the current database, as well as the
 structure of the tables and their primary and foreign keys can be retrieved
 with the <tt class="docutils literal"><span class="pre">odbc::tables</span></tt>, <tt class="docutils literal"><span class="pre">odbc::columns</span></tt>, <tt class="docutils literal"><span class="pre">odbc::primary_keys</span></tt> and
 <tt class="docutils literal"><span class="pre">odbc::foreign_keys</span></tt> functions:</p>
-<div class="highlight-python"><pre>&gt; odbc::tables db;
-[("event","TABLE"),("pet","TABLE")]
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>tables db<span class="p">;</span>
+[(<span class="s">&quot;event&quot;</span>,<span class="s">&quot;TABLE&quot;</span>),(<span class="s">&quot;pet&quot;</span>,<span class="s">&quot;TABLE&quot;</span>)]
 
-&gt; odbc::columns db "pet";
-[("name","varchar","NO","''"),("owner","varchar","YES",odbc::SQLNULL),
-("species","varchar","YES",odbc::SQLNULL),("sex","char","YES",odbc::SQLNULL),
-("birth","date","YES",odbc::SQLNULL),("death","date","YES",odbc::SQLNULL)]
+<span class="gp">&gt; </span>odbc<span class="p">::</span>columns db <span class="s">&quot;pet&quot;</span><span class="p">;</span>
+[(<span class="s">&quot;name&quot;</span>,<span class="s">&quot;varchar&quot;</span>,<span class="s">&quot;NO&quot;</span>,<span class="s">&quot;&#39;&#39;&quot;</span>),(<span class="s">&quot;owner&quot;</span>,<span class="s">&quot;varchar&quot;</span>,<span class="s">&quot;YES&quot;</span>,odbc<span class="p">::</span>SQLNULL),
+(<span class="s">&quot;species&quot;</span>,<span class="s">&quot;varchar&quot;</span>,<span class="s">&quot;YES&quot;</span>,odbc<span class="p">::</span>SQLNULL),(<span class="s">&quot;sex&quot;</span>,<span class="s">&quot;char&quot;</span>,<span class="s">&quot;YES&quot;</span>,odbc<span class="p">::</span>SQLNULL),
+(<span class="s">&quot;birth&quot;</span>,<span class="s">&quot;date&quot;</span>,<span class="s">&quot;YES&quot;</span>,odbc<span class="p">::</span>SQLNULL),(<span class="s">&quot;death&quot;</span>,<span class="s">&quot;date&quot;</span>,<span class="s">&quot;YES&quot;</span>,odbc<span class="p">::</span>SQLNULL)]
 
-&gt; odbc::primary_keys db "pet";
-["name"]
+<span class="gp">&gt; </span>odbc<span class="p">::</span>primary_keys db <span class="s">&quot;pet&quot;</span><span class="p">;</span>
+[<span class="s">&quot;name&quot;</span>]
 
-&gt; odbc::foreign_keys db "event";
-[("name","pet","name")]</pre>
+<span class="gp">&gt; </span>odbc<span class="p">::</span>foreign_keys db <span class="s">&quot;event&quot;</span><span class="p">;</span>
+[(<span class="s">&quot;name&quot;</span>,<span class="s">&quot;pet&quot;</span>,<span class="s">&quot;name&quot;</span>)]
+</pre></div>
 </div>
 <p>This often provides a convenient and portable means to retrieve basic
 information about table structures, at least on RDBMS which properly implement
@@ -281,31 +292,36 @@ case.</p>
 following examples assume the sample &#8220;menagerie&#8221; tables from the MySQL
 documentation. The <tt class="docutils literal"><span class="pre">initdb</span></tt> function in the examples/menagerie.pure script
 can be used to create these tables in your default database.)</p>
-<div class="highlight-python"><pre>&gt; odbc::sql db "select name,species from pet where owner='Harold'" [];
-[["name","species"],["Fluffy","cat"],["Buffy","dog"]]</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql db <span class="s">&quot;select name,species from pet where owner=&#39;Harold&#39;&quot;</span> []<span class="p">;</span>
+[[<span class="s">&quot;name&quot;</span>,<span class="s">&quot;species&quot;</span>],[<span class="s">&quot;Fluffy&quot;</span>,<span class="s">&quot;cat&quot;</span>],[<span class="s">&quot;Buffy&quot;</span>,<span class="s">&quot;dog&quot;</span>]]
+</pre></div>
 </div>
 <p>Often the third parameter of <tt class="docutils literal"><span class="pre">sql</span></tt>, as above, is just the empty list,
 indicating a parameterless query. Queries involving marked input parameters
 can be executed by specifying the parameter values in the third argument of
 the <tt class="docutils literal"><span class="pre">sql</span></tt> call. For instance:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql db "select name,species from pet where owner=?" ["Harold"];
-[["name","species"],["Fluffy","cat"],["Buffy","dog"]]</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql db <span class="s">&quot;select name,species from pet where owner=?&quot;</span> [<span class="s">&quot;Harold&quot;</span>]<span class="p">;</span>
+[[<span class="s">&quot;name&quot;</span>,<span class="s">&quot;species&quot;</span>],[<span class="s">&quot;Fluffy&quot;</span>,<span class="s">&quot;cat&quot;</span>],[<span class="s">&quot;Buffy&quot;</span>,<span class="s">&quot;dog&quot;</span>]]
+</pre></div>
 </div>
 <p>Multiple parameters are specified as a list:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql db "select name,species from pet where owner=? and species=?"
-&gt; ["Harold","cat"];
-[["name","species"],["Fluffy","cat"]]</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql db <span class="s">&quot;select name,species from pet where owner=? and species=?&quot;</span>
+<span class="gp">&gt; </span>[<span class="s">&quot;Harold&quot;</span>,<span class="s">&quot;cat&quot;</span>]<span class="p">;</span>
+[[<span class="s">&quot;name&quot;</span>,<span class="s">&quot;species&quot;</span>],[<span class="s">&quot;Fluffy&quot;</span>,<span class="s">&quot;cat&quot;</span>]]
+</pre></div>
 </div>
 <p>Parameterized queries are particularly useful for the purpose of inserting
 data into a table:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql db "insert into pet values (?,?,?,?,?,?)"
-&gt; ["Puffball","Diane","hamster","f","1999-03-30",odbc::SQLNULL];
-1</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql db <span class="s">&quot;insert into pet values (?,?,?,?,?,?)&quot;</span>
+<span class="gp">&gt; </span>[<span class="s">&quot;Puffball&quot;</span>,<span class="s">&quot;Diane&quot;</span>,<span class="s">&quot;hamster&quot;</span>,<span class="s">&quot;f&quot;</span>,<span class="s">&quot;1999-03-30&quot;</span>,odbc<span class="p">::</span>SQLNULL]<span class="p">;</span>
+<span class="mi">1</span>
+</pre></div>
 </div>
 <p>In this case we could also have hard-coded the data to be inserted right into
 the SQL statement, but a parameterized query like the one above can easily be
 applied to a whole collection of data rows, e.g., as follows:</p>
-<div class="highlight-python"><pre>&gt; do (odbc::sql db "insert into pet values (?,?,?,?,?,?)") data;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>do (odbc<span class="p">::</span>sql db <span class="s">&quot;insert into pet values (?,?,?,?,?,?)&quot;</span>) data<span class="p">;</span>
+</pre></div>
 </div>
 <p>Parameterized queries also let you insert data which cannot be specified
 easily inside an SQL query, such as long strings or binary data.</p>
@@ -358,7 +374,8 @@ returned by a query, the <tt class="docutils literal"><span class="pre">msql</sp
 invoked in exactly the same way as the <tt class="docutils literal"><span class="pre">sql</span></tt> function, but returns a list
 with all the result sets and/or row counts of the query.</p>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt; odbc::msql db "select * from pet; select * from event" [];</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>msql db <span class="s">&quot;select * from pet; select * from event&quot;</span> []<span class="p">;</span>
+</pre></div>
 </div>
 <p>This will return a list with two result sets, one for each query.</p>
 </div>
@@ -377,22 +394,24 @@ either the next row count, or a tuple of column names, after which you can
 invoke <tt class="docutils literal"><span class="pre">sql_fetch</span></tt> again to obtain the data rows in the second set,
 etc. When the last result set has been processed, <tt class="docutils literal"><span class="pre">sql_more</span></tt> fails.</p>
 <p>Example:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql_exec db "select name,species from pet where owner='Harold'" [];
-["name","species"]
-&gt; odbc::sql_fetch db; // get the 1st row
-["Fluffy","cat"]
-&gt; odbc::sql_fetch db; // get the 2nd row
-["Buffy","dog"]
-&gt; odbc::sql_fetch db; // no more results
-odbc::sql_fetch #&lt;pointer 0x24753e0&gt;
-&gt; odbc::sql_more db; // no more result sets
-odbc::sql_more #&lt;pointer 0x24753e0&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql_exec db <span class="s">&quot;select name,species from pet where owner=&#39;Harold&#39;&quot;</span> []<span class="p">;</span>
+[<span class="s">&quot;name&quot;</span>,<span class="s">&quot;species&quot;</span>]
+<span class="gp">&gt; </span>odbc<span class="p">::</span>sql_fetch db<span class="p">;</span> <span class="c1">// get the 1st row</span>
+[<span class="s">&quot;Fluffy&quot;</span>,<span class="s">&quot;cat&quot;</span>]
+<span class="gp">&gt; </span>odbc<span class="p">::</span>sql_fetch db<span class="p">;</span> <span class="c1">// get the 2nd row</span>
+[<span class="s">&quot;Buffy&quot;</span>,<span class="s">&quot;dog&quot;</span>]
+<span class="gp">&gt; </span>odbc<span class="p">::</span>sql_fetch db<span class="p">;</span> <span class="c1">// no more results</span>
+odbc<span class="p">::</span>sql_fetch <span class="kt">#&lt;pointer 0x24753e0&gt;</span>
+<span class="gp">&gt; </span>odbc<span class="p">::</span>sql_more db<span class="p">;</span> <span class="c1">// no more result sets</span>
+odbc<span class="p">::</span>sql_more <span class="kt">#&lt;pointer 0x24753e0&gt;</span>
+</pre></div>
 </div>
 <p>Moreover, the <tt class="docutils literal"><span class="pre">sql_close</span></tt> function can be called at any time to terminate an
 SQL query, after which subsequent calls to <tt class="docutils literal"><span class="pre">sql_fetch</span></tt> and <tt class="docutils literal"><span class="pre">sql_more</span></tt> will
 fail:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql_close db; // terminate query
-()</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql_close db<span class="p">;</span> <span class="c1">// terminate query</span>
+()
+</pre></div>
 </div>
 <p>This is not strictly necessary (it will be done automatically as soon as the
 next SQL query is invoked), but it is useful in order to release all resources
@@ -427,14 +446,15 @@ prohibitive when working with large amounts of data.</p>
 <p>These functions are invoked just like <tt class="docutils literal"><span class="pre">odbc::sql</span></tt> and <tt class="docutils literal"><span class="pre">odbc::msql</span></tt>, but
 they return a lazy list of rows (or a lazy list of lazy lists of rows in the
 case of <tt class="docutils literal"><span class="pre">lmsql</span></tt>). For instance:</p>
-<div class="highlight-python"><pre>&gt; odbc::lsql db "select * from pet" [];
-["name","owner","species","sex","birth","death"]:#&lt;thunk 0x7ffbb9aa2eb8&gt;</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>lsql db <span class="s">&quot;select * from pet&quot;</span> []<span class="p">;</span>
+[<span class="s">&quot;name&quot;</span>,<span class="s">&quot;owner&quot;</span>,<span class="s">&quot;species&quot;</span>,<span class="s">&quot;sex&quot;</span>,<span class="s">&quot;birth&quot;</span>,<span class="s">&quot;death&quot;</span>]:<span class="kt">#&lt;thunk 0x7ffbb9aa2eb8&gt;</span>
+</pre></div>
 </div>
 <p>Note that the tail of the result list is &#8220;thunked&#8221; and will only be produced
 on demand, as you traverse the list. As a simple example, suppose that we just
 want to print the <tt class="docutils literal"><span class="pre">name</span></tt> field of each data row:</p>
-<div class="highlight-python"><pre>&gt; using system;
-&gt; do (\(name:_)-&gt;puts name) $ tail $ odbc::lsql db "select * from pet" [];
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> system<span class="p">;</span>
+<span class="gp">&gt; </span>do (\(name:_)-&gt;puts name) $ tail $ odbc<span class="p">::</span>lsql db <span class="s">&quot;select * from pet&quot;</span> []<span class="p">;</span>
 Fluffy
 Claws
 Buffy
@@ -443,7 +463,8 @@ Bowser
 Chirpy
 Whistler
 Slim
-()</pre>
+()
+</pre></div>
 </div>
 <p>Here only one row is in memory at any time while the <tt class="docutils literal"><span class="pre">do</span></tt> function is in
 progress. This keeps memory requirements much lower than when using the
@@ -454,9 +475,10 @@ the processing significantly if only a part of the result set is needed. For
 instance, in the following example we only look at the first two data rows
 until the desired row is found, so the remaining rows are never fetched from
 the database:</p>
-<div class="highlight-python"><pre>&gt; head [row | row@(name:_) = tail $ odbc::lsql db "select * from pet" [];
-&gt;             name == "Claws"];
-["Claws","Gwen","cat","m","1994-03-17",odbc::SQLNULL]</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>head [row | row<span class="p">@</span>(name:_) = tail $ odbc<span class="p">::</span>lsql db <span class="s">&quot;select * from pet&quot;</span> []<span class="p">;</span>
+<span class="gp">&gt; </span>            name == <span class="s">&quot;Claws&quot;</span>]<span class="p">;</span>
+[<span class="s">&quot;Claws&quot;</span>,<span class="s">&quot;Gwen&quot;</span>,<span class="s">&quot;cat&quot;</span>,<span class="s">&quot;m&quot;</span>,<span class="s">&quot;1994-03-17&quot;</span>,odbc<span class="p">::</span>SQLNULL]
+</pre></div>
 </div>
 <p>On the other hand, <tt class="docutils literal"><span class="pre">lsql</span></tt>/<tt class="docutils literal"><span class="pre">lmsql</span></tt> will usually be somewhat slower than
 <tt class="docutils literal"><span class="pre">sql</span></tt>/<tt class="docutils literal"><span class="pre">msql</span></tt> if the entire result set is being processed. So you should
@@ -479,13 +501,15 @@ which specifies an error message and the corresponding SQL state (i.e., error
 code). A detailed explanation of the state codes can be found in the ODBC
 documentation. For instance, a reference to a non-existent table will cause a
 report like the following:</p>
-<div class="highlight-python"><pre>&gt; odbc::sql db "select * from pets" [];
-odbc::error "[TCX][MyODBC]Table 'test.pets' doesn't exist" "S1000"</pre>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>odbc<span class="p">::</span>sql db <span class="s">&quot;select * from pets&quot;</span> []<span class="p">;</span>
+odbc<span class="p">::</span>error <span class="s">&quot;[TCX][MyODBC]Table &#39;test.pets&#39; doesn&#39;t exist&quot;</span> <span class="s">&quot;S1000&quot;</span>
+</pre></div>
 </div>
 <p>You can check for such return values and take some appropriate action. By
 redefining odbc::error accordingly, you can also have it generate exceptions
 or print an error message. For instance:</p>
-<div class="highlight-python"><pre>odbc::error msg state = fprintf stderr "%s (%s)\n" (msg,state) $$ ();</pre>
+<div class="highlight-pure"><div class="highlight"><pre>odbc<span class="p">::</span>error msg state = fprintf stderr <span class="s">&quot;%s (%s)</span><span class="se">\n</span><span class="s">&quot;</span> (msg,state) $$ ()<span class="p">;</span>
+</pre></div>
 </div>
 <p><strong>NOTE:</strong> When redefining <tt class="docutils literal"><span class="pre">odbc::error</span></tt> in this manner, you should be aware
 that the return value of <tt class="docutils literal"><span class="pre">odbc::error</span></tt> is what will be returned by the other

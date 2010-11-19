@@ -51,12 +51,8 @@
             
   <div class="section" id="pure-csv-comma-separated-value-interface-for-the-pure-programming-language">
 <h1>Pure-CSV - Comma Separated Value Interface for the Pure Programming Language<a class="headerlink" href="#pure-csv-comma-separated-value-interface-for-the-pure-programming-language" title="Permalink to this headline">¶</a></h1>
-<p>Version 1.4, November 14, 2010</p>
+<p>Version 1.4, November 19, 2010</p>
 <p>Eddie Rucker &lt;<a class="reference external" href="mailto:erucker&#37;&#52;&#48;bmc&#46;edu">erucker<span>&#64;</span>bmc<span>&#46;</span>edu</a>&gt;</p>
-<div class="line-block">
-<div class="line">Copyright (c) 2008, 2009, 2010 by Eddie Rucker</div>
-<div class="line">License: 3-clause BSD license, see the accompanying COPYING file for details</div>
-</div>
 <p>The CSV library provides an interface for reading and writing comma
 separated value files. The module is very loosely based on Python&#8217;s CSV
 module (<a class="reference external" href="http://docs.python.org/lib/module-csv.html">http://docs.python.org/lib/module-csv.html</a>).</p>
@@ -142,13 +138,11 @@ null string.</li>
 </ul>
 </li>
 <li><tt class="docutils literal"><span class="pre">terminator</span></tt> - Record termination string.<ul>
-<li>Value - One of {<tt class="docutils literal"><span class="pre">LF</span></tt>, <tt class="docutils literal"><span class="pre">CRLF</span></tt>} where <tt class="docutils literal"><span class="pre">LF</span> <span class="pre">=</span> <span class="pre">&quot;\n&quot;</span></tt> and
-<tt class="docutils literal"><span class="pre">CRLF</span> <span class="pre">=</span> <span class="pre">&quot;\r\n&quot;</span></tt>.</li>
-<li>Default - <tt class="docutils literal"><span class="pre">LF</span></tt>.</li>
-<li>Reading - Carriage returns, <tt class="docutils literal"><span class="pre">&quot;\r&quot;</span></tt>, are always ignored except when
-embedded in quotes or escaped.</li>
-<li>Writing - Every writen record is terminated with the the defined
-terminator string.</li>
+<li>Value - any string.</li>
+<li>Reading - Either a user specified string or if not specivied
+the file is sniffed for a <tt class="docutils literal"><span class="pre">\r</span></tt>, <tt class="docutils literal"><span class="pre">\r\n</span></tt>, or <tt class="docutils literal"><span class="pre">\n</span></tt>.</li>
+<li>Writing - Either a user specified string, <tt class="docutils literal"><span class="pre">\r\n</span></tt> for
+Windows platforms, or <tt class="docutils literal"><span class="pre">\n</span></tt> for everything else.</li>
 </ul>
 </li>
 <li><tt class="docutils literal"><span class="pre">quote_flag</span></tt> - Sets the quoting style of strings and/or numbers.<ul>
@@ -214,8 +208,6 @@ reading tab delimited files without quoted strings.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> csv<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> csv<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> d = dialect {delimiter=&gt;<span class="s">&quot;</span><span class="se">\t</span><span class="s">&quot;</span>, quote_flag=&gt;STRING}<span class="p">;</span>
-<span class="gp">&gt; </span>d<span class="p">;</span>
-<span class="kt">#&lt;pointer 0x9d75280&gt;</span>
 <span class="gp">&gt;</span>
 </pre></div>
 </div>
@@ -235,10 +227,10 @@ opened for writing and the file exists, the old file is overwritten. If
 the file does not exist, a new empty file is created. When a file is
 opened for appending and the file exists, new records are appended to
 the end of the file, otherwise a new empty file is created.</dd>
-<dt><tt class="docutils literal"><span class="pre">open</span> <span class="pre">(name::string,</span> <span class="pre">rw_flag::string,</span> <span class="pre">d::pointer)</span></tt></dt>
+<dt><tt class="docutils literal"><span class="pre">open</span> <span class="pre">(name::string,</span> <span class="pre">rw_flag::string,</span> <span class="pre">d::matrix)</span></tt></dt>
 <dd>exactly as above except reading/writing is done according to a user defined
 dialect <tt class="docutils literal"><span class="pre">d</span></tt>.</dd>
-<dt><tt class="docutils literal"><span class="pre">open</span> <span class="pre">(name::string,</span> <span class="pre">rw_flag::string,</span> <span class="pre">d::pointer,</span> <span class="pre">opts&#64;(_:_))</span></tt></dt>
+<dt><tt class="docutils literal"><span class="pre">open</span> <span class="pre">(name::string,</span> <span class="pre">rw_flag::string,</span> <span class="pre">d::matrix,</span> <span class="pre">opts&#64;(_:_))</span></tt></dt>
 <dd><p class="first">exactly as above except allows for list output or header options when
 reading.</p>
 <ol class="last arabic simple">
@@ -286,11 +278,11 @@ NAME,TEST1,TEST2
 <span class="s">&quot;HOPE, BOB&quot;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> k = header f<span class="p">;</span>
 <span class="gp">&gt; </span>k<span class="p">;</span>
-[<span class="s">&quot;NAME&quot;</span>=&gt;<span class="mi">0</span>,<span class="s">&quot;TEST1&quot;</span>=&gt;<span class="mi">1</span>,<span class="s">&quot;TEST2&quot;</span>=&gt;<span class="mi">2</span>]
+{<span class="s">&quot;NAME&quot;</span>=&gt;<span class="mi">0</span>,<span class="s">&quot;TEST1&quot;</span>=&gt;<span class="mi">1</span>,<span class="s">&quot;TEST2&quot;</span>=&gt;<span class="mi">2</span>}
 <span class="gp">&gt; </span>r!(k!<span class="s">&quot;NAME&quot;</span>)<span class="p">;</span>
 <span class="s">&quot;HOPE, BOB&quot;</span>
 <span class="gp">&gt; </span>r!!(k!![<span class="s">&quot;NAME&quot;</span>,<span class="s">&quot;TEST1&quot;</span>])<span class="p">;</span>
-[<span class="s">&quot;HOPE, BOB&quot;</span>,<span class="mi">95</span>]
+[<span class="s">&quot;HOPE, BOB&quot;</span>,<span class="mi">90</span>]
 <span class="gp">&gt;</span>
 </pre></div>
 </div>
@@ -412,7 +404,7 @@ csv<span class="p">::</span>error <span class="s">&quot;parse error at line 1&qu
 </pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">trim_space</span></tt> flag should be used with caution. A field with space in
-font of a number should be interpreted as a string, but consider the following
+front of a number should be interpreted as a string, but consider the following
 file.</p>
 <div class="highlight-pure"><div class="highlight"><pre>erucker:$ more test.csv
 <span class="s">&quot;  this   &quot;</span>, <span class="mi">45</span> ,<span class="mi">23</span>,  hello

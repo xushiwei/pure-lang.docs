@@ -35,6 +35,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="pure-modindex.html" title="Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="gnumeric-pure.html" title="Gnumeric/Pure: A Pure Plugin for Gnumeric"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -49,9 +52,9 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="pure-sockets-pure-sockets-interface">
-<h1>pure-sockets: Pure Sockets Interface<a class="headerlink" href="#pure-sockets-pure-sockets-interface" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, November 14, 2010</p>
+  <div class="section" id="module-sockets">
+<span id="pure-sockets-pure-sockets-interface"></span><h1>pure-sockets: Pure Sockets Interface<a class="headerlink" href="#module-sockets" title="Permalink to this headline">¶</a></h1>
+<p>Version 0.1, November 22, 2010</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This is an interface to the Berkeley socket functions. It provides most of the
 core functionality, so you can create sockets for both stream and datagram
@@ -79,12 +82,12 @@ other targets (mostly for maintainers), please see the Makefile for details.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> sockets<span class="p">;</span>
 </pre></div>
 </div>
-<p>NOTE: On some systems you may also have to pull in a special system library to
-get the socket functions. E.g.:</p>
+<p>On some systems you may also have to pull in a special system library to get
+the socket functions. E.g.:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> <span class="s">&quot;lib:wsock32&quot;</span>, sockets<span class="p">;</span>
 </pre></div>
 </div>
-<p>With the <tt class="docutils literal"><span class="pre">sockets</span></tt> module loaded, all the standard socket functions are
+<p>With the <a class="reference internal" href="#module-sockets"><tt class="xref pure pure-mod docutils literal"><span class="pre">sockets</span></tt></a> module loaded, all the standard socket functions are
 available and work pretty much like in C. The only real difference is that,
 for convenience, functions taking socket addresses as parameters
 (<tt class="docutils literal"><span class="pre">struct_sockaddr*</span></tt> pointers in Pure), are called without the <tt class="docutils literal"><span class="pre">addrlen</span></tt>
@@ -99,114 +102,209 @@ pages for details, and check the Pure scripts in the examples subdirectory for
 some examples.</p>
 <div class="section" id="creating-and-inspecting-socket-addresses">
 <h3>Creating and Inspecting Socket Addresses<a class="headerlink" href="#creating-and-inspecting-socket-addresses" title="Permalink to this headline">¶</a></h3>
-<p>These functions are Pure-specific. The created socket addresses are
-<tt class="docutils literal"><span class="pre">malloc</span></tt>&#8216;ed and free themselves automatically when garbage-collected.</p>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddr();</span></tt></p>
-<blockquote>
-Create a pointer to an empty socket address suitable to hold the socket
-address result of routines like <tt class="docutils literal"><span class="pre">accept</span></tt>, <tt class="docutils literal"><span class="pre">getsockname</span></tt>, <tt class="docutils literal"><span class="pre">recvfrom</span></tt>,
-etc. which return a socket address.</blockquote>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddr([int</span> <span class="pre">family,]</span> <span class="pre">char</span> <span class="pre">*path);</span></tt></p>
-<blockquote>
-Create a local (a.k.a. file) socket for the given pathname. The <tt class="docutils literal"><span class="pre">family</span></tt>
-parameter, if specified, must be <tt class="docutils literal"><span class="pre">AF_UNIX</span></tt> here. Please note that
-<tt class="docutils literal"><span class="pre">AF_UNIX</span></tt> is not supported on all platforms. You can check for this by
-testing the <tt class="docutils literal"><span class="pre">HAVE_AF_UNIX</span></tt> constant, which is a truth value specifying
-whether <tt class="docutils literal"><span class="pre">AF_UNIX</span></tt> is available on your system.</blockquote>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddr([int</span> <span class="pre">family,]</span> <span class="pre">char</span> <span class="pre">*host,</span> <span class="pre">char</span> <span class="pre">*port);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddr([int</span> <span class="pre">family,]</span> <span class="pre">char</span> <span class="pre">*host,</span> <span class="pre">int</span> <span class="pre">port);</span></tt></p>
-<blockquote>
-This uses <tt class="docutils literal"><span class="pre">getaddrinfo</span></tt> to retrieve an <tt class="docutils literal"><span class="pre">AF_INET</span></tt> or <tt class="docutils literal"><span class="pre">AF_INET6</span></tt>
-address for the given hostname (or numeric IP address in string form) and
-port (specified either as an int or a string). If <tt class="docutils literal"><span class="pre">family</span></tt> is omitted,
-it defaults to <tt class="docutils literal"><span class="pre">AF_UNSPEC</span></tt> which matches both <tt class="docutils literal"><span class="pre">AF_INET</span></tt> and
-<tt class="docutils literal"><span class="pre">AF_INET6</span></tt> addresses.</blockquote>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddrs([int</span> <span class="pre">family,]</span> <span class="pre">char</span> <span class="pre">*host,</span> <span class="pre">char</span> <span class="pre">*port);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">struct_sockaddr</span> <span class="pre">*sockaddrs([int</span> <span class="pre">family,]</span> <span class="pre">char</span> <span class="pre">*host,</span> <span class="pre">int</span> <span class="pre">port);</span></tt></p>
-<blockquote>
-This works like <tt class="docutils literal"><span class="pre">sockaddr</span></tt> above, but returns a list with <em>all</em> matching
-addresses.</blockquote>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">sockaddr_family(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the address family of the given address.</blockquote>
-<p><tt class="docutils literal"><span class="pre">char</span> <span class="pre">*sockaddr_path(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the pathname for <tt class="docutils literal"><span class="pre">AF_UNIX</span></tt> addresses.</blockquote>
-<p><tt class="docutils literal"><span class="pre">char</span> <span class="pre">*sockaddr_hostname(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the hostname if available, the IP address otherwise.</blockquote>
-<p><tt class="docutils literal"><span class="pre">char</span> <span class="pre">*sockaddr_ip(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the IP address.</blockquote>
-<p><tt class="docutils literal"><span class="pre">char</span> <span class="pre">*sockaddr_service(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the service (a.k.a. port) name.</blockquote>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">sockaddr_port(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns the port number.</blockquote>
-<p><tt class="docutils literal"><span class="pre">expr</span> <span class="pre">*sockaddr_info(struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<blockquote>
-Returns a readable description of a socket address, as a
+<p>These functions are Pure-specific. The created socket addresses are malloc&#8217;ed
+and free themselves automatically when garbage-collected.</p>
+<dl class="function">
+<dt id="sockaddr">
+<tt class="descname">sockaddr</tt> ()<a class="headerlink" href="#sockaddr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pointer to an empty socket address suitable to hold the socket
+address result of routines like <a class="reference internal" href="#accept" title="accept"><tt class="xref pure pure-func docutils literal"><span class="pre">accept</span></tt></a>, <a class="reference internal" href="#getsockname" title="getsockname"><tt class="xref pure pure-func docutils literal"><span class="pre">getsockname</span></tt></a>,
+<a class="reference internal" href="#recvfrom" title="recvfrom"><tt class="xref pure pure-func docutils literal"><span class="pre">recvfrom</span></tt></a>, etc. which return a socket address.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">sockaddr</tt> ([int family,] char *path)</dt>
+<dd><p>Create a local (a.k.a. file) socket address for the given pathname. The
+<tt class="docutils literal"><span class="pre">family</span></tt> parameter, if specified, must be <tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNIX</span></tt> here. Please
+note that <tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNIX</span></tt> is not supported on all platforms. You can check
+for this by testing the <tt class="xref pure pure-const docutils literal"><span class="pre">HAVE_AF_UNIX</span></tt> constant, which is a truth
+value specifying whether <tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNIX</span></tt> is available on your system.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<tt class="descname">sockaddr</tt> ([int family,] char *host, char *port)</dt>
+<dt>
+<tt class="descname">sockaddr</tt> ([int family,] char *host, int port)</dt>
+<dd><p>This uses <tt class="docutils literal"><span class="pre">getaddrinfo</span></tt> to retrieve an <tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET</span></tt> or
+<tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET6</span></tt> address for the given hostname (or numeric IP address in
+string form) and port (specified either as an int or a string). If
+<tt class="docutils literal"><span class="pre">family</span></tt> is omitted, it defaults to <tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNSPEC</span></tt> which matches both
+<tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET</span></tt> and <tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET6</span></tt> addresses.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddrs">
+<tt class="descname">sockaddrs</tt> ([int family,] char *host, char *port)<a class="headerlink" href="#sockaddrs" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">sockaddrs</tt> ([int family,] char *host, int port)</dt>
+<dd><p>This works like <a class="reference internal" href="#sockaddr" title="sockaddr"><tt class="xref pure pure-func docutils literal"><span class="pre">sockaddr</span></tt></a> above, but returns a list with <em>all</em>
+matching addresses.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_family">
+<tt class="descname">sockaddr_family</tt> addr<a class="headerlink" href="#sockaddr_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the address family of the given address.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_path">
+<tt class="descname">sockaddr_path</tt> addr<a class="headerlink" href="#sockaddr_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the pathname for <tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNIX</span></tt> addresses.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_hostname">
+<tt class="descname">sockaddr_hostname</tt> addr<a class="headerlink" href="#sockaddr_hostname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the hostname if available, the IP address otherwise.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_ip">
+<tt class="descname">sockaddr_ip</tt> addr<a class="headerlink" href="#sockaddr_ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the IP address.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_service">
+<tt class="descname">sockaddr_service</tt> addr<a class="headerlink" href="#sockaddr_service" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the service (a.k.a. port) name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_port">
+<tt class="descname">sockaddr_port</tt> addr<a class="headerlink" href="#sockaddr_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the port number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="sockaddr_info">
+<tt class="descname">sockaddr_info</tt> addr<a class="headerlink" href="#sockaddr_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a readable description of a socket address, as a
 <tt class="docutils literal"><span class="pre">(family,hostname,port)</span></tt> tuple. You should be able to pass this into
-<tt class="docutils literal"><span class="pre">sockaddr</span></tt> again to get the original address.</blockquote>
+<a class="reference internal" href="#sockaddr" title="sockaddr"><tt class="xref pure pure-func docutils literal"><span class="pre">sockaddr</span></tt></a> again to get the original address.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="creating-and-closing-sockets">
 <h3>Creating and Closing Sockets<a class="headerlink" href="#creating-and-closing-sockets" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">socket(int</span> <span class="pre">domain,</span> <span class="pre">int</span> <span class="pre">type,</span> <span class="pre">int</span> <span class="pre">protocol);</span></tt></p>
-<blockquote>
-Creates a socket for the given protocol family (<tt class="docutils literal"><span class="pre">AF_UNIX</span></tt>, <tt class="docutils literal"><span class="pre">AF_INET</span></tt>
-or <tt class="docutils literal"><span class="pre">AF_INET6</span></tt>), socket type (<tt class="docutils literal"><span class="pre">SOCK_STREAM</span></tt>, <tt class="docutils literal"><span class="pre">SOCK_DGRAM</span></tt>, etc.) and
-protocol. Note that on Linux we also support the <tt class="docutils literal"><span class="pre">SOCK_NONBLOCK</span></tt>
-(non-blocking) and <tt class="docutils literal"><span class="pre">SOCK_CLOEXEC</span></tt> (close-on-exec) flags which can be
-or&#8217;ed with the socket type to get sockets with the corresponding
-features. The protocol number is usually 0, denoting the default protocol,
-but it can also be any of the prescribed <tt class="docutils literal"><span class="pre">IPPROTO</span></tt> constants (a few
-common ones are predefined by this module, try <tt class="docutils literal"><span class="pre">show</span> <span class="pre">-g</span> <span class="pre">IPPROTO_*</span></tt> for a
-list of those).</blockquote>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">socketpair(int</span> <span class="pre">domain,</span> <span class="pre">int</span> <span class="pre">type,</span> <span class="pre">int</span> <span class="pre">protocol,</span> <span class="pre">int</span> <span class="pre">*sv);</span></tt></p>
-<blockquote>
-Create a pair of sockets. The descriptors are returned in the integer
-vector passed in the last argument.</blockquote>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">shutdown(int</span> <span class="pre">fd,</span> <span class="pre">int</span> <span class="pre">how);</span></tt></p>
-<blockquote>
-Perform shutdown on a socket. The second argument should be one of
-<tt class="docutils literal"><span class="pre">SHUT_RD</span></tt>, <tt class="docutils literal"><span class="pre">SHUT_WR</span></tt> and <tt class="docutils literal"><span class="pre">SHUT_RDWR</span></tt>.</blockquote>
-<p><tt class="docutils literal"><span class="pre">closesocket(int</span> <span class="pre">fd);</span></tt></p>
-<blockquote>
-This is provided for Windows compatibility. On POSIX systems this is just
-<tt class="docutils literal"><span class="pre">close</span></tt>.</blockquote>
+<dl class="function">
+<dt id="socket">
+<tt class="descname">socket</tt> domain type protocol<a class="headerlink" href="#socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a socket for the given protocol family (<tt class="xref pure pure-const docutils literal"><span class="pre">AF_UNIX</span></tt>,
+<tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET</span></tt> or <tt class="xref pure pure-const docutils literal"><span class="pre">AF_INET6</span></tt>), socket type (<tt class="xref pure pure-const docutils literal"><span class="pre">SOCK_STREAM</span></tt>,
+<tt class="xref pure pure-const docutils literal"><span class="pre">SOCK_DGRAM</span></tt>, etc.) and protocol. Note that on Linux we also support
+the <tt class="xref pure pure-const docutils literal"><span class="pre">SOCK_NONBLOCK</span></tt> (non-blocking) and <tt class="xref pure pure-const docutils literal"><span class="pre">SOCK_CLOEXEC</span></tt>
+(close-on-exec) flags which can be or&#8217;ed with the socket type to get
+sockets with the corresponding features. The protocol number is usually 0,
+denoting the default protocol, but it can also be any of the prescribed
+<tt class="xref pure pure-const docutils literal"><span class="pre">IPPROTO</span></tt> constants (a few common ones are predefined by this
+module, try <tt class="docutils literal"><span class="pre">show</span> <span class="pre">-g</span> <span class="pre">IPPROTO_*</span></tt> for a list of those).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="socketpair">
+<tt class="descname">socketpair</tt> domain type protocol sv<a class="headerlink" href="#socketpair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pair of sockets. The descriptors are returned in the integer
+vector <tt class="docutils literal"><span class="pre">sv</span></tt> passed in the last argument.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="shutdown">
+<tt class="descname">shutdown</tt> fd how<a class="headerlink" href="#shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform shutdown on a socket. The second argument should be one of
+<tt class="xref pure pure-const docutils literal"><span class="pre">SHUT_RD</span></tt>, <tt class="xref pure pure-const docutils literal"><span class="pre">SHUT_WR</span></tt> and <tt class="xref pure pure-const docutils literal"><span class="pre">SHUT_RDWR</span></tt>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="closesocket">
+<tt class="descname">closesocket</tt> fd<a class="headerlink" href="#closesocket" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is provided for Windows compatibility. On POSIX systems this is just
+<tt class="docutils literal"><span class="pre">close</span></tt>.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="establishing-connections">
 <h3>Establishing Connections<a class="headerlink" href="#establishing-connections" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">accept(int</span> <span class="pre">sockfd,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">bind(int</span> <span class="pre">sockfd,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">connect(int</span> <span class="pre">sockfd,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">listen(int</span> <span class="pre">sockfd,</span> <span class="pre">int</span> <span class="pre">backlog);</span></tt></p>
+<dl class="function">
+<dt id="accept">
+<tt class="descname">accept</tt> sockfd addr<a class="headerlink" href="#accept" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bind">
+<tt class="descname">bind</tt> sockfd addr<a class="headerlink" href="#bind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="connect">
+<tt class="descname">connect</tt> sockfd addr<a class="headerlink" href="#connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="listen">
+<tt class="descname">listen</tt> sockfd backlog<a class="headerlink" href="#listen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="socket-i-o">
 <h3>Socket I/O<a class="headerlink" href="#socket-i-o" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">size_t</span> <span class="pre">recv(int</span> <span class="pre">fd,</span> <span class="pre">void</span> <span class="pre">*buf,</span> <span class="pre">size_t</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">flags);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">size_t</span> <span class="pre">send(int</span> <span class="pre">fd,</span> <span class="pre">void</span> <span class="pre">*buf,</span> <span class="pre">size_t</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">flags);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">size_t</span> <span class="pre">recvfrom(int</span> <span class="pre">fd,</span> <span class="pre">void</span> <span class="pre">*buf,</span> <span class="pre">size_t</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">flags,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">size_t</span> <span class="pre">sendto(int</span> <span class="pre">fd,</span> <span class="pre">void</span> <span class="pre">*buf,</span> <span class="pre">size_t</span> <span class="pre">len,</span> <span class="pre">int</span> <span class="pre">flags,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p>The usual <tt class="docutils literal"><span class="pre">send</span></tt>/<tt class="docutils literal"><span class="pre">recv</span></tt> flags specified by POSIX (<tt class="docutils literal"><span class="pre">MSG_EOR</span></tt>,
-<tt class="docutils literal"><span class="pre">MSG_OOB</span></tt>, <tt class="docutils literal"><span class="pre">MSG_PEEK</span></tt>, <tt class="docutils literal"><span class="pre">MSG_WAITALL</span></tt>) are provided. On Linux we also
-support <tt class="docutils literal"><span class="pre">MSG_DONTWAIT</span></tt>. Note that on POSIX systems you can also just
-<tt class="docutils literal"><span class="pre">fdopen</span></tt> the socket descriptor and use the standard file I/O operations from
-the <tt class="docutils literal"><span class="pre">system</span></tt> module instead.</p>
+<dl class="function">
+<dt id="recv">
+<tt class="descname">recv</tt> fd buf len flags<a class="headerlink" href="#recv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="send">
+<tt class="descname">send</tt> fd buf len flags<a class="headerlink" href="#send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="recvfrom">
+<tt class="descname">recvfrom</tt> fd buf len flags addr<a class="headerlink" href="#recvfrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="sendto">
+<tt class="descname">sendto</tt> fd buf len flags addr<a class="headerlink" href="#sendto" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The usual <a class="reference internal" href="#send" title="send"><tt class="xref pure pure-func docutils literal"><span class="pre">send</span></tt></a>/<a class="reference internal" href="#recv" title="recv"><tt class="xref pure pure-func docutils literal"><span class="pre">recv</span></tt></a> flags specified by POSIX
+(<tt class="xref pure pure-const docutils literal"><span class="pre">MSG_EOR</span></tt>, <tt class="xref pure pure-const docutils literal"><span class="pre">MSG_OOB</span></tt>, <tt class="xref pure pure-const docutils literal"><span class="pre">MSG_PEEK</span></tt>, <tt class="xref pure pure-const docutils literal"><span class="pre">MSG_WAITALL</span></tt>)
+are provided. On Linux we also support <tt class="xref pure pure-const docutils literal"><span class="pre">MSG_DONTWAIT</span></tt>. Note that on
+POSIX systems you can also just <a class="reference internal" href="purelib.html#fdopen" title="fdopen"><tt class="xref pure pure-func docutils literal"><span class="pre">fdopen</span></tt></a> the socket descriptor and use
+the standard file I/O operations from the <a class="reference internal" href="purelib.html#module-system"><tt class="xref pure pure-mod docutils literal"><span class="pre">system</span></tt></a> module instead.</p>
 </div>
 <div class="section" id="socket-information">
 <h3>Socket Information<a class="headerlink" href="#socket-information" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">getsockname(int</span> <span class="pre">fd,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">getpeername(int</span> <span class="pre">fd,</span> <span class="pre">struct_sockaddr</span> <span class="pre">*addr);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">getsockopt(int</span> <span class="pre">fd,</span> <span class="pre">int</span> <span class="pre">level,</span> <span class="pre">int</span> <span class="pre">name,</span> <span class="pre">void</span> <span class="pre">*val,</span> <span class="pre">int</span> <span class="pre">*len);</span></tt></p>
-<p><tt class="docutils literal"><span class="pre">int</span> <span class="pre">setsockopt(int</span> <span class="pre">fd,</span> <span class="pre">int</span> <span class="pre">level,</span> <span class="pre">int</span> <span class="pre">name,</span> <span class="pre">void</span> <span class="pre">*val,</span> <span class="pre">int</span> <span class="pre">len);</span></tt></p>
-<p>For <tt class="docutils literal"><span class="pre">getsockopt</span></tt> and <tt class="docutils literal"><span class="pre">setsockopt</span></tt>, currently only the <tt class="docutils literal"><span class="pre">SOL_SOCKET</span></tt> level
-is defined (<tt class="docutils literal"><span class="pre">level</span></tt> argument) along with the available POSIX socket options
-(<tt class="docutils literal"><span class="pre">name</span></tt> argument). Try <tt class="docutils literal"><span class="pre">show</span> <span class="pre">-g</span> <span class="pre">SO_*</span></tt> to get a list of those. Also note
-that for most socket level options the <tt class="docutils literal"><span class="pre">val</span></tt> argument is actually an
-<tt class="docutils literal"><span class="pre">int*</span></tt>, so you can pass a Pure int vector (with <tt class="docutils literal"><span class="pre">len</span> <span class="pre">=</span> <span class="pre">SIZEOF_INT</span></tt>) for
-that parameter.</p>
+<dl class="function">
+<dt id="getsockname">
+<tt class="descname">getsockname</tt> fd addr<a class="headerlink" href="#getsockname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="getpeername">
+<tt class="descname">getpeername</tt> fd addr<a class="headerlink" href="#getpeername" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="getsockopt">
+<tt class="descname">getsockopt</tt> fd level name val len<a class="headerlink" href="#getsockopt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="setsockopt">
+<tt class="descname">setsockopt</tt> fd level name val len<a class="headerlink" href="#setsockopt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>For <a class="reference internal" href="#getsockopt" title="getsockopt"><tt class="xref pure pure-func docutils literal"><span class="pre">getsockopt</span></tt></a> and <a class="reference internal" href="#setsockopt" title="setsockopt"><tt class="xref pure pure-func docutils literal"><span class="pre">setsockopt</span></tt></a>, currently only the
+<tt class="xref pure pure-const docutils literal"><span class="pre">SOL_SOCKET</span></tt> level is defined (<tt class="docutils literal"><span class="pre">level</span></tt> argument) along with the
+available POSIX socket options (<tt class="docutils literal"><span class="pre">name</span></tt> argument). Try <tt class="docutils literal"><span class="pre">show</span> <span class="pre">-g</span> <span class="pre">SO_*</span></tt> to
+get a list of those. Also note that for most socket level options the <tt class="docutils literal"><span class="pre">val</span></tt>
+argument is actually an <tt class="docutils literal"><span class="pre">int*</span></tt>, so you can pass a Pure int vector (with
+<tt class="docutils literal"><span class="pre">len</span> <span class="pre">=</span> <span class="pre">SIZEOF_INT</span></tt>) for that parameter.</p>
 </div>
 </div>
 <div class="section" id="example">
@@ -348,6 +446,9 @@ clients as you like.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="pure-modindex.html" title="Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="gnumeric-pure.html" title="Gnumeric/Pure: A Pure Plugin for Gnumeric"
              >next</a> |</li>

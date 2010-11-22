@@ -13,21 +13,21 @@ which creates GUI wrappers for Faust DSPs. The package also includes a bunch
 of examples. The software is distributed under the GPL; see the COPYING file
 for details.
 
-**NOTE:** This faust2pd version is written in Pure and was ported from an
-earlier version written in Pure's predecessor Q. The version of the script
-provided here should be 100% backward-compatible to those previous versions,
-except for the following changes:
+.. note:: This faust2pd version is written in Pure and was ported from an
+   earlier version written in Pure's predecessor Q. The version of the script
+   provided here should be 100% backward-compatible to those previous
+   versions, except for the following changes:
 
-- The (rarely used) -f (a.k.a. --fake-buttons) option was renamed to -b.
+   - The (rarely used) -f (a.k.a. --fake-buttons) option was renamed to -b.
 
-- A new -f (a.k.a. --font-size) option was added to change the font size
-  of the GUI elements.
+   - A new -f (a.k.a. --font-size) option was added to change the font size
+     of the GUI elements.
 
-- Most command line options can now also be specified using special
-  ``[pd:...]`` tags in the Faust source.
+   - Most command line options can now also be specified using special
+     ``[pd:...]`` tags in the Faust source.
 
-Also note that you can now run the script on 64 bit systems (Q never worked
-there).
+   Also note that you can now run the script on 64 bit systems (Q never worked
+   there).
 
 As of version 2.1, the faust2pd script is now compiled to a native executable
 before installation. This makes the program start up much faster, which is a
@@ -443,7 +443,9 @@ Thanks are due to Yann Orlarey for his wonderful Faust, which makes developing
 DSP algorithms so easy and fun.
 
 .. Appendix follows here.
-..
+.. default-domain:: pure
+.. module:: faustxml
+.. namespace:: faustxml
 
 Appendix: faustxml
 ==================
@@ -453,7 +455,7 @@ description of a Faust DSP from its XML file as a data structure which
 is ready to be processed by Pure programs. It may also be useful in other
 Pure applications which need to inspect description of Faust DSPs.
 
-The main entry point is the info_ function which takes the name of a
+The main entry point is the :func:`info` function which takes the name of a
 Faust-generated XML file as argument and returns a tuple ``(name, descr,
 version, in, out, controls)`` with the name, description, version, number
 of inputs and outputs and the toplevel group with the descriptions of the
@@ -478,64 +480,68 @@ Data Structure
 The following constructors are used to represent the UI controls of Faust
 DSPs:
 
-- ``button|checkbox label``: A button or checkbox with the given
-  label.
+.. constructor:: button label
+                 checkbox label
 
-- ``nentry|vslider|hslider (label,init,min,max,step)``: A
-  numeric input control with the given label, initial value, range and
-  stepwidth.
+   A button or checkbox with the given label.
 
-- ``vbargraph|hbargraph (label,min,max)``: A numeric output control
-  with the given label and range.
+.. constructor:: nentry (label,init,min,max,step)
+                 vslider (label,init,min,max,step)
+                 hslider (label,init,min,max,step)
 
-- ``vgroup|hgroup|tgroup (label,controls)``: A group with the
-  given label and list of controls in the group.
+   A numeric input control with the given label, initial value, range and
+   stepwidth.
+
+.. constructor:: vbargraph (label,min,max)
+                 hbargraph (label,min,max)
+
+   A numeric output control with the given label and range.
+
+.. constructor:: vgroup (label,controls)
+                 hgroup (label,controls)
+                 tgroup (label,controls)
+
+   A group with the given label and list of controls in the group.
 
 ..
 
 Operations
 ----------
 
-.. index:: faustxml::controlp
+.. function:: controlp x
 
-``controlp x``
-  Check for control description values.
+   Check for control description values.
 
-.. index:: faustxml::control_type
-.. index:: faustxml::control_label
-.. index:: faustxml::control_args
+.. function:: control_type x
+              control_label x
+              control_args x
 
-``control_type x``, ``control_label x``, ``control_args x``
-  Access functions for the various components of a control description.
+   Access functions for the various components of a control description.
 
-.. _controls:
-.. index:: faustxml::controls
+.. function:: controls x
 
-``controls x``
-  This function returns a flat representation of a control group ``x`` as a
-  list of basic control descriptions, which provides a quick way to access
-  all the control values of a Faust DSP. The grouping controls themselves
-  are omitted. You can pass the last component of the return value of the
-  info_ function to this function.
+   This function returns a flat representation of a control group ``x`` as
+   a list of basic control descriptions, which provides a quick way to
+   access all the control values of a Faust DSP. The grouping controls
+   themselves are omitted. You can pass the last component of the return
+   value of the :func:`info` function to this function.
 
-.. index:: faustxml::pcontrols
+.. function:: pcontrols x
 
-``pcontrols x``
-  Works like the controls_ function above, but also replaces the label of
-  each basic control with a fully qualified path consisting of all control
-  labels leading up to the given control. Thus, e.g., the label of a slider
-  ``"gain"`` inside a group ``"voice#0"`` inside the main ``"faust"`` group
-  will be denoted by the label ``"faust/voice#0/gain"``.
+   Works like the :func:`controls` function above, but also replaces the label of
+   each basic control with a fully qualified path consisting of all control
+   labels leading up to the given control. Thus, e.g., the label of a
+   slider ``"gain"`` inside a group ``"voice#0"`` inside the main
+   ``"faust"`` group will be denoted by the label
+   ``"faust/voice#0/gain"``.
 
-.. _info:
-.. index:: faustxml::info
+.. function:: info fname
 
-``info fname``
-  Extract the description of a Faust DSP from its XML file. This is the
-  main entry point. Returns a tuple with the name, description and version
-  of the DSP, as well as the number of inputs and outputs and the toplevel
-  group with all the control descriptions. Raises an exception if the XML
-  file doesn't exist or contains invalid contents.
+   Extract the description of a Faust DSP from its XML file. This is the
+   main entry point. Returns a tuple with the name, description and version
+   of the DSP, as well as the number of inputs and outputs and the toplevel
+   group with all the control descriptions. Raises an exception if the XML
+   file doesn't exist or contains invalid contents.
 
 Example::
 

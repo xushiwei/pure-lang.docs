@@ -575,9 +575,10 @@ Usage`_ section) to list definitions along with additional debugging
 information.
 
 The :option:`-w` option enables some additional warnings which are useful to
-check your scripts for possible errors. Right now it will report implicit
-declarations of function symbols which might indicate missing or mistyped
-symbols that need to be fixed, see `Symbol Lookup and Creation`_ for details.
+check your scripts for possible errors. In particular, it will report implicit
+declarations of function and type symbols, which might indicate undefined or
+mistyped symbols that need to be fixed, see `Symbol Lookup and Creation`_ for
+details.
 
 Code Generation Options
 -----------------------
@@ -1571,6 +1572,7 @@ forms which process some or all of their arguments using call-by-name.
 .. _def:
 .. _let:
 .. _const:
+.. _otherwise:
 
 Toplevel
 --------
@@ -1864,13 +1866,15 @@ But this gets parsed as ``(foo xs@x):_ = x:xs``, which is most certainly *not*
 what you want. It is thus a good idea to just always enclose the subpattern
 with parentheses in order to prevent such glitches.
 
-Another potential pitfall is that the notation ``foo::bar`` is also used to
-denote "qualified symbols" in Pure, cf. Namespaces_. Usually this will be
-resolved correctly, but if ``foo`` happens to also be a valid namespace then
-most likely you'll get an error message about an undeclared symbol. You can
-always work around this by adding spaces around the '``::``' symbol, as in
-``foo :: bar``. Spaces are never permitted in qualified symbols, so this makes
-it clear that the construct denotes a type tag.
+.. note:: Another pitfall is that the notation ``foo::bar`` is also used to
+   denote "qualified symbols" in Pure, cf. Namespaces_. Usually this will be
+   resolved correctly, but if ``foo`` happens to also be a valid namespace
+   then most likely you'll get an error message about an undeclared symbol.
+   You can always work around this by adding spaces around the '``::``'
+   symbol, as in ``foo :: bar``. Spaces are never permitted in qualified
+   symbols, so this makes it clear that the construct denotes a type tag. The
+   same applies if the variable or the tag is a qualified identifier; in this
+   case they should always be separated by whitespace.
 
 .. _Type Tags:
 
@@ -1878,19 +1882,20 @@ Type Tags
 ---------
 
 Like Lisp, Pure is essentially a typeless language and doesn't really have a
-built-in notion of "data types"; all data belongs to the same universe of
-terms. However, for convenience it is possible to describe data domains by
+built-in notion of "data types". Rather, all data belongs to the same universe
+of terms. However, for convenience it is possible to describe data domains by
 means of (unary) type *predicates* which may denote arbitrary sets of
 terms. The names of these type predicates can then be used as `type tags` on
 variables, so that they can only be matched by values of the given type.
 
-.. note:: It is important to note here that Pure's notion of types has nothing
-   to do with static typing. Type tags are only used at runtime to restrict
-   the kind of data that can be matched by a rule, and maybe by the compiler
-   to generate better code. But they will never cause the compiler to spit out
-   "type errors". This wouldn't make any sense in Pure anyway, as failure to
-   match any of the rules given in the definition of a function simply means
-   that a function application is in normal form.
+We have to emphasize here that Pure's notion of types has nothing to do with
+static typing. Type tags are merely used at runtime to restrict the kind of
+data that can be matched by a rule (and by the compiler to generate better
+code in some cases). But they will never cause the compiler to impose a static
+typing discipline and spit out corresponding "type errors". (This wouldn't
+make any sense in Pure anyway, as failure to match any of the rules given in
+the definition of a function simply means that a function application is in
+normal form.)
 
 Some basic types are built into the language. The corresponding tags enable
 you to match the built-in types of terms for which there is no way to spell
@@ -1934,30 +1939,43 @@ of coordinates. We can then define the ``point`` data type as follows::
 
 This introduces the type symbol ``point`` and specifies that this type
 consists of terms of the form ``Point x y`` where ``x`` and ``y`` may be any
-kinds of numbers (the :type:`number` type is defined in the prelude). We can
-now equip this data type with an operation ``point`` to construct a point from
-its coordinates, and two operations ``xcoord`` and ``ycoord`` to retrieve the
-coordinates::
+kinds of numbers (the :type:`number/type` type is defined in the prelude). We
+can now equip this data type with an operation ``point`` to construct a point
+from its coordinates, and two operations ``xcoord`` and ``ycoord`` to retrieve
+the coordinates::
 
-  point x::number y::number = Point (x,y);
-  xcoord (Point (x,y)) = x;
-  ycoord (Point (x,y)) = y;
+  point x::number y::number = Point x y;
+  xcoord (Point x y) = x;
+  ycoord (Point x y) = y;
 
 Next we might define a function ``translate`` which shifts the coordinates of
 a point by a given amount in the x and y directions as follows::
 
-  translate (x::number,y::number) p::point = point (xcoord p+x) (ycoord p+y);
+  translate (x,y) p::point = point (xcoord p+x) (ycoord p+y);
 
 Note the use of ``point`` as a type tag on the ``p`` variable. By these means,
-we can ensure that the argument is actually an instance of the point data
-type. The ``translate`` function can be invoked as follows::
+we can ensure that the argument is actually an instance of the point data type
+we just defined. The type tag acts just like an extra guard of the equation
+defining ``translate``, as if you had written::
+
+  translate (x,y) p = point (xcoord p+x) (ycoord p+y) if pointp p with
+    pointp (Point x::number y::number) = true;
+    pointp _ = false otherwise;
+  end;
+
+However, using the type tag, all the necessary type checking is done
+automatically during pattern matching. This is often more convenient (and,
+depending on the implementation, the compiler may generate more efficient code
+for a type tag than for an ordinary guard).
+
+The ``translate`` function can be invoked as follows::
 
   > let p::point = point 3 3;
   > p; translate (1,2) p;
-  Point (3,3)
-  Point (4,5)
+  Point 3 3
+  Point 4 5
 
-The important point here is that ``translate`` can be defined without knowing
+One important point here is that ``translate`` can be defined without knowing
 or assuming *anything* about the internal representation of the ``point`` data
 type. In fact, the ``Point`` constructor might well be hidden by making it a
 private member of some namespace (cf. Namespaces_), so that all accesses to
@@ -1968,6 +1986,14 @@ design of larger software systems. In particular, it makes it possible to
 revise the internal representation or even provide alternative implementations
 of a data type, and have auxiliary functions (like our ``translate`` function)
 still work on the modified data structure.
+
+.. note:: As we've already seen, Pure has some powerful capabilities which
+   enable you to write functions to inspect and manipulate terms in a
+   completely generic fashion. Thus the internal structure of term data is
+   never truly opaque in Pure and it is always possible to break the
+   "abstraction barrier" provided by an ADT. But if the user of an ADT plays
+   such dirty tricks to wreak havoc on the internal representation of an ADT,
+   he gets what he deserves.
 
 Pure's standard library provides a few predefined data types, some of them
 concrete (like the derived number types), some of them abstract (like the
@@ -2065,25 +2091,34 @@ if the discriminant ``d = p^2/4-q`` is nonnegative::
 Note that the above definition leaves the case of a negative discriminant
 undefined.
 
+.. _Type Rules:
 .. _type:
 
 Type Rules
 ----------
 
-The definition of a type (cf. `Type Tags`_ above) consists of one or more type
-rules which basically have the same format as the `general rules`_, but with
-the keyword :keyword:`type` in front of each rule. Also, each left-hand side
-must have either zero or one argument patterns, and multiple right-hand sides
-aren't permitted (multiple left-hand sides work the same as in the general
-rule format, though).
+In Pure the definition of a type takes a somewhat unusual form, since it is
+not a static declaration of the structure of the type's members, but rather an
+arbitrary predicate which determines through a runtime check which terms
+belong to the type. Thus the definition of a type looks more like an ordinary
+function definition (and that's essentially what it is, although types live in
+their own space where they can't be confused with functions of the same name).
+
+The definition of a type thus consists of one or more type rules which
+basically have the same format as the `general rules`_, but with the keyword
+:keyword:`type` in front of each rule. Also, each left-hand side must have at
+most one argument pattern and exactly one right-hand side. Hence, if the
+definition of a type requires several right-hand sides, you normally have to
+write a separate :keyword:`type` rule for each of them. Multiple left-hand
+sides work the same as in the general rule format, though.
 
 The identifier in the head of the left-hand side of a type rule is the name of
-the type which can then be used as a type tag in other equations. This is just
-a normal, possibly qualified identifier subject to the same namespace
-mechanisms as other symbols; see Namespaces_ for details. However, as the type
-symbol only gets used as a type tag, it can never collide with function and
-variable symbols and hence the same symbol can be used both as a type and a
-function or variable name.
+the type which can then be used as a type tag in other equations, cf. `Type
+Tags`_. This is just a normal, possibly qualified identifier subject to the
+same namespace mechanisms as other symbols; see Namespaces_ for details.
+However, as the type symbol only gets used as a type tag, it can never collide
+with function and variable symbols and hence the same symbol can be used both
+as a type and as a function or variable name.
 
 A collection of type rules specifies a predicate, i.e. a unary, truth-valued
 function which denotes a set of terms. The type consists precisely of those
@@ -2117,20 +2152,17 @@ considered as triples, too, then you may add the following type rule::
   type triple [x,y,z] = true;
 
 This makes it possible to define a type in a piecemeal fashion. Each
-subsequent rule enlarges the term set of the type.
-
-Conversely, consider a definition like::
+subsequent rule enlarges the term set of the type. Conversely, consider a
+definition like::
 
   type pair x = tuplep x && #x==2;
 
 In this case the type rule applies to all values ``x`` and thus the type
-definition is complete; there is no way to extend it later.
-
-Whether to prefer the former or latter kind of definition depends on the
-situation. If you want to keep a type extensible, so that you can later make
-existing definitions of operations on the type work with new data
-representations, then you should use the former approach, otherwise the
-latter.
+definition is complete; there is no way to extend it later. Whether to prefer
+the former or latter kind of definition depends on the situation. If you want
+to keep a type extensible, so that you can later make existing definitions of
+operations on the type work with new data representations, then you should use
+the former approach, otherwise the latter.
 
 As an example for an extensible type definition, consider the following type
 ``nat`` which denotes the type of positive (machine) integers::
@@ -2151,8 +2183,8 @@ machine integers, but nothing else::
   > fact 10L;
   fact 10L
 
-But if we later decide that positive bigints should be consider as members of
-``nat`` as well, we can simply add another rule for the ``nat`` type::
+But if we later decide that positive bigints should be considered as members
+of ``nat`` as well, we can simply add another rule for the ``nat`` type::
 
   type nat x::bigint = x>0;
 
@@ -2162,11 +2194,11 @@ Et voila, our ``fact`` routine now magically works with bigints, too::
   [fact 0L,1,2L,6L,24L,120L,720L,5040L,40320L,362880L,3628800L]
 
 Note that we did all this without ever touching our original definition of
-``fact``. This works because the ``bigint`` data type already provides all
-the operations which we expect to use with the ``nat`` type. Pulling off this
+``fact``. This works because the ``bigint`` data type already provides all the
+operations which we expect to use with the ``nat`` type. Pulling off this
 trick with other, more exotic kinds of data requires more preparation, since
-we'll first have to provide the required operations (in this case, at least
-comparisons with and subtraction of 1, as well as multiplication). For
+we'll first have to provide the required operations. In this case, we need at
+least multiplication, as well as comparisons with 1 and subtraction by 1. For
 instance, and just for the fun of it, let's implement our own variation of the
 ``nat`` type using Peano arithmetic::
 
@@ -2196,7 +2228,7 @@ This implements just the bare bones, but that should be enough to make
   s (s (s (s (s (s 0)))))
 
 So, counting the ``s``\ 's, the factorial of 3 is 6. Works! It goes without
-saying, though, that this implementation of ``nat`` is rather inefficient;
+saying, though, that this implementation of ``nat`` is rather impractical;
 you'll get mountains of ``s``\ 's for larger values of ``n``.
 
 As you can see, a type definition may in general consist of many type rules
@@ -2270,27 +2302,91 @@ With those definitions you get::
   > map even (0..10);
   [1,0,1,0,1,0,1,0,1,0,1]
 
-(There's one caveat here. As the type symbol passed to :func:`typep` gets
+There's one caveat here. As the type symbol passed to :func:`typep` gets
 evaluated in normal code you have to be careful if the symbol is also defined
 as a parameterless function or a variable; in such a case you'll have to quote
-the symbol, as described in section `The Quote`_.)
+the symbol, as described in section `The Quote`_. For instance, we might
+rewrite the above definitions as follows, giving "pointless" definitions of
+the ``odd`` and ``even`` predicates in terms of :func:`typep`::
 
-Finally, note that Pure places no a priori restrictions on the rules defining
-a data type (other than that they must either define a unary predicate or an
-alias for an existing data type). Thus any type of relation between two data
-types is possible; they might be unrelated (disjoint) term sets, one may be a
-subset of another, or they might be related in some other way (some terms may
-be members of both types, while others aren't). Thus the relationships between
-types and their adherence to certain "interfaces" are the responsibility of
-the programmer; as far as Pure is concerned, types are just subsets of the
+  type odd x::int = x mod 2;
+  type even x::int = ~odd x;
+
+  odd = typep ('odd);
+  even = typep ('even);
+
+Note that the quotes on ``odd`` and ``even`` are really needed here to prevent
+the predicate definitions from looping.
+
+Pure places no a priori restrictions on the rules defining a data type (other
+than that they must either define a unary predicate or an alias for an
+existing data type). Thus any type of relation between two data types is
+possible; they might be unrelated (disjoint) term sets, one may be a subset of
+another, or they might be related in some other way (some terms may be members
+of both types, while others aren't). Thus the relationships between types and
+their adherence to certain "interfaces" are the responsibility of the
+programmer. As far as Pure is concerned, types are just subsets of the
 universe of terms.
 
 Also note that since the right-hand side of a type definition may in general
-be any predicate, it is the responsibility of the programmer that the
-definition of a type is actually computable. In fact, you should strive for
-the best possible efficiency in type predicates. A type definition which has
-worse than O(1) complexity may well be a serious performance hog depending on
-the way in which it is used.
+be any predicate, it is up to the programmer to ensure that the definition of
+a type is actually computable. In fact, you should strive for the best
+possible efficiency in type predicates. A type definition which has worse than
+O(1) complexity may well be a serious performance hog depending on the way in
+which it is used. For instance, consider the definition of the
+:type:`list/type` type from the prelude::
+
+  type list [] | list (x:xs::list);
+
+This type is defined recursively, so that it only matches "proper" lists which
+have list values in all their tails (and are thus terminated by the empty
+list). However, this also implies that a check for this type will take O(n)
+time, where n is the size of the list. This will have dire consequences if you
+do this check repeatedly while traversing a list, as in the following ``sum``
+function::
+
+  sum xs::list = if null xs then 0 else head xs+sum (tail xs);
+
+As this function repeatedly checks its entire argument, the total time it
+takes to compute the sum of a list this way becomes O(n^2). (To see how slow
+this function is, just try invoking it on successively larger lists ``1..n``,
+e.g., for ``n = 1000, 2000, 3000, ...``.)
+
+One way to work around this is to write a "wrapper" function which simply
+checks the type of its argument in advance and then invokes a "worker"
+function to do the actual computation::
+
+  sum xs::list = sum xs with
+    sum xs = if null xs then 0 else head xs+sum (tail xs);
+  end;
+
+This "wrapper-worker" design is quite common and useful in many situations,
+but it is a bit cumbersome in this specific case. A better way is to just do
+the type checking in a piecemeal fashion, as the list is being traversed. To
+these ends, the prelude also provides a :type:`listn/type` ("list node") type
+which is defined as follows::
+
+  type listn [] | listn (x:xs);
+
+Note that the recursion is missing here and thus this type can always be
+checked in O(1) time, performing just a single pattern match, which is
+efficient. Hence, if we replace :type:`list/type` with :type:`listn/type` in
+our original definition then ``sum`` will now run in O(n) time, which is fine.
+
+If you define your own data types, you're free to choose any suitable
+representation, so you might just wrap up all data objects with a special
+constructor symbol, which makes checking the type simple and efficient. This
+is also the approach taken in the ``point`` example in `Type Tags`_ above, as
+well as by the container data types in the standard library. But note that
+this works best with abstract data types, since in this case you may safely
+assume that a user of your data structure doesn't "fiddle" with your internal
+representation.
+
+Finally, note that in general it may be hard or even impossible to predict
+exactly when the code of a type definition will be executed at runtime. Thus,
+as a general rule, a type definition should not rely on side effects such as
+doing I/O (except maybe for debugging purposes), modifying references or
+external data structures via C pointers, etc.
 
 Simple Rules
 ------------
@@ -3949,7 +4045,7 @@ Now let's see how the rules above transform a list comprehension if we
   g = do (\x -> if x mod 2 then [printf "%g\n" (2^x+1)] else []) (1..5);
 
 Ok, so the :func:`catmap` got replaced with a :func:`do` which is just what we
-need to make this code go essentially as fast as a :keyword:`for` loop in
+need to make this code go essentially as fast as a ``for`` loop in
 conventional programming languages (up to constant factors, of course). Here's
 how it looks like when we run the ``g`` function::
 
@@ -6490,12 +6586,12 @@ namespaces. This means that name lookup works in a slightly different fashion
 now (see `Hierarchical Namespaces`_ for details), but old code which doesn't
 use the new feature should continue to work unchanged.
 
-Pure 0.26 also changed the :keyword:`nullary` keyword to :keyword:`nonfix`,
-which is more consistent with the other kinds of fixity declarations.
-Moreover, the parser was enhanced so that it can cope with a theoretically
-unbounded number of precedence levels, and the system of standard operators in
-the prelude was modified so that it becomes possible to sneak in new operator
-symbols with ease; details can be found in the `Symbol Declarations`_ section.
+Pure 0.26 also changed the ``nullary`` keyword to :keyword:`nonfix`, which is
+more consistent with the other kinds of fixity declarations.  Moreover, the
+parser was enhanced so that it can cope with a theoretically unbounded number
+of precedence levels, and the system of standard operators in the prelude was
+modified so that it becomes possible to sneak in new operator symbols with
+ease; details can be found in the `Symbol Declarations`_ section.
 
 Pure 0.41 added support for optimization of indirect tail calls, so that any
 previous restrictions on the use of tail recursion in indirect function calls
@@ -6543,12 +6639,16 @@ construct in Emacs Pure mode.
 
 Pure 0.47 also introduced a new, more flexible type tag feature, which defines
 type tags as unary predicates, using normal rewriting rules just as with
-ordinary functions. To these ends, a new keyword :keyword:`type` was added.
-Please see section `Type Rules`_ for details. (In contrast, the old-tyle type
-tags were just a syntactic shortcut for "as" patterns involving unary
-constructor symbols. For the time being, these are still supported, but
-considered deprecated. The :option:`-w` option can be used to get warnings
-about these so that you can fix up your scripts accordingly.)
+ordinary functions; cf. section `Type Rules`_ for details. To these ends, a
+new keyword :keyword:`type` was added (if you used this as an ordinary
+identifier, you will have to rename these). Note that the old-tyle type tags
+were just a syntactic shortcut for "as" patterns involving unary constructor
+symbols. These aren't supported any more, so you'll have to fix up your old
+scripts accordingly. To assist with this, the Pure interpreter can be run with
+the :option:`-w` option in order to identify occurrences of undefined
+(presumably old-style) type tags. You should either change these to the
+corresponding "as" pattern (i.e., ``x::foo`` to ``x@(foo _)``), or just add a
+proper type definition for the tag (like ``type foo (foo _);``).
 
 Error Recovery
 --------------

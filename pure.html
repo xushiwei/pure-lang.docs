@@ -1445,12 +1445,20 @@ arguments using call-by-value, just like the other arithmetic
 operations.</p>
 </div>
 </dd>
-<dt>Lists: <tt class="docutils literal"><span class="pre">[x,y,z]</span></tt>, <tt class="docutils literal"><span class="pre">x:xs</span></tt>, <tt class="docutils literal"><span class="pre">x..y</span></tt>, <tt class="docutils literal"><span class="pre">x:y..z</span></tt></dt>
+<dt>Lists: <tt class="docutils literal"><span class="pre">[x,y,z]</span></tt>, <tt class="docutils literal"><span class="pre">x:xs</span></tt></dt>
 <dd><p class="first">Pure&#8217;s basic list syntax is the same as in Haskell, thus <tt class="docutils literal"><span class="pre">[]</span></tt> is the
 empty list and <tt class="docutils literal"><span class="pre">x:xs</span></tt> denotes a list with head element <tt class="docutils literal"><span class="pre">x</span></tt> and tail
 list <tt class="docutils literal"><span class="pre">xs</span></tt>. The infix constructor symbol &#8216;<a class="reference internal" href="purelib.html#:" title=":"><tt class="xref pure pure-cons docutils literal"><span class="pre">:</span></tt></a>&#8216; is declared in
 the prelude. The usual syntactic sugar for list values in brackets is
-provided, thus <tt class="docutils literal"><span class="pre">[x,y,z]</span></tt> is exactly the same as <tt class="docutils literal"><span class="pre">x:y:z:[]</span></tt>.</p>
+provided, thus <tt class="docutils literal"><span class="pre">[x,y,z]</span></tt> is exactly the same as <tt class="docutils literal"><span class="pre">x:y:z:[]</span></tt>. (This kind
+of list value is also called a &#8220;proper&#8221; list. Pure also permits &#8220;improper&#8221;
+list values such as <tt class="docutils literal"><span class="pre">1:2:3</span></tt> with a non-list value in the tail. These
+aren&#8217;t of much use as ordinary list values, but are frequently used in
+patterns or symbolic expressions such as <tt class="docutils literal"><span class="pre">x:xs</span></tt> where the tail usually
+is a variable. Also, lists can be &#8220;lazy&#8221; in which case the tail is a
+special kind of deferred value known as a &#8220;thunk&#8221;, see <a class="reference internal" href="#lazy-evaluation-and-streams">Lazy Evaluation
+and Streams</a>; technically, such lazy list values are improper lists,
+too.)</p>
 <p class="last">There&#8217;s also a way to denote arithmetic sequences such as <tt class="docutils literal"><span class="pre">1..5</span></tt>, which
 denotes the list <tt class="docutils literal"><span class="pre">[1,2,3,4,5]</span></tt>. Haskell users should note the missing
 brackets. In contrast to Haskell, Pure doesn&#8217;t use any special syntax for
@@ -1463,7 +1471,7 @@ floating point sequence is always rounded to the nearest grid point. Thus,
 e.g., <tt class="docutils literal"><span class="pre">0.0:0.1..0.29</span></tt> actually yields <tt class="docutils literal"><span class="pre">[0.0,0.1,0.2,0.3]</span></tt>, as does
 <tt class="docutils literal"><span class="pre">0.0:0.1..0.31</span></tt>.</p>
 </dd>
-<dt>Tuples: <tt class="docutils literal"><span class="pre">x,y,z</span></tt></dt>
+<dt>Tuples: <tt class="docutils literal"><span class="pre">(x,y,z)</span></tt></dt>
 <dd><p class="first">Pure&#8217;s tuples are a bit unusual: They are constructed by just &#8220;pairing&#8221;
 things using the &#8216;<a class="reference internal" href="purelib.html#," title=","><tt class="xref pure pure-cons docutils literal"><span class="pre">,</span></tt></a>&#8216; operator, for which the empty tuple
 <a class="reference internal" href="purelib.html#()" title="()"><tt class="xref pure pure-cons docutils literal"><span class="pre">()</span></tt></a> acts as a neutral element (i.e., <tt class="docutils literal"><span class="pre">(),x</span></tt> is just <tt class="docutils literal"><span class="pre">x</span></tt>, as is
@@ -1472,20 +1480,15 @@ things using the &#8216;<a class="reference internal" href="purelib.html#," titl
 This implies that tuples are always flat, i.e., there are no nested tuples
 (tuples of tuples); if you need such constructs then you should use lists
 instead.</p>
-<div class="last admonition note">
-<p class="first admonition-title">Note</p>
-<p>Syntactically, tuples aren&#8217;t really primary expressions, but we
-still include them here because they are closely related to lists which
-are also defined in the prelude. Also, tuples are often used as a
-simpler replacement for lists, in particular in function arguments and
-return values, when no elaborate hierarchical structure is needed.</p>
-<p class="last">Also note that parentheses are generally only used to group expressions
-and are <em>not</em> part of the tuple syntax in Pure, although they will be
-needed to include a tuple in a list or matrix. E.g.,
-<tt class="docutils literal"><span class="pre">[(1,2),3,(4,5)]</span></tt> is a three element list consisting of the tuple
-<tt class="docutils literal"><span class="pre">1,2</span></tt>, the integer <tt class="docutils literal"><span class="pre">3</span></tt>, and another tuple <tt class="docutils literal"><span class="pre">4,5</span></tt>. Likewise,
+<p class="last">Syntactically, tuples aren&#8217;t really primary expressions, but we still
+include them here because they are often used as a simpler replacement for
+lists, in particular in function arguments and return values, when no
+elaborate hierarchical structure is needed. Also note that parentheses are
+generally only used to group expressions and are <em>not</em> part of the tuple
+syntax in Pure, although they will be needed to include a tuple in a list
+or matrix. E.g., <tt class="docutils literal"><span class="pre">[(1,2),3,(4,5)]</span></tt> is a three element list consisting of
+the tuple <tt class="docutils literal"><span class="pre">1,2</span></tt>, the integer <tt class="docutils literal"><span class="pre">3</span></tt>, and another tuple <tt class="docutils literal"><span class="pre">4,5</span></tt>. Likewise,
 <tt class="docutils literal"><span class="pre">[(1,2,3)]</span></tt> is a list with a single element, the tuple <tt class="docutils literal"><span class="pre">1,2,3</span></tt>.</p>
-</div>
 </dd>
 <dt>Matrices: <tt class="docutils literal"><span class="pre">{1.0,2.0,3.0}</span></tt>, <tt class="docutils literal"><span class="pre">{1,2;3,4}</span></tt>, <tt class="docutils literal"><span class="pre">{1L,y+1;foo,bar}</span></tt></dt>
 <dd><p class="first">Pure also offers matrices, a kind of two-dimensional arrays, as a built-in
@@ -3214,8 +3217,8 @@ function to obtain its value. For instance:</p>
 </div>
 <p>Lisp programmers will be well familiar with this operation which enables some
 powerful metaprogramming techniques. However, there are some notable
-differences to Lisp&#8217;s quote. First, <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> only inhibits the evaluation
-of global variables, <em>local</em> variables are substituted as usual:</p>
+differences to Lisp&#8217;s quote. In particular, <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> only inhibits the
+evaluation of global variables, <em>local</em> variables are substituted as usual:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>(\x -&gt; &#39;(<span class="mi">2</span>*x+<span class="mi">1</span>)) <span class="mi">99</span><span class="p">;</span>
 <span class="mi">2</span>*<span class="mi">99</span>+<span class="mi">1</span>
 <span class="gp">&gt; </span>foo x = &#39;(<span class="mi">2</span>*x+<span class="mi">1</span>)<span class="p">;</span>
@@ -3228,42 +3231,57 @@ of global variables, <em>local</em> variables are substituted as usual:</p>
 <span class="mi">2</span>*<span class="mi">42</span>+<span class="mi">2</span>^<span class="mi">12</span>
 </pre></div>
 </div>
-<p>This may come as a surprise (or even annoyance) to real Lisp weenies, but it
-does have its advantages. In particular, it makes it easy to fill in the
-variable parts in a quoted &#8220;template&#8221; expression, without any need for an
-arguably complex tool like Lisp&#8217;s &#8220;quasiquote&#8221;. (It is quite easy to define
-quasiquote in Pure if you want it, however. See the <a class="reference internal" href="#recursive-macros">Recursive Macros</a>
-section for a simplified version; a full implementation can be found in the
-Pure library sources.)</p>
-<p>As already mentioned, if you do need to quote a symbol which is already being
-used as a local variable in the current context, you can do this by supplying
-the symbol as a string to the prelude function <a class="reference internal" href="purelib.html#val" title="val"><tt class="xref pure pure-func docutils literal"><span class="pre">val</span></tt></a>:</p>
+<p>Local parameterless functions are treated in the same fashion:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>&#39;(<span class="mi">2</span>*<span class="mi">42</span>+<span class="mi">2</span>^n) <span class="kr">with</span> n = <span class="mi">12</span> <span class="kr">end</span><span class="p">;</span>
+<span class="mi">2</span>*<span class="mi">42</span>+<span class="mi">2</span>^<span class="mi">12</span>
+</pre></div>
+</div>
+<p>Note that, in contrast, for global functions (and variables) we have:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>n = <span class="mi">12</span><span class="p">;</span>
+<span class="gp">&gt; </span>&#39;(<span class="mi">2</span>*<span class="mi">42</span>+<span class="mi">2</span>^n)<span class="p">;</span>
+<span class="mi">2</span>*<span class="mi">42</span>+<span class="mi">2</span>^n
+</pre></div>
+</div>
+<p>This discrepancy may come as a surprise (or even annoyance) to real Lisp
+weenies, but it does have its advantages. In particular, it makes it easy to
+fill in the variable parts in a quoted &#8220;template&#8221; expression, without any need
+for an arguably complex tool like Lisp&#8217;s &#8220;quasiquote&#8221;.</p>
+<p>If you do need to quote a symbol which is already being used as a local
+variable or function in the current context, you can do this by supplying the
+symbol as a string to the prelude function <a class="reference internal" href="purelib.html#val" title="val"><tt class="xref pure pure-func docutils literal"><span class="pre">val</span></tt></a>:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>val <span class="s">&quot;x&quot;</span>+x <span class="kr">when</span> x = <span class="mi">99</span> <span class="kr">end</span><span class="p">;</span>
 x+<span class="mi">99</span>
 </pre></div>
 </div>
-<p>Second, it is in fact possible to perform arbitrary computations right in the
-middle of a quoted expression. This is because <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> only ever quotes
-<a class="reference internal" href="#simple-expressions">simple expressions</a>, embedded <a class="reference internal" href="#special-expressions">special expressions</a> (conditionals, lambda
-and the <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> and <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> constructs) are
-evaluated as usual. Example:</p>
+<p>Also note that while local functions are always substituted in a quoted
+expression, <em>applications</em> involving local functions can still be quoted:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>&#39;foo <span class="mi">99</span> <span class="kr">with</span> foo x = <span class="mi">2</span>*x+<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
+foo <span class="mi">99</span>
+<span class="gp">&gt; </span>eval ans<span class="p">;</span>
+<span class="mi">199</span>
+</pre></div>
+</div>
+<p>A limitation of Pure&#8217;s <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> is that in the current implementation it
+isn&#8217;t possible to quote embedded <a class="reference internal" href="#special-expressions">special expressions</a> (conditionals, lambda
+and the <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> and <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> constructs);
+these are always evaluated as usual. Example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>&#39;(x+<span class="mi">1</span> <span class="kr">when</span> x = &#39;(<span class="mi">2</span>*<span class="mi">3</span>) <span class="kr">end</span>)<span class="p">;</span>
 <span class="mi">2</span>*<span class="mi">3</span>+<span class="mi">1</span>
 <span class="gp">&gt; </span>&#39;(<span class="mi">2</span>*<span class="mi">42</span>+(<span class="mi">2</span>^n <span class="kr">when</span> n = <span class="mi">2</span>*<span class="mi">6</span> <span class="kr">end</span>))<span class="p">;</span>
 <span class="mi">2</span>*<span class="mi">42</span>+<span class="mf">4096.0</span>
 </pre></div>
 </div>
-<p>The downside of this is that there is no way to quote special expressions.
-Macro expansion <em>is</em> inhibited in quoted expressions, however, so it is
-possible to work around this limitation by defining a custom special form (see
-<a class="reference internal" href="#macros">Macros</a>) to be used as a symbolic representation for, say, a lambda
-expression, which reduces to a real lambda when evaluated. To these ends, the
-<a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> function can be invoked with a string argument as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">def</span> lambda x y = eval $ <span class="s">&quot;</span><span class="se">\\</span><span class="s"> &quot;</span>+str (&#39;x)+<span class="s">&quot; -&gt; &quot;</span>+str (&#39;y)<span class="p">;</span>
-</pre></div>
-</div>
-<p>Example:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> l = &#39;lambda x (x+<span class="mi">1</span>)<span class="p">;</span> l<span class="p">;</span>
+<p>We&#8217;re not sure whether this is actually a bug or a feature, so you should
+expect this to change in the future, and relying on this behaviour is not
+recommended. (It is always possible to achieve the same effect by substituting
+a local variable, as shown above.)</p>
+<p>For the time being, it is possible to work around this limitation by defining
+a custom special form (see <a class="reference internal" href="#macros">Macros</a>) to be used as a symbolic representation
+for, say, a lambda expression, which reduces to a real lambda when evaluated.
+This works because macro expansion <em>is</em> inhibited in quoted expressions. For
+instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> lambda x y = eval $ <span class="s">&quot;</span><span class="se">\\</span><span class="s"> &quot;</span>+str (&#39;x)+<span class="s">&quot; -&gt; &quot;</span>+str (&#39;y)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> l = &#39;lambda x (x+<span class="mi">1</span>)<span class="p">;</span> l<span class="p">;</span>
 lambda x (x+<span class="mi">1</span>)
 <span class="gp">&gt; </span><span class="kr">let</span> f = eval l<span class="p">;</span> f<span class="p">;</span> f <span class="mi">9</span><span class="p">;</span>
 <span class="kt">#&lt;closure 0x7fdc3ca45be8&gt;</span>
@@ -3271,11 +3289,18 @@ lambda x (x+<span class="mi">1</span>)
 </pre></div>
 </div>
 <p>Other special constructs, such as <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> and
-<a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> can be handled in a similar fashion.</p>
-<p>Another useful feature of Lisp&#8217;s quasiquote is the capability to splice
-arguments into a function application. It is possible to achieve pretty much
-the same in Pure with the following variation of the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> operator which
-&#8220;curries&#8221; its second (tuple) operand:</p>
+<a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> can be treated in a similar fashion. (In the future, the
+compiler may handle this automatically, without having to go through any kind
+of string representation.)</p>
+<p>Finally, as we mentioned Lisp&#8217;s quasiquote, note that it is quite easy to
+define this in Pure if you want it. See the <a class="reference internal" href="#recursive-macros">Recursive Macros</a> section for a
+simplified version; a full implementation (actually two of them) can be found
+in the Pure library sources. However, using the above facilities, the need to
+whip out the almighty quasiquote shouldn&#8217;t arise very often.</p>
+<p>A useful feature of Lisp&#8217;s quasiquote is the capability to splice arguments
+into a function application. It is possible to achieve pretty much the same in
+Pure with the following variation of the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> operator which &#8220;curries&#8221;
+its second (tuple) operand:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">infixr</span> <span class="mi">0</span> $<span class="p">@</span> <span class="p">;</span>
 f $<span class="p">@</span> ()     = f<span class="p">;</span>
 f $<span class="p">@</span> (x,xs) = f x $<span class="p">@</span> xs<span class="p">;</span>

@@ -1458,12 +1458,21 @@ Operator and constant symbols: `+', `==', `not'
           whereas the bitwise connectives receive their arguments using
           call-by-value, just like the other arithmetic operations.
 
-Lists: `[x,y,z]', `x:xs', `x..y', `x:y..z'
+Lists: `[x,y,z]', `x:xs'
      Pure's basic list syntax is the same as in Haskell, thus `[]' is
      the empty list and `x:xs' denotes a list with head element `x' and
      tail list `xs'. The infix constructor symbol '`:'' is declared in
      the prelude. The usual syntactic sugar for list values in brackets
      is provided, thus `[x,y,z]' is exactly the same as `x:y:z:[]'.
+     (This kind of list value is also called a "proper" list. Pure also
+     permits "improper" list values such as `1:2:3' with a non-list
+     value in the tail. These aren't of much use as ordinary list
+     values, but are frequently used in patterns or symbolic
+     expressions such as `x:xs' where the tail usually is a variable.
+     Also, lists can be "lazy" in which case the tail is a special kind
+     of deferred value known as a "thunk", see *note Lazy Evaluation
+     and Streams: 76.; technically, such lazy list values are improper
+     lists, too.)
 
      There's also a way to denote arithmetic sequences such as `1..5',
      which denotes the list `[1,2,3,4,5]'. Haskell users should note
@@ -1477,7 +1486,7 @@ Lists: `[x,y,z]', `x:xs', `x..y', `x:y..z'
      rounded to the nearest grid point. Thus, e.g., `0.0:0.1..0.29'
      actually yields `[0.0,0.1,0.2,0.3]', as does `0.0:0.1..0.31'.
 
-Tuples: `x,y,z'
+Tuples: `(x,y,z)'
      Pure's tuples are a bit unusual: They are constructed by just
      "pairing" things using the '`,'' operator, for which the empty
      tuple `()' acts as a neutral element (i.e., `(),x' is just `x', as
@@ -1487,20 +1496,17 @@ Tuples: `x,y,z'
      there are no nested tuples (tuples of tuples); if you need such
      constructs then you should use lists instead.
 
-          Note: Syntactically, tuples aren't really primary
-          expressions, but we still include them here because they are
-          closely related to lists which are also defined in the
-          prelude. Also, tuples are often used as a simpler replacement
-          for lists, in particular in function arguments and return
-          values, when no elaborate hierarchical structure is needed.
-
-          Also note that parentheses are generally only used to group
-          expressions and are _not_ part of the tuple syntax in Pure,
-          although they will be needed to include a tuple in a list or
-          matrix. E.g., `[(1,2),3,(4,5)]' is a three element list
-          consisting of the tuple `1,2', the integer `3', and another
-          tuple `4,5'. Likewise, `[(1,2,3)]' is a list with a single
-          element, the tuple `1,2,3'.
+     Syntactically, tuples aren't really primary expressions, but we
+     still include them here because they are often used as a simpler
+     replacement for lists, in particular in function arguments and
+     return values, when no elaborate hierarchical structure is needed.
+     Also note that parentheses are generally only used to group
+     expressions and are _not_ part of the tuple syntax in Pure,
+     although they will be needed to include a tuple in a list or
+     matrix. E.g., `[(1,2),3,(4,5)]' is a three element list consisting
+     of the tuple `1,2', the integer `3', and another tuple `4,5'.
+     Likewise, `[(1,2,3)]' is a list with a single element, the tuple
+     `1,2,3'.
 
 Matrices: `{1.0,2.0,3.0}', `{1,2;3,4}', `{1L,y+1;foo,bar}'
      Pure also offers matrices, a kind of two-dimensional arrays, as a
@@ -1535,19 +1541,19 @@ Matrices: `{1.0,2.0,3.0}', `{1,2;3,4}', `{1L,y+1;foo,bar}'
      which are considered as symbolic values as far as matrix
      construction is concerned). Numeric matrices use an internal data
      layout that is fully compatible with the *note GNU Scientific
-     Library: 76.  (GSL), and can readily be passed to GSL routines via
+     Library: 77.  (GSL), and can readily be passed to GSL routines via
      the C interface. (The Pure interpreter does not require GSL,
      however, so numeric matrices will work even if GSL is not
      installed.)
 
      More information about matrices and corresponding examples can be
-     found in the *note Examples: 77. section below.
+     found in the *note Examples: 78. section below.
 
           Note: While the `[...]' and `{...}' constructs look
           superficially similar, they work in very different ways. The
           former is just syntactic sugar for a corresponding
           constructor term and can thus be used as a pattern on the
-          left-hand side of an equation, cf. *note Patterns: 78. In
+          left-hand side of an equation, cf. *note Patterns: 79. In
           contrast, the latter is special syntax for a built-in
           operation which creates objects of a special matrix type.
           Thus matrix expressions can _not_ be used as patterns
@@ -1572,7 +1578,7 @@ Comprehensions: `[x,y | x=1..n; y=1..m; x<y]', `{f x | x=1..n}'
      comprehensions alternate between row and column generation so that
      most common mathematical abbreviations carry over quite easily.
      Examples of both kinds of comprehensions can be found in the *note
-     Examples: 77. section below.
+     Examples: 78. section below.
 
 
 File: pure.info,  Node: Simple Expressions,  Next: Special Expressions,  Prev: Primary Expressions,  Up: Expression Syntax
@@ -1666,7 +1672,7 @@ Case expressions: `case x of rule; ... end'
 When expressions: `x when rule; ... end'
      An alternative way to bind local variables by matching a
      collection of subject terms against corresponding patterns,
-     similar to *note Aardappel: 7b.'s `when' construct. A single
+     similar to *note Aardappel: 7c.'s `when' construct. A single
      binding such as `x when u = v end' is equivalent to `case v of u =
      x end', but the former is often more convenient to write. A `when'
      clause may contain multiple definitions, which are processed from
@@ -1772,7 +1778,7 @@ call-by-name.
      simply a list with a thunked tail, which allows it to be infinite.
      The Pure prelude defines many functions for creating and
      manipulating these kinds of objects; further details and examples
-     can be found in the *note Examples: 77. section below.
+     can be found in the *note Examples: 78. section below.
 
  -- Function: quote x
  -- Function: ' x
@@ -1789,7 +1795,7 @@ call-by-name.
      This enables some powerful metaprogramming techniques, which
      should be well familiar to Lisp programmers. However, there are
      some notable differences to Lisp's quote, please see *note The
-     Quote: 7e. in the *note Examples: 77. section for details and more
+     Quote: 7f. in the *note Examples: 78. section for details and more
      examples.
 
 
@@ -1810,7 +1816,7 @@ variable definitions, and expressions to be evaluated:
              | rule ";"
              | expr ";"
 
-(The syntax of the *note rule: 6b, *note type_rule: 83. and *note
+(The syntax of the *note rule: 6b, *note type_rule: 84. and *note
 simple_rule: 6c.  elements is discussed in the *note Rule Syntax: 61.
 section below. Also, a few additional toplevel elements are provided in
 the declaration syntax, see *note Declarations: 32.)
@@ -1824,7 +1830,7 @@ the declaration syntax, see *note Declarations: 32.)
      6d. expressions, this basic form can also be augmented with a
      condition `if guard' tacked on to the end of the rule, where
      `guard' is an integer expression which determines whether the rule
-     is applicable.  Moreover, the keyword *note otherwise: 81.  may be
+     is applicable.  Moreover, the keyword *note otherwise: 82.  may be
      used to denote an empty guard which is always true (this is
      syntactic sugar to point out the "default" case of a definition;
      the interpreter just treats this as a comment). Pure also provides
@@ -1833,12 +1839,12 @@ the declaration syntax, see *note Declarations: 32.)
      Syntax: 61. section for details.
 
  -- Description: def lhs = rhs;
-     A rule starting with the keyword *note def: 7f. defines a macro
+     A rule starting with the keyword *note def: 80. defines a macro
      function. No guards or multiple left-hand and right-hand sides are
      permitted here. Macro rules are used to preprocess expressions on
      the right-hand side of other definitions at compile time, and are
      typically employed to implement user-defined special forms and
-     simple kinds of optimization rules. See the *note Macros: 84.
+     simple kinds of optimization rules. See the *note Macros: 85.
      section below for details and examples.
 
  -- Description: let lhs = rhs;
@@ -1849,9 +1855,9 @@ the declaration syntax, see *note Declarations: 32.)
      function and variable definitions.
 
  -- Description: const lhs = rhs;
-     An alternative form of *note let: 80. which defines constants
+     An alternative form of *note let: 81. which defines constants
      rather than variables. (These are not to be confused with nonfix
-     symbols which simply stand for themselves!) Like *note let: 80,
+     symbols which simply stand for themselves!) Like *note let: 81,
      this construct binds the variable symbols on the left-hand side to
      the corresponding values on the right-hand side (after
      evaluation). The difference is that *note const: 43.  symbols can
@@ -1903,7 +1909,7 @@ in order to ensure consistent behaviour between interactive and batch
 mode operation.
 
   So, for instance, you can easily bind a global variable to a new
-value by just entering a corresponding *note let: 80. command:
+value by just entering a corresponding *note let: 81. command:
 
     > foo x = c*x;
     > foo 99;
@@ -1915,7 +1921,7 @@ value by just entering a corresponding *note let: 80. command:
 
 This works pretty much like global variables in imperative languages,
 but note that in Pure the value of a global variable can only be
-changed with a *note let: 80. command at the toplevel. Thus referential
+changed with a *note let: 81. command at the toplevel. Thus referential
 transparency is unimpaired; while the value of a global variable may
 change between different toplevel expressions, it will always take the
 same value in a single evaluation.
@@ -1955,7 +1961,7 @@ File: pure.info,  Node: Rule Syntax,  Next: Examples,  Prev: Pure Overview,  Up:
 
 Basically, the same rule syntax is used in all kinds of global and local
 definitions. However, some constructs (specifically, *note when: 6e,
-*note let: 80, *note const: 43, *note type: 86. and *note def: 7f.) use
+*note let: 81, *note const: 43, *note type: 87. and *note def: 80.) use
 a variation of the basic rule syntax which does away with guards and/or
 multiple left-hand or right-hand sides. The syntax of these elements is
 captured by the following grammar rules:
@@ -2168,7 +2174,7 @@ they can be matched very efficiently):
      The type of C pointer values.
 
   To define your own data types, you employ a special kind of rule
-syntax, which is explained in *note Type Rules: 8e. below. For
+syntax, which is explained in *note Type Rules: 8f. below. For
 instance, we might represent points in the plane using a constructor
 symbol `Point' which gets applied to pairs of coordinates. We can then
 define the `point' data type as follows:
@@ -2242,7 +2248,7 @@ frequently used type predicates (such as the matrix subtypes). These
 are all described in the `purelib'.
 
   More examples and a detailed explanation of Pure's type tag concept
-can be found in the *note Type Rules: 8e. section below.
+can be found in the *note Type Rules: 8f. section below.
 
 
 File: pure.info,  Node: General Rules,  Next: Type Rules,  Prev: Type Tags,  Up: Rule Syntax
@@ -2352,11 +2358,11 @@ what it is, although types live in their own space where they can't be
 confused with functions of the same name).
 
   The definition of a type thus consists of one or more type rules which
-basically have the same format as the *note general rules: 8f, but with
-the keyword *note type: 86. in front of each rule. Also, each left-hand
+basically have the same format as the *note general rules: 90, but with
+the keyword *note type: 87. in front of each rule. Also, each left-hand
 side must have at most one argument pattern and exactly one right-hand
 side. Hence, if the definition of a type requires several right-hand
-sides, you normally have to write a separate *note type: 86. rule for
+sides, you normally have to write a separate *note type: 87. rule for
 each of them. Multiple left-hand sides work the same as in the general
 rule format, though.
 
@@ -2566,7 +2572,7 @@ There's one caveat here. As the type symbol passed to `typep' gets
 evaluated in normal code you have to be careful if the symbol is also
 defined as a parameterless function or a variable; in such a case
 you'll have to quote the symbol, as described in section *note The
-Quote: 7e. For instance, we might rewrite the above definitions as
+Quote: 7f. For instance, we might rewrite the above definitions as
 follows, giving "pointless" definitions of the `odd' and `even'
 predicates in terms of `typep':
 
@@ -2578,7 +2584,7 @@ predicates in terms of `typep':
 
 Note that the quotes on `odd' and `even' are really needed here to
 prevent the predicate definitions from looping. If you need this a lot
-then you might define a little helper macro (cf. *note Macros: 84.)
+then you might define a little helper macro (cf. *note Macros: 85.)
 which quotes the type symbol in an automatic fashion:
 
     def typep ty::symbol = typep ('ty);
@@ -2703,7 +2709,7 @@ File: pure.info,  Node: Simple Rules,  Prev: Type Rules,  Up: Rule Syntax
 4.5 Simple Rules
 ================
 
-As already mentioned, *note when: 6e, *note let: 80. and *note const:
+As already mentioned, *note when: 6e, *note let: 81. and *note const:
 43. use a simplified kind of rule syntax which just consists of a
 left-hand and a right-hand side separated by the equals sign. In this
 case the meaning of the rule is to bind the variables in the left-hand
@@ -2730,8 +2736,8 @@ has been computed:
     solve 2 4
 
 Note that simple rules of the same form `lhs = rhs' are also used in
-macro definitions (*note def: 7f.), to be discussed in the *note
-Macros: 84. section. In this case, however, the rule denotes a real
+macro definitions (*note def: 80.), to be discussed in the *note
+Macros: 85. section. In this case, however, the rule denotes a real
 rewriting rule, not a pattern binding, hence the left-hand side is
 mandatory in these rules.
 
@@ -2771,7 +2777,7 @@ the *note Caveats and Notes: c.  section for more details on this):
 
 Here is an example showing how constants are defined and used. Constant
 definitions take pretty much the same form as variable definitions with
-*note let: 80. (see above), but work more like the definition of a
+*note let: 81. (see above), but work more like the definition of a
 parameterless function whose value is precomputed at compile time:
 
     > extern double atan(double);
@@ -2785,7 +2791,7 @@ parameterless function whose value is precomputed at compile time:
 Note that the compiler normally computes constant subexpressions at
 compile time, such as `2*pi' in the `foo' function. This works with all
 simple scalars (machine ints and doubles), see *note Constant
-Definitions: 92. for details.
+Definitions: 93. for details.
 
 * Menu:
 
@@ -3155,7 +3161,7 @@ instance:
     {1,2,3,4}
 
 One way to inhibit this "splicing" of the submatrices in a larger
-matrix is to use the "quote" operator (cf. *note The Quote: 7e.):
+matrix is to use the "quote" operator (cf. *note The Quote: 7f.):
 
     > '{{1,2},{3,4}};
     {{1,2},{3,4}}
@@ -3192,7 +3198,7 @@ pair of "non-splicing" vector brackets:
     {{{1,2}},{{3,4}}}
 
 (Both macros and *note outfix: 9c. symbol declarations are described
-later in the appropriate sections, see *note Macros: 84. and *note
+later in the appropriate sections, see *note Macros: 85. and *note
 Symbol Declarations: 5b.)
 
 
@@ -3246,7 +3252,7 @@ function:
     {99=>99}
 
 In the case of global variables and function symbols, you might also
-protect the symbol with a quote (see *note The Quote: 7e.):
+protect the symbol with a quote (see *note The Quote: 7f.):
 
     > {'u=>u};
     {u=>99}
@@ -3378,9 +3384,9 @@ The quote also inhibits evaluation inside matrix values, including the
 
 Lisp programmers will be well familiar with this operation which
 enables some powerful metaprogramming techniques. However, there are
-some notable differences to Lisp's quote. First, *note quote: 66. only
-inhibits the evaluation of global variables, _local_ variables are
-substituted as usual:
+some notable differences to Lisp's quote. In particular, *note quote:
+66. only inhibits the evaluation of global variables, _local_ variables
+are substituted as usual:
 
     > (\x -> '(2*x+1)) 99;
     2*99+1
@@ -3393,46 +3399,61 @@ substituted as usual:
     > '(2*42+2^n) when n = 12 end;
     2*42+2^12
 
-This may come as a surprise (or even annoyance) to real Lisp weenies,
-but it does have its advantages. In particular, it makes it easy to
-fill in the variable parts in a quoted "template" expression, without
-any need for an arguably complex tool like Lisp's "quasiquote". (It is
-quite easy to define quasiquote in Pure if you want it, however. See
-the *note Recursive Macros: 9f.  section for a simplified version; a
-full implementation can be found in the Pure library sources.)
+Local parameterless functions are treated in the same fashion:
 
-  As already mentioned, if you do need to quote a symbol which is
-already being used as a local variable in the current context, you can
-do this by supplying the symbol as a string to the prelude function
-`val':
+    > '(2*42+2^n) with n = 12 end;
+    2*42+2^12
+
+Note that, in contrast, for global functions (and variables) we have:
+
+    > n = 12;
+    > '(2*42+2^n);
+    2*42+2^n
+
+This discrepancy may come as a surprise (or even annoyance) to real Lisp
+weenies, but it does have its advantages. In particular, it makes it
+easy to fill in the variable parts in a quoted "template" expression,
+without any need for an arguably complex tool like Lisp's "quasiquote".
+
+  If you do need to quote a symbol which is already being used as a
+local variable or function in the current context, you can do this by
+supplying the symbol as a string to the prelude function `val':
 
     > val "x"+x when x = 99 end;
     x+99
 
-Second, it is in fact possible to perform arbitrary computations right
-in the middle of a quoted expression. This is because *note quote: 66.
-only ever quotes *note simple expressions: 79, embedded *note special
-expressions: 7a. (conditionals, lambda and the *note case: 6d, *note
-when: 6e. and *note with: 67. constructs) are evaluated as usual.
-Example:
+Also note that while local functions are always substituted in a quoted
+expression, _applications_ involving local functions can still be
+quoted:
+
+    > 'foo 99 with foo x = 2*x+1 end;
+    foo 99
+    > eval ans;
+    199
+
+A limitation of Pure's *note quote: 66. is that in the current
+implementation it isn't possible to quote embedded *note special
+expressions: 7b. (conditionals, lambda and the *note case: 6d, *note
+when: 6e. and *note with: 67. constructs); these are always evaluated
+as usual. Example:
 
     > '(x+1 when x = '(2*3) end);
     2*3+1
     > '(2*42+(2^n when n = 2*6 end));
     2*42+4096.0
 
-The downside of this is that there is no way to quote special
-expressions.  Macro expansion _is_ inhibited in quoted expressions,
-however, so it is possible to work around this limitation by defining a
-custom special form (see *note Macros: 84.) to be used as a symbolic
-representation for, say, a lambda expression, which reduces to a real
-lambda when evaluated. To these ends, the `eval' function can be
-invoked with a string argument as follows:
+We're not sure whether this is actually a bug or a feature, so you
+should expect this to change in the future, and relying on this
+behaviour is not recommended. (It is always possible to achieve the
+same effect by substituting a local variable, as shown above.)
 
-    def lambda x y = eval $ "\\ "+str ('x)+" -> "+str ('y);
+  For the time being, it is possible to work around this limitation by
+defining a custom special form (see *note Macros: 85.) to be used as a
+symbolic representation for, say, a lambda expression, which reduces to
+a real lambda when evaluated.  This works because macro expansion _is_
+inhibited in quoted expressions. For instance:
 
-Example:
-
+    > def lambda x y = eval $ "\\ "+str ('x)+" -> "+str ('y);
     > let l = 'lambda x (x+1); l;
     lambda x (x+1)
     > let f = eval l; f; f 9;
@@ -3440,12 +3461,21 @@ Example:
     10
 
 Other special constructs, such as *note case: 6d, *note when: 6e. and
-*note with: 67. can be handled in a similar fashion.
+*note with: 67. can be treated in a similar fashion. (In the future, the
+compiler may handle this automatically, without having to go through
+any kind of string representation.)
 
-  Another useful feature of Lisp's quasiquote is the capability to
-splice arguments into a function application. It is possible to achieve
-pretty much the same in Pure with the following variation of the `$'
-operator which "curries" its second (tuple) operand:
+  Finally, as we mentioned Lisp's quasiquote, note that it is quite
+easy to define this in Pure if you want it. See the *note Recursive
+Macros: 9f. section for a simplified version; a full implementation
+(actually two of them) can be found in the Pure library sources.
+However, using the above facilities, the need to whip out the almighty
+quasiquote shouldn't arise very often.
+
+  A useful feature of Lisp's quasiquote is the capability to splice
+arguments into a function application. It is possible to achieve pretty
+much the same in Pure with the following variation of the `$' operator
+which "curries" its second (tuple) operand:
 
     infixr 0 $@ ;
     f $@ ()     = f;
@@ -3481,7 +3511,7 @@ manage programs consisting of several source modules:
      thereby make it easier to manage large programs consisting of many
      separate modules.
 
-  These are toplevel elements (cf. *note Toplevel: 82.):
+  These are toplevel elements (cf. *note Toplevel: 83.):
 
     item ::= symbol_decl | extern_decl | using_decl | namespace_decl
 
@@ -4022,7 +4052,7 @@ to just declare the symbols in their proper namespaces.
 
   New symbols are also created if a global unqualified (and yet
 undeclared) symbol is being "defined" in a rewriting rule or *note let:
-80./*note const: 43. definition, even if a symbol with the same print
+81./*note const: 43. definition, even if a symbol with the same print
 name from another namespace is already visible in the current scope. To
 distinguish "defining" from "referring" uses of a global symbol, Pure
 uses the following (purely syntactic) notions:
@@ -4034,7 +4064,7 @@ uses the following (purely syntactic) notions:
    * A *defining occurrence* of a global _variable_ or _constant
      symbol_ is any occurrence of the symbol in a _variable position_
      (as given by the "head = function" rule, cf. *note Variables in
-     Equations: 68.) on the left-hand side of a *note let: 80. or *note
+     Equations: 68.) on the left-hand side of a *note let: 81. or *note
      const: 43. definition.
 
    * All other occurrences of global symbols on the left-hand side, as
@@ -4050,10 +4080,10 @@ uses the following (purely syntactic) notions:
 
 Here, the first occurrence of `bar' on the left-hand side `bar (bar x)'
 of the first rule is a _defining_ occurrence, as are the occurrences of
-`x' and `y' on the left-hand side of the *note let: 80. definition.
+`x' and `y' on the left-hand side of the *note let: 81. definition.
 Hence these symbols are created as new symbols in the namespace `foo'.
 On the other hand, the other occurrences of `bar' in the first rule, as
-well as the '`,'' symbol on the left-hand side of the *note let: 80.
+well as the '`,'' symbol on the left-hand side of the *note let: 81.
 definition are _referring_ occurrences. In the former case, `bar'
 refers to the `bar' symbol defined by the rule, while in the latter
 case the '`,'' operator is actually declared in the prelude and thus
@@ -4363,11 +4393,11 @@ provide a kind of textual substitution mechanism, Pure macros operate
 on symbolic expressions and are implemented by the same kind of
 rewriting rules that are also used to define ordinary functions in
 Pure. In contrast to these, macro rules start out with the keyword
-*note def: 7f, and only simple kinds of rules without any guards or
+*note def: 80, and only simple kinds of rules without any guards or
 multiple left-hand and right-hand sides are permitted.
 
   Syntactically, a macro definition looks just like a variable or
-constant definition, using *note def: 7f. in lieu of *note let: 80. or
+constant definition, using *note def: 80. in lieu of *note let: 81. or
 *note const: 43, but they are processed in a different way. Macros are
 substituted into the right-hand sides of function, constant and variable
 definitions. All macro substitution happens before constant
@@ -4738,7 +4768,7 @@ special form *note catch: c0. which is invoked as follows:
 Exceptions are also generated by the runtime system if the program runs
 out of stack space, when a guard does not evaluate to a truth value,
 and when the subject term fails to match the pattern in a
-pattern-matching lambda abstraction, or a *note let: 80, *note case:
+pattern-matching lambda abstraction, or a *note let: 81, *note case:
 6d. or *note when: 6e.  construct. These types of exceptions are
 reported using the symbols `stack_fault', `failed_cond' and
 `failed_match', respectively, which are declared as constant symbols in
@@ -4809,7 +4839,7 @@ E.g., let's compute a solution for a standard 8x8 board:
     [(1,1),(2,5),(3,8),(4,6),(5,3),(6,7),(7,2),(8,4)]
 
 Finally, note that since the right-hand side of a type definition (cf.
-*note Type Rules: 8e.) is just ordinary Pure code, it may be
+*note Type Rules: 8f.) is just ordinary Pure code, it may be
 susceptible to exceptions, too.  Such exceptions are reported or caught
 just like any other. In particular, if you want to make a type
 definition just fail silently in case of an exception, you'll have to
@@ -6690,7 +6720,7 @@ the "bare metal", without a hosting interpreter. Only a minimal runtime
 system is provided. This considerably reduces startup times, but also
 implies the following quirks and limitations:
 
-   * All toplevel expressions and *note let: 80. bindings are evaluated
+   * All toplevel expressions and *note let: 81. bindings are evaluated
      _after_ all functions have been defined. This might cause
      inconsistent behaviour with an interpreted run of the same
      program, which executes expressions and variable definitions
@@ -6765,7 +6795,7 @@ opens the door for some powerful programming techniques like partial
 evaluation (http://en.wikipedia.org/wiki/Partial_evaluation). It is
 also a necessity because of Pure's highly dynamic nature. For instance,
 Pure allows you to define constants by evaluating an arbitrary
-expression (see *note Constant Definitions: 92. below), and using
+expression (see *note Constant Definitions: 93. below), and using
 `eval' a program can easily modify itself in even more unforeseeable
 ways. Therefore pretty much anything in your program can actually
 depend on previous computations performed while the program is being
@@ -6907,7 +6937,7 @@ program, which is needed by the runtime environment.)
   Stripped executables should be fine for most purposes, but you have
 to be careful when using `eval' in your compiled program. The compiler
 only does a _static_ analysis of which functions might be reached from
-the initialization code (i.e., toplevel expressions and *note let: 80.
+the initialization code (i.e., toplevel expressions and *note let: 81.
 bindings). It does _not_ take into account code run via the `eval'
 routine. Thus, functions used only in `eval'ed code will be stripped
 from the executable, as if they were never defined at all. If such a
@@ -7274,7 +7304,7 @@ mode.
   Pure 0.47 also introduced a new, more flexible type tag feature,
 which defines type tags as unary predicates, using normal rewriting
 rules just as with ordinary functions; cf. section *note Type Rules:
-8e. for details. To these ends, a new keyword *note type: 86. was added
+8f. for details. To these ends, a new keyword *note type: 87. was added
 (if you used this as an ordinary identifier, you will have to rename
 these). Note that the old-tyle type tags were just a syntactic shortcut
 for "as" patterns involving unary constructor symbols. These aren't
@@ -7407,7 +7437,7 @@ File: pure.info,  Node: Non-Linear Patterns,  Next: "As" Patterns,  Prev: The __
 13.5 Non-Linear Patterns
 ========================
 
-As explained in section *note Patterns: 78, Pure allows multiple
+As explained in section *note Patterns: 79, Pure allows multiple
 occurrences of the same variable in a pattern (so-called
 non-linearities):
 
@@ -7453,7 +7483,7 @@ provoke an error message from the compiler:
 
 This is because the spine of a function application is not available
 when the function is called at runtime. "As" patterns in pattern
-bindings (*note let: 80, *note const: 43, *note case: 6d, *note when:
+bindings (*note let: 81, *note const: 43, *note case: 6d, *note when:
 6e.) are not affected by this restriction since the entire value to be
 matched is available at runtime. For instance:
 
@@ -7570,7 +7600,7 @@ place local definitions in front of the code they apply to. To grasp
 the operational meaning of such nested definitions, it can be helpful
 to read the nested scopes "in reverse" (from bottom to top). Some
 people also prefer to write their programs that way. In contrast to
-Haskell and ML which have *note let: 80. expressions to support that
+Haskell and ML which have *note let: 81. expressions to support that
 kind of notation, Pure doesn't provide any special syntax for this. But
 note that you can always write *note when: 6e. clauses in the following
 style which places the "body" at the bottom of the clause:
@@ -7892,7 +7922,7 @@ you should be aware of:
      entire memoized part of the data structure to stay in main memory
      while it is being traversed, leading to rather nasty memory leaks.
      Please see the `all_primes' function in *note Lazy Evaluation and
-     Streams: 94. for an example.
+     Streams: 76. for an example.
 
 
 File: pure.info,  Node: Reflection,  Next: Hygienic Macros,  Prev: Laziness,  Up: Caveats and Notes
@@ -7907,7 +7937,7 @@ and modify the running program. The only "canonical" way to represent an
 entire Pure program in Pure itself is the program text, hence `evalcmd'
 only provides a textual interface at this time. But of course custom
 higher-level representations can be built on top of that, similar to
-those discussed in section *note The Quote: 7e.
+those discussed in section *note The Quote: 7f.
 
   Here's an example showing what can be done using the `show' command
 and a little bit of trivial text processing. The following `sym_info'
@@ -8593,549 +8623,549 @@ Node: Primary Expressions56470
 Ref: primary expressions56568
 Ref: 7256568
 Ref: primary-expressions56568
-Node: Simple Expressions68707
-Ref: simple expressions68833
-Ref: 7968833
-Ref: simple-expressions68833
-Node: Special Expressions71947
-Ref: special expressions72045
-Ref: 6f72045
-Ref: if72045
-Ref: 7072045
-Ref: then72045
-Ref: 7172045
-Ref: else72045
-Ref: 6d72045
-Ref: case72045
-Ref: 6e72045
-Ref: when72045
-Ref: 6772045
-Ref: with72045
-Ref: 5872045
-Ref: end72045
-Ref: 7a72045
-Ref: special-expressions72045
-Node: Special Forms74557
-Ref: special forms74661
-Ref: 7574661
-Ref: special-forms74661
-Ref: 7c74661
-Ref: id274661
-Ref: 6275061
-Ref: &&/special75061
-Ref: 6375082
-Ref: ||/special75082
-Ref: 6476800
-Ref: $$76800
-Ref: 6577604
-Ref: &77604
-Ref: 6678617
-Ref: quote78617
-Ref: 7d78639
-Ref: '78639
-Node: Toplevel79313
-Ref: toplevel79413
-Ref: 7f79413
-Ref: def79413
-Ref: 8079413
-Ref: let79413
-Ref: 4379413
-Ref: const79413
-Ref: 8179413
-Ref: otherwise79413
-Ref: 8279413
-Node: Scoping Rules82837
-Ref: scoping rules82915
-Ref: 8582915
-Ref: scoping-rules82915
-Node: Rule Syntax85942
-Ref: rule syntax86030
-Ref: 6186030
-Ref: rule-syntax86030
-Node: Patterns87324
-Ref: patterns87396
-Ref: 7887396
-Node: Type Tags92892
-Ref: type tags92986
-Ref: 6092986
-Ref: type-tags92986
-Ref: 8792986
-Ref: id492986
-Ref: 8894554
-Ref: int/type94554
-Ref: 8994604
-Ref: bigint/type94604
-Ref: 8a94683
-Ref: double/type94683
-Ref: 8b94759
-Ref: string/type94759
-Ref: 8c94813
-Ref: matrix/type94813
-Ref: 8d94888
-Ref: pointer/type94888
-Node: General Rules98583
-Ref: general rules98679
-Ref: 8f98679
-Ref: general-rules98679
-Node: Type Rules101911
-Ref: type rules102010
-Ref: 86102010
-Ref: type102010
-Ref: 8e102010
-Ref: type-rules102010
-Ref: 90102010
-Ref: id5102010
-Node: Simple Rules117144
-Ref: simple rules117221
-Ref: 91117221
-Ref: simple-rules117221
-Node: Examples118751
-Ref: examples118838
-Ref: 77118838
-Node: List Comprehensions120567
-Ref: list comprehensions120665
-Ref: 93120665
-Ref: list-comprehensions120665
-Node: Lazy Evaluation and Streams122303
-Ref: lazy evaluation and streams122429
-Ref: 94122429
-Ref: lazy-evaluation-and-streams122429
-Ref: 95122429
-Ref: id6122429
-Node: Matrix Computations126974
-Ref: matrix computations127098
-Ref: 96127098
-Ref: matrix-computations127098
-Ref: 97127098
-Ref: id7127098
-Node: Symbolic Matrices134512
-Ref: symbolic matrices134620
-Ref: 9b134620
-Ref: symbolic-matrices134620
-Node: Record Data136841
-Ref: record data136939
-Ref: 9d136939
-Ref: record-data136939
-Ref: 9e136939
-Ref: id8136939
-Node: The Quote142463
-Ref: the quote142535
-Ref: 7e142535
-Ref: the-quote142535
-Node: Declarations145990
-Ref: declarations146072
-Ref: 32146072
-Node: Symbol Declarations147174
-Ref: symbol declarations147268
-Ref: a3147268
-Ref: public147268
-Ref: a4147268
-Ref: private147268
-Ref: a5147268
-Ref: infix147268
-Ref: a6147268
-Ref: infixl147268
-Ref: a7147268
-Ref: infixr147268
-Ref: a8147268
-Ref: prefix147268
-Ref: a9147268
-Ref: postfix147268
-Ref: 9c147268
-Ref: outfix147268
-Ref: 69147268
-Ref: nonfix147268
-Ref: 5b147268
-Ref: symbol-declarations147268
-Node: Modules and Imports154409
-Ref: modules and imports154522
-Ref: 31154522
-Ref: using154522
-Ref: ac154522
-Ref: modules-and-imports154522
-Ref: ad157880
-Ref: index-7157880
-Ref: ae157994
-Ref: index-8157994
-Ref: af158292
-Ref: index-9158292
-Ref: b0158579
-Ref: index-10158579
-Ref: b1158607
-Ref: index-11158607
-Ref: b2160194
-Ref: index-12160194
-Node: Namespaces160498
-Ref: namespaces160583
-Ref: a1160583
-Ref: namespace160583
-Ref: 74160583
-Node: Using Namespaces164171
-Ref: using namespaces164267
-Ref: b4164267
-Ref: using-namespace164267
-Ref: b5164267
-Ref: using-namespaces164267
-Node: Symbol Lookup and Creation166706
-Ref: symbol lookup and creation166826
-Ref: 3a166826
-Ref: symbol-lookup-and-creation166826
-Node: Private Symbols173326
-Ref: private symbols173453
-Ref: aa173453
-Ref: private-symbols173453
-Node: Hierarchical Namespaces174627
-Ref: hierarchical namespaces174745
-Ref: b6174745
-Ref: hierarchical-namespaces174745
-Ref: b7175887
-Ref: index-13175887
-Node: Scoped Namespaces176915
-Ref: scoped namespaces177009
-Ref: b3177009
-Ref: scoped-namespaces177009
-Node: Macros180258
-Ref: macros180350
-Ref: 84180350
-Node: Optimization Rules182163
-Ref: optimization rules182247
-Ref: b8182247
-Ref: optimization-rules182247
-Ref: b9182247
-Ref: id10182247
-Node: Recursive Macros186613
-Ref: recursive macros186732
-Ref: 9f186732
-Ref: recursive-macros186732
-Ref: bb189274
-Ref: index-14189274
-Node: User-Defined Special Forms189319
-Ref: user-defined special forms189433
-Ref: bc189433
-Ref: user-defined-special-forms189433
-Node: Macro Hygiene193300
-Ref: macro hygiene193389
-Ref: bd193389
-Ref: macro-hygiene193389
-Node: Exception Handling195788
-Ref: exception handling195879
-Ref: be195879
-Ref: exception-handling195879
-Ref: bf195879
-Ref: id11195879
-Ref: c0196191
-Ref: catch196191
-Ref: c1197359
-Ref: index-15197359
-Node: C Interface200529
-Ref: c interface200630
-Ref: 33200630
-Ref: c-interface200630
-Node: Extern Declarations202108
-Ref: extern declarations202202
-Ref: a0202202
-Ref: extern202202
-Ref: c3202202
-Ref: extern-declarations202202
-Node: Variadic C Functions207257
-Ref: variadic c functions207367
-Ref: c5207367
-Ref: variadic-c-functions207367
-Node: C Types208616
-Ref: c types208734
-Ref: c4208734
-Ref: c-types208734
-Ref: c6208734
-Ref: id12208734
-Node: Basic C Types209974
-Ref: basic c types210051
-Ref: c7210051
-Ref: basic-c-types210051
-Node: Pointer Types212219
-Ref: pointer types212326
-Ref: c8212326
-Ref: pointer-types212326
-Node: Pointers and Matrices215518
-Ref: pointers and matrices215628
-Ref: c9215628
-Ref: pointers-and-matrices215628
-Node: Pointer Examples218804
-Ref: pointer examples218892
-Ref: ca218892
-Ref: pointer-examples218892
-Node: Importing Dynamic Libraries223116
-Ref: importing dynamic libraries223236
-Ref: cb223236
-Ref: importing-dynamic-libraries223236
-Ref: cc224357
-Ref: index-16224357
-Ref: cd224432
-Ref: index-17224432
-Ref: ce224643
-Ref: index-18224643
-Node: Importing LLVM Bitcode225035
-Ref: importing llvm bitcode225159
-Ref: cf225159
-Ref: importing-llvm-bitcode225159
-Node: Inline Code230911
-Ref: inline code230999
-Ref: 55230999
-Ref: inline-code230999
-Ref: d2234329
-Ref: index-19234329
-Ref: d3234443
-Ref: index-20234443
-Ref: d4234644
-Ref: index-21234644
-Ref: d5234656
-Ref: index-22234656
-Ref: d6234670
-Ref: index-23234670
-Ref: d7234890
-Ref: index-24234890
-Node: Standard Library235131
-Ref: standard library235231
-Ref: 56235231
-Ref: standard-library235231
-Node: Interactive Usage239494
-Ref: interactive usage239600
-Ref: a239600
-Ref: interactive-usage239600
-Node: Online Help241593
-Ref: online help241685
-Ref: 4241685
-Ref: online-help241685
-Ref: d9241985
-Ref: index-25241985
-Ref: da242013
-Ref: index-26242013
-Ref: db243786
-Ref: docutils243786
-Node: Interactive Commands244727
-Ref: interactive commands244839
-Ref: d8244839
-Ref: interactive-commands244839
-Ref: dc245070
-Ref: index-27245070
-Ref: dd245117
-Ref: index-28245117
-Ref: de245544
-Ref: index-29245544
-Ref: df245870
-Ref: index-30245870
-Ref: e0245932
-Ref: index-31245932
-Ref: e4246918
-Ref: index-32246918
-Ref: e5247507
-Ref: index-33247507
-Ref: e7249026
-Ref: index-34249026
-Ref: e8249354
-Ref: index-35249354
-Ref: e9249420
-Ref: index-36249420
-Ref: ea249971
-Ref: index-37249971
-Ref: eb250217
-Ref: index-38250217
-Ref: ec250297
-Ref: index-39250297
-Ref: ed250348
-Ref: index-40250348
-Ref: ee252032
-Ref: index-41252032
-Ref: ef252282
-Ref: index-42252282
-Ref: f1252694
-Ref: index-43252694
-Ref: f2253311
-Ref: index-44253311
-Ref: f3253615
-Ref: index-45253615
-Node: Last Result254423
-Ref: last result254552
-Ref: e1254552
-Ref: last-result254552
-Node: Specifying Symbol Selections255262
-Ref: specifying symbol selections255387
-Ref: e3255387
-Ref: specifying-symbol-selections255387
-Node: The show Command258747
-Ref: the show command258878
-Ref: f0258878
-Ref: the-show-command258878
-Ref: f4259980
-Ref: index-46259980
-Node: Definition Levels262746
-Ref: definition levels262858
-Ref: e2262858
-Ref: definition-levels262858
-Node: Debugging268038
-Ref: debugging268153
-Ref: 39268153
-Ref: f6269844
-Ref: index-47269844
-Node: Interactive Startup278656
-Ref: interactive startup278745
-Ref: e6278745
-Ref: interactive-startup278745
-Ref: f7279113
-Ref: index-48279113
-Node: Batch Compilation279969
-Ref: batch compilation280076
-Ref: b280076
-Ref: batch-compilation280076
-Ref: f9285236
-Ref: partial-evaluation285236
-Node: Example285363
-Ref: example285467
-Ref: fa285467
-Node: Code Size and Unstripped Executables288420
-Ref: code size and unstripped executables288558
-Ref: f8288558
-Ref: code-size-and-unstripped-executables288558
-Node: Other Output Code Formats292018
-Ref: other output code formats292178
-Ref: fb292178
-Ref: other-output-code-formats292178
-Ref: fc296687
-Ref: llvm-documentation296687
-Node: Calling Pure Functions From C296687
-Ref: calling pure functions from c296802
-Ref: fd296802
-Ref: calling-pure-functions-from-c296802
-Node: Caveats and Notes298295
-Ref: caveats and notes298391
-Ref: c298391
-Ref: caveats-and-notes298391
-Node: Etymology299017
-Ref: etymology299109
-Ref: fe299109
-Node: Backward Compatibility299938
-Ref: backward compatibility300053
-Ref: ff300053
-Ref: backward-compatibility300053
-Node: Error Recovery306867
-Ref: error recovery306994
-Ref: 102306994
-Ref: error-recovery306994
-Node: The __show__ Function307650
-Ref: the __show__ function307774
-Ref: 9a307774
-Ref: the-show-function307774
-Ref: 99307829
-Ref: __show__307829
-Node: Non-Linear Patterns311470
-Ref: non-linear patterns311593
-Ref: 103311593
-Ref: non-linear-patterns311593
-Node: "As" Patterns312993
-Ref: "as" patterns313110
-Ref: 104313110
-Ref: as-patterns313110
-Node: Head = Function313866
-Ref: head = function313977
-Ref: ba313977
-Ref: head-function313977
-Node: With and when317528
-Ref: with and when317646
-Ref: 105317646
-Ref: with-and-when317646
-Node: Numeric Calculations319772
-Ref: numeric calculations319895
-Ref: 106319895
-Ref: numeric-calculations319895
-Node: Constant Definitions321804
-Ref: constant definitions321934
-Ref: 92321934
-Ref: constant-definitions321934
-Node: External C Functions326939
-Ref: external c functions327070
-Ref: c2327070
-Ref: external-c-functions327070
-Ref: 107328350
-Ref: libffi328350
-Node: Calling Special Forms328735
-Ref: calling special forms328854
-Ref: 108328854
-Ref: calling-special-forms328854
-Node: Laziness329341
-Ref: laziness329450
-Ref: 109329450
-Node: Reflection333957
-Ref: reflection334060
-Ref: f5334060
-Node: Hygienic Macros336728
-Ref: hygienic macros336852
-Ref: 10b336852
-Ref: hygienic-macros336852
-Node: Stack Size and Tail Recursion338206
-Ref: stack size and tail recursion338352
-Ref: 3f338352
-Ref: stack-size-and-tail-recursion338352
-Ref: 10c338740
-Ref: index-49338740
-Ref: 10d338952
-Ref: index-50338952
-Ref: 10e339240
-Ref: index-51339240
-Node: Handling of Asynchronous Signals340304
-Ref: handling of asynchronous signals340426
-Ref: 40340426
-Ref: handling-of-asynchronous-signals340426
-Node: Author342447
-Ref: author342533
-Ref: 10f342533
-Node: Copying343102
-Ref: copying343191
-Ref: 3343191
-Node: References and Links345553
-Ref: references and links345641
-Ref: 110345641
-Ref: references-and-links345641
-Ref: 7b345690
-Ref: aardappel345690
-Ref: 10a345831
-Ref: alice-ml345831
-Ref: 10345966
-Ref: baader-and-nipkow345966
-Ref: ab346084
-Ref: bertrand346084
-Ref: d0346344
-Ref: clang346344
-Ref: d1346616
-Ref: faust346616
-Ref: 111346703
-Ref: gnu-multiprecision-library346703
-Ref: 73346703
-Ref: gmp346703
-Ref: 112346811
-Ref: gnu-octave346811
-Ref: 98346811
-Ref: octave346811
-Ref: 76346955
-Ref: gnu-scientific-library346955
-Ref: 113346955
-Ref: gsl346955
-Ref: 5e347116
-Ref: haskell347116
-Ref: 7347182
-Ref: llvm347182
-Ref: 101347247
-Ref: miranda347247
-Ref: 5f347418
-Ref: ml347418
-Ref: f347577
-Ref: michael-o-donnell347577
-Ref: 100347727
-Ref: q347727
-Node: Index347812
-Ref: index347884
-Ref: 83360142
-Ref: a2360173
-Ref: 6b360204
-Ref: 6c360235
+Node: Simple Expressions69095
+Ref: simple expressions69221
+Ref: 7a69221
+Ref: simple-expressions69221
+Node: Special Expressions72335
+Ref: special expressions72433
+Ref: 6f72433
+Ref: if72433
+Ref: 7072433
+Ref: then72433
+Ref: 7172433
+Ref: else72433
+Ref: 6d72433
+Ref: case72433
+Ref: 6e72433
+Ref: when72433
+Ref: 6772433
+Ref: with72433
+Ref: 5872433
+Ref: end72433
+Ref: 7b72433
+Ref: special-expressions72433
+Node: Special Forms74945
+Ref: special forms75049
+Ref: 7575049
+Ref: special-forms75049
+Ref: 7d75049
+Ref: id275049
+Ref: 6275449
+Ref: &&/special75449
+Ref: 6375470
+Ref: ||/special75470
+Ref: 6477188
+Ref: $$77188
+Ref: 6577992
+Ref: &77992
+Ref: 6679005
+Ref: quote79005
+Ref: 7e79027
+Ref: '79027
+Node: Toplevel79701
+Ref: toplevel79801
+Ref: 8079801
+Ref: def79801
+Ref: 8179801
+Ref: let79801
+Ref: 4379801
+Ref: const79801
+Ref: 8279801
+Ref: otherwise79801
+Ref: 8379801
+Node: Scoping Rules83225
+Ref: scoping rules83303
+Ref: 8683303
+Ref: scoping-rules83303
+Node: Rule Syntax86330
+Ref: rule syntax86418
+Ref: 6186418
+Ref: rule-syntax86418
+Node: Patterns87712
+Ref: patterns87784
+Ref: 7987784
+Node: Type Tags93280
+Ref: type tags93374
+Ref: 6093374
+Ref: type-tags93374
+Ref: 8893374
+Ref: id493374
+Ref: 8994942
+Ref: int/type94942
+Ref: 8a94992
+Ref: bigint/type94992
+Ref: 8b95071
+Ref: double/type95071
+Ref: 8c95147
+Ref: string/type95147
+Ref: 8d95201
+Ref: matrix/type95201
+Ref: 8e95276
+Ref: pointer/type95276
+Node: General Rules98971
+Ref: general rules99067
+Ref: 9099067
+Ref: general-rules99067
+Node: Type Rules102299
+Ref: type rules102398
+Ref: 87102398
+Ref: type102398
+Ref: 8f102398
+Ref: type-rules102398
+Ref: 91102398
+Ref: id5102398
+Node: Simple Rules117532
+Ref: simple rules117609
+Ref: 92117609
+Ref: simple-rules117609
+Node: Examples119139
+Ref: examples119226
+Ref: 78119226
+Node: List Comprehensions120955
+Ref: list comprehensions121053
+Ref: 94121053
+Ref: list-comprehensions121053
+Node: Lazy Evaluation and Streams122691
+Ref: lazy evaluation and streams122817
+Ref: 76122817
+Ref: lazy-evaluation-and-streams122817
+Ref: 95122817
+Ref: id6122817
+Node: Matrix Computations127362
+Ref: matrix computations127486
+Ref: 96127486
+Ref: matrix-computations127486
+Ref: 97127486
+Ref: id7127486
+Node: Symbolic Matrices134900
+Ref: symbolic matrices135008
+Ref: 9b135008
+Ref: symbolic-matrices135008
+Node: Record Data137229
+Ref: record data137327
+Ref: 9d137327
+Ref: record-data137327
+Ref: 9e137327
+Ref: id8137327
+Node: The Quote142851
+Ref: the quote142923
+Ref: 7f142923
+Ref: the-quote142923
+Node: Declarations147199
+Ref: declarations147281
+Ref: 32147281
+Node: Symbol Declarations148383
+Ref: symbol declarations148477
+Ref: a3148477
+Ref: public148477
+Ref: a4148477
+Ref: private148477
+Ref: a5148477
+Ref: infix148477
+Ref: a6148477
+Ref: infixl148477
+Ref: a7148477
+Ref: infixr148477
+Ref: a8148477
+Ref: prefix148477
+Ref: a9148477
+Ref: postfix148477
+Ref: 9c148477
+Ref: outfix148477
+Ref: 69148477
+Ref: nonfix148477
+Ref: 5b148477
+Ref: symbol-declarations148477
+Node: Modules and Imports155618
+Ref: modules and imports155731
+Ref: 31155731
+Ref: using155731
+Ref: ac155731
+Ref: modules-and-imports155731
+Ref: ad159089
+Ref: index-7159089
+Ref: ae159203
+Ref: index-8159203
+Ref: af159501
+Ref: index-9159501
+Ref: b0159788
+Ref: index-10159788
+Ref: b1159816
+Ref: index-11159816
+Ref: b2161403
+Ref: index-12161403
+Node: Namespaces161707
+Ref: namespaces161792
+Ref: a1161792
+Ref: namespace161792
+Ref: 74161792
+Node: Using Namespaces165380
+Ref: using namespaces165476
+Ref: b4165476
+Ref: using-namespace165476
+Ref: b5165476
+Ref: using-namespaces165476
+Node: Symbol Lookup and Creation167915
+Ref: symbol lookup and creation168035
+Ref: 3a168035
+Ref: symbol-lookup-and-creation168035
+Node: Private Symbols174535
+Ref: private symbols174662
+Ref: aa174662
+Ref: private-symbols174662
+Node: Hierarchical Namespaces175836
+Ref: hierarchical namespaces175954
+Ref: b6175954
+Ref: hierarchical-namespaces175954
+Ref: b7177096
+Ref: index-13177096
+Node: Scoped Namespaces178124
+Ref: scoped namespaces178218
+Ref: b3178218
+Ref: scoped-namespaces178218
+Node: Macros181467
+Ref: macros181559
+Ref: 85181559
+Node: Optimization Rules183372
+Ref: optimization rules183456
+Ref: b8183456
+Ref: optimization-rules183456
+Ref: b9183456
+Ref: id10183456
+Node: Recursive Macros187822
+Ref: recursive macros187941
+Ref: 9f187941
+Ref: recursive-macros187941
+Ref: bb190483
+Ref: index-14190483
+Node: User-Defined Special Forms190528
+Ref: user-defined special forms190642
+Ref: bc190642
+Ref: user-defined-special-forms190642
+Node: Macro Hygiene194509
+Ref: macro hygiene194598
+Ref: bd194598
+Ref: macro-hygiene194598
+Node: Exception Handling196997
+Ref: exception handling197088
+Ref: be197088
+Ref: exception-handling197088
+Ref: bf197088
+Ref: id11197088
+Ref: c0197400
+Ref: catch197400
+Ref: c1198568
+Ref: index-15198568
+Node: C Interface201738
+Ref: c interface201839
+Ref: 33201839
+Ref: c-interface201839
+Node: Extern Declarations203317
+Ref: extern declarations203411
+Ref: a0203411
+Ref: extern203411
+Ref: c3203411
+Ref: extern-declarations203411
+Node: Variadic C Functions208466
+Ref: variadic c functions208576
+Ref: c5208576
+Ref: variadic-c-functions208576
+Node: C Types209825
+Ref: c types209943
+Ref: c4209943
+Ref: c-types209943
+Ref: c6209943
+Ref: id12209943
+Node: Basic C Types211183
+Ref: basic c types211260
+Ref: c7211260
+Ref: basic-c-types211260
+Node: Pointer Types213428
+Ref: pointer types213535
+Ref: c8213535
+Ref: pointer-types213535
+Node: Pointers and Matrices216727
+Ref: pointers and matrices216837
+Ref: c9216837
+Ref: pointers-and-matrices216837
+Node: Pointer Examples220013
+Ref: pointer examples220101
+Ref: ca220101
+Ref: pointer-examples220101
+Node: Importing Dynamic Libraries224325
+Ref: importing dynamic libraries224445
+Ref: cb224445
+Ref: importing-dynamic-libraries224445
+Ref: cc225566
+Ref: index-16225566
+Ref: cd225641
+Ref: index-17225641
+Ref: ce225852
+Ref: index-18225852
+Node: Importing LLVM Bitcode226244
+Ref: importing llvm bitcode226368
+Ref: cf226368
+Ref: importing-llvm-bitcode226368
+Node: Inline Code232120
+Ref: inline code232208
+Ref: 55232208
+Ref: inline-code232208
+Ref: d2235538
+Ref: index-19235538
+Ref: d3235652
+Ref: index-20235652
+Ref: d4235853
+Ref: index-21235853
+Ref: d5235865
+Ref: index-22235865
+Ref: d6235879
+Ref: index-23235879
+Ref: d7236099
+Ref: index-24236099
+Node: Standard Library236340
+Ref: standard library236440
+Ref: 56236440
+Ref: standard-library236440
+Node: Interactive Usage240703
+Ref: interactive usage240809
+Ref: a240809
+Ref: interactive-usage240809
+Node: Online Help242802
+Ref: online help242894
+Ref: 4242894
+Ref: online-help242894
+Ref: d9243194
+Ref: index-25243194
+Ref: da243222
+Ref: index-26243222
+Ref: db244995
+Ref: docutils244995
+Node: Interactive Commands245936
+Ref: interactive commands246048
+Ref: d8246048
+Ref: interactive-commands246048
+Ref: dc246279
+Ref: index-27246279
+Ref: dd246326
+Ref: index-28246326
+Ref: de246753
+Ref: index-29246753
+Ref: df247079
+Ref: index-30247079
+Ref: e0247141
+Ref: index-31247141
+Ref: e4248127
+Ref: index-32248127
+Ref: e5248716
+Ref: index-33248716
+Ref: e7250235
+Ref: index-34250235
+Ref: e8250563
+Ref: index-35250563
+Ref: e9250629
+Ref: index-36250629
+Ref: ea251180
+Ref: index-37251180
+Ref: eb251426
+Ref: index-38251426
+Ref: ec251506
+Ref: index-39251506
+Ref: ed251557
+Ref: index-40251557
+Ref: ee253241
+Ref: index-41253241
+Ref: ef253491
+Ref: index-42253491
+Ref: f1253903
+Ref: index-43253903
+Ref: f2254520
+Ref: index-44254520
+Ref: f3254824
+Ref: index-45254824
+Node: Last Result255632
+Ref: last result255761
+Ref: e1255761
+Ref: last-result255761
+Node: Specifying Symbol Selections256471
+Ref: specifying symbol selections256596
+Ref: e3256596
+Ref: specifying-symbol-selections256596
+Node: The show Command259956
+Ref: the show command260087
+Ref: f0260087
+Ref: the-show-command260087
+Ref: f4261189
+Ref: index-46261189
+Node: Definition Levels263955
+Ref: definition levels264067
+Ref: e2264067
+Ref: definition-levels264067
+Node: Debugging269247
+Ref: debugging269362
+Ref: 39269362
+Ref: f6271053
+Ref: index-47271053
+Node: Interactive Startup279865
+Ref: interactive startup279954
+Ref: e6279954
+Ref: interactive-startup279954
+Ref: f7280322
+Ref: index-48280322
+Node: Batch Compilation281178
+Ref: batch compilation281285
+Ref: b281285
+Ref: batch-compilation281285
+Ref: f9286445
+Ref: partial-evaluation286445
+Node: Example286572
+Ref: example286676
+Ref: fa286676
+Node: Code Size and Unstripped Executables289629
+Ref: code size and unstripped executables289767
+Ref: f8289767
+Ref: code-size-and-unstripped-executables289767
+Node: Other Output Code Formats293227
+Ref: other output code formats293387
+Ref: fb293387
+Ref: other-output-code-formats293387
+Ref: fc297896
+Ref: llvm-documentation297896
+Node: Calling Pure Functions From C297896
+Ref: calling pure functions from c298011
+Ref: fd298011
+Ref: calling-pure-functions-from-c298011
+Node: Caveats and Notes299504
+Ref: caveats and notes299600
+Ref: c299600
+Ref: caveats-and-notes299600
+Node: Etymology300226
+Ref: etymology300318
+Ref: fe300318
+Node: Backward Compatibility301147
+Ref: backward compatibility301262
+Ref: ff301262
+Ref: backward-compatibility301262
+Node: Error Recovery308076
+Ref: error recovery308203
+Ref: 102308203
+Ref: error-recovery308203
+Node: The __show__ Function308859
+Ref: the __show__ function308983
+Ref: 9a308983
+Ref: the-show-function308983
+Ref: 99309038
+Ref: __show__309038
+Node: Non-Linear Patterns312679
+Ref: non-linear patterns312802
+Ref: 103312802
+Ref: non-linear-patterns312802
+Node: "As" Patterns314202
+Ref: "as" patterns314319
+Ref: 104314319
+Ref: as-patterns314319
+Node: Head = Function315075
+Ref: head = function315186
+Ref: ba315186
+Ref: head-function315186
+Node: With and when318737
+Ref: with and when318855
+Ref: 105318855
+Ref: with-and-when318855
+Node: Numeric Calculations320981
+Ref: numeric calculations321104
+Ref: 106321104
+Ref: numeric-calculations321104
+Node: Constant Definitions323013
+Ref: constant definitions323143
+Ref: 93323143
+Ref: constant-definitions323143
+Node: External C Functions328148
+Ref: external c functions328279
+Ref: c2328279
+Ref: external-c-functions328279
+Ref: 107329559
+Ref: libffi329559
+Node: Calling Special Forms329944
+Ref: calling special forms330063
+Ref: 108330063
+Ref: calling-special-forms330063
+Node: Laziness330550
+Ref: laziness330659
+Ref: 109330659
+Node: Reflection335166
+Ref: reflection335269
+Ref: f5335269
+Node: Hygienic Macros337937
+Ref: hygienic macros338061
+Ref: 10b338061
+Ref: hygienic-macros338061
+Node: Stack Size and Tail Recursion339415
+Ref: stack size and tail recursion339561
+Ref: 3f339561
+Ref: stack-size-and-tail-recursion339561
+Ref: 10c339949
+Ref: index-49339949
+Ref: 10d340161
+Ref: index-50340161
+Ref: 10e340449
+Ref: index-51340449
+Node: Handling of Asynchronous Signals341513
+Ref: handling of asynchronous signals341635
+Ref: 40341635
+Ref: handling-of-asynchronous-signals341635
+Node: Author343656
+Ref: author343742
+Ref: 10f343742
+Node: Copying344311
+Ref: copying344400
+Ref: 3344400
+Node: References and Links346762
+Ref: references and links346850
+Ref: 110346850
+Ref: references-and-links346850
+Ref: 7c346899
+Ref: aardappel346899
+Ref: 10a347040
+Ref: alice-ml347040
+Ref: 10347175
+Ref: baader-and-nipkow347175
+Ref: ab347293
+Ref: bertrand347293
+Ref: d0347553
+Ref: clang347553
+Ref: d1347825
+Ref: faust347825
+Ref: 111347912
+Ref: gnu-multiprecision-library347912
+Ref: 73347912
+Ref: gmp347912
+Ref: 112348020
+Ref: gnu-octave348020
+Ref: 98348020
+Ref: octave348020
+Ref: 77348164
+Ref: gnu-scientific-library348164
+Ref: 113348164
+Ref: gsl348164
+Ref: 5e348325
+Ref: haskell348325
+Ref: 7348391
+Ref: llvm348391
+Ref: 101348456
+Ref: miranda348456
+Ref: 5f348627
+Ref: ml348627
+Ref: f348786
+Ref: michael-o-donnell348786
+Ref: 100348936
+Ref: q348936
+Node: Index349021
+Ref: index349093
+Ref: 84361351
+Ref: a2361382
+Ref: 6b361413
+Ref: 6c361444
 
 End Tag Table
 

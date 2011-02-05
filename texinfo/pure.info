@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.47, February 02, 2011
+  Version 0.47, February 05, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -2488,8 +2488,7 @@ you'll get mountains of `s''s for larger values of `n'.
 
   As you can see, a type definition may in general consist of many type
 rules which may be scattered out over different parts of a program.
-This works exactly in the same way as with ordinary functions, which
-can also be defined in a piecemeal fashion in Pure.
+This works in exactly the same way as with ordinary functions.
 
   There's an additional convenience provided for type rules, namely
 that the right-hand side may be omitted if it's just `true'. For
@@ -2509,6 +2508,12 @@ left-hand sides so that we can give all the constructor patterns in one
 go):
 
     type bintree (tip value) | bintree (bin left right);
+
+You can also use this notation to quickly make one type a "subtype" of
+another, or to create a type which is the union of several existing
+types. The following example can be found in the standard library:
+
+    type integer x::int | integer x::bigint;
 
 Moreover, a type rule can also take the form of a function definition
 without arguments.  In this case, the corresponding right-hand side may
@@ -2534,17 +2539,15 @@ as an explicit predicate or an alias).
 
   Type aliases can also be used to quickly turn an existing predicate
 into a "convenience" type which can be used as a tag on the left-hand
-side of equations. For instance:
+side of equations. The prelude defines a number of these, see _Prelude
+Types_.  For instance:
 
     type closure = closurep;
 
-(The standard library also defines a number of these, e.g., for the
-different matrix types `imatrix', `dmatrix' etc.)
-
-  Conversely, you can turn any type tag into an ordinary predicate
-which can be used on the right-hand side of other definitions. To these
-ends, the prelude provides the `typep' predicate which takes a type
-symbol and the value to be checked as arguments. For instance:
+Conversely, you can turn any type tag into an ordinary predicate which
+can be used on the right-hand side of other definitions. To these ends,
+the prelude provides the `typep' predicate which takes a type symbol
+and the value to be checked as arguments. For instance:
 
     type odd x::int = x mod 2;
     type even x::int = ~odd x;
@@ -2574,7 +2577,14 @@ predicates in terms of `typep':
     even = typep ('even);
 
 Note that the quotes on `odd' and `even' are really needed here to
-prevent the predicate definitions from looping.
+prevent the predicate definitions from looping. If you need this a lot
+then you might define a little helper macro (cf. *note Macros: 84.)
+which quotes the type symbol in an automatic fashion:
+
+    def typep ty::symbol = typep ('ty);
+
+(However, this gets in the way if you want to check for computed type
+symbols, that's why this macro isn't defined in the prelude.)
 
   Pure places no a priori restrictions on the rules defining a data
 type (other than that they must either define a unary predicate or an
@@ -2586,15 +2596,35 @@ Thus the relationships between types and their adherence to certain
 "interfaces" are the responsibility of the programmer. As far as Pure
 is concerned, types are just subsets of the universe of terms.
 
-  Also note that since the right-hand side of a type definition may in
-general be any predicate, it is up to the programmer to ensure that the
-definition of a type is actually computable. In fact, you should strive
-for the best possible efficiency in type predicates. A type definition
-which has worse than O(1) complexity may well be a serious performance
-hog depending on the way in which it is used. For instance, consider
-the definition of the `list' type from the prelude:
+  For instance, consider the types `nat' and `odd' from above. Both are
+subtypes of the `int' type (assuming our original definition of `nat' as
+the positive `int' values), but neither is a subtype of the other. It's
+sometimes useful to define the "intersection type" of two such types,
+which can be done in a straightforward way using the logical
+conjunction of the two type predicates:
 
-    type list [] | list (x:xs::list);
+    type nat x::int = x>0;
+    type odd x::int = x mod 2;
+    type odd_nat x  = typep nat x && typep odd x;
+
+Similarly, a variation of the `integer' union type from above could be
+defined using logical disjunction (this employs the `intp' and
+`bigintp' predicates from the prelude):
+
+    type myinteger x = intp x || bigintp x;
+
+(Note that this isn't quite the same as the previous definition, which
+uses explicit patterns in order to make the definition extensible.)
+
+  Since the right-hand side of a type definition may in general be any
+predicate, it is up to the programmer to ensure that the definition of
+a type is actually computable. In fact, you should strive for the best
+possible efficiency in type predicates. A type definition which has
+worse than O(1) complexity may well be a serious performance hog
+depending on the way in which it is used. For instance, consider the
+definition of the `rlist' type from the prelude:
+
+    type rlist [] | rlist (x:xs::rlist);
 
 This type is defined recursively, so that it only matches "proper"
 lists which have list values in all their tails (and are thus
@@ -2603,42 +2633,63 @@ for this type will take O(n) time, where n is the size of the list.
 This will have dire consequences if you do this check repeatedly while
 traversing a list, as in the following `sum' function:
 
-    sum xs::list = if null xs then 0 else head xs+sum (tail xs);
+    sum xs::rlist = if null xs then 0 else head xs+sum (tail xs);
 
 As this function repeatedly checks its entire argument, the total time
-it takes to compute the sum of a list this way becomes O(n^2). (To see
-how slow this function is, just try invoking it on successively larger
-lists `1..n', e.g., for `n = 1000, 2000, 3000, ...'.)
+it takes to compute the sum of a list this way becomes O(n^2). To see
+how slow this function is, just try it on successively larger lists
+`1..1000', `1..2000', etc. One way to work around this is to write a
+"wrapper" function which simply checks the type of its argument in
+advance and then invokes a "worker" function to do the actual
+computation:
 
-  One way to work around this is to write a "wrapper" function which
-simply checks the type of its argument in advance and then invokes a
-"worker" function to do the actual computation:
-
-    sum xs::list = sum xs with
+    sum xs::rlist = sum xs with
       sum xs = if null xs then 0 else head xs+sum (tail xs);
     end;
 
 This "wrapper-worker" design is quite common and useful in many
-situations, but it is a bit cumbersome in this specific case. A better
+situations, but it is a bit cumbersome in this specific case. An easier
 way is to just do the type checking in a piecemeal fashion, as the list
-is being traversed. To these ends, the prelude also provides a `listn'
-("list node") type which is defined as follows:
+is being traversed. To these ends, the prelude also provides a basic
+`list' type which is defined as follows:
 
-    type listn [] | listn (x:xs);
+    type list [] | list (x:xs);
 
 Note that the recursion is missing here and thus this type can always be
 checked in O(1) time, performing just a single pattern match, which is
-efficient. Hence, if we replace `list' with `listn' in our original
-definition then `sum' will now run in O(n) time, which is fine.
+efficient (in fact, this is also the reason that the prelude provides
+this type as the default list type). Hence, if we replace `rlist' with
+`list' in our original definition then `sum' will now run in O(n) time,
+as desired. However, this approach also has its drawbacks. For instance,
+consider:
 
-  If you define your own data types, you're free to choose any suitable
+    > sum xs::list = if null xs then 0 else head xs+sum (tail xs);
+    > sum (1:2:3);
+    1+(2+sum 3)
+
+In contrast, our wrapper-worker definition of `sum' from above returns a
+somewhat prettier normal form instead:
+
+    > clear sum
+    > sum xs::rlist = sum xs with
+    >  sum xs = if null xs then 0 else head xs+sum (tail xs);
+    > end;
+    > sum (1:2:3);
+    sum (1:2:3)
+
+Thus the wrapper-worker approach also has its merits, and whether to
+use one or the other depends on the situation. Similar techniques and
+tradeoffs also apply to other recursive types such as trees.
+
+  Yet another approach is possible if you define your own (abstract)
+data types.  In this case you're free to choose any suitable
 representation, so you might just wrap up all data objects with a
 special constructor symbol, which makes checking the type simple and
 efficient. This is also the approach taken in the `point' example in
 *note Type Tags: 60. above, as well as by the container data types in
 the standard library. But note that this works best with abstract data
-types, since in this case you may safely assume that a user of your
-data structure doesn't "fiddle" with your internal representation.
+types, since in this case applications aren't supposed to "fiddle" with
+the internal representation.
 
   Finally, note that in general it may be hard or even impossible to
 predict exactly when the code of a type definition will be executed at
@@ -4756,6 +4807,23 @@ E.g., let's compute a solution for a standard 8x8 board:
 
     > queens 8;
     [(1,1),(2,5),(3,8),(4,6),(5,3),(6,7),(7,2),(8,4)]
+
+Finally, note that since the right-hand side of a type definition (cf.
+*note Type Rules: 8e.) is just ordinary Pure code, it may be
+susceptible to exceptions, too.  Such exceptions are reported or caught
+just like any other. In particular, if you want to make a type
+definition just fail silently in case of an exception, you'll have to
+wrap it up in a suitable *note catch: c0. clause:
+
+    > foo x = throw foo; // dummy predicate which always throws an exception
+    > type bar x = foo x;
+    > type baz x = catch (cst false) (foo x);
+    > test_bar x::bar = x;
+    > test_baz x::baz = x;
+    > test_bar ();
+    <stdin>, line 6: unhandled exception 'foo' while evaluating 'test_bar ()'
+    > test_baz ();
+    test_baz ()
 
 
 
@@ -8611,463 +8679,463 @@ Ref: 8f98679
 Ref: general-rules98679
 Node: Type Rules101911
 Ref: type rules102010
-Ref: 8e102010
-Ref: type-rules102010
 Ref: 86102010
 Ref: type102010
+Ref: 8e102010
+Ref: type-rules102010
 Ref: 90102010
 Ref: id5102010
-Node: Simple Rules115121
-Ref: simple rules115198
-Ref: 91115198
-Ref: simple-rules115198
-Node: Examples116728
-Ref: examples116815
-Ref: 77116815
-Node: List Comprehensions118544
-Ref: list comprehensions118642
-Ref: 93118642
-Ref: list-comprehensions118642
-Node: Lazy Evaluation and Streams120280
-Ref: lazy evaluation and streams120406
-Ref: 94120406
-Ref: lazy-evaluation-and-streams120406
-Ref: 95120406
-Ref: id6120406
-Node: Matrix Computations124951
-Ref: matrix computations125075
-Ref: 96125075
-Ref: matrix-computations125075
-Ref: 97125075
-Ref: id7125075
-Node: Symbolic Matrices132489
-Ref: symbolic matrices132597
-Ref: 9b132597
-Ref: symbolic-matrices132597
-Node: Record Data134818
-Ref: record data134916
-Ref: 9d134916
-Ref: record-data134916
-Ref: 9e134916
-Ref: id8134916
-Node: The Quote140440
-Ref: the quote140512
-Ref: 7e140512
-Ref: the-quote140512
-Node: Declarations143967
-Ref: declarations144049
-Ref: 32144049
-Node: Symbol Declarations145151
-Ref: symbol declarations145245
-Ref: a3145245
-Ref: public145245
-Ref: a4145245
-Ref: private145245
-Ref: a5145245
-Ref: infix145245
-Ref: a6145245
-Ref: infixl145245
-Ref: a7145245
-Ref: infixr145245
-Ref: a8145245
-Ref: prefix145245
-Ref: a9145245
-Ref: postfix145245
-Ref: 9c145245
-Ref: outfix145245
-Ref: 69145245
-Ref: nonfix145245
-Ref: 5b145245
-Ref: symbol-declarations145245
-Node: Modules and Imports152386
-Ref: modules and imports152499
-Ref: 31152499
-Ref: using152499
-Ref: ac152499
-Ref: modules-and-imports152499
-Ref: ad155857
-Ref: index-7155857
-Ref: ae155971
-Ref: index-8155971
-Ref: af156269
-Ref: index-9156269
-Ref: b0156556
-Ref: index-10156556
-Ref: b1156584
-Ref: index-11156584
-Ref: b2158171
-Ref: index-12158171
-Node: Namespaces158475
-Ref: namespaces158560
-Ref: a1158560
-Ref: namespace158560
-Ref: 74158560
-Node: Using Namespaces162148
-Ref: using namespaces162244
-Ref: b4162244
-Ref: using-namespace162244
-Ref: b5162244
-Ref: using-namespaces162244
-Node: Symbol Lookup and Creation164683
-Ref: symbol lookup and creation164803
-Ref: 3a164803
-Ref: symbol-lookup-and-creation164803
-Node: Private Symbols171303
-Ref: private symbols171430
-Ref: aa171430
-Ref: private-symbols171430
-Node: Hierarchical Namespaces172604
-Ref: hierarchical namespaces172722
-Ref: b6172722
-Ref: hierarchical-namespaces172722
-Ref: b7173864
-Ref: index-13173864
-Node: Scoped Namespaces174892
-Ref: scoped namespaces174986
-Ref: b3174986
-Ref: scoped-namespaces174986
-Node: Macros178235
-Ref: macros178327
-Ref: 84178327
-Node: Optimization Rules180140
-Ref: optimization rules180224
-Ref: b8180224
-Ref: optimization-rules180224
-Ref: b9180224
-Ref: id10180224
-Node: Recursive Macros184590
-Ref: recursive macros184709
-Ref: 9f184709
-Ref: recursive-macros184709
-Ref: bb187251
-Ref: index-14187251
-Node: User-Defined Special Forms187296
-Ref: user-defined special forms187410
-Ref: bc187410
-Ref: user-defined-special-forms187410
-Node: Macro Hygiene191277
-Ref: macro hygiene191366
-Ref: bd191366
-Ref: macro-hygiene191366
-Node: Exception Handling193765
-Ref: exception handling193856
-Ref: be193856
-Ref: exception-handling193856
-Ref: bf193856
-Ref: id11193856
-Ref: c0194168
-Ref: catch194168
-Ref: c1195336
-Ref: index-15195336
-Node: C Interface197782
-Ref: c interface197883
-Ref: 33197883
-Ref: c-interface197883
-Node: Extern Declarations199361
-Ref: extern declarations199455
-Ref: a0199455
-Ref: extern199455
-Ref: c3199455
-Ref: extern-declarations199455
-Node: Variadic C Functions204510
-Ref: variadic c functions204620
-Ref: c5204620
-Ref: variadic-c-functions204620
-Node: C Types205869
-Ref: c types205987
-Ref: c4205987
-Ref: c-types205987
-Ref: c6205987
-Ref: id12205987
-Node: Basic C Types207227
-Ref: basic c types207304
-Ref: c7207304
-Ref: basic-c-types207304
-Node: Pointer Types209472
-Ref: pointer types209579
-Ref: c8209579
-Ref: pointer-types209579
-Node: Pointers and Matrices212771
-Ref: pointers and matrices212881
-Ref: c9212881
-Ref: pointers-and-matrices212881
-Node: Pointer Examples216057
-Ref: pointer examples216145
-Ref: ca216145
-Ref: pointer-examples216145
-Node: Importing Dynamic Libraries220369
-Ref: importing dynamic libraries220489
-Ref: cb220489
-Ref: importing-dynamic-libraries220489
-Ref: cc221610
-Ref: index-16221610
-Ref: cd221685
-Ref: index-17221685
-Ref: ce221896
-Ref: index-18221896
-Node: Importing LLVM Bitcode222288
-Ref: importing llvm bitcode222412
-Ref: cf222412
-Ref: importing-llvm-bitcode222412
-Node: Inline Code228164
-Ref: inline code228252
-Ref: 55228252
-Ref: inline-code228252
-Ref: d2231582
-Ref: index-19231582
-Ref: d3231696
-Ref: index-20231696
-Ref: d4231897
-Ref: index-21231897
-Ref: d5231909
-Ref: index-22231909
-Ref: d6231923
-Ref: index-23231923
-Ref: d7232143
-Ref: index-24232143
-Node: Standard Library232384
-Ref: standard library232484
-Ref: 56232484
-Ref: standard-library232484
-Node: Interactive Usage236747
-Ref: interactive usage236853
-Ref: a236853
-Ref: interactive-usage236853
-Node: Online Help238846
-Ref: online help238938
-Ref: 4238938
-Ref: online-help238938
-Ref: d9239238
-Ref: index-25239238
-Ref: da239266
-Ref: index-26239266
-Ref: db241039
-Ref: docutils241039
-Node: Interactive Commands241980
-Ref: interactive commands242092
-Ref: d8242092
-Ref: interactive-commands242092
-Ref: dc242323
-Ref: index-27242323
-Ref: dd242370
-Ref: index-28242370
-Ref: de242797
-Ref: index-29242797
-Ref: df243123
-Ref: index-30243123
-Ref: e0243185
-Ref: index-31243185
-Ref: e4244171
-Ref: index-32244171
-Ref: e5244760
-Ref: index-33244760
-Ref: e7246279
-Ref: index-34246279
-Ref: e8246607
-Ref: index-35246607
-Ref: e9246673
-Ref: index-36246673
-Ref: ea247224
-Ref: index-37247224
-Ref: eb247470
-Ref: index-38247470
-Ref: ec247550
-Ref: index-39247550
-Ref: ed247601
-Ref: index-40247601
-Ref: ee249285
-Ref: index-41249285
-Ref: ef249535
-Ref: index-42249535
-Ref: f1249947
-Ref: index-43249947
-Ref: f2250564
-Ref: index-44250564
-Ref: f3250868
-Ref: index-45250868
-Node: Last Result251676
-Ref: last result251805
-Ref: e1251805
-Ref: last-result251805
-Node: Specifying Symbol Selections252515
-Ref: specifying symbol selections252640
-Ref: e3252640
-Ref: specifying-symbol-selections252640
-Node: The show Command256000
-Ref: the show command256131
-Ref: f0256131
-Ref: the-show-command256131
-Ref: f4257233
-Ref: index-46257233
-Node: Definition Levels259999
-Ref: definition levels260111
-Ref: e2260111
-Ref: definition-levels260111
-Node: Debugging265291
-Ref: debugging265406
-Ref: 39265406
-Ref: f6267097
-Ref: index-47267097
-Node: Interactive Startup275909
-Ref: interactive startup275998
-Ref: e6275998
-Ref: interactive-startup275998
-Ref: f7276366
-Ref: index-48276366
-Node: Batch Compilation277222
-Ref: batch compilation277329
-Ref: b277329
-Ref: batch-compilation277329
-Ref: f9282489
-Ref: partial-evaluation282489
-Node: Example282616
-Ref: example282720
-Ref: fa282720
-Node: Code Size and Unstripped Executables285673
-Ref: code size and unstripped executables285811
-Ref: f8285811
-Ref: code-size-and-unstripped-executables285811
-Node: Other Output Code Formats289271
-Ref: other output code formats289431
-Ref: fb289431
-Ref: other-output-code-formats289431
-Ref: fc293940
-Ref: llvm-documentation293940
-Node: Calling Pure Functions From C293940
-Ref: calling pure functions from c294055
-Ref: fd294055
-Ref: calling-pure-functions-from-c294055
-Node: Caveats and Notes295548
-Ref: caveats and notes295644
-Ref: c295644
-Ref: caveats-and-notes295644
-Node: Etymology296270
-Ref: etymology296362
-Ref: fe296362
-Node: Backward Compatibility297191
-Ref: backward compatibility297306
-Ref: ff297306
-Ref: backward-compatibility297306
-Node: Error Recovery304120
-Ref: error recovery304247
-Ref: 102304247
-Ref: error-recovery304247
-Node: The __show__ Function304903
-Ref: the __show__ function305027
-Ref: 9a305027
-Ref: the-show-function305027
-Ref: 99305082
-Ref: __show__305082
-Node: Non-Linear Patterns308723
-Ref: non-linear patterns308846
-Ref: 103308846
-Ref: non-linear-patterns308846
-Node: "As" Patterns310246
-Ref: "as" patterns310363
-Ref: 104310363
-Ref: as-patterns310363
-Node: Head = Function311119
-Ref: head = function311230
-Ref: ba311230
-Ref: head-function311230
-Node: With and when314781
-Ref: with and when314899
-Ref: 105314899
-Ref: with-and-when314899
-Node: Numeric Calculations317025
-Ref: numeric calculations317148
-Ref: 106317148
-Ref: numeric-calculations317148
-Node: Constant Definitions319057
-Ref: constant definitions319187
-Ref: 92319187
-Ref: constant-definitions319187
-Node: External C Functions324192
-Ref: external c functions324323
-Ref: c2324323
-Ref: external-c-functions324323
-Ref: 107325603
-Ref: libffi325603
-Node: Calling Special Forms325988
-Ref: calling special forms326107
-Ref: 108326107
-Ref: calling-special-forms326107
-Node: Laziness326594
-Ref: laziness326703
-Ref: 109326703
-Node: Reflection331210
-Ref: reflection331313
-Ref: f5331313
-Node: Hygienic Macros333981
-Ref: hygienic macros334105
-Ref: 10b334105
-Ref: hygienic-macros334105
-Node: Stack Size and Tail Recursion335459
-Ref: stack size and tail recursion335605
-Ref: 3f335605
-Ref: stack-size-and-tail-recursion335605
-Ref: 10c335993
-Ref: index-49335993
-Ref: 10d336205
-Ref: index-50336205
-Ref: 10e336493
-Ref: index-51336493
-Node: Handling of Asynchronous Signals337557
-Ref: handling of asynchronous signals337679
-Ref: 40337679
-Ref: handling-of-asynchronous-signals337679
-Node: Author339700
-Ref: author339786
-Ref: 10f339786
-Node: Copying340355
-Ref: copying340444
-Ref: 3340444
-Node: References and Links342806
-Ref: references and links342894
-Ref: 110342894
-Ref: references-and-links342894
-Ref: 7b342943
-Ref: aardappel342943
-Ref: 10a343084
-Ref: alice-ml343084
-Ref: 10343219
-Ref: baader-and-nipkow343219
-Ref: ab343337
-Ref: bertrand343337
-Ref: d0343597
-Ref: clang343597
-Ref: d1343869
-Ref: faust343869
-Ref: 111343956
-Ref: gnu-multiprecision-library343956
-Ref: 73343956
-Ref: gmp343956
-Ref: 112344064
-Ref: gnu-octave344064
-Ref: 98344064
-Ref: octave344064
-Ref: 76344208
-Ref: gnu-scientific-library344208
-Ref: 113344208
-Ref: gsl344208
-Ref: 5e344369
-Ref: haskell344369
-Ref: 7344435
-Ref: llvm344435
-Ref: 101344500
-Ref: miranda344500
-Ref: 5f344671
-Ref: ml344671
-Ref: f344830
-Ref: michael-o-donnell344830
-Ref: 100344980
-Ref: q344980
-Node: Index345065
-Ref: index345137
-Ref: 83357395
-Ref: a2357426
-Ref: 6b357457
-Ref: 6c357488
+Node: Simple Rules117144
+Ref: simple rules117221
+Ref: 91117221
+Ref: simple-rules117221
+Node: Examples118751
+Ref: examples118838
+Ref: 77118838
+Node: List Comprehensions120567
+Ref: list comprehensions120665
+Ref: 93120665
+Ref: list-comprehensions120665
+Node: Lazy Evaluation and Streams122303
+Ref: lazy evaluation and streams122429
+Ref: 94122429
+Ref: lazy-evaluation-and-streams122429
+Ref: 95122429
+Ref: id6122429
+Node: Matrix Computations126974
+Ref: matrix computations127098
+Ref: 96127098
+Ref: matrix-computations127098
+Ref: 97127098
+Ref: id7127098
+Node: Symbolic Matrices134512
+Ref: symbolic matrices134620
+Ref: 9b134620
+Ref: symbolic-matrices134620
+Node: Record Data136841
+Ref: record data136939
+Ref: 9d136939
+Ref: record-data136939
+Ref: 9e136939
+Ref: id8136939
+Node: The Quote142463
+Ref: the quote142535
+Ref: 7e142535
+Ref: the-quote142535
+Node: Declarations145990
+Ref: declarations146072
+Ref: 32146072
+Node: Symbol Declarations147174
+Ref: symbol declarations147268
+Ref: a3147268
+Ref: public147268
+Ref: a4147268
+Ref: private147268
+Ref: a5147268
+Ref: infix147268
+Ref: a6147268
+Ref: infixl147268
+Ref: a7147268
+Ref: infixr147268
+Ref: a8147268
+Ref: prefix147268
+Ref: a9147268
+Ref: postfix147268
+Ref: 9c147268
+Ref: outfix147268
+Ref: 69147268
+Ref: nonfix147268
+Ref: 5b147268
+Ref: symbol-declarations147268
+Node: Modules and Imports154409
+Ref: modules and imports154522
+Ref: 31154522
+Ref: using154522
+Ref: ac154522
+Ref: modules-and-imports154522
+Ref: ad157880
+Ref: index-7157880
+Ref: ae157994
+Ref: index-8157994
+Ref: af158292
+Ref: index-9158292
+Ref: b0158579
+Ref: index-10158579
+Ref: b1158607
+Ref: index-11158607
+Ref: b2160194
+Ref: index-12160194
+Node: Namespaces160498
+Ref: namespaces160583
+Ref: a1160583
+Ref: namespace160583
+Ref: 74160583
+Node: Using Namespaces164171
+Ref: using namespaces164267
+Ref: b4164267
+Ref: using-namespace164267
+Ref: b5164267
+Ref: using-namespaces164267
+Node: Symbol Lookup and Creation166706
+Ref: symbol lookup and creation166826
+Ref: 3a166826
+Ref: symbol-lookup-and-creation166826
+Node: Private Symbols173326
+Ref: private symbols173453
+Ref: aa173453
+Ref: private-symbols173453
+Node: Hierarchical Namespaces174627
+Ref: hierarchical namespaces174745
+Ref: b6174745
+Ref: hierarchical-namespaces174745
+Ref: b7175887
+Ref: index-13175887
+Node: Scoped Namespaces176915
+Ref: scoped namespaces177009
+Ref: b3177009
+Ref: scoped-namespaces177009
+Node: Macros180258
+Ref: macros180350
+Ref: 84180350
+Node: Optimization Rules182163
+Ref: optimization rules182247
+Ref: b8182247
+Ref: optimization-rules182247
+Ref: b9182247
+Ref: id10182247
+Node: Recursive Macros186613
+Ref: recursive macros186732
+Ref: 9f186732
+Ref: recursive-macros186732
+Ref: bb189274
+Ref: index-14189274
+Node: User-Defined Special Forms189319
+Ref: user-defined special forms189433
+Ref: bc189433
+Ref: user-defined-special-forms189433
+Node: Macro Hygiene193300
+Ref: macro hygiene193389
+Ref: bd193389
+Ref: macro-hygiene193389
+Node: Exception Handling195788
+Ref: exception handling195879
+Ref: be195879
+Ref: exception-handling195879
+Ref: bf195879
+Ref: id11195879
+Ref: c0196191
+Ref: catch196191
+Ref: c1197359
+Ref: index-15197359
+Node: C Interface200529
+Ref: c interface200630
+Ref: 33200630
+Ref: c-interface200630
+Node: Extern Declarations202108
+Ref: extern declarations202202
+Ref: a0202202
+Ref: extern202202
+Ref: c3202202
+Ref: extern-declarations202202
+Node: Variadic C Functions207257
+Ref: variadic c functions207367
+Ref: c5207367
+Ref: variadic-c-functions207367
+Node: C Types208616
+Ref: c types208734
+Ref: c4208734
+Ref: c-types208734
+Ref: c6208734
+Ref: id12208734
+Node: Basic C Types209974
+Ref: basic c types210051
+Ref: c7210051
+Ref: basic-c-types210051
+Node: Pointer Types212219
+Ref: pointer types212326
+Ref: c8212326
+Ref: pointer-types212326
+Node: Pointers and Matrices215518
+Ref: pointers and matrices215628
+Ref: c9215628
+Ref: pointers-and-matrices215628
+Node: Pointer Examples218804
+Ref: pointer examples218892
+Ref: ca218892
+Ref: pointer-examples218892
+Node: Importing Dynamic Libraries223116
+Ref: importing dynamic libraries223236
+Ref: cb223236
+Ref: importing-dynamic-libraries223236
+Ref: cc224357
+Ref: index-16224357
+Ref: cd224432
+Ref: index-17224432
+Ref: ce224643
+Ref: index-18224643
+Node: Importing LLVM Bitcode225035
+Ref: importing llvm bitcode225159
+Ref: cf225159
+Ref: importing-llvm-bitcode225159
+Node: Inline Code230911
+Ref: inline code230999
+Ref: 55230999
+Ref: inline-code230999
+Ref: d2234329
+Ref: index-19234329
+Ref: d3234443
+Ref: index-20234443
+Ref: d4234644
+Ref: index-21234644
+Ref: d5234656
+Ref: index-22234656
+Ref: d6234670
+Ref: index-23234670
+Ref: d7234890
+Ref: index-24234890
+Node: Standard Library235131
+Ref: standard library235231
+Ref: 56235231
+Ref: standard-library235231
+Node: Interactive Usage239494
+Ref: interactive usage239600
+Ref: a239600
+Ref: interactive-usage239600
+Node: Online Help241593
+Ref: online help241685
+Ref: 4241685
+Ref: online-help241685
+Ref: d9241985
+Ref: index-25241985
+Ref: da242013
+Ref: index-26242013
+Ref: db243786
+Ref: docutils243786
+Node: Interactive Commands244727
+Ref: interactive commands244839
+Ref: d8244839
+Ref: interactive-commands244839
+Ref: dc245070
+Ref: index-27245070
+Ref: dd245117
+Ref: index-28245117
+Ref: de245544
+Ref: index-29245544
+Ref: df245870
+Ref: index-30245870
+Ref: e0245932
+Ref: index-31245932
+Ref: e4246918
+Ref: index-32246918
+Ref: e5247507
+Ref: index-33247507
+Ref: e7249026
+Ref: index-34249026
+Ref: e8249354
+Ref: index-35249354
+Ref: e9249420
+Ref: index-36249420
+Ref: ea249971
+Ref: index-37249971
+Ref: eb250217
+Ref: index-38250217
+Ref: ec250297
+Ref: index-39250297
+Ref: ed250348
+Ref: index-40250348
+Ref: ee252032
+Ref: index-41252032
+Ref: ef252282
+Ref: index-42252282
+Ref: f1252694
+Ref: index-43252694
+Ref: f2253311
+Ref: index-44253311
+Ref: f3253615
+Ref: index-45253615
+Node: Last Result254423
+Ref: last result254552
+Ref: e1254552
+Ref: last-result254552
+Node: Specifying Symbol Selections255262
+Ref: specifying symbol selections255387
+Ref: e3255387
+Ref: specifying-symbol-selections255387
+Node: The show Command258747
+Ref: the show command258878
+Ref: f0258878
+Ref: the-show-command258878
+Ref: f4259980
+Ref: index-46259980
+Node: Definition Levels262746
+Ref: definition levels262858
+Ref: e2262858
+Ref: definition-levels262858
+Node: Debugging268038
+Ref: debugging268153
+Ref: 39268153
+Ref: f6269844
+Ref: index-47269844
+Node: Interactive Startup278656
+Ref: interactive startup278745
+Ref: e6278745
+Ref: interactive-startup278745
+Ref: f7279113
+Ref: index-48279113
+Node: Batch Compilation279969
+Ref: batch compilation280076
+Ref: b280076
+Ref: batch-compilation280076
+Ref: f9285236
+Ref: partial-evaluation285236
+Node: Example285363
+Ref: example285467
+Ref: fa285467
+Node: Code Size and Unstripped Executables288420
+Ref: code size and unstripped executables288558
+Ref: f8288558
+Ref: code-size-and-unstripped-executables288558
+Node: Other Output Code Formats292018
+Ref: other output code formats292178
+Ref: fb292178
+Ref: other-output-code-formats292178
+Ref: fc296687
+Ref: llvm-documentation296687
+Node: Calling Pure Functions From C296687
+Ref: calling pure functions from c296802
+Ref: fd296802
+Ref: calling-pure-functions-from-c296802
+Node: Caveats and Notes298295
+Ref: caveats and notes298391
+Ref: c298391
+Ref: caveats-and-notes298391
+Node: Etymology299017
+Ref: etymology299109
+Ref: fe299109
+Node: Backward Compatibility299938
+Ref: backward compatibility300053
+Ref: ff300053
+Ref: backward-compatibility300053
+Node: Error Recovery306867
+Ref: error recovery306994
+Ref: 102306994
+Ref: error-recovery306994
+Node: The __show__ Function307650
+Ref: the __show__ function307774
+Ref: 9a307774
+Ref: the-show-function307774
+Ref: 99307829
+Ref: __show__307829
+Node: Non-Linear Patterns311470
+Ref: non-linear patterns311593
+Ref: 103311593
+Ref: non-linear-patterns311593
+Node: "As" Patterns312993
+Ref: "as" patterns313110
+Ref: 104313110
+Ref: as-patterns313110
+Node: Head = Function313866
+Ref: head = function313977
+Ref: ba313977
+Ref: head-function313977
+Node: With and when317528
+Ref: with and when317646
+Ref: 105317646
+Ref: with-and-when317646
+Node: Numeric Calculations319772
+Ref: numeric calculations319895
+Ref: 106319895
+Ref: numeric-calculations319895
+Node: Constant Definitions321804
+Ref: constant definitions321934
+Ref: 92321934
+Ref: constant-definitions321934
+Node: External C Functions326939
+Ref: external c functions327070
+Ref: c2327070
+Ref: external-c-functions327070
+Ref: 107328350
+Ref: libffi328350
+Node: Calling Special Forms328735
+Ref: calling special forms328854
+Ref: 108328854
+Ref: calling-special-forms328854
+Node: Laziness329341
+Ref: laziness329450
+Ref: 109329450
+Node: Reflection333957
+Ref: reflection334060
+Ref: f5334060
+Node: Hygienic Macros336728
+Ref: hygienic macros336852
+Ref: 10b336852
+Ref: hygienic-macros336852
+Node: Stack Size and Tail Recursion338206
+Ref: stack size and tail recursion338352
+Ref: 3f338352
+Ref: stack-size-and-tail-recursion338352
+Ref: 10c338740
+Ref: index-49338740
+Ref: 10d338952
+Ref: index-50338952
+Ref: 10e339240
+Ref: index-51339240
+Node: Handling of Asynchronous Signals340304
+Ref: handling of asynchronous signals340426
+Ref: 40340426
+Ref: handling-of-asynchronous-signals340426
+Node: Author342447
+Ref: author342533
+Ref: 10f342533
+Node: Copying343102
+Ref: copying343191
+Ref: 3343191
+Node: References and Links345553
+Ref: references and links345641
+Ref: 110345641
+Ref: references-and-links345641
+Ref: 7b345690
+Ref: aardappel345690
+Ref: 10a345831
+Ref: alice-ml345831
+Ref: 10345966
+Ref: baader-and-nipkow345966
+Ref: ab346084
+Ref: bertrand346084
+Ref: d0346344
+Ref: clang346344
+Ref: d1346616
+Ref: faust346616
+Ref: 111346703
+Ref: gnu-multiprecision-library346703
+Ref: 73346703
+Ref: gmp346703
+Ref: 112346811
+Ref: gnu-octave346811
+Ref: 98346811
+Ref: octave346811
+Ref: 76346955
+Ref: gnu-scientific-library346955
+Ref: 113346955
+Ref: gsl346955
+Ref: 5e347116
+Ref: haskell347116
+Ref: 7347182
+Ref: llvm347182
+Ref: 101347247
+Ref: miranda347247
+Ref: 5f347418
+Ref: ml347418
+Ref: f347577
+Ref: michael-o-donnell347577
+Ref: 100347727
+Ref: q347727
+Node: Index347812
+Ref: index347884
+Ref: 83360142
+Ref: a2360173
+Ref: 6b360204
+Ref: 6c360235
 
 End Tag Table
 

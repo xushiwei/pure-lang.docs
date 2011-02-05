@@ -54,6 +54,9 @@ automatically (unless the interpreter is invoked with the ``--no-prelude``
 option), all operations discussed in this section are normally available in
 Pure programs without requiring any explicit import declarations.
 
+Constants and Operators
+-----------------------
+
 The prelude also declares a signature of commonly used constant and
 operator symbols. This includes the truth values ``true`` and ``false``.
 
@@ -127,7 +130,127 @@ corresponding binary operator.
   prefix  2900   ' ;                 // quote
   postfix 3000   & ;                 // thunk
 
-..
+.. _Prelude Types:
+
+Prelude Types
+-------------
+
+Some additional type symbols are provided which can be used as type tags on
+the left-hand side of equations, see :ref:`Type Tags` in the Pure Manual.
+
+.. type:: number /type
+          complex /type
+          real /type
+          rational /type
+          integer /type
+
+   Additional number types.
+
+These types are defined in a purely syntactic way, by checking the
+builtin-type or the constructor symbol of a number. Some semantic number
+types can be found in the :mod:`math` module, see `Semantic Number
+Predicates and Types`_.
+
+:type:`integer/type` is the union of Pure's built-in integer types, i.e.,
+it comprises all :type:`int/type` and :type:`bigint/type`
+values. :type:`rational/type` and :type:`complex/type` are the rational and
+complex types, while :type:`real/type` is the union of the
+:type:`double/type` and :type:`rational/type` types (i.e., anything that
+can represent a real number and be used for the real and imaginary parts of
+a :type:`complex/type` number). Finally, :type:`number/type` is the union
+of all numeric types, i.e., this type can be used to match any kind of
+number.
+
+Note that the operations of the :type:`rational/type` and
+:type:`complex/type` types are actually defined in the :mod:`math` module
+which isn't part of the prelude, so you have to import this module in order
+to do computations with these types of values. However, the type tags and
+constructors for these types are defined in the prelude so that these kinds
+of values can be parsed and recognized without having the :mod:`math`
+module loaded.
+
+The prelude also provides a subtype of the built-in :type:`string/type`
+type which represents single-character strings:
+
+.. type:: char /type
+
+   A single character string. This matches any string value of length 1.
+
+`Lists and tuples`_ can be matched with the following types:
+
+.. type:: list /type
+          rlist /type
+
+   The list and "proper" (or "recursive") list types. Note that the former
+   comprises both the empty list ``[]`` and all list nodes of the form
+   ``x:xs`` (no matter whether the tail ``xs`` is a proper list value or
+   not), whereas the latter only matches proper list values of the form
+   ``x1:...:xn:[]``. Thus the :type:`list/type` type can be checked in O(1)
+   time, while the :type:`rlist/type` type is defined recursively and
+   requires linear time (with respect to the size of the list) to be
+   checked. This should be considered when deciding whether to use one or
+   the other in a given situation; see :ref:`Type Rules` for further
+   explanation.
+
+.. type:: tuple /type
+
+   The type of all tuples, comprises the empty tuple ``()`` and all tuples
+   ``(x,xs)`` with at least two members. This is analogous to the
+   :type:`list/type` type above, but no "proper" tuple type is needed here
+   since any tuple of this form is always a proper tuple.
+
+There are some other, more specialized types representing various kinds of
+applications, function objects and other named entities. These are useful,
+in particular, for the definition of higher-order functions and for
+performing symbolic manipulations on unevaluated symbolic terms.
+
+.. type:: appl /type
+
+   This type represents all unevaluated function or constructor
+   applications of the form ``x y``. This comprises constructor terms and
+   quoted or partial function applications.
+
+.. type:: function /type
+
+   This type represents any term which may be called as a function. This
+   may be a closure (global or local function, or a lambda function) which
+   takes at least one argument, or a partial application of a closure to
+   some arguments which is still "unsaturated", i.e., expects some further
+   arguments to be "ready to go".
+
+.. type:: fun /type
+
+   A named function object (global or local function, but not a partial
+   application).
+
+.. type:: lambda /type
+
+   An anonymous (lambda) function.
+
+.. type:: closure /type
+
+   Any kind of function object (named function or lambda). This is the
+   union of the :type:`fun/type` and :type:`lambda/type` types.
+
+.. type:: thunk /type
+
+   This is a special kind of unevaluated parameterless function object used
+   in lazy evaluation. See :ref:`Lazy Evaluation and Streams` in the Pure
+   Manual.
+
+.. type:: var /type
+
+   A free variable. This can be any kind of unevaluated global symbol which
+   isn't bound to a function.
+
+.. type:: symbol /type
+
+   A free variable or a named function, i.e., an unevaluated symbol. This
+   is the union of the :type:`fun/type` and :type:`var/type` types.
+
+Corresponding type predicates are provided for all of the above, see
+Predicates_. Some further types and predicates for matrices can be found
+under `Matrix Inspection and Manipulation`_.
 
 Basic Combinators
 -----------------
@@ -274,40 +397,70 @@ useful basic operations on lists and tuples. These are all described below.
 
    List and tuple constructors. These are right-associative in Pure.
 
-   Lists are the usual right-recursive aggregates, pretty much the same as
-   in Lisp or Prolog except that they use a Haskell-like syntax. In
-   difference to Haskell, list concatenation is denoted '\ :func:`+/list`\ '
-   (see below), and lists may contain an arbitrary mixture of arguments,
-   i.e., they are fully polymorphic::
+Lists are the usual right-recursive aggregates of the form ``x:xs``, where
+``x`` denotes the `head` and ``xs`` the `tail` of the list, pretty much the
+same as in Lisp or Prolog except that they use a Haskell-like syntax. In
+contrast to Haskell, list concatenation is denoted '\ :func:`+/list`\ '
+(see below), and lists may contain an arbitrary mixture of arguments, i.e.,
+they are fully polymorphic::
 
-     > 1:2:3:[];
-     [1,2,3]
-     > [1,2,3]+[u,v,w]+[3.14];
-     [1,2,3,u,v,w,3.14]
+  > 1:2:3:[];
+  [1,2,3]
+  > [1,2,3]+[u,v,w]+[3.14];
+  [1,2,3,u,v,w,3.14]
 
-   Lists are `eager` in Pure by default, but they can also be made `lazy`,
-   see section :ref:`Lazy Evaluation and Streams` in the Pure Manual.
+Lists are `eager` in Pure by default, but they can also be made `lazy` (in
+the latter case they are also called `streams`). This is accomplished by
+turning the tail of a list into a "thunk" (a.k.a. "future") which defers
+evaluation until the list tail is actually needed, see section :ref:`Lazy
+Evaluation and Streams` in the Pure Manual. For instance, an infinite
+arithmetic sequence (see below) will always produce a list with a thunked
+tail::
 
-   Tuples work in a similar fashion, but with the special twist that the
-   pairing constructor '\ :cons:`,`\ ' is associative (it always produces
-   right-recursive pairs) and '\ :cons:`()`\ ' acts as a neutral element on
-   these constructs, so that '\ :cons:`,`\ ' and '\ :cons:`()`\ ' define a
-   complete monoid structure. Note that this means that '\ :cons:`,`\ ' is
-   actually a "constructor with equations" since it obeys the laws
-   ``(x,y),z == x,(y,z)`` and ``(),x == x,() == x``. Also note that there
-   isn't a separate operation for concatenating tuples, since the pairing
-   operator already does this::
+  > 1:3..inf;
+  1:#<thunk 0x7f696cd2dbd8>
 
-     > (1,2,3),(10,9,8);
-     1,2,3,10,9,8
-     > (),(a,b,c);
-     a,b,c
-     > (a,b,c),();
-     a,b,c
+Pure also distinguishes `proper` and `improper` lists. The former are
+always terminated by an empty list in the final tail and can thus be
+written using the conventional ``[x1,x2,...,xn]`` syntax::
 
-   This also implies that tuples are always flat in Pure and can't be
-   nested; if you need this, you should use lists instead. Also, tuples
-   are always eager in Pure.
+  > 1:2:3:[];
+  [1,2,3]
+
+In contrast, improper lists are terminated with a non-list value and
+can only be represented using the '\ :func:`:`\ ' operator::
+
+  > 1:2:3;
+  1:2:3
+
+These aren't of much use as ordinary list values, but are frequently
+encountered as patterns on the left-hand side of an equation, where the
+final tail is usually a variable. Also note that technically, a lazy list
+is also an improper list (although it may expand to a proper list value as
+it is traversed).
+
+Tuples work in a similar fashion, but with the special twist that the
+pairing constructor '\ :cons:`,`\ ' is associative (it always produces
+right-recursive pairs) and '\ :cons:`()`\ ' acts as a neutral element on
+these constructs, so that '\ :cons:`,`\ ' and '\ :cons:`()`\ ' define a
+complete monoid structure. Note that this means that '\ :cons:`,`\ ' is
+actually a "constructor with equations" since it obeys the laws
+``(x,y),z == x,(y,z)`` and ``(),x == x,() == x``. Also note that there
+isn't a separate operation for concatenating tuples, since the pairing
+operator already does this::
+
+  > (1,2,3),(10,9,8);
+  1,2,3,10,9,8
+  > (),(a,b,c);
+  a,b,c
+  > (a,b,c),();
+  a,b,c
+
+This also implies that tuples are always flat in Pure and can't be
+nested; if you need this, you should use lists instead. Also, tuples
+are always eager in Pure.
+
+Some important basic operations on lists and tuples are listed below.
 
 .. index:: list; concatenation
 
@@ -327,17 +480,21 @@ useful basic operations on lists and tuples. These are all described below.
      [] + ys = ys;
      (x:xs) + ys = x : xs+ys;
 
-   Since Pure is dynamically typed and places no limits on ad-hoc
-   polymorphism, this may sometimes produce surprising (but correct)
-   results like::
+   To make this work, both operands should be proper lists, otherwise you
+   may get somewhat surprising (but correct) improper list results like the
+   following::
 
      > [1,2,3]+99;
      1:2:3:99
-     > ans+33;
-     1:2:3:132
+     > (1:2:3)+33;
+     1:2:36
 
-   (Note that the latter result is due to the fact that '\ :func:`+`\ '
-   also denotes the addition of numbers.)
+   This happens because Pure is dynamically typed and places no limits on
+   ad hoc polymorphism. Note that the latter result is due to the fact
+   that '\ :func:`+`\ ' also denotes the addition of numbers, and the
+   improper tail of the first operand is a number in this case, as is the
+   second operand. Otherwise you might have got an unreduced instance of
+   the '\ :func:`+`\ ' operator instead.
 
 .. index:: list; equality
 .. index:: tuple; equality
@@ -494,7 +651,8 @@ In addition, the prelude provides the following conversion operations.
      > (-1:-3..-inf)!!(0..9);
      [-1,-3,-5,-7,-9,-11,-13,-15,-17,-19]
 
-Conversely, it is also possible to convert a list to a stream.
+Conversely, it is also possible to convert an (eager) list to a lazy one (a
+stream).
 
 .. function:: stream x
 
@@ -1302,14 +1460,24 @@ Matrix Construction and Conversions
 Matrix Inspection and Manipulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. type:: dmatrix
+          cmatrix
+          imatrix
+          smatrix
+          nmatrix
+
+   Convenience types for the different subtypes of matrices (double,
+   complex, int, symbolic and numeric, i.e., non-symbolic). These can be
+   used as type tags on the left-hand side of equations to match specific
+   types of matrices.
+
 .. function:: dmatrixp x
               cmatrixp x
               imatrixp x
               smatrixp x
               nmatrixp x
 
-   Check for different kinds of matrices (double, complex, int, symbolic
-   and numeric, i.e., non-symbolic).
+   Corresponding predicates to check for different kinds of matrices.
 
 .. function:: vectorp x
               rowvectorp x
@@ -1876,7 +2044,9 @@ Predicates
 ~~~~~~~~~~
 
 A syntactic equality test is provided, as well as various type checking
-predicates.
+predicates. Note that type definitions are provided for most of the type
+checking predicates which don't denote built-in types; see `Prelude Types`_
+for details.
 
 .. function:: same x y
               infix === x y
@@ -1893,9 +2063,9 @@ predicates.
 
    Generic type checking predicate. This checks whether ``x`` is of type
    ``ty``, where ``ty`` is a symbol denoting any of the built-in types
-   (``int``, ``bigint`` etc.) or any type defined in a :keyword:`type`
-   definition. (Note that you may have to quote ``ty`` if it happens to be
-   defined as a variable or parameterless function.)
+   (:type:`int/type`, :type:`bigint/type` etc.) or any type defined in a
+   :keyword:`type` definition. (Note that you may have to quote ``ty`` if
+   it happens to be defined as a variable or parameterless function.)
 
 .. function:: intp x
               bigintp x
@@ -1916,7 +2086,9 @@ predicates.
               rationalp x
               integerp x
 
-   Additional number predicates.
+   Additional number predicates. Note some further "semantic" number
+   predicates are defined in the :mod:`math` module, see `Semantic Number
+   Predicates and Types`_.
 
 .. function:: exactp x
               inexactp x
@@ -1935,16 +2107,16 @@ predicates.
 
 .. function:: applp x
               listp x
-              listnp x
+              rlistp x
               tuplep x
 
-   Predicates to check for function applications, proper lists, list nodes
-   and proper tuples. Note that :func:`listnp` only checks for a toplevel
-   list constructor, whereas :func:`listp` also recursively checks the
-   tails of the list; the latter may need time proportional to the list
-   size. The :func:`applp` and :func:`tuplep` predicates look for an
-   application or tuple constructor at the toplevel only, which can always
-   be done in constant time.
+   Predicates to check for function applications, lists, proper lists and
+   tuples. Note that :func:`listp` only checks for a toplevel list
+   constructor, whereas :func:`rlistp` also recursively checks the tails of
+   the list; the latter may need time proportional to the list size. The
+   :func:`applp` and :func:`tuplep` predicates look for an application or
+   tuple constructor at the toplevel only, which can always be done in
+   constant time.
 
 .. function:: funp x
               lambdap x
@@ -1954,11 +2126,17 @@ predicates.
    Predicates to check for various kinds of function objects (named,
    anonymous or thunk), and free variable symbols.
 
-.. function:: atomp x
+.. function:: symbolp x
               closurep x
 
-   Convenience functions to check for atoms (named function or variable)
+   Convenience functions to check for symbols (named function or variable)
    and closures (named function or lambda).
+
+.. function:: functionp x
+
+   Convenience function to check for "callable" functions. This includes
+   any kind of closure with a nonzero argument count as well as partial
+   (unsaturated) applications of these.
 
 Inspection
 ~~~~~~~~~~
@@ -2953,8 +3131,8 @@ still accurate up to rounding errors). For instance::
 
 ..
 
-Semantic Number Predicates
---------------------------
+Semantic Number Predicates and Types
+------------------------------------
 
 In difference to the syntactic predicates in Primitives_, these check
 whether the given value can be represented as an object of the given target
@@ -2983,6 +3161,18 @@ bigintvalp x => ratvalp x => realvalp x => compvalp x <=> numberp x``.
 
    Check for "small" integer values which can be represented as a machine
    int.
+
+..
+
+.. type:: compval
+          realval
+          ratval
+          bigintval
+          intval
+
+   Convenience types for the above predicates. These can be used as type
+   tags on the left-hand side of an equation to match numeric values for
+   which the corresponding predicate yields :const:`true`.
 
 ..
 

@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.47, February 02, 2011</p>
+<p>Version 0.47, February 05, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -110,7 +110,7 @@ and the latest sources can be found under the following URLs:</p>
 <li><a class="reference internal" href="#patterns" id="id38">Patterns</a></li>
 <li><a class="reference internal" href="#type-tags" id="id39">Type Tags</a></li>
 <li><a class="reference internal" href="#general-rules" id="id40">General Rules</a></li>
-<li><a class="reference internal" href="#type" id="id41">Type Rules</a></li>
+<li><a class="reference internal" href="#type-rules" id="id41">Type Rules</a></li>
 <li><a class="reference internal" href="#simple-rules" id="id42">Simple Rules</a></li>
 </ul>
 </li>
@@ -2122,7 +2122,7 @@ of coordinates. We can then define the <tt class="docutils literal"><span class=
 </div>
 <p>This introduces the type symbol <tt class="docutils literal"><span class="pre">point</span></tt> and specifies that this type
 consists of terms of the form <tt class="docutils literal"><span class="pre">Point</span> <span class="pre">x</span> <span class="pre">y</span></tt> where <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> may be any
-kinds of numbers (the <tt class="xref pure pure-type docutils literal"><span class="pre">number</span></tt> type is defined in the prelude). We
+kinds of numbers (the <a class="reference internal" href="purelib.html#number/type" title="number"><tt class="xref pure pure-type docutils literal"><span class="pre">number</span></tt></a> type is defined in the prelude). We
 can now equip this data type with an operation <tt class="docutils literal"><span class="pre">point</span></tt> to construct a point
 from its coordinates, and two operations <tt class="docutils literal"><span class="pre">xcoord</span></tt> and <tt class="docutils literal"><span class="pre">ycoord</span></tt> to retrieve
 the coordinates:</p>
@@ -2272,8 +2272,8 @@ solve <span class="mi">2</span> <span class="mi">4</span>
 <p>Note that the above definition leaves the case of a negative discriminant
 undefined.</p>
 </div>
-<div class="section" id="type">
-<span id="type-rules"></span><span id="id5"></span><h3><a class="toc-backref" href="#id41">Type Rules</a><a class="headerlink" href="#type" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="type-rules">
+<span id="type"></span><span id="id5"></span><h3><a class="toc-backref" href="#id41">Type Rules</a><a class="headerlink" href="#type-rules" title="Permalink to this headline">¶</a></h3>
 <p>In Pure the definition of a type takes a somewhat unusual form, since it is
 not a static declaration of the structure of the type&#8217;s members, but rather an
 arbitrary predicate which determines through a runtime check which terms
@@ -2403,8 +2403,7 @@ saying, though, that this implementation of <tt class="docutils literal"><span c
 you&#8217;ll get mountains of <tt class="docutils literal"><span class="pre">s</span></tt>&#8216;s for larger values of <tt class="docutils literal"><span class="pre">n</span></tt>.</p>
 <p>As you can see, a type definition may in general consist of many type rules
 which may be scattered out over different parts of a program. This works
-exactly in the same way as with ordinary functions, which can also be defined
-in a piecemeal fashion in Pure.</p>
+in exactly the same way as with ordinary functions.</p>
 <p>There&#8217;s an additional convenience provided for type rules, namely that the
 right-hand side may be omitted if it&#8217;s just <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-func docutils literal"><span class="pre">true</span></tt></a>. For instance, the
 rule</p>
@@ -2421,6 +2420,12 @@ instance, a binary tree data type might be defined as follows (here we employ
 the <tt class="docutils literal"><span class="pre">|</span></tt> symbol to separate the different left-hand sides so that we can give
 all the constructor patterns in one go):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> bintree (tip value) | bintree (bin left right)<span class="p">;</span>
+</pre></div>
+</div>
+<p>You can also use this notation to quickly make one type a &#8220;subtype&#8221; of
+another, or to create a type which is the union of several existing types. The
+following example can be found in the standard library:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> integer x<span class="p">::</span><span class="kt">int</span> | integer x<span class="p">::</span><span class="kt">bigint</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>Moreover, a type rule can also take the form of a function definition without
@@ -2445,12 +2450,11 @@ have to give a proper definition of the type later (either as an explicit
 predicate or an alias).</p>
 <p>Type aliases can also be used to quickly turn an existing predicate into a
 &#8220;convenience&#8221; type which can be used as a tag on the left-hand side of
-equations. For instance:</p>
+equations. The prelude defines a number of these, see <a class="reference internal" href="purelib.html#prelude-types"><em>Prelude Types</em></a>.
+For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> closure = closurep<span class="p">;</span>
 </pre></div>
 </div>
-<p>(The standard library also defines a number of these, e.g., for the different
-matrix types <tt class="docutils literal"><span class="pre">imatrix</span></tt>, <tt class="docutils literal"><span class="pre">dmatrix</span></tt> etc.)</p>
 <p>Conversely, you can turn any type tag into an ordinary predicate which can be
 used on the right-hand side of other definitions. To these ends, the prelude
 provides the <a class="reference internal" href="purelib.html#typep" title="typep"><tt class="xref pure pure-func docutils literal"><span class="pre">typep</span></tt></a> predicate which takes a type symbol and the value
@@ -2483,7 +2487,14 @@ even = typep (&#39;even)<span class="p">;</span>
 </pre></div>
 </div>
 <p>Note that the quotes on <tt class="docutils literal"><span class="pre">odd</span></tt> and <tt class="docutils literal"><span class="pre">even</span></tt> are really needed here to prevent
-the predicate definitions from looping.</p>
+the predicate definitions from looping. If you need this a lot then you might
+define a little helper macro (cf. <a class="reference internal" href="#macros">Macros</a>) which quotes the type symbol in an
+automatic fashion:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">def</span> typep ty<span class="p">::</span>symbol = typep (&#39;ty)<span class="p">;</span>
+</pre></div>
+</div>
+<p>(However, this gets in the way if you want to check for computed type symbols,
+that&#8217;s why this macro isn&#8217;t defined in the prelude.)</p>
 <p>Pure places no a priori restrictions on the rules defining a data type (other
 than that they must either define a unary predicate or an alias for an
 existing data type). Thus any type of relation between two data types is
@@ -2493,14 +2504,33 @@ of both types, while others aren&#8217;t). Thus the relationships between types 
 their adherence to certain &#8220;interfaces&#8221; are the responsibility of the
 programmer. As far as Pure is concerned, types are just subsets of the
 universe of terms.</p>
-<p>Also note that since the right-hand side of a type definition may in general
-be any predicate, it is up to the programmer to ensure that the definition of
-a type is actually computable. In fact, you should strive for the best
-possible efficiency in type predicates. A type definition which has worse than
-O(1) complexity may well be a serious performance hog depending on the way in
-which it is used. For instance, consider the definition of the
-<tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt> type from the prelude:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> list [] | list (x:xs<span class="p">::</span>list)<span class="p">;</span>
+<p>For instance, consider the types <tt class="docutils literal"><span class="pre">nat</span></tt> and <tt class="docutils literal"><span class="pre">odd</span></tt> from above. Both are
+subtypes of the <tt class="docutils literal"><span class="pre">int</span></tt> type (assuming our original definition of <tt class="docutils literal"><span class="pre">nat</span></tt> as
+the positive <tt class="docutils literal"><span class="pre">int</span></tt> values), but neither is a subtype of the other. It&#8217;s
+sometimes useful to define the &#8220;intersection type&#8221; of two such types, which
+can be done in a straightforward way using the logical conjunction of the two
+type predicates:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> nat x<span class="p">::</span><span class="kt">int</span> = x&gt;<span class="mi">0</span><span class="p">;</span>
+<span class="kr">type</span> odd x<span class="p">::</span><span class="kt">int</span> = x mod <span class="mi">2</span><span class="p">;</span>
+<span class="kr">type</span> odd_nat x  = typep nat x &amp;&amp; typep odd x<span class="p">;</span>
+</pre></div>
+</div>
+<p>Similarly, a variation of the <tt class="docutils literal"><span class="pre">integer</span></tt> union type from above could be
+defined using logical disjunction (this employs the <a class="reference internal" href="purelib.html#intp" title="intp"><tt class="xref pure pure-func docutils literal"><span class="pre">intp</span></tt></a> and
+<a class="reference internal" href="purelib.html#bigintp" title="bigintp"><tt class="xref pure pure-func docutils literal"><span class="pre">bigintp</span></tt></a> predicates from the prelude):</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> myinteger x = intp x || bigintp x<span class="p">;</span>
+</pre></div>
+</div>
+<p>(Note that this isn&#8217;t quite the same as the previous definition, which uses
+explicit patterns in order to make the definition extensible.)</p>
+<p>Since the right-hand side of a type definition may in general be any
+predicate, it is up to the programmer to ensure that the definition of a type
+is actually computable. In fact, you should strive for the best possible
+efficiency in type predicates. A type definition which has worse than O(1)
+complexity may well be a serious performance hog depending on the way in which
+it is used. For instance, consider the definition of the <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a>
+type from the prelude:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> rlist [] | rlist (x:xs<span class="p">::</span>rlist)<span class="p">;</span>
 </pre></div>
 </div>
 <p>This type is defined recursively, so that it only matches &#8220;proper&#8221; lists which
@@ -2509,41 +2539,61 @@ list). However, this also implies that a check for this type will take O(n)
 time, where n is the size of the list. This will have dire consequences if you
 do this check repeatedly while traversing a list, as in the following <tt class="docutils literal"><span class="pre">sum</span></tt>
 function:</p>
-<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>list = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>rlist = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
 </pre></div>
 </div>
 <p>As this function repeatedly checks its entire argument, the total time it
-takes to compute the sum of a list this way becomes O(n^2). (To see how slow
-this function is, just try invoking it on successively larger lists <tt class="docutils literal"><span class="pre">1..n</span></tt>,
-e.g., for <tt class="docutils literal"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">1000,</span> <span class="pre">2000,</span> <span class="pre">3000,</span> <span class="pre">...</span></tt>.)</p>
-<p>One way to work around this is to write a &#8220;wrapper&#8221; function which simply
-checks the type of its argument in advance and then invokes a &#8220;worker&#8221;
-function to do the actual computation:</p>
-<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>list = sum xs <span class="kr">with</span>
+takes to compute the sum of a list this way becomes O(n^2). To see how slow
+this function is, just try it on successively larger lists <tt class="docutils literal"><span class="pre">1..1000</span></tt>,
+<tt class="docutils literal"><span class="pre">1..2000</span></tt>, etc. One way to work around this is to write a &#8220;wrapper&#8221; function
+which simply checks the type of its argument in advance and then invokes a
+&#8220;worker&#8221; function to do the actual computation:</p>
+<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>rlist = sum xs <span class="kr">with</span>
   sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
 <span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
 <p>This &#8220;wrapper-worker&#8221; design is quite common and useful in many situations,
-but it is a bit cumbersome in this specific case. A better way is to just do
+but it is a bit cumbersome in this specific case. An easier way is to just do
 the type checking in a piecemeal fashion, as the list is being traversed. To
-these ends, the prelude also provides a <tt class="xref pure pure-type docutils literal"><span class="pre">listn</span></tt> (&#8220;list node&#8221;) type
-which is defined as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> listn [] | listn (x:xs)<span class="p">;</span>
+these ends, the prelude also provides a basic <a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a> type which is
+defined as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> list [] | list (x:xs)<span class="p">;</span>
 </pre></div>
 </div>
 <p>Note that the recursion is missing here and thus this type can always be
 checked in O(1) time, performing just a single pattern match, which is
-efficient. Hence, if we replace <tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt> with <tt class="xref pure pure-type docutils literal"><span class="pre">listn</span></tt> in
-our original definition then <tt class="docutils literal"><span class="pre">sum</span></tt> will now run in O(n) time, which is fine.</p>
-<p>If you define your own data types, you&#8217;re free to choose any suitable
-representation, so you might just wrap up all data objects with a special
-constructor symbol, which makes checking the type simple and efficient. This
-is also the approach taken in the <tt class="docutils literal"><span class="pre">point</span></tt> example in <a class="reference internal" href="#type-tags">Type Tags</a> above, as
-well as by the container data types in the standard library. But note that
-this works best with abstract data types, since in this case you may safely
-assume that a user of your data structure doesn&#8217;t &#8220;fiddle&#8221; with your internal
-representation.</p>
+efficient (in fact, this is also the reason that the prelude provides this
+type as the default list type). Hence, if we replace <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a> with
+<a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a> in our original definition then <tt class="docutils literal"><span class="pre">sum</span></tt> will now run in O(n)
+time, as desired. However, this approach also has its drawbacks. For instance,
+consider:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum xs<span class="p">::</span>list = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
+<span class="mi">1</span>+(<span class="mi">2</span>+sum <span class="mi">3</span>)
+</pre></div>
+</div>
+<p>In contrast, our wrapper-worker definition of <tt class="docutils literal"><span class="pre">sum</span></tt> from above returns a
+somewhat prettier normal form instead:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear sum
+<span class="gp">&gt; </span>sum xs<span class="p">::</span>rlist = sum xs <span class="kr">with</span>
+<span class="gp">&gt; </span> sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
+sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)
+</pre></div>
+</div>
+<p>Thus the wrapper-worker approach also has its merits, and whether to use one
+or the other depends on the situation. Similar techniques and tradeoffs also
+apply to other recursive types such as trees.</p>
+<p>Yet another approach is possible if you define your own (abstract) data types.
+In this case you&#8217;re free to choose any suitable representation, so you might
+just wrap up all data objects with a special constructor symbol, which makes
+checking the type simple and efficient. This is also the approach taken in the
+<tt class="docutils literal"><span class="pre">point</span></tt> example in <a class="reference internal" href="#type-tags">Type Tags</a> above, as well as by the container data
+types in the standard library. But note that this works best with abstract
+data types, since in this case applications aren&#8217;t supposed to &#8220;fiddle&#8221; with
+the internal representation.</p>
 <p>Finally, note that in general it may be hard or even impossible to predict
 exactly when the code of a type definition will be executed at runtime. Thus,
 as a general rule, a type definition should not rely on side effects such as
@@ -4439,6 +4489,22 @@ regularly returns with <tt class="docutils literal"><span class="pre">()</span><
 <p>E.g., let&#8217;s compute a solution for a standard 8x8 board:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>queens <span class="mi">8</span><span class="p">;</span>
 [(<span class="mi">1</span>,<span class="mi">1</span>),(<span class="mi">2</span>,<span class="mi">5</span>),(<span class="mi">3</span>,<span class="mi">8</span>),(<span class="mi">4</span>,<span class="mi">6</span>),(<span class="mi">5</span>,<span class="mi">3</span>),(<span class="mi">6</span>,<span class="mi">7</span>),(<span class="mi">7</span>,<span class="mi">2</span>),(<span class="mi">8</span>,<span class="mi">4</span>)]
+</pre></div>
+</div>
+<p>Finally, note that since the right-hand side of a type definition (cf. <a class="reference internal" href="#type-rules">Type
+Rules</a>) is just ordinary Pure code, it may be susceptible to exceptions, too.
+Such exceptions are reported or caught just like any other. In particular, if
+you want to make a type definition just fail silently in case of an exception,
+you&#8217;ll have to wrap it up in a suitable <a class="reference internal" href="#catch" title="catch"><tt class="xref pure pure-func docutils literal"><span class="pre">catch</span></tt></a> clause:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo x = <span class="nb">throw</span> foo<span class="p">;</span> <span class="c1">// dummy predicate which always throws an exception</span>
+<span class="gp">&gt; </span><span class="kr">type</span> bar x = foo x<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">type</span> baz x = <span class="nb">catch</span> (cst false) (foo x)<span class="p">;</span>
+<span class="gp">&gt; </span>test_bar x<span class="p">::</span>bar = x<span class="p">;</span>
+<span class="gp">&gt; </span>test_baz x<span class="p">::</span>baz = x<span class="p">;</span>
+<span class="gp">&gt; </span>test_bar ()<span class="p">;</span>
+<span class="gr">&lt;stdin&gt;, line 6: </span>unhandled exception &#39;foo&#39; while evaluating &#39;test_bar ()&#39;
+<span class="gp">&gt; </span>test_baz ()<span class="p">;</span>
+test_baz ()
 </pre></div>
 </div>
 </div>
@@ -7459,7 +7525,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 <li><a class="reference internal" href="#patterns">Patterns</a></li>
 <li><a class="reference internal" href="#type-tags">Type Tags</a></li>
 <li><a class="reference internal" href="#general-rules">General Rules</a></li>
-<li><a class="reference internal" href="#type">Type Rules</a></li>
+<li><a class="reference internal" href="#type-rules">Type Rules</a></li>
 <li><a class="reference internal" href="#simple-rules">Simple Rules</a></li>
 </ul>
 </li>

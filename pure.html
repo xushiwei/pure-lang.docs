@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.47, February 05, 2011</p>
+<p>Version 0.47, February 08, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -1510,6 +1510,12 @@ constructs can be nested to an arbitrary depth. Thus <tt class="docutils literal
 another way to write the 2x2 matrix <tt class="docutils literal"><span class="pre">{1,2;3,4}</span></tt> in a kind of
 &#8220;column-major&#8221; format (however, internally all matrices are stored in C&#8217;s
 row-major format).</p>
+<p>Note that this behaviour of the <tt class="docutils literal"><span class="pre">{...}</span></tt> construct only applies when
+<em>constructing</em> matrix values. If this construct is used as a pattern on
+the left-hand side of equations, nested matrices are interpreted
+literally, and variables in matrix patterns can only match single
+elements, not rows or columns. Thus the pattern <tt class="docutils literal"><span class="pre">{x,y}</span></tt> will only match
+a 1x2 matrix and bind <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> to the two elements.</p>
 <p>Pure supports both numeric and symbolic matrices. The former are
 homogeneous arrays of double, complex double or (machine) int matrices,
 while the latter can contain any mixture of Pure expressions. Pure will
@@ -1522,19 +1528,8 @@ data layout that is fully compatible with the <a class="reference internal" href
 (GSL), and can readily be passed to GSL routines via the C interface. (The
 Pure interpreter does not require GSL, however, so numeric matrices will
 work even if GSL is not installed.)</p>
-<p>More information about matrices and corresponding examples can be found in
+<p class="last">More information about matrices and corresponding examples can be found in
 the <a class="reference internal" href="#examples">Examples</a> section below.</p>
-<div class="last admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">While the <tt class="docutils literal"><span class="pre">[...]</span></tt> and <tt class="docutils literal"><span class="pre">{...}</span></tt> constructs look superficially
-similar, they work in very different ways. The former is just syntactic
-sugar for a corresponding constructor term and can thus be used as a
-pattern on the left-hand side of an equation, cf. <a class="reference internal" href="#patterns">Patterns</a>. In
-contrast, the latter is special syntax for a built-in operation which
-creates objects of a special matrix type. Thus matrix expressions can
-<em>not</em> be used as patterns (instead, matrix values can be matched as a
-whole using the special <tt class="docutils literal"><span class="pre">matrix</span></tt> type tag).</p>
-</div>
 </dd>
 <dt>Comprehensions: <tt class="docutils literal"><span class="pre">[x,y</span> <span class="pre">|</span> <span class="pre">x=1..n;</span> <span class="pre">y=1..m;</span> <span class="pre">x&lt;y]</span></tt>, <tt class="docutils literal"><span class="pre">{f</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">x=1..n}</span></tt></dt>
 <dd><p class="first">Pure provides both list and matrix comprehensions as a convenient means to
@@ -1939,12 +1934,15 @@ definition.)</p>
 <h3><a class="toc-backref" href="#id38">Patterns</a><a class="headerlink" href="#patterns" title="Permalink to this headline">¶</a></h3>
 <p>The left-hand side of a rule is a special kind of simple expression, called a
 <strong class="dfn">pattern</strong>. Patterns consist of function and operator applications as well as
-any of the &#8220;atomic&#8221; expression types (symbols, numbers, strings and list
-values). <em>Not</em> permitted are any of the special expression types (lambda,
+any of the primary expression types (symbols, numbers, strings, matrices and
+list values). <em>Not</em> permitted are any of the special expression types (lambda,
 <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>, <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a>, conditional expressions, as
-well as list and matrix comprehensions). For technical reasons, the current
-implementation also forbids matrix values in patterns, but it is possible to
-match a matrix value as a whole using the <tt class="docutils literal"><span class="pre">matrix</span></tt> type tag, see below.</p>
+well as list and matrix comprehensions). Also note that the pattern matching
+capabilities for matrices are somewhat limited, as a matrix pattern can only
+match a matrix with exactly the same dimensions as the pattern. To match a
+matrix of arbitrary dimensions, you&#8217;ll have to use the built-in
+<a class="reference internal" href="#matrix/type" title="matrix"><tt class="xref pure pure-type docutils literal"><span class="pre">matrix</span></tt></a> type (or a user-defined type derived from that), cf. <a class="reference internal" href="#type-tags">Type
+Tags</a>.</p>
 <p>As already mentioned, the &#8216;<tt class="docutils literal"><span class="pre">_</span></tt>&#8216; symbol is special in patterns; it denotes
 the <strong class="dfn">anonymous variable</strong> which matches an arbitrary value (independently for
 all occurrences) without actually binding a variable. For instance:</p>
@@ -2075,7 +2073,7 @@ normal form.)</p>
 <p>Some basic types are built into the language. The corresponding tags enable
 you to match the built-in types of terms for which there is no way to spell
 out all &#8220;constructors&#8221;, as there are infinitely many (or none, as in the case
-of <tt class="docutils literal"><span class="pre">matrix</span></tt> and <tt class="docutils literal"><span class="pre">pointer</span></tt> which are constructed and inspected using
+of <a class="reference internal" href="#pointer/type" title="pointer"><tt class="xref pure pure-type docutils literal"><span class="pre">pointer</span></tt></a> values which are constructed and inspected using
 special primitives, but are otherwise &#8220;opaque&#8221; at the Pure level).
 Specifically, the following data types are built-in (in fact, the pattern
 matcher has special knowledge about these so that they can be matched very
@@ -5680,13 +5678,17 @@ the current definitions level.</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">-v</span></kbd></td>
 <td>Select defined variables.</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-y</span></kbd></td>
+<td>Select defined types.</td></tr>
 </tbody>
 </table>
 <p>In addition, the <tt class="docutils literal"><span class="pre">-h</span></tt> option prints a short help message describing all
 available options of the command at hand.</p>
-<p>If none of the <tt class="docutils literal"><span class="pre">-c</span></tt>, <tt class="docutils literal"><span class="pre">-f</span></tt>, <tt class="docutils literal"><span class="pre">-m</span></tt> and <tt class="docutils literal"><span class="pre">-v</span></tt> options are specified, then
-all kinds of symbols (constants, functions, macros and variables) are
-selected, otherwise only the specified categories will be considered.</p>
+<p>If none of the <tt class="docutils literal"><span class="pre">-c</span></tt>, <tt class="docutils literal"><span class="pre">-f</span></tt>, <tt class="docutils literal"><span class="pre">-m</span></tt>, <tt class="docutils literal"><span class="pre">-v</span></tt> and <tt class="docutils literal"><span class="pre">-y</span></tt> options are
+specified, then all kinds of symbols (constants, functions, macros, variables
+and types) are selected, otherwise only the specified categories will be
+considered.</p>
 <p>A reasonable default is used if the <tt class="docutils literal"><span class="pre">-t</span></tt> option is omitted. By default, if
 no symbols are specified, only temporary definitions are considered, which
 corresponds to <tt class="docutils literal"><span class="pre">-t1</span></tt>. Otherwise the command applies to all corresponding
@@ -6687,11 +6689,17 @@ from <tt class="docutils literal"><span class="pre">%{...%}</span></tt> to <tt c
 (note that <tt class="docutils literal"><span class="pre">%{</span></tt> is legal Pure syntax; it could denote a <tt class="docutils literal"><span class="pre">%</span></tt> operator
 followed by a matrix value), and also makes it easier to properly support this
 construct in Emacs Pure mode.</p>
+<p>Simple kinds of matrix patterns like <tt class="docutils literal"><span class="pre">{x,y}</span></tt>, <tt class="docutils literal"><span class="pre">{x::int,y}</span></tt>, <tt class="docutils literal"><span class="pre">{x,y;z,t}</span></tt>,
+<tt class="docutils literal"><span class="pre">{{x,y},z}</span></tt> are also supported beginning with Pure 0.47. This facility is
+somewhat limited, however, as variables in matrix patterns match only single
+elements (not rows or columns), and thus the subject term to be matched must
+have exactly the same shape as the pattern; non-rectangular patterns like
+<tt class="docutils literal"><span class="pre">{x,y;z}</span></tt> will produce an error message.</p>
 <p>Pure 0.47 also introduced a new, more flexible type tag feature, which defines
 type tags as unary predicates, using normal rewriting rules just as with
 ordinary functions; cf. section <a class="reference internal" href="#type-rules">Type Rules</a> for details. To these ends, a
 new keyword <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> was added (if you used this as an ordinary
-identifier, you will have to rename these). Note that the old-tyle type tags
+identifier, you will have to rename these). Note that the old-style type tags
 were just a syntactic shortcut for &#8220;as&#8221; patterns involving unary constructor
 symbols. These aren&#8217;t supported any more, so you&#8217;ll have to fix up your old
 scripts accordingly. To assist with this, the Pure interpreter can be run with

@@ -186,21 +186,22 @@ and the latest sources can be found under the following URLs:</p>
 <li><a class="reference internal" href="#non-linear-patterns" id="id96">Non-Linear Patterns</a></li>
 <li><a class="reference internal" href="#as-patterns" id="id97">&#8220;As&#8221; Patterns</a></li>
 <li><a class="reference internal" href="#head-function" id="id98">Head = Function</a></li>
-<li><a class="reference internal" href="#with-and-when" id="id99">With and when</a></li>
-<li><a class="reference internal" href="#numeric-calculations" id="id100">Numeric Calculations</a></li>
-<li><a class="reference internal" href="#constant-definitions" id="id101">Constant Definitions</a></li>
-<li><a class="reference internal" href="#external-c-functions" id="id102">External C Functions</a></li>
-<li><a class="reference internal" href="#calling-special-forms" id="id103">Calling Special Forms</a></li>
-<li><a class="reference internal" href="#laziness" id="id104">Laziness</a></li>
-<li><a class="reference internal" href="#reflection" id="id105">Reflection</a></li>
-<li><a class="reference internal" href="#hygienic-macros" id="id106">Hygienic Macros</a></li>
-<li><a class="reference internal" href="#stack-size-and-tail-recursion" id="id107">Stack Size and Tail Recursion</a></li>
-<li><a class="reference internal" href="#handling-of-asynchronous-signals" id="id108">Handling of Asynchronous Signals</a></li>
+<li><a class="reference internal" href="#recursive-types" id="id99">Recursive Types</a></li>
+<li><a class="reference internal" href="#with-and-when" id="id100">With and when</a></li>
+<li><a class="reference internal" href="#numeric-calculations" id="id101">Numeric Calculations</a></li>
+<li><a class="reference internal" href="#constant-definitions" id="id102">Constant Definitions</a></li>
+<li><a class="reference internal" href="#external-c-functions" id="id103">External C Functions</a></li>
+<li><a class="reference internal" href="#calling-special-forms" id="id104">Calling Special Forms</a></li>
+<li><a class="reference internal" href="#laziness" id="id105">Laziness</a></li>
+<li><a class="reference internal" href="#reflection" id="id106">Reflection</a></li>
+<li><a class="reference internal" href="#hygienic-macros" id="id107">Hygienic Macros</a></li>
+<li><a class="reference internal" href="#stack-size-and-tail-recursion" id="id108">Stack Size and Tail Recursion</a></li>
+<li><a class="reference internal" href="#handling-of-asynchronous-signals" id="id109">Handling of Asynchronous Signals</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#author" id="id109">Author</a></li>
-<li><a class="reference internal" href="#copying" id="id110">Copying</a></li>
-<li><a class="reference internal" href="#references-and-links" id="id111">References and Links</a></li>
+<li><a class="reference internal" href="#author" id="id110">Author</a></li>
+<li><a class="reference internal" href="#copying" id="id111">Copying</a></li>
+<li><a class="reference internal" href="#references-and-links" id="id112">References and Links</a></li>
 </ul>
 </div>
 <div class="section" id="introduction">
@@ -2525,15 +2526,21 @@ all the constructor patterns in one go):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> bintree (tip value) | bintree (bin left right)<span class="p">;</span>
 </pre></div>
 </div>
-<p>You can also use this notation to quickly make one type a &#8220;subtype&#8221; of
+<p>This method is also useful if you define your own abstract data types. In this
+case you&#8217;re free to choose any suitable representation, so you might just wrap
+up all data objects of the type with a special constructor symbol, which makes
+checking the type simple and efficient. This is also the approach taken in the
+<tt class="docutils literal"><span class="pre">point</span></tt> example in <a class="reference internal" href="#type-tags">Type Tags</a> above, as well as by the container data
+types in the standard library.</p>
+<p>The same notation can also be used to quickly make one type a &#8220;subtype&#8221; of
 another, or to create a type which is the union of several existing types. The
 following example can be found in the standard library:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> integer x<span class="p">::</span><span class="kt">int</span> | integer x<span class="p">::</span><span class="kt">bigint</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Moreover, a type rule can also take the form of a function definition without
-arguments.  In this case, the corresponding right-hand side may either be
-another type symbol, or any kind of closure denoting a (curried) type
+<p>Last but not least, a type rule can also take the form of a function definition
+without arguments.  In this case, the corresponding right-hand side may either
+be another type symbol, or any kind of closure denoting a (curried) type
 predicate. In this case the defined type is simply an <strong class="dfn">alias</strong> for the type
 denoted on the right-hand side. This is often done, e.g., for numeric types,
 to document that they actually stand for special kinds of quantities:</p>
@@ -2631,73 +2638,8 @@ predicate, it is up to the programmer to ensure that the definition of a type
 is actually computable. In fact, you should strive for the best possible
 efficiency in type predicates. A type definition which has worse than O(1)
 complexity may well be a serious performance hog depending on the way in which
-it is used. For instance, consider the following definition of a proper list
-type (the prelude contains a similar definition, see the <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a>
-type):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> prlist [] | prlist (x:xs<span class="p">::</span>prlist)<span class="p">;</span>
-</pre></div>
-</div>
-<p>This type is defined recursively, so that it only matches proper lists which
-have list values in all their tails (and are thus terminated by the empty
-list). However, this also implies that a check for this type will take O(n)
-time, where n is the size of the list. This will have dire consequences if you
-do this check repeatedly while traversing a list, as in the following <tt class="docutils literal"><span class="pre">sum</span></tt>
-function:</p>
-<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>prlist = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
-</pre></div>
-</div>
-<p>As this function repeatedly checks its entire argument, the total time it
-takes to compute the sum of a list this way becomes O(n^2). To see how slow
-this function is, just try it on successively larger lists <tt class="docutils literal"><span class="pre">1..1000</span></tt>,
-<tt class="docutils literal"><span class="pre">1..2000</span></tt>, etc. One way to work around this is to write a &#8220;wrapper&#8221; function
-which simply checks the type of its argument in advance and then invokes a
-&#8220;worker&#8221; function to do the actual computation:</p>
-<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>prlist = sum xs <span class="kr">with</span>
-  sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
-<span class="kr">end</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>This &#8220;wrapper-worker&#8221; design is quite common and useful in many situations,
-but it is a bit cumbersome in this specific case. An easier way is to just do
-the type checking in a piecemeal fashion, as the list is being traversed. To
-these ends, the prelude provides a basic <a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a> type which is
-defined as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> list [] | list (x:xs)<span class="p">;</span>
-</pre></div>
-</div>
-<p>Note that the recursion is missing here and thus this type can always be
-checked in O(1) time, performing just a single pattern match, which is
-efficient (in fact, this is also the reason that the prelude provides this
-type as the default list type). Hence, if we replace <tt class="docutils literal"><span class="pre">prlist</span></tt> with the
-<a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a> type in our original definition then <tt class="docutils literal"><span class="pre">sum</span></tt> will now run in
-O(n) time, as desired. However, this approach also has its drawbacks. For
-instance, consider:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum xs<span class="p">::</span>list = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
-<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
-<span class="mi">1</span>+(<span class="mi">2</span>+sum <span class="mi">3</span>)
-</pre></div>
-</div>
-<p>In contrast, our wrapper-worker definition of <tt class="docutils literal"><span class="pre">sum</span></tt> from above returns a
-somewhat prettier normal form instead:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear sum
-<span class="gp">&gt; </span>sum xs<span class="p">::</span>prlist = sum xs <span class="kr">with</span>
-<span class="gp">&gt; </span> sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
-<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
-<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
-sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)
-</pre></div>
-</div>
-<p>Thus the wrapper-worker approach also has its merits, and whether to use one
-or the other depends on the situation. Similar techniques and tradeoffs also
-apply to other recursive types such as trees.</p>
-<p>Yet another approach is possible if you define your own (abstract) data types.
-In this case you&#8217;re free to choose any suitable representation, so you might
-just wrap up all data objects with a special constructor symbol, which makes
-checking the type simple and efficient. This is also the approach taken in the
-<tt class="docutils literal"><span class="pre">point</span></tt> example in <a class="reference internal" href="#type-tags">Type Tags</a> above, as well as by the container data
-types in the standard library. But note that this works best with abstract
-data types, since in this case applications aren&#8217;t supposed to &#8220;fiddle&#8221; with
-the internal representation.</p>
+it is used, see <a class="reference internal" href="#recursive-types">Recursive Types</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section for
+more information about this.</p>
 <p>Finally, note that in general it may be hard or even impossible to predict
 exactly when the code of a type definition will be executed at runtime. Thus,
 as a general rule, a type definition should not rely on side effects such as
@@ -7029,8 +6971,97 @@ such a declaration it cannot be used as a local variable anymore. It&#8217;s usu
 a good idea to avoid that kind of thing, at least for generic symbols, so the
 above solution is preferred in this case.</p>
 </div>
+<div class="section" id="recursive-types">
+<h3><a class="toc-backref" href="#id99">Recursive Types</a><a class="headerlink" href="#recursive-types" title="Permalink to this headline">¶</a></h3>
+<p>Using the facilities described in <a class="reference internal" href="#type-rules">Type Rules</a>, type tags can easily be
+defined in a recursive fashion. For instance, the following list type is
+defined recursively, so that it only matches proper lists which have list
+values in all their tails (and are thus terminated by the empty list).</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> prlist [] | prlist (x:xs<span class="p">::</span>prlist)<span class="p">;</span>
+</pre></div>
+</div>
+<p>This is a perfectly legal type definition, but note that the current
+implementation doesn&#8217;t do any tail call optimization for such type predicates.
+(Technically, type tags are just additional guards on an equation which are
+executed recursively before evaluating the right-hand side of an equation.)
+Therefore you&#8217;ll run into stack overflows when trying to apply this definition
+to big list values:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>typep prlist (<span class="mi">1</span>..<span class="mi">300000</span>)<span class="p">;</span>
+<span class="gr">&lt;stdin&gt;, line 2: </span>unhandled exception &#39;stack_fault&#39; while evaluating
+&#39;typep prlist (<span class="mi">1</span>..<span class="mi">300000</span>)&#39;
+</pre></div>
+</div>
+<p>It is possible to work around this by implementing the actual type check as an
+ordinary predicate, since those <em>will</em> be optimized to run in constant stack
+space if they are tail-recursive (cf. <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail Recursion</a>). For
+instance, here is how the proper list type <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a> is actually
+implemented in the prelude:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> rlist xs<span class="p">@</span>[] | rlist xs<span class="p">@</span>(_:_) = true <span class="kr">if</span> check xs <span class="kr">with</span>
+  check [] = true<span class="p">;</span>
+  check (_:xs) = check xs<span class="p">;</span>
+  check _ = false<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This definition works just fine with big list values:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>typep rlist (<span class="mi">1</span>..<span class="mi">300000</span>)<span class="p">;</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<p>However, there&#8217;s yet another important issue with recursive type definitions,
+namely the <em>time</em> it takes to check the definition. In the above example,
+checking <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a> takes O(n) time, where n is the size of the
+list. This will have dire consequences if you do this check repeatedly while
+traversing a list, as in the following <tt class="docutils literal"><span class="pre">sum</span></tt> function:</p>
+<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>rlist = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+</pre></div>
+</div>
+<p>As this function repeatedly checks its entire argument, the total time it
+takes to compute the sum of a list this way becomes O(n^2). To see how slow
+this function is, just try it on successively larger lists <tt class="docutils literal"><span class="pre">1..1000</span></tt>,
+<tt class="docutils literal"><span class="pre">1..2000</span></tt>, etc. One way to work around this is to write a &#8220;wrapper&#8221; function
+which simply checks the type of its argument in advance and then invokes a
+&#8220;worker&#8221; function to do the actual computation:</p>
+<div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>rlist = sum xs <span class="kr">with</span>
+  sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This &#8220;wrapper-worker&#8221; design is quite common and useful in many situations,
+but it is a bit cumbersome in this specific case. An easier way is to just do
+the type checking in a piecemeal fashion, as the list is being traversed. To
+these ends, the prelude also provides a basic <a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a> type which is
+defined as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> list [] | list (x:xs)<span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that the recursion is missing here and thus this type can always be
+checked in O(1) time, performing just a single pattern match, which is
+efficient. Hence, if we replace <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a> with the <a class="reference internal" href="purelib.html#list/type" title="list"><tt class="xref pure pure-type docutils literal"><span class="pre">list</span></tt></a>
+type in our original definition then <tt class="docutils literal"><span class="pre">sum</span></tt> will now run in O(n) time, as
+desired. On the other hand, this approach also has its drawbacks. For
+instance, consider:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum xs<span class="p">::</span>list = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
+<span class="mi">1</span>+(<span class="mi">2</span>+sum <span class="mi">3</span>)
+</pre></div>
+</div>
+<p>In contrast, our wrapper-worker definition of <tt class="docutils literal"><span class="pre">sum</span></tt> from above returns a
+somewhat prettier normal form instead:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear sum
+<span class="gp">&gt; </span>sum xs<span class="p">::</span>rlist = sum xs <span class="kr">with</span>
+<span class="gp">&gt; </span> sum xs = <span class="kr">if</span> null xs <span class="kr">then</span> <span class="mi">0</span> <span class="kr">else</span> head xs+sum (tail xs)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)<span class="p">;</span>
+sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</span>)
+</pre></div>
+</div>
+<p>Thus the wrapper-worker approach also has its merits, and whether to use one
+or the other depends on the situation. Similar techniques and tradeoffs also
+apply to other recursive types such as trees.</p>
+</div>
 <div class="section" id="with-and-when">
-<h3><a class="toc-backref" href="#id99">With and when</a><a class="headerlink" href="#with-and-when" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id100">With and when</a><a class="headerlink" href="#with-and-when" title="Permalink to this headline">¶</a></h3>
 <p>A common source of confusion is that Pure provides two different constructs to
 bind local function and variable symbols, respectively. This distinction is
 necessary because Pure does not segregate defined functions and constructors,
@@ -7074,7 +7105,7 @@ exactly the same code as:</p>
 </div>
 </div>
 <div class="section" id="numeric-calculations">
-<h3><a class="toc-backref" href="#id100">Numeric Calculations</a><a class="headerlink" href="#numeric-calculations" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id101">Numeric Calculations</a><a class="headerlink" href="#numeric-calculations" title="Permalink to this headline">¶</a></h3>
 <p>If possible, you should decorate numeric variables on the left-hand sides of
 function definitions with the appropriate type tags, like <tt class="docutils literal"><span class="pre">int</span></tt> or
 <tt class="docutils literal"><span class="pre">double</span></tt>. This often helps the compiler to generate better code and makes
@@ -7107,7 +7138,7 @@ integers, not bigints; for the latter you&#8217;ll have to use the &#8220;big L&
 bigints.</p>
 </div>
 <div class="section" id="constant-definitions">
-<h3><a class="toc-backref" href="#id101">Constant Definitions</a><a class="headerlink" href="#constant-definitions" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id102">Constant Definitions</a><a class="headerlink" href="#constant-definitions" title="Permalink to this headline">¶</a></h3>
 <p>Constants differ from variables in that they cannot be redefined (that&#8217;s their
 main purpose after all) so that their values, once defined, can be substituted
 into other definitions which use them. For instance:</p>
@@ -7224,7 +7255,7 @@ necessary, in order to create smaller executables; see <a class="reference inter
 Unstripped Executables</a> for details.)</p>
 </div>
 <div class="section" id="external-c-functions">
-<h3><a class="toc-backref" href="#id102">External C Functions</a><a class="headerlink" href="#external-c-functions" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id103">External C Functions</a><a class="headerlink" href="#external-c-functions" title="Permalink to this headline">¶</a></h3>
 <p>The interpreter always takes your <a class="reference internal" href="#extern"><tt class="xref std std-keyword docutils literal"><span class="pre">extern</span></tt></a> declarations of C routines
 at face value. It will not go and read any C header files to determine whether
 you actually declared the function correctly! So you have to be careful to
@@ -7249,7 +7280,7 @@ and functions declared in the header. Please refer to <a class="reference intern
 details.</p>
 </div>
 <div class="section" id="calling-special-forms">
-<h3><a class="toc-backref" href="#id103">Calling Special Forms</a><a class="headerlink" href="#calling-special-forms" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id104">Calling Special Forms</a><a class="headerlink" href="#calling-special-forms" title="Permalink to this headline">¶</a></h3>
 <p>Special forms are recognized at compile time only. Thus the <a class="reference internal" href="#catch" title="catch"><tt class="xref pure pure-func docutils literal"><span class="pre">catch</span></tt></a>
 function, as well as <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> and the operators <a class="reference internal" href="#&amp;&amp;/special" title="&amp;&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;&amp;</span></tt></a>,
 <a class="reference internal" href="#||/special" title="||"><tt class="xref pure pure-func docutils literal"><span class="pre">||</span></tt></a>, <a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a> and <a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>, are only treated as special
@@ -7258,7 +7289,7 @@ around as function values or in partial applications, but in this case they
 lose all their special call-by-name argument processing.</p>
 </div>
 <div class="section" id="laziness">
-<h3><a class="toc-backref" href="#id104">Laziness</a><a class="headerlink" href="#laziness" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id105">Laziness</a><a class="headerlink" href="#laziness" title="Permalink to this headline">¶</a></h3>
 <p>Pure does lazy evaluation in the same way as <a class="reference internal" href="#alice-ml">Alice ML</a>, providing an
 explicit operation (<a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>) to defer evaluation and create a &#8220;future&#8221; which
 is called by need. However, note that like any language with a basically eager
@@ -7330,7 +7361,7 @@ is being traversed, leading to rather nasty memory leaks. Please see the
 </ul>
 </div>
 <div class="section" id="reflection">
-<h3><a class="toc-backref" href="#id105">Reflection</a><a class="headerlink" href="#reflection" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id106">Reflection</a><a class="headerlink" href="#reflection" title="Permalink to this headline">¶</a></h3>
 <p>Pure versions since 0.12 offer some basic reflection capabilities via the
 <a class="reference internal" href="purelib.html#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> primitive. This function provides access to interactive
 commands like <tt class="docutils literal"><span class="pre">clear</span></tt>, <tt class="docutils literal"><span class="pre">save</span></tt> and <tt class="docutils literal"><span class="pre">show</span></tt>, which enable you to inspect
@@ -7382,7 +7413,7 @@ sym_info cat<span class="p">::</span><span class="kt">string</span> pat<span cla
 </div>
 </div>
 <div class="section" id="hygienic-macros">
-<h3><a class="toc-backref" href="#id106">Hygienic Macros</a><a class="headerlink" href="#hygienic-macros" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id107">Hygienic Macros</a><a class="headerlink" href="#hygienic-macros" title="Permalink to this headline">¶</a></h3>
 <p>As mentioned in the <a class="reference internal" href="#macro-hygiene">Macro Hygiene</a> section, Pure macros are lexically scoped
 and thus &#8220;hygienic&#8221;. So Pure macros are not suceptible to name capture, but
 there is also one Pure-related caveat here. The expression printer currently
@@ -7411,7 +7442,7 @@ hopefully be fixed some time. But for the time being you will have to correct
 such glitches manually.</p>
 </div>
 <div class="section" id="stack-size-and-tail-recursion">
-<h3><a class="toc-backref" href="#id107">Stack Size and Tail Recursion</a><a class="headerlink" href="#stack-size-and-tail-recursion" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id108">Stack Size and Tail Recursion</a><a class="headerlink" href="#stack-size-and-tail-recursion" title="Permalink to this headline">¶</a></h3>
 <p>Pure programs may need a considerable amount of stack space to handle
 recursive function and macro calls, and the interpreter itself also takes its
 toll. So you should configure your system accordingly (8 MB of stack space is
@@ -7445,7 +7476,7 @@ may run into stack overflows when debugging a program that does deep tail
 recursion.</p>
 </div>
 <div class="section" id="handling-of-asynchronous-signals">
-<h3><a class="toc-backref" href="#id108">Handling of Asynchronous Signals</a><a class="headerlink" href="#handling-of-asynchronous-signals" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id109">Handling of Asynchronous Signals</a><a class="headerlink" href="#handling-of-asynchronous-signals" title="Permalink to this headline">¶</a></h3>
 <p>As described in section <a class="reference internal" href="#exception-handling">Exception Handling</a>, signals delivered to the
 process can be caught and handled with Pure&#8217;s exception handling facilities.
 This has its limitations, however. Since Pure code cannot be executed directly
@@ -7486,7 +7517,7 @@ process x = printf <span class="s">&quot;counting: %d</span><span class="se">\n<
 </div>
 </div>
 <div class="section" id="author">
-<h2><a class="toc-backref" href="#id109">Author</a><a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id110">Author</a><a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;, Dept. of Computer Music, Johannes
 Gutenberg University of Mainz, Germany.</p>
 <p>The author gratefully acknowledges the contributions by Scott E. Dillard,
@@ -7497,7 +7528,7 @@ due to Vili Aapro, Alvaro Castro Castilla, John Cowan, Chris Double, Tim
 Haynes, Roman Neuhauser, Wm Leler, John Lunney and Max Wolf.</p>
 </div>
 <div class="section" id="copying">
-<h2><a class="toc-backref" href="#id110">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id111">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
 <p>Pure comes with a fairly liberal license which lets you distribute your own
 Pure programs and extensions under a license of your choice and permits
 linking of commercial applications against the Pure runtime and the Pure
@@ -7534,7 +7565,7 @@ distribution for the exact licensing terms. You can also find the LLVM license
 at the <a class="reference internal" href="#llvm">LLVM</a> website.</p>
 </div>
 <div class="section" id="references-and-links">
-<h2><a class="toc-backref" href="#id111">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id112">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils" id="aardappel">
 <dt>Aardappel</dt>
 <dd>Wouter van Oortmerssen&#8217;s functional programming language based on term
@@ -7732,6 +7763,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 <li><a class="reference internal" href="#non-linear-patterns">Non-Linear Patterns</a></li>
 <li><a class="reference internal" href="#as-patterns">&#8220;As&#8221; Patterns</a></li>
 <li><a class="reference internal" href="#head-function">Head = Function</a></li>
+<li><a class="reference internal" href="#recursive-types">Recursive Types</a></li>
 <li><a class="reference internal" href="#with-and-when">With and when</a></li>
 <li><a class="reference internal" href="#numeric-calculations">Numeric Calculations</a></li>
 <li><a class="reference internal" href="#constant-definitions">Constant Definitions</a></li>

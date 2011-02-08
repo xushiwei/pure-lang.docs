@@ -113,8 +113,8 @@ Rule Syntax
 * Patterns::
 * Type Tags::
 * General Rules::
-* Type Rules::
 * Simple Rules::
+* Type Rules::
 
 Examples
 
@@ -1183,7 +1183,7 @@ Moreover, there are some keywords which cannot be used as identifiers:
 case       const   def      else    end        extern  if
 infix      infixl  infixr   let     namespace  nonfix  of
 otherwise  outfix  postfix  prefix  private    public  then
-using      when    with
+type       using   when     with
 @end example
 
 @noindent
@@ -1505,15 +1505,7 @@ application  ::= application prim_expr
                 | prim_expr
 rules        ::= rule (";" rule)* [";"]
 simple_rules ::= simple_rule (";" simple_rule)* [";"]
-@end example
-
-@noindent
-@c Split the productionlist here to avoid bad page breaks in the pdf edition.
-(Note that the @pxref{6b,,rule} and @pxref{6c,,simple_rule} elements are part of the
-definition syntax, which is explained in the @pxref{61,,Rule Syntax} section.)
-
-@example
-prim_expr ::= qualified_symbol
+prim_expr    ::= qualified_symbol
               | number
               | string
               | "(" op ")"
@@ -1526,13 +1518,16 @@ prim_expr ::= qualified_symbol
               | "@{" exprs (";" exprs)* [";"] "@}"
               | "[" expr "|" simple_rules "]"
               | "@{" expr "|" simple_rules "@}"
-exprs     ::= expr ("," expr)*
-op        ::= qualified_symbol
-left_op   ::= qualified_symbol
-right_op  ::= qualified_symbol
+exprs        ::= expr ("," expr)*
+op           ::= qualified_symbol
+left_op      ::= qualified_symbol
+right_op     ::= qualified_symbol
 @end example
 
 @noindent
+(Note that the @pxref{6b,,rule} and @pxref{6c,,simple_rule} elements are part of the
+definition syntax, which is explained in the @pxref{61,,Rule Syntax} section.)
+
 Typical examples of the different expression types are summarized in the
 following table. Note that lambdas bind most weakly, followed by the special
 @pxref{6d,,case}, @pxref{6e,,when} and @pxref{67,,with} constructs, followed by
@@ -1720,15 +1715,15 @@ This implies that tuples are always flat, i.e., there are no nested tuples
 (tuples of tuples); if you need such constructs then you should use lists
 instead.
 
-Syntactically, tuples aren't really primary expressions, but we still
-include them here because they are often used as a simpler replacement for
-lists, in particular in function arguments and return values, when no
-elaborate hierarchical structure is needed. Also note that parentheses are
-generally only used to group expressions and are @emph{not} part of the tuple
-syntax in Pure, although they will be needed to include a tuple in a list
-or matrix. E.g., @code{[(1,2),3,(4,5)]} is a three element list consisting of
-the tuple @code{1,2}, the integer @code{3}, and another tuple @code{4,5}. Likewise,
-@code{[(1,2,3)]} is a list with a single element, the tuple @code{1,2,3}.
+Note that the parentheses are in fact @emph{not} part of the tuple syntax in
+Pure (they're just used to group expressions). However, they will be
+needed to include a tuple in a list or matrix. (E.g., @code{[(1,2),3,(4,5)]}
+is a three element list consisting of the tuple @code{1,2}, the integer
+@code{3}, and another tuple @code{4,5}.) Hence, tuples aren't really primary
+expressions at all, but we still include them here because they are often
+used as a simpler replacement for lists, in particular in function
+arguments and return values, when no elaborate hierarchical structure is
+needed.
 
 @item Matrices: @code{@{1.0,2.0,3.0@}}, @code{@{1,2;3,4@}}, @code{@{1L,y+1;foo,bar@}}
 Pure also offers matrices, a kind of two-dimensional arrays, as a built-in
@@ -1751,12 +1746,13 @@ another way to write the 2x2 matrix @code{@{1,2;3,4@}} in a kind of
 "column-major" format (however, internally all matrices are stored in C's
 row-major format).
 
-Note that this behaviour of the @code{@{...@}} construct only applies when
-@emph{constructing} matrix values. If this construct is used as a pattern on
-the left-hand side of equations, nested matrices are interpreted
-literally, and variables in matrix patterns can only match single
+Note that @code{@{...@}} only behaves this way when @emph{constructing} matrix
+values. When used as a pattern on the left-hand side of equations, nested
+matrices are matched literally, and variables can only match single
 elements, not rows or columns. Thus the pattern @code{@{x,y@}} will only match
-a 1x2 matrix and bind @code{x} and @code{y} to the two elements.
+a 1x2 matrix and bind @code{x} and @code{y} to the two elements of the matrix.
+Similarly, the pattern @code{@{@{x,y@},z@}} matches a (symbolic) 1x2 matrix which
+has another matrix @code{@{x,y@}} as its first element.
 
 Pure supports both numeric and symbolic matrices. The former are
 homogeneous arrays of double, complex double or (machine) int matrices,
@@ -2235,8 +2231,8 @@ definition.)
 * Patterns::
 * Type Tags::
 * General Rules::
-* Type Rules::
 * Simple Rules::
+* Type Rules::
 @end menu
 
 
@@ -2244,19 +2240,117 @@ definition.)
 @anchor{patterns}@anchor{87}
 @section Patterns
 The left-hand side of a rule is a special kind of simple expression, called a
-@strong{pattern}. Patterns consist of function and operator applications as well as
-any of the primary expression types (symbols, numbers, strings, matrices and
-list values). @emph{Not} permitted are any of the special expression types (lambda,
+@strong{pattern}. The variables in a pattern serve as placeholders which are bound to
+corresponding values when the rule is applied to a target expression. (As
+already mentioned, the variables in a pattern are the identifiers in "variable
+positions", cf. @pxref{68,,Variables in Equations}.) To these ends, the pattern is
+@strong{matched} against the target expression, i.e., the literal parts of the
+pattern are compared against the target expression and, if everything matches
+up, the variables in the pattern are @strong{bound} (set to the value of) the
+corresponding subterms of the target expression.
+
+Patterns are pervasive in Pure; they are used on the left-hand side of
+function and macro definitions, just as well as in global and local variable
+definitions. For instance, the following variable definition matches the
+result of evaluating the right-hand side list expression against the pattern
+@code{x:y:xs} and binds the variables @code{x}, @code{y} and @code{xs} to the first two
+elements of the resulting list and @code{xs} to the list of remaining elements,
+respectively.
+
+@example
+> let x:y:xs = 1..10;
+> x,y,xs;
+1,2,[3,4,5,6,7,8,9,10]
+@end example
+
+@noindent
+The same works with local variable definitions:
+
+@example
+> x,y,xs when x:y:xs = 1..10 end;
+1,2,[3,4,5,6,7,8,9,10]
+@end example
+
+@noindent
+Or with @pxref{6d,,case} expressions:
+
+@example
+> case 1..10 of x:y:xs = x,y,xs end;
+1,2,[3,4,5,6,7,8,9,10]
+@end example
+
+@noindent
+The arguments of functions (and macros) are handled in the same fashion, too:
+
+@example
+> swap [x,y] = [y,x];
+> swap [1,2];
+[2,1]
+@end example
+
+@noindent
+However, in this case you can keep adding more equations to make the function
+work with different argument patterns:
+
+@example
+> swap (x,y) = y,x;
+> swap @{x,y@} = @{y,x@};
+> swap (1,2); swap @{1,2@};
+2,1
+@{2,1@}
+@end example
+
+@noindent
+This doesn't only work with the usual predefined aggregates (such as lists,
+tuples and matrices, as shown in the above examples), but with any kind of
+Pure expression:
+
+@example
+> foo (bar x) = x+1;
+> foo (bar 99);
+100
+@end example
+
+@noindent
+If a pattern fails to match the target expression, the corresponding rule
+isn't applicable. In the case of global and local variable bindings, this
+indicates an error which raises a corresponding exception:
+
+@example
+> let x:y:xs = [1];
+<stdin>, line 12: failed match while evaluating 'let x:y:xs = [1]'
+@end example
+
+@noindent
+However, for the rules in a function definition a match failure just means
+that the corresponding rule will be bypassed and other rules will be tried
+instead. Failing that, the target expression becomes a normal form which is
+simply returned as is:
+
+@example
+> swap [1,2,3];
+swap [1,2,3]
+@end example
+
+@noindent
+This may come as a surprise (other functional languages will give you an error
+in such cases), but is a crucial feature of term rewriting languages, as it
+opens the door to symbolic evaluation techniques, see @pxref{5d,,Definitions and Symbolic Evaluation}.
+
+Patterns may consist of function and operator applications as well as any of
+the primary expression types (symbols, numbers, strings, matrices and list
+values). @emph{Not} permitted are any of the special expression types: lambda,
 @pxref{6d,,case}, @pxref{6e,,when}, @pxref{67,,with}, conditional expressions, as
-well as list and matrix comprehensions). Also note that the pattern matching
+well as list and matrix comprehensions. Also note that the pattern matching
 capabilities for matrices are somewhat limited, as a matrix pattern can only
 match a matrix with exactly the same dimensions as the pattern. To match a
 matrix of arbitrary dimensions, you'll have to use the built-in
-@pxref{88,,matrix} type (or a user-defined type derived from that), cf. @pxref{60,,Type Tags}.
+@pxref{88,,matrix} type (or a user-defined type derived from that), see
+@pxref{89,,Matrix Computations} for some examples.
 
-As already mentioned, the '@code{_}' symbol is special in patterns; it denotes
-the @strong{anonymous variable} which matches an arbitrary value (independently for
-all occurrences) without actually binding a variable. For instance:
+The '@code{_}' symbol is special in patterns; it denotes the @strong{anonymous variable}
+which matches an arbitrary value (independently for all occurrences) without
+actually binding a variable. For instance:
 
 @example
 foo _ _ = 0;
@@ -2403,7 +2497,7 @@ case they should always be separated by whitespace.
 
 
 @node Type Tags,General Rules,Patterns,Rule Syntax
-@anchor{type tags}@anchor{60}@anchor{type-tags}@anchor{89}@anchor{id4}
+@anchor{type tags}@anchor{60}@anchor{type-tags}@anchor{8a}@anchor{id4}
 @section Type Tags
 Like Lisp, Pure is essentially a typeless language and doesn't really have a
 built-in notion of "data types". Rather, all data belongs to the same universe
@@ -2424,35 +2518,35 @@ normal form.)
 Some basic types are built into the language. The corresponding tags enable
 you to match the built-in types of terms for which there is no way to spell
 out all "constructors", as there are infinitely many (or none, as in the case
-of @pxref{8a,,pointer} values which are constructed and inspected using
+of @pxref{8b,,pointer} values which are constructed and inspected using
 special primitives, but are otherwise "opaque" at the Pure level).
 Specifically, the following data types are built-in (in fact, the pattern
 matcher has special knowledge about these so that they can be matched very
 efficiently):
 
 @geindex int type
-@anchor{8b}@anchor{int/type}
+@anchor{8c}@anchor{int/type}
 @deffn {type} int
 
 The type of machine integers.
 @end deffn
 
 @geindex bigint type
-@anchor{8c}@anchor{bigint/type}
+@anchor{8d}@anchor{bigint/type}
 @deffn {type} bigint
 
 The type of arbitrary precision integers (GMP bigints).
 @end deffn
 
 @geindex double type
-@anchor{8d}@anchor{double/type}
+@anchor{8e}@anchor{double/type}
 @deffn {type} double
 
 The type of double precision floating point numbers.
 @end deffn
 
 @geindex string type
-@anchor{8e}@anchor{string/type}
+@anchor{8f}@anchor{string/type}
 @deffn {type} string
 
 The type of character strings.
@@ -2466,14 +2560,14 @@ The type of all numeric and symbolic matrix values.
 @end deffn
 
 @geindex pointer type
-@anchor{8a}@anchor{pointer/type}
+@anchor{8b}@anchor{pointer/type}
 @deffn {type} pointer
 
 The type of C pointer values.
 @end deffn
 
 To define your own data types, you employ a special kind of rule syntax, which
-is explained in @pxref{8f,,Type Rules} below. For instance, we might represent points
+is explained in @pxref{90,,Type Rules} below. For instance, we might represent points
 in the plane using a constructor symbol @code{Point} which gets applied to pairs
 of coordinates. We can then define the @code{point} data type as follows:
 
@@ -2564,11 +2658,11 @@ type predicates (such as the matrix subtypes). These are all described in the
 @code{purelib}.
 
 More examples and a detailed explanation of Pure's type tag concept can be
-found in the @pxref{8f,,Type Rules} section below.
+found in the @pxref{90,,Type Rules} section below.
 
 
-@node General Rules,Type Rules,Type Tags,Rule Syntax
-@anchor{general rules}@anchor{90}@anchor{general-rules}
+@node General Rules,Simple Rules,Type Tags,Rule Syntax
+@anchor{general rules}@anchor{91}@anchor{general-rules}
 @section General Rules
 The most general type of rule, used in function definitions and
 @pxref{6d,,case} expressions, consists of a left-hand side pattern, a
@@ -2688,8 +2782,45 @@ Note that the above definition leaves the case of a negative discriminant
 undefined.
 
 
-@node Type Rules,Simple Rules,General Rules,Rule Syntax
-@anchor{type rules}@anchor{86}@anchor{type}@anchor{8f}@anchor{type-rules}@anchor{91}@anchor{id5}
+@node Simple Rules,Type Rules,General Rules,Rule Syntax
+@anchor{simple rules}@anchor{92}@anchor{simple-rules}
+@section Simple Rules
+As already mentioned, @pxref{6e,,when}, @pxref{80,,let} and @pxref{43,,const} use
+a simplified kind of rule syntax which just consists of a left-hand and a
+right-hand side separated by the equals sign. In this case the meaning of the
+rule is to bind the variables in the left-hand side of the rule to the
+corresponding subterms of the value of the right-hand side. This is also
+called a @strong{pattern binding}.
+
+Guards or multiple left-hand or right-hand sides are not permitted in these
+rules. However, it is possible to omit the left-hand side if it is just the
+anonymous variable '@code{_}' by itself, indicating that you don't care about the
+result. The right-hand side is still evaluated, if only for its side-effects,
+which is handy, e.g., for adding debugging statements to your code. For
+instance, here is a variation of the quadratic equation solver which also
+prints the discriminant after it has been computed:
+
+@example
+> using math, system;
+> solve p q = -p/2+sqrt d,-p/2-sqrt d if d>=0
+> when d = p^2/4-q; printf "The discriminant is: %g\n" d; end;
+> solve 4 2;
+The discriminant is: 2
+-0.585786437626905,-3.41421356237309
+> solve 2 4;
+The discriminant is: -3
+solve 2 4
+@end example
+
+@noindent
+Note that simple rules of the same form @code{lhs = rhs} are also used in macro
+definitions (@pxref{7f,,def}), to be discussed in the @pxref{84,,Macros} section. In
+this case, however, the rule denotes a real rewriting rule, not a pattern
+binding, hence the left-hand side is mandatory in these rules.
+
+
+@node Type Rules,,Simple Rules,Rule Syntax
+@anchor{type rules}@anchor{86}@anchor{type}@anchor{90}@anchor{type-rules}@anchor{93}@anchor{id5}
 @section Type Rules
 In Pure the definition of a type takes a somewhat unusual form, since it is
 not a static declaration of the structure of the type's members, but rather an
@@ -2699,7 +2830,7 @@ function definition (and that's essentially what it is, although types live in
 their own space where they can't be confused with functions of the same name).
 
 The definition of a type thus consists of one or more type rules which
-basically have the same format as the @pxref{90,,general rules}, but with the keyword
+basically have the same format as the @pxref{91,,general rules}, but with the keyword
 @pxref{86,,type} in front of each rule. Also, each left-hand side must have at
 most one argument pattern and exactly one right-hand side. Hence, if the
 definition of a type requires several right-hand sides, you normally have to
@@ -3025,15 +3156,16 @@ predicate, it is up to the programmer to ensure that the definition of a type
 is actually computable. In fact, you should strive for the best possible
 efficiency in type predicates. A type definition which has worse than O(1)
 complexity may well be a serious performance hog depending on the way in which
-it is used. For instance, consider the definition of the @code{rlist}
-type from the prelude:
+it is used. For instance, consider the following definition of a proper list
+type (the prelude contains a similar definition, see the @code{rlist}
+type):
 
 @example
-type rlist [] | rlist (x:xs::rlist);
+type prlist [] | prlist (x:xs::prlist);
 @end example
 
 @noindent
-This type is defined recursively, so that it only matches "proper" lists which
+This type is defined recursively, so that it only matches proper lists which
 have list values in all their tails (and are thus terminated by the empty
 list). However, this also implies that a check for this type will take O(n)
 time, where n is the size of the list. This will have dire consequences if you
@@ -3041,7 +3173,7 @@ do this check repeatedly while traversing a list, as in the following @code{sum}
 function:
 
 @example
-sum xs::rlist = if null xs then 0 else head xs+sum (tail xs);
+sum xs::prlist = if null xs then 0 else head xs+sum (tail xs);
 @end example
 
 @noindent
@@ -3053,7 +3185,7 @@ which simply checks the type of its argument in advance and then invokes a
 "worker" function to do the actual computation:
 
 @example
-sum xs::rlist = sum xs with
+sum xs::prlist = sum xs with
   sum xs = if null xs then 0 else head xs+sum (tail xs);
 end;
 @end example
@@ -3062,7 +3194,7 @@ end;
 This "wrapper-worker" design is quite common and useful in many situations,
 but it is a bit cumbersome in this specific case. An easier way is to just do
 the type checking in a piecemeal fashion, as the list is being traversed. To
-these ends, the prelude also provides a basic @code{list} type which is
+these ends, the prelude provides a basic @code{list} type which is
 defined as follows:
 
 @example
@@ -3073,10 +3205,10 @@ type list [] | list (x:xs);
 Note that the recursion is missing here and thus this type can always be
 checked in O(1) time, performing just a single pattern match, which is
 efficient (in fact, this is also the reason that the prelude provides this
-type as the default list type). Hence, if we replace @code{rlist} with
-@code{list} in our original definition then @code{sum} will now run in O(n)
-time, as desired. However, this approach also has its drawbacks. For instance,
-consider:
+type as the default list type). Hence, if we replace @code{prlist} with the
+@code{list} type in our original definition then @code{sum} will now run in
+O(n) time, as desired. However, this approach also has its drawbacks. For
+instance, consider:
 
 @example
 > sum xs::list = if null xs then 0 else head xs+sum (tail xs);
@@ -3090,7 +3222,7 @@ somewhat prettier normal form instead:
 
 @example
 > clear sum
-> sum xs::rlist = sum xs with
+> sum xs::prlist = sum xs with
 >  sum xs = if null xs then 0 else head xs+sum (tail xs);
 > end;
 > sum (1:2:3);
@@ -3116,43 +3248,6 @@ exactly when the code of a type definition will be executed at runtime. Thus,
 as a general rule, a type definition should not rely on side effects such as
 doing I/O (except maybe for debugging purposes), modifying references or
 external data structures via C pointers, etc.
-
-
-@node Simple Rules,,Type Rules,Rule Syntax
-@anchor{simple rules}@anchor{92}@anchor{simple-rules}
-@section Simple Rules
-As already mentioned, @pxref{6e,,when}, @pxref{80,,let} and @pxref{43,,const} use
-a simplified kind of rule syntax which just consists of a left-hand and a
-right-hand side separated by the equals sign. In this case the meaning of the
-rule is to bind the variables in the left-hand side of the rule to the
-corresponding subterms of the value of the right-hand side. This is also
-called a @strong{pattern binding}.
-
-Guards or multiple left-hand or right-hand sides are not permitted in these
-rules. However, it is possible to omit the left-hand side if it is just the
-anonymous variable '@code{_}' by itself, indicating that you don't care about the
-result. The right-hand side is still evaluated, if only for its side-effects,
-which is handy, e.g., for adding debugging statements to your code. For
-instance, here is a variation of the quadratic equation solver which also
-prints the discriminant after it has been computed:
-
-@example
-> using math, system;
-> solve p q = -p/2+sqrt d,-p/2-sqrt d if d>=0
-> when d = p^2/4-q; printf "The discriminant is: %g\n" d; end;
-> solve 4 2;
-The discriminant is: 2
--0.585786437626905,-3.41421356237309
-> solve 2 4;
-The discriminant is: -3
-solve 2 4
-@end example
-
-@noindent
-Note that simple rules of the same form @code{lhs = rhs} are also used in macro
-definitions (@pxref{7f,,def}), to be discussed in the @pxref{84,,Macros} section. In
-this case, however, the rule denotes a real rewriting rule, not a pattern
-binding, hence the left-hand side is mandatory in these rules.
 
 
 @node Examples,Declarations,Rule Syntax,Top
@@ -3213,7 +3308,7 @@ foo x = 6.28318530717959*x;
 @noindent
 Note that the compiler normally computes constant subexpressions at compile
 time, such as @code{2*pi} in the @code{foo} function. This works with all simple
-scalars (machine ints and doubles), see @pxref{93,,Constant Definitions} for details.
+scalars (machine ints and doubles), see @pxref{94,,Constant Definitions} for details.
 
 
 @menu
@@ -3227,7 +3322,7 @@ scalars (machine ints and doubles), see @pxref{93,,Constant Definitions} for det
 
 
 @node List Comprehensions,Lazy Evaluation and Streams,,Examples
-@anchor{list comprehensions}@anchor{94}@anchor{list-comprehensions}
+@anchor{list comprehensions}@anchor{95}@anchor{list-comprehensions}
 @section List Comprehensions
 List comprehensions are Pure's main workhorse for generating and processing
 all kinds of list values. Here's a well-known example, a variation of
@@ -3284,7 +3379,7 @@ Pure distribution for a much better algorithm by Libor Spacek.)
 
 
 @node Lazy Evaluation and Streams,Matrix Computations,List Comprehensions,Examples
-@anchor{lazy evaluation and streams}@anchor{76}@anchor{lazy-evaluation-and-streams}@anchor{95}@anchor{id6}
+@anchor{lazy evaluation and streams}@anchor{76}@anchor{lazy-evaluation-and-streams}@anchor{96}@anchor{id6}
 @section Lazy Evaluation and Streams
 As already mentioned, lists can also be evaluated in a "lazy" fashion, by just
 turning the tail of a list into a future. This special kind of list is also
@@ -3435,23 +3530,22 @@ the corresponding stream element.)
 
 
 @node Matrix Computations,Symbolic Matrices,Lazy Evaluation and Streams,Examples
-@anchor{matrix computations}@anchor{96}@anchor{matrix-computations}@anchor{97}@anchor{id7}
+@anchor{matrix computations}@anchor{89}@anchor{matrix-computations}@anchor{97}@anchor{id7}
 @section Matrix Computations
 Pure offers a number of basic matrix operations, such as matrix construction,
-indexing, slicing, as well as getting the size and dimensions of a matrix
-(these are briefly described in the @pxref{56,,Standard Library} section). However, it
-does @emph{not} supply built-in support for matrix arithmetic and other linear
-algebra algorithms. The idea is that these can and should be provided through
-separate libraries (please check the Pure website for the pure-gsl module
-which is an ongoing project to provide a full GSL interface for the Pure
-language).
+pattern matching, indexing, slicing, as well as getting the size and
+dimensions of a matrix. However, it does @emph{not} supply built-in support for
+matrix arithmetic and other linear algebra algorithms. The idea is that these
+can and should be provided through separate libraries (please check the Pure
+website for the pure-gsl module which is an ongoing project to provide a full
+GSL interface for the Pure language).
 
 But Pure's facilities for matrix and list processing also make it easy to roll
-your own, if desired. First, the prelude provides matrix versions of the
-common list operations like @code{map}, @code{foldl}, @code{zip} etc.,
-which provide a way to implement common matrix operations. E.g., multiplying a
-matrix @code{x} with a scalar @code{a} amounts to mapping the function @code{(a*)} to
-x, which can be done as follows:
+your own, if desired. The prelude provides matrix versions of the common list
+operations like @code{map}, @code{foldl}, @code{zip} etc., which provide a
+way to implement common matrix operations. E.g., multiplying a matrix @code{x}
+with a scalar @code{a} amounts to mapping the function @code{(a*)} to x, which can
+be done as follows:
 
 @example
 > a * x::matrix = map (a*) x if ~matrixp a;
@@ -3471,11 +3565,37 @@ using a given binary function:
 @end example
 
 @noindent
-Second, matrix comprehensions make it easy to express a variety of algorithms
-which would typically be implemented using @code{for} loops in conventional
-programming languages. To illustrate the use of matrix comprehensions, here is
-how we can define an operation to create a square identity matrix of a given
-dimension:
+Note that, as shown in the examples above, the @pxref{88,,matrix} tag can be
+used on the left-hand side of an equation to restrict a variable to matrix
+values. (The prelude provides a few other types for various specific kinds of
+matrices, see the @code{purelib} for details.) Another possibility is to
+employ a @strong{matrix pattern}. The Pure language has built-in support for these,
+so that they work like the other kinds of patterns we've already encountered.
+For instance, to compute the dot product of two 2D vectors, you may write
+something like:
+
+@example
+> @{x1,y1@}*@{x2,y2@} = x1*x2+y1*y2;
+> @{2,3@}*@{1,4@};
+14
+@end example
+
+@noindent
+Or, to compute the determinant of a 2x2 matrix:
+
+@example
+> det @{a,b;c,d@} = a*d-b*c;
+> det @{1,2;3,4@};
+-2
+@end example
+
+@noindent
+This simplifies the definitions if the dimensions of the involved matrices are
+small and known beforehand. If you need to go beyond this, @strong{matrix
+comprehensions} provide a means to express a variety of algorithms which would
+typically be implemented using @code{for} loops in conventional programming
+languages. To illustrate the use of matrix comprehensions, here is how we can
+define an operation to create a square identity matrix of a given dimension:
 
 @example
 > eye n = @{i==j | i = 1..n; j = 1..n@};
@@ -3497,7 +3617,7 @@ instead of lists. In this case the block layout of the component matrices is
 preserved. For instance:
 
 @example
-> @{x,y|x=@{1,2@};y=@{a,b;c,d@}@};
+> @{x,y | x = @{1,2@}; y = @{a,b;c,d@}@};
 @{(1,a),(1,b),(2,a),(2,b);(1,c),(1,d),(2,c),(2,d)@}
 @end example
 
@@ -3510,7 +3630,8 @@ different lengths.
 
 As a slightly more comprehensive example (no pun intended!), here is a
 definition of matrix multiplication in Pure. The building block here is the
-"dot" product of two vectors which can be defined as follows:
+dot product of two vectors which can be defined for arbitrary dimensions as
+follows:
 
 @example
 > sum = foldl (+) 0;
@@ -3654,10 +3775,18 @@ use the "quote" operator (cf. @pxref{7e,,The Quote}):
 @end example
 
 @noindent
-(Note that this result is really different from @code{@{1,2;3,4@}}. The latter is a
+Note that this result is really different from @code{@{1,2;3,4@}}. The latter is a
 2x2 integer matrix, while the former is a symbolic vector a.k.a. 1x2 matrix
-whose elements happen to be two integer vectors.)
+whose elements happen to be two integer vectors. You can match these values
+with a nested matrix pattern as usual, e.g.:
 
+@example
+> let @{@{a,b@},@{c,d@}@} = '@{@{1,2@},@{3,4@}@};
+> a,b,c,d;
+1,2,3,4
+@end example
+
+@noindent
 Unfortunately, the quote operator in fact inhibits evaluation of @emph{all}
 embedded subterms which may be undesirable if the matrix expression contains
 arithmetic (as in @code{'@{@{1+1,2*3@}@}}), so this method works best for constant
@@ -3992,10 +4121,10 @@ these are always evaluated as usual. Example:
 @end example
 
 @noindent
-We're not sure whether this is actually a bug or a feature, so you should
-expect this to change in the future, and relying on this behaviour is not
-recommended. (It is always possible to achieve the same effect by substituting
-a local variable, as shown above.)
+We're not sure whether this is actually a bug or a feature, so this might
+change in the future, and relying on this behaviour is not recommended. (It is
+always possible to achieve the same effect by substituting local variables,
+as shown above.)
 
 For the time being, it is possible to work around this limitation by defining
 a custom special form (see @pxref{84,,Macros}) to be used as a symbolic representation
@@ -5607,7 +5736,7 @@ E.g., let's compute a solution for a standard 8x8 board:
 @end example
 
 @noindent
-Finally, note that since the right-hand side of a type definition (cf. @pxref{8f,,Type Rules}) is just ordinary Pure code, it may be susceptible to exceptions, too.
+Finally, note that since the right-hand side of a type definition (cf. @pxref{90,,Type Rules}) is just ordinary Pure code, it may be susceptible to exceptions, too.
 Such exceptions are reported or caught just like any other. In particular, if
 you want to make a type definition just fail silently in case of an exception,
 you'll have to wrap it up in a suitable @pxref{c0,,catch} clause:
@@ -7763,7 +7892,7 @@ executed as usual, i.e., the script is also run @emph{at compile time}. This mig
 first seem to be a big annoyance, but it actually opens the door for some
 powerful programming techniques like @uref{http://en.wikipedia.org/wiki/Partial_evaluation,partial evaluation}. It is also a
 necessity because of Pure's highly dynamic nature. For instance, Pure allows
-you to define constants by evaluating an arbitrary expression (see @pxref{93,,Constant Definitions} below), and using @code{eval} a program can easily modify
+you to define constants by evaluating an arbitrary expression (see @pxref{94,,Constant Definitions} below), and using @code{eval} a program can easily modify
 itself in even more unforeseeable ways. Therefore pretty much anything in your
 program can actually depend on previous computations performed while the
 program is being executed.
@@ -8306,7 +8435,7 @@ have exactly the same shape as the pattern; non-rectangular patterns like
 
 Pure 0.47 also introduced a new, more flexible type tag feature, which defines
 type tags as unary predicates, using normal rewriting rules just as with
-ordinary functions; cf. section @pxref{8f,,Type Rules} for details. To these ends, a
+ordinary functions; cf. section @pxref{90,,Type Rules} for details. To these ends, a
 new keyword @pxref{86,,type} was added (if you used this as an ordinary
 identifier, you will have to rename these). Note that the old-style type tags
 were just a syntactic shortcut for "as" patterns involving unary constructor
@@ -8694,7 +8823,7 @@ bigints.
 
 
 @node Constant Definitions,External C Functions,Numeric Calculations,Caveats and Notes
-@anchor{constant definitions}@anchor{93}@anchor{constant-definitions}
+@anchor{constant definitions}@anchor{94}@anchor{constant-definitions}
 @section Constant Definitions
 Constants differ from variables in that they cannot be redefined (that's their
 main purpose after all) so that their values, once defined, can be substituted

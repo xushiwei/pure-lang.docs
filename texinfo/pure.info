@@ -89,8 +89,8 @@ Rule Syntax
 * Patterns::
 * Type Tags::
 * General Rules::
-* Type Rules::
 * Simple Rules::
+* Type Rules::
 
 Examples
 
@@ -1001,7 +1001,7 @@ cannot be used as identifiers:
     case       const   def      else    end        extern  if
     infix      infixl  infixr   let     namespace  nonfix  of
     otherwise  outfix  postfix  prefix  private    public  then
-    using      when    with
+    type       using   when     with
 
 Pure fully supports the *Unicode* character set or, more precisely,
 UTF-8.  This is an ASCII extension capable of representing all Unicode
@@ -1307,12 +1307,7 @@ rules:
                     | prim_expr
     rules        ::= rule (";" rule)* [";"]
     simple_rules ::= simple_rule (";" simple_rule)* [";"]
-
-(Note that the *note rule: 6b. and *note simple_rule: 6c. elements are
-part of the definition syntax, which is explained in the *note Rule
-Syntax: 61. section.)
-
-    prim_expr ::= qualified_symbol
+    prim_expr    ::= qualified_symbol
                   | number
                   | string
                   | "(" op ")"
@@ -1325,19 +1320,23 @@ Syntax: 61. section.)
                   | "{" exprs (";" exprs)* [";"] "}"
                   | "[" expr "|" simple_rules "]"
                   | "{" expr "|" simple_rules "}"
-    exprs     ::= expr ("," expr)*
-    op        ::= qualified_symbol
-    left_op   ::= qualified_symbol
-    right_op  ::= qualified_symbol
+    exprs        ::= expr ("," expr)*
+    op           ::= qualified_symbol
+    left_op      ::= qualified_symbol
+    right_op     ::= qualified_symbol
 
-Typical examples of the different expression types are summarized in the
-following table. Note that lambdas bind most weakly, followed by the
-special *note case: 6d, *note when: 6e. and *note with: 67. constructs,
-followed by conditional expressions (*note if: 6f.-*note then:
-70.-*note else: 71.), followed by the simple expressions. Operators are
-a part of the simple expression syntax, and are parsed according to
-their declared precedences and associativities (cf. *note Symbol
-Declarations: 5b.). Function application binds stronger than all
+(Note that the *note rule: 6b. and *note simple_rule: 6c. elements are
+part of the definition syntax, which is explained in the *note Rule
+Syntax: 61. section.)
+
+  Typical examples of the different expression types are summarized in
+the following table. Note that lambdas bind most weakly, followed by
+the special *note case: 6d, *note when: 6e. and *note with: 67.
+constructs, followed by conditional expressions (*note if: 6f.-*note
+then: 70.-*note else: 71.), followed by the simple expressions.
+Operators are a part of the simple expression syntax, and are parsed
+according to their declared precedences and associativities (cf. *note
+Symbol Declarations: 5b.). Function application binds stronger than all
 operators. Parentheses can be used to group expressions and override
 default precedences as usual.
 
@@ -1496,17 +1495,15 @@ Tuples: `(x,y,z)'
      there are no nested tuples (tuples of tuples); if you need such
      constructs then you should use lists instead.
 
-     Syntactically, tuples aren't really primary expressions, but we
-     still include them here because they are often used as a simpler
-     replacement for lists, in particular in function arguments and
-     return values, when no elaborate hierarchical structure is needed.
-     Also note that parentheses are generally only used to group
-     expressions and are _not_ part of the tuple syntax in Pure,
-     although they will be needed to include a tuple in a list or
-     matrix. E.g., `[(1,2),3,(4,5)]' is a three element list consisting
-     of the tuple `1,2', the integer `3', and another tuple `4,5'.
-     Likewise, `[(1,2,3)]' is a list with a single element, the tuple
-     `1,2,3'.
+     Note that the parentheses are in fact _not_ part of the tuple
+     syntax in Pure (they're just used to group expressions). However,
+     they will be needed to include a tuple in a list or matrix. (E.g.,
+     `[(1,2),3,(4,5)]' is a three element list consisting of the tuple
+     `1,2', the integer `3', and another tuple `4,5'.) Hence, tuples
+     aren't really primary expressions at all, but we still include
+     them here because they are often used as a simpler replacement for
+     lists, in particular in function arguments and return values, when
+     no elaborate hierarchical structure is needed.
 
 Matrices: `{1.0,2.0,3.0}', `{1,2;3,4}', `{1L,y+1;foo,bar}'
      Pure also offers matrices, a kind of two-dimensional arrays, as a
@@ -1531,13 +1528,14 @@ Matrices: `{1.0,2.0,3.0}', `{1,2;3,4}', `{1L,y+1;foo,bar}'
      (however, internally all matrices are stored in C's row-major
      format).
 
-     Note that this behaviour of the `{...}' construct only applies when
-     _constructing_ matrix values. If this construct is used as a
-     pattern on the left-hand side of equations, nested matrices are
-     interpreted literally, and variables in matrix patterns can only
+     Note that `{...}' only behaves this way when _constructing_ matrix
+     values. When used as a pattern on the left-hand side of equations,
+     nested matrices are matched literally, and variables can only
      match single elements, not rows or columns. Thus the pattern
      `{x,y}' will only match a 1x2 matrix and bind `x' and `y' to the
-     two elements.
+     two elements of the matrix.  Similarly, the pattern `{{x,y},z}'
+     matches a (symbolic) 1x2 matrix which has another matrix `{x,y}'
+     as its first element.
 
      Pure supports both numeric and symbolic matrices. The former are
      homogeneous arrays of double, complex double or (machine) int
@@ -1985,8 +1983,8 @@ rule is actually a separate definition.)
 * Patterns::
 * Type Tags::
 * General Rules::
-* Type Rules::
 * Simple Rules::
+* Type Rules::
 
 
 File: pure.info,  Node: Patterns,  Next: Type Tags,  Up: Rule Syntax
@@ -1995,22 +1993,98 @@ File: pure.info,  Node: Patterns,  Next: Type Tags,  Up: Rule Syntax
 ============
 
 The left-hand side of a rule is a special kind of simple expression,
-called a *pattern*. Patterns consist of function and operator
-applications as well as any of the primary expression types (symbols,
-numbers, strings, matrices and list values). _Not_ permitted are any of
-the special expression types (lambda, *note case: 6d, *note when: 6e,
-*note with: 67, conditional expressions, as well as list and matrix
-comprehensions). Also note that the pattern matching capabilities for
-matrices are somewhat limited, as a matrix pattern can only match a
-matrix with exactly the same dimensions as the pattern. To match a
-matrix of arbitrary dimensions, you'll have to use the built-in *note
-matrix: 88. type (or a user-defined type derived from that), cf. *note
-Type Tags: 60.
+called a *pattern*. The variables in a pattern serve as placeholders
+which are bound to corresponding values when the rule is applied to a
+target expression. (As already mentioned, the variables in a pattern
+are the identifiers in "variable positions", cf. *note Variables in
+Equations: 68.) To these ends, the pattern is *matched* against the
+target expression, i.e., the literal parts of the pattern are compared
+against the target expression and, if everything matches up, the
+variables in the pattern are *bound* (set to the value of) the
+corresponding subterms of the target expression.
 
-  As already mentioned, the '`_'' symbol is special in patterns; it
-denotes the *anonymous variable* which matches an arbitrary value
-(independently for all occurrences) without actually binding a
-variable. For instance:
+  Patterns are pervasive in Pure; they are used on the left-hand side of
+function and macro definitions, just as well as in global and local
+variable definitions. For instance, the following variable definition
+matches the result of evaluating the right-hand side list expression
+against the pattern `x:y:xs' and binds the variables `x', `y' and `xs'
+to the first two elements of the resulting list and `xs' to the list of
+remaining elements, respectively.
+
+    > let x:y:xs = 1..10;
+    > x,y,xs;
+    1,2,[3,4,5,6,7,8,9,10]
+
+The same works with local variable definitions:
+
+    > x,y,xs when x:y:xs = 1..10 end;
+    1,2,[3,4,5,6,7,8,9,10]
+
+Or with *note case: 6d. expressions:
+
+    > case 1..10 of x:y:xs = x,y,xs end;
+    1,2,[3,4,5,6,7,8,9,10]
+
+The arguments of functions (and macros) are handled in the same
+fashion, too:
+
+    > swap [x,y] = [y,x];
+    > swap [1,2];
+    [2,1]
+
+However, in this case you can keep adding more equations to make the
+function work with different argument patterns:
+
+    > swap (x,y) = y,x;
+    > swap {x,y} = {y,x};
+    > swap (1,2); swap {1,2};
+    2,1
+    {2,1}
+
+This doesn't only work with the usual predefined aggregates (such as
+lists, tuples and matrices, as shown in the above examples), but with
+any kind of Pure expression:
+
+    > foo (bar x) = x+1;
+    > foo (bar 99);
+    100
+
+If a pattern fails to match the target expression, the corresponding
+rule isn't applicable. In the case of global and local variable
+bindings, this indicates an error which raises a corresponding
+exception:
+
+    > let x:y:xs = [1];
+    <stdin>, line 12: failed match while evaluating 'let x:y:xs = [1]'
+
+However, for the rules in a function definition a match failure just
+means that the corresponding rule will be bypassed and other rules will
+be tried instead. Failing that, the target expression becomes a normal
+form which is simply returned as is:
+
+    > swap [1,2,3];
+    swap [1,2,3]
+
+This may come as a surprise (other functional languages will give you
+an error in such cases), but is a crucial feature of term rewriting
+languages, as it opens the door to symbolic evaluation techniques, see
+*note Definitions and Symbolic Evaluation: 5d.
+
+  Patterns may consist of function and operator applications as well as
+any of the primary expression types (symbols, numbers, strings,
+matrices and list values). _Not_ permitted are any of the special
+expression types: lambda, *note case: 6d, *note when: 6e, *note with:
+67, conditional expressions, as well as list and matrix comprehensions.
+Also note that the pattern matching capabilities for matrices are
+somewhat limited, as a matrix pattern can only match a matrix with
+exactly the same dimensions as the pattern. To match a matrix of
+arbitrary dimensions, you'll have to use the built-in *note matrix: 88.
+type (or a user-defined type derived from that), see *note Matrix
+Computations: 89. for some examples.
+
+  The '`_'' symbol is special in patterns; it denotes the *anonymous
+variable* which matches an arbitrary value (independently for all
+occurrences) without actually binding a variable. For instance:
 
     foo _ _ = 0;
 
@@ -2149,7 +2223,7 @@ a function simply means that a function application is in normal form.)
   Some basic types are built into the language. The corresponding tags
 enable you to match the built-in types of terms for which there is no
 way to spell out all "constructors", as there are infinitely many (or
-none, as in the case of *note pointer: 8a. values which are constructed
+none, as in the case of *note pointer: 8b. values which are constructed
 and inspected using special primitives, but are otherwise "opaque" at
 the Pure level).  Specifically, the following data types are built-in
 (in fact, the pattern matcher has special knowledge about these so that
@@ -2174,7 +2248,7 @@ they can be matched very efficiently):
      The type of C pointer values.
 
   To define your own data types, you employ a special kind of rule
-syntax, which is explained in *note Type Rules: 8f. below. For
+syntax, which is explained in *note Type Rules: 90. below. For
 instance, we might represent points in the plane using a constructor
 symbol `Point' which gets applied to pairs of coordinates. We can then
 define the `point' data type as follows:
@@ -2248,10 +2322,10 @@ frequently used type predicates (such as the matrix subtypes). These
 are all described in the `purelib'.
 
   More examples and a detailed explanation of Pure's type tag concept
-can be found in the *note Type Rules: 8f. section below.
+can be found in the *note Type Rules: 90. section below.
 
 
-File: pure.info,  Node: General Rules,  Next: Type Rules,  Prev: Type Tags,  Up: Rule Syntax
+File: pure.info,  Node: General Rules,  Next: Simple Rules,  Prev: Type Tags,  Up: Rule Syntax
 
 4.3 General Rules
 =================
@@ -2344,9 +2418,47 @@ Note that the above definition leaves the case of a negative
 discriminant undefined.
 
 
-File: pure.info,  Node: Type Rules,  Next: Simple Rules,  Prev: General Rules,  Up: Rule Syntax
+File: pure.info,  Node: Simple Rules,  Next: Type Rules,  Prev: General Rules,  Up: Rule Syntax
 
-4.4 Type Rules
+4.4 Simple Rules
+================
+
+As already mentioned, *note when: 6e, *note let: 80. and *note const:
+43. use a simplified kind of rule syntax which just consists of a
+left-hand and a right-hand side separated by the equals sign. In this
+case the meaning of the rule is to bind the variables in the left-hand
+side of the rule to the corresponding subterms of the value of the
+right-hand side. This is also called a *pattern binding*.
+
+  Guards or multiple left-hand or right-hand sides are not permitted in
+these rules. However, it is possible to omit the left-hand side if it
+is just the anonymous variable '`_'' by itself, indicating that you
+don't care about the result. The right-hand side is still evaluated, if
+only for its side-effects, which is handy, e.g., for adding debugging
+statements to your code. For instance, here is a variation of the
+quadratic equation solver which also prints the discriminant after it
+has been computed:
+
+    > using math, system;
+    > solve p q = -p/2+sqrt d,-p/2-sqrt d if d>=0
+    > when d = p^2/4-q; printf "The discriminant is: %g\n" d; end;
+    > solve 4 2;
+    The discriminant is: 2
+    -0.585786437626905,-3.41421356237309
+    > solve 2 4;
+    The discriminant is: -3
+    solve 2 4
+
+Note that simple rules of the same form `lhs = rhs' are also used in
+macro definitions (*note def: 7f.), to be discussed in the *note
+Macros: 84. section. In this case, however, the rule denotes a real
+rewriting rule, not a pattern binding, hence the left-hand side is
+mandatory in these rules.
+
+
+File: pure.info,  Node: Type Rules,  Prev: Simple Rules,  Up: Rule Syntax
+
+4.5 Type Rules
 ==============
 
 In Pure the definition of a type takes a somewhat unusual form, since
@@ -2358,7 +2470,7 @@ what it is, although types live in their own space where they can't be
 confused with functions of the same name).
 
   The definition of a type thus consists of one or more type rules which
-basically have the same format as the *note general rules: 90, but with
+basically have the same format as the *note general rules: 91, but with
 the keyword *note type: 86. in front of each rule. Also, each left-hand
 side must have at most one argument pattern and exactly one right-hand
 side. Hence, if the definition of a type requires several right-hand
@@ -2628,18 +2740,19 @@ a type is actually computable. In fact, you should strive for the best
 possible efficiency in type predicates. A type definition which has
 worse than O(1) complexity may well be a serious performance hog
 depending on the way in which it is used. For instance, consider the
-definition of the `rlist' type from the prelude:
+following definition of a proper list type (the prelude contains a
+similar definition, see the `rlist' type):
 
-    type rlist [] | rlist (x:xs::rlist);
+    type prlist [] | prlist (x:xs::prlist);
 
-This type is defined recursively, so that it only matches "proper"
-lists which have list values in all their tails (and are thus
-terminated by the empty list). However, this also implies that a check
-for this type will take O(n) time, where n is the size of the list.
-This will have dire consequences if you do this check repeatedly while
-traversing a list, as in the following `sum' function:
+This type is defined recursively, so that it only matches proper lists
+which have list values in all their tails (and are thus terminated by
+the empty list). However, this also implies that a check for this type
+will take O(n) time, where n is the size of the list. This will have
+dire consequences if you do this check repeatedly while traversing a
+list, as in the following `sum' function:
 
-    sum xs::rlist = if null xs then 0 else head xs+sum (tail xs);
+    sum xs::prlist = if null xs then 0 else head xs+sum (tail xs);
 
 As this function repeatedly checks its entire argument, the total time
 it takes to compute the sum of a list this way becomes O(n^2). To see
@@ -2649,25 +2762,25 @@ how slow this function is, just try it on successively larger lists
 advance and then invokes a "worker" function to do the actual
 computation:
 
-    sum xs::rlist = sum xs with
+    sum xs::prlist = sum xs with
       sum xs = if null xs then 0 else head xs+sum (tail xs);
     end;
 
 This "wrapper-worker" design is quite common and useful in many
 situations, but it is a bit cumbersome in this specific case. An easier
 way is to just do the type checking in a piecemeal fashion, as the list
-is being traversed. To these ends, the prelude also provides a basic
-`list' type which is defined as follows:
+is being traversed. To these ends, the prelude provides a basic `list'
+type which is defined as follows:
 
     type list [] | list (x:xs);
 
 Note that the recursion is missing here and thus this type can always be
 checked in O(1) time, performing just a single pattern match, which is
 efficient (in fact, this is also the reason that the prelude provides
-this type as the default list type). Hence, if we replace `rlist' with
-`list' in our original definition then `sum' will now run in O(n) time,
-as desired. However, this approach also has its drawbacks. For instance,
-consider:
+this type as the default list type). Hence, if we replace `prlist' with
+the `list' type in our original definition then `sum' will now run in
+O(n) time, as desired. However, this approach also has its drawbacks.
+For instance, consider:
 
     > sum xs::list = if null xs then 0 else head xs+sum (tail xs);
     > sum (1:2:3);
@@ -2677,7 +2790,7 @@ In contrast, our wrapper-worker definition of `sum' from above returns a
 somewhat prettier normal form instead:
 
     > clear sum
-    > sum xs::rlist = sum xs with
+    > sum xs::prlist = sum xs with
     >  sum xs = if null xs then 0 else head xs+sum (tail xs);
     > end;
     > sum (1:2:3);
@@ -2702,44 +2815,6 @@ predict exactly when the code of a type definition will be executed at
 runtime. Thus, as a general rule, a type definition should not rely on
 side effects such as doing I/O (except maybe for debugging purposes),
 modifying references or external data structures via C pointers, etc.
-
-
-File: pure.info,  Node: Simple Rules,  Prev: Type Rules,  Up: Rule Syntax
-
-4.5 Simple Rules
-================
-
-As already mentioned, *note when: 6e, *note let: 80. and *note const:
-43. use a simplified kind of rule syntax which just consists of a
-left-hand and a right-hand side separated by the equals sign. In this
-case the meaning of the rule is to bind the variables in the left-hand
-side of the rule to the corresponding subterms of the value of the
-right-hand side. This is also called a *pattern binding*.
-
-  Guards or multiple left-hand or right-hand sides are not permitted in
-these rules. However, it is possible to omit the left-hand side if it
-is just the anonymous variable '`_'' by itself, indicating that you
-don't care about the result. The right-hand side is still evaluated, if
-only for its side-effects, which is handy, e.g., for adding debugging
-statements to your code. For instance, here is a variation of the
-quadratic equation solver which also prints the discriminant after it
-has been computed:
-
-    > using math, system;
-    > solve p q = -p/2+sqrt d,-p/2-sqrt d if d>=0
-    > when d = p^2/4-q; printf "The discriminant is: %g\n" d; end;
-    > solve 4 2;
-    The discriminant is: 2
-    -0.585786437626905,-3.41421356237309
-    > solve 2 4;
-    The discriminant is: -3
-    solve 2 4
-
-Note that simple rules of the same form `lhs = rhs' are also used in
-macro definitions (*note def: 7f.), to be discussed in the *note
-Macros: 84. section. In this case, however, the rule denotes a real
-rewriting rule, not a pattern binding, hence the left-hand side is
-mandatory in these rules.
 
 
 File: pure.info,  Node: Examples,  Next: Declarations,  Prev: Rule Syntax,  Up: Top
@@ -2791,7 +2866,7 @@ parameterless function whose value is precomputed at compile time:
 Note that the compiler normally computes constant subexpressions at
 compile time, such as `2*pi' in the `foo' function. This works with all
 simple scalars (machine ints and doubles), see *note Constant
-Definitions: 93. for details.
+Definitions: 94. for details.
 
 * Menu:
 
@@ -2977,21 +3052,20 @@ File: pure.info,  Node: Matrix Computations,  Next: Symbolic Matrices,  Prev: La
 =======================
 
 Pure offers a number of basic matrix operations, such as matrix
-construction, indexing, slicing, as well as getting the size and
-dimensions of a matrix (these are briefly described in the *note
-Standard Library: 56. section). However, it does _not_ supply built-in
-support for matrix arithmetic and other linear algebra algorithms. The
-idea is that these can and should be provided through separate
-libraries (please check the Pure website for the pure-gsl module which
-is an ongoing project to provide a full GSL interface for the Pure
-language).
+construction, pattern matching, indexing, slicing, as well as getting
+the size and dimensions of a matrix. However, it does _not_ supply
+built-in support for matrix arithmetic and other linear algebra
+algorithms. The idea is that these can and should be provided through
+separate libraries (please check the Pure website for the pure-gsl
+module which is an ongoing project to provide a full GSL interface for
+the Pure language).
 
   But Pure's facilities for matrix and list processing also make it
-easy to roll your own, if desired. First, the prelude provides matrix
-versions of the common list operations like `map', `foldl', `zip' etc.,
-which provide a way to implement common matrix operations. E.g.,
-multiplying a matrix `x' with a scalar `a' amounts to mapping the
-function `(a*)' to x, which can be done as follows:
+easy to roll your own, if desired. The prelude provides matrix versions
+of the common list operations like `map', `foldl', `zip' etc., which
+provide a way to implement common matrix operations. E.g., multiplying
+a matrix `x' with a scalar `a' amounts to mapping the function `(a*)'
+to x, which can be done as follows:
 
     > a * x::matrix = map (a*) x if ~matrixp a;
     > 2*{1,2,3;4,5,6};
@@ -3005,7 +3079,28 @@ matrices using a given binary function:
     > {1,2,3;4,5,6}+{1,2,1;3,2,3};
     {2,4,4;7,7,9}
 
-Second, matrix comprehensions make it easy to express a variety of
+Note that, as shown in the examples above, the *note matrix: 88. tag
+can be used on the left-hand side of an equation to restrict a variable
+to matrix values. (The prelude provides a few other types for various
+specific kinds of matrices, see the `purelib' for details.) Another
+possibility is to employ a *matrix pattern*. The Pure language has
+built-in support for these, so that they work like the other kinds of
+patterns we've already encountered.  For instance, to compute the dot
+product of two 2D vectors, you may write something like:
+
+    > {x1,y1}*{x2,y2} = x1*x2+y1*y2;
+    > {2,3}*{1,4};
+    14
+
+Or, to compute the determinant of a 2x2 matrix:
+
+    > det {a,b;c,d} = a*d-b*c;
+    > det {1,2;3,4};
+    -2
+
+This simplifies the definitions if the dimensions of the involved
+matrices are small and known beforehand. If you need to go beyond this,
+*matrix comprehensions* provide a means to express a variety of
 algorithms which would typically be implemented using `for' loops in
 conventional programming languages. To illustrate the use of matrix
 comprehensions, here is how we can define an operation to create a
@@ -3028,7 +3123,7 @@ customary mathematical notation very closely.
 matrices instead of lists. In this case the block layout of the
 component matrices is preserved. For instance:
 
-    > {x,y|x={1,2};y={a,b;c,d}};
+    > {x,y | x = {1,2}; y = {a,b;c,d}};
     {(1,a),(1,b),(2,a),(2,b);(1,c),(1,d),(2,c),(2,d)}
 
 Note that a matrix comprehension involving filters may fail because the
@@ -3039,7 +3134,8 @@ have different lengths.
 
   As a slightly more comprehensive example (no pun intended!), here is a
 definition of matrix multiplication in Pure. The building block here is
-the "dot" product of two vectors which can be defined as follows:
+the dot product of two vectors which can be defined for arbitrary
+dimensions as follows:
 
     > sum = foldl (+) 0;
     > dot x::matrix y::matrix = sum $ zipwith (*) (rowvector x) (rowvector y);
@@ -3166,11 +3262,16 @@ matrix is to use the "quote" operator (cf. *note The Quote: 7e.):
     > '{{1,2},{3,4}};
     {{1,2},{3,4}}
 
-(Note that this result is really different from `{1,2;3,4}'. The latter
+Note that this result is really different from `{1,2;3,4}'. The latter
 is a 2x2 integer matrix, while the former is a symbolic vector a.k.a.
-1x2 matrix whose elements happen to be two integer vectors.)
+1x2 matrix whose elements happen to be two integer vectors. You can
+match these values with a nested matrix pattern as usual, e.g.:
 
-  Unfortunately, the quote operator in fact inhibits evaluation of _all_
+    > let {{a,b},{c,d}} = '{{1,2},{3,4}};
+    > a,b,c,d;
+    1,2,3,4
+
+Unfortunately, the quote operator in fact inhibits evaluation of _all_
 embedded subterms which may be undesirable if the matrix expression
 contains arithmetic (as in `'{{1+1,2*3}}'), so this method works best
 for constant matrices. A more general way to create a symbolic vector
@@ -3442,10 +3543,10 @@ as usual. Example:
     > '(2*42+(2^n when n = 2*6 end));
     2*42+4096.0
 
-We're not sure whether this is actually a bug or a feature, so you
-should expect this to change in the future, and relying on this
-behaviour is not recommended. (It is always possible to achieve the
-same effect by substituting a local variable, as shown above.)
+We're not sure whether this is actually a bug or a feature, so this
+might change in the future, and relying on this behaviour is not
+recommended. (It is always possible to achieve the same effect by
+substituting local variables, as shown above.)
 
   For the time being, it is possible to work around this limitation by
 defining a custom special form (see *note Macros: 84.) to be used as a
@@ -4839,7 +4940,7 @@ E.g., let's compute a solution for a standard 8x8 board:
     [(1,1),(2,5),(3,8),(4,6),(5,3),(6,7),(7,2),(8,4)]
 
 Finally, note that since the right-hand side of a type definition (cf.
-*note Type Rules: 8f.) is just ordinary Pure code, it may be
+*note Type Rules: 90.) is just ordinary Pure code, it may be
 susceptible to exceptions, too.  Such exceptions are reported or caught
 just like any other. In particular, if you want to make a type
 definition just fail silently in case of an exception, you'll have to
@@ -6799,7 +6900,7 @@ opens the door for some powerful programming techniques like partial
 evaluation (http://en.wikipedia.org/wiki/Partial_evaluation). It is
 also a necessity because of Pure's highly dynamic nature. For instance,
 Pure allows you to define constants by evaluating an arbitrary
-expression (see *note Constant Definitions: 93. below), and using
+expression (see *note Constant Definitions: 94. below), and using
 `eval' a program can easily modify itself in even more unforeseeable
 ways. Therefore pretty much anything in your program can actually
 depend on previous computations performed while the program is being
@@ -7316,7 +7417,7 @@ message.
   Pure 0.47 also introduced a new, more flexible type tag feature,
 which defines type tags as unary predicates, using normal rewriting
 rules just as with ordinary functions; cf. section *note Type Rules:
-8f. for details. To these ends, a new keyword *note type: 86. was added
+90. for details. To these ends, a new keyword *note type: 86. was added
 (if you used this as an ordinary identifier, you will have to rename
 these). Note that the old-style type tags were just a syntactic
 shortcut for "as" patterns involving unary constructor symbols. These
@@ -8613,571 +8714,571 @@ Node: Lexical Matters38777
 Ref: lexical matters38884
 Ref: 5738884
 Ref: lexical-matters38884
-Ref: 5942671
-Ref: code-charts42671
-Ref: 5a42671
-Ref: unicode-consortium42671
-Ref: 5c45224
-Ref: id145224
-Node: Definitions and Symbolic Evaluation45224
-Ref: definitions and symbolic evaluation45362
-Ref: 5d45362
-Ref: definitions-and-symbolic-evaluation45362
-Node: Variables in Equations50317
-Ref: variables in equations50457
-Ref: 6850457
-Ref: variables-in-equations50457
-Node: Expression Syntax52648
-Ref: expression syntax52766
-Ref: 6a52766
-Ref: expression-syntax52766
-Node: Primary Expressions56470
-Ref: primary expressions56568
-Ref: 7256568
-Ref: primary-expressions56568
-Node: Simple Expressions68894
-Ref: simple expressions69020
-Ref: 7969020
-Ref: simple-expressions69020
-Node: Special Expressions72134
-Ref: special expressions72232
-Ref: 6f72232
-Ref: if72232
-Ref: 7072232
-Ref: then72232
-Ref: 7172232
-Ref: else72232
-Ref: 6d72232
-Ref: case72232
-Ref: 6e72232
-Ref: when72232
-Ref: 6772232
-Ref: with72232
-Ref: 5872232
-Ref: end72232
-Ref: 7a72232
-Ref: special-expressions72232
-Node: Special Forms74744
-Ref: special forms74848
-Ref: 7574848
-Ref: special-forms74848
-Ref: 7c74848
-Ref: id274848
-Ref: 6275248
-Ref: &&/special75248
-Ref: 6375269
-Ref: ||/special75269
-Ref: 6476987
-Ref: $$76987
-Ref: 6577791
-Ref: &77791
-Ref: 6678804
-Ref: quote78804
-Ref: 7d78826
-Ref: '78826
-Node: Toplevel79500
-Ref: toplevel79600
-Ref: 7f79600
-Ref: def79600
-Ref: 8079600
-Ref: let79600
-Ref: 4379600
-Ref: const79600
-Ref: 8179600
-Ref: otherwise79600
-Ref: 8279600
-Node: Scoping Rules83024
-Ref: scoping rules83102
-Ref: 8583102
-Ref: scoping-rules83102
-Node: Rule Syntax86129
-Ref: rule syntax86217
-Ref: 6186217
-Ref: rule-syntax86217
-Node: Patterns87511
-Ref: patterns87583
-Ref: 8787583
-Node: Type Tags93248
-Ref: type tags93342
-Ref: 6093342
-Ref: type-tags93342
-Ref: 8993342
-Ref: id493342
-Ref: 8b94913
-Ref: int/type94913
-Ref: 8c94963
-Ref: bigint/type94963
-Ref: 8d95042
-Ref: double/type95042
-Ref: 8e95118
-Ref: string/type95118
-Ref: 8895172
-Ref: matrix/type95172
-Ref: 8a95247
-Ref: pointer/type95247
-Node: General Rules98942
-Ref: general rules99038
-Ref: 9099038
-Ref: general-rules99038
-Node: Type Rules102270
-Ref: type rules102369
-Ref: 86102369
-Ref: type102369
-Ref: 8f102369
-Ref: type-rules102369
-Ref: 91102369
-Ref: id5102369
-Node: Simple Rules117503
-Ref: simple rules117580
-Ref: 92117580
-Ref: simple-rules117580
-Node: Examples119110
-Ref: examples119197
-Ref: 78119197
-Node: List Comprehensions120926
-Ref: list comprehensions121024
-Ref: 94121024
-Ref: list-comprehensions121024
-Node: Lazy Evaluation and Streams122662
-Ref: lazy evaluation and streams122788
-Ref: 76122788
-Ref: lazy-evaluation-and-streams122788
-Ref: 95122788
-Ref: id6122788
-Node: Matrix Computations127333
-Ref: matrix computations127457
-Ref: 96127457
-Ref: matrix-computations127457
-Ref: 97127457
-Ref: id7127457
-Node: Symbolic Matrices134871
-Ref: symbolic matrices134979
-Ref: 9b134979
-Ref: symbolic-matrices134979
-Node: Record Data137200
-Ref: record data137298
-Ref: 9d137298
-Ref: record-data137298
-Ref: 9e137298
-Ref: id8137298
-Node: The Quote142822
-Ref: the quote142894
-Ref: 7e142894
-Ref: the-quote142894
-Node: Declarations147170
-Ref: declarations147252
-Ref: 32147252
-Node: Symbol Declarations148354
-Ref: symbol declarations148448
-Ref: a3148448
-Ref: public148448
-Ref: a4148448
-Ref: private148448
-Ref: a5148448
-Ref: infix148448
-Ref: a6148448
-Ref: infixl148448
-Ref: a7148448
-Ref: infixr148448
-Ref: a8148448
-Ref: prefix148448
-Ref: a9148448
-Ref: postfix148448
-Ref: 9c148448
-Ref: outfix148448
-Ref: 69148448
-Ref: nonfix148448
-Ref: 5b148448
-Ref: symbol-declarations148448
-Node: Modules and Imports155589
-Ref: modules and imports155702
-Ref: 31155702
-Ref: using155702
-Ref: ac155702
-Ref: modules-and-imports155702
-Ref: ad159060
-Ref: index-7159060
-Ref: ae159174
-Ref: index-8159174
-Ref: af159472
-Ref: index-9159472
-Ref: b0159759
-Ref: index-10159759
-Ref: b1159787
-Ref: index-11159787
-Ref: b2161374
-Ref: index-12161374
-Node: Namespaces161678
-Ref: namespaces161763
-Ref: a1161763
-Ref: namespace161763
-Ref: 74161763
-Node: Using Namespaces165351
-Ref: using namespaces165447
-Ref: b4165447
-Ref: using-namespace165447
-Ref: b5165447
-Ref: using-namespaces165447
-Node: Symbol Lookup and Creation167886
-Ref: symbol lookup and creation168006
-Ref: 3a168006
-Ref: symbol-lookup-and-creation168006
-Node: Private Symbols174506
-Ref: private symbols174633
-Ref: aa174633
-Ref: private-symbols174633
-Node: Hierarchical Namespaces175807
-Ref: hierarchical namespaces175925
-Ref: b6175925
-Ref: hierarchical-namespaces175925
-Ref: b7177067
-Ref: index-13177067
-Node: Scoped Namespaces178095
-Ref: scoped namespaces178189
-Ref: b3178189
-Ref: scoped-namespaces178189
-Node: Macros181438
-Ref: macros181530
-Ref: 84181530
-Node: Optimization Rules183343
-Ref: optimization rules183427
-Ref: b8183427
-Ref: optimization-rules183427
-Ref: b9183427
-Ref: id10183427
-Node: Recursive Macros187793
-Ref: recursive macros187912
-Ref: 9f187912
-Ref: recursive-macros187912
-Ref: bb190454
-Ref: index-14190454
-Node: User-Defined Special Forms190499
-Ref: user-defined special forms190613
-Ref: bc190613
-Ref: user-defined-special-forms190613
-Node: Macro Hygiene194480
-Ref: macro hygiene194569
-Ref: bd194569
-Ref: macro-hygiene194569
-Node: Exception Handling196968
-Ref: exception handling197059
-Ref: be197059
-Ref: exception-handling197059
-Ref: bf197059
-Ref: id11197059
-Ref: c0197371
-Ref: catch197371
-Ref: c1198539
-Ref: index-15198539
-Node: C Interface201709
-Ref: c interface201810
-Ref: 33201810
-Ref: c-interface201810
-Node: Extern Declarations203288
-Ref: extern declarations203382
-Ref: a0203382
-Ref: extern203382
-Ref: c3203382
-Ref: extern-declarations203382
-Node: Variadic C Functions208437
-Ref: variadic c functions208547
-Ref: c5208547
-Ref: variadic-c-functions208547
-Node: C Types209796
-Ref: c types209914
-Ref: c4209914
-Ref: c-types209914
-Ref: c6209914
-Ref: id12209914
-Node: Basic C Types211154
-Ref: basic c types211231
-Ref: c7211231
-Ref: basic-c-types211231
-Node: Pointer Types213399
-Ref: pointer types213506
-Ref: c8213506
-Ref: pointer-types213506
-Node: Pointers and Matrices216698
-Ref: pointers and matrices216808
-Ref: c9216808
-Ref: pointers-and-matrices216808
-Node: Pointer Examples219984
-Ref: pointer examples220072
-Ref: ca220072
-Ref: pointer-examples220072
-Node: Importing Dynamic Libraries224296
-Ref: importing dynamic libraries224416
-Ref: cb224416
-Ref: importing-dynamic-libraries224416
-Ref: cc225537
-Ref: index-16225537
-Ref: cd225612
-Ref: index-17225612
-Ref: ce225823
-Ref: index-18225823
-Node: Importing LLVM Bitcode226215
-Ref: importing llvm bitcode226339
-Ref: cf226339
-Ref: importing-llvm-bitcode226339
-Node: Inline Code232091
-Ref: inline code232179
-Ref: 55232179
-Ref: inline-code232179
-Ref: d2235509
-Ref: index-19235509
-Ref: d3235623
-Ref: index-20235623
-Ref: d4235824
-Ref: index-21235824
-Ref: d5235836
-Ref: index-22235836
-Ref: d6235850
-Ref: index-23235850
-Ref: d7236070
-Ref: index-24236070
-Node: Standard Library236311
-Ref: standard library236411
-Ref: 56236411
-Ref: standard-library236411
-Node: Interactive Usage240674
-Ref: interactive usage240780
-Ref: a240780
-Ref: interactive-usage240780
-Node: Online Help242773
-Ref: online help242865
-Ref: 4242865
-Ref: online-help242865
-Ref: d9243165
-Ref: index-25243165
-Ref: da243193
-Ref: index-26243193
-Ref: db244966
-Ref: docutils244966
-Node: Interactive Commands245907
-Ref: interactive commands246019
-Ref: d8246019
-Ref: interactive-commands246019
-Ref: dc246250
-Ref: index-27246250
-Ref: dd246297
-Ref: index-28246297
-Ref: de246724
-Ref: index-29246724
-Ref: df247050
-Ref: index-30247050
-Ref: e0247112
-Ref: index-31247112
-Ref: e4248098
-Ref: index-32248098
-Ref: e5248687
-Ref: index-33248687
-Ref: e7250206
-Ref: index-34250206
-Ref: e8250534
-Ref: index-35250534
-Ref: e9250600
-Ref: index-36250600
-Ref: ea251151
-Ref: index-37251151
-Ref: eb251397
-Ref: index-38251397
-Ref: ec251477
-Ref: index-39251477
-Ref: ed251528
-Ref: index-40251528
-Ref: ee253212
-Ref: index-41253212
-Ref: ef253462
-Ref: index-42253462
-Ref: f1253874
-Ref: index-43253874
-Ref: f2254491
-Ref: index-44254491
-Ref: f3254795
-Ref: index-45254795
-Node: Last Result255603
-Ref: last result255732
-Ref: e1255732
-Ref: last-result255732
-Node: Specifying Symbol Selections256442
-Ref: specifying symbol selections256567
-Ref: e3256567
-Ref: specifying-symbol-selections256567
-Node: The show Command259973
-Ref: the show command260104
-Ref: f0260104
-Ref: the-show-command260104
-Ref: f4261206
-Ref: index-46261206
-Node: Definition Levels263972
-Ref: definition levels264084
-Ref: e2264084
-Ref: definition-levels264084
-Node: Debugging269264
-Ref: debugging269379
-Ref: 39269379
-Ref: f6271070
-Ref: index-47271070
-Node: Interactive Startup279882
-Ref: interactive startup279971
-Ref: e6279971
-Ref: interactive-startup279971
-Ref: f7280339
-Ref: index-48280339
-Node: Batch Compilation281195
-Ref: batch compilation281302
-Ref: b281302
-Ref: batch-compilation281302
-Ref: f9286462
-Ref: partial-evaluation286462
-Node: Example286589
-Ref: example286693
-Ref: fa286693
-Node: Code Size and Unstripped Executables289646
-Ref: code size and unstripped executables289784
-Ref: f8289784
-Ref: code-size-and-unstripped-executables289784
-Node: Other Output Code Formats293244
-Ref: other output code formats293404
-Ref: fb293404
-Ref: other-output-code-formats293404
-Ref: fc297913
-Ref: llvm-documentation297913
-Node: Calling Pure Functions From C297913
-Ref: calling pure functions from c298028
-Ref: fd298028
-Ref: calling-pure-functions-from-c298028
-Node: Caveats and Notes299521
-Ref: caveats and notes299617
-Ref: c299617
-Ref: caveats-and-notes299617
-Node: Etymology300243
-Ref: etymology300335
-Ref: fe300335
-Node: Backward Compatibility301164
-Ref: backward compatibility301279
-Ref: ff301279
-Ref: backward-compatibility301279
-Node: Error Recovery308513
-Ref: error recovery308640
-Ref: 102308640
-Ref: error-recovery308640
-Node: The __show__ Function309296
-Ref: the __show__ function309420
-Ref: 9a309420
-Ref: the-show-function309420
-Ref: 99309475
-Ref: __show__309475
-Node: Non-Linear Patterns313116
-Ref: non-linear patterns313239
-Ref: 103313239
-Ref: non-linear-patterns313239
-Node: "As" Patterns314639
-Ref: "as" patterns314756
-Ref: 104314756
-Ref: as-patterns314756
-Node: Head = Function315512
-Ref: head = function315623
-Ref: ba315623
-Ref: head-function315623
-Node: With and when319174
-Ref: with and when319292
-Ref: 105319292
-Ref: with-and-when319292
-Node: Numeric Calculations321418
-Ref: numeric calculations321541
-Ref: 106321541
-Ref: numeric-calculations321541
-Node: Constant Definitions323450
-Ref: constant definitions323580
-Ref: 93323580
-Ref: constant-definitions323580
-Node: External C Functions328585
-Ref: external c functions328716
-Ref: c2328716
-Ref: external-c-functions328716
-Ref: 107329996
-Ref: libffi329996
-Node: Calling Special Forms330381
-Ref: calling special forms330500
-Ref: 108330500
-Ref: calling-special-forms330500
-Node: Laziness330987
-Ref: laziness331096
-Ref: 109331096
-Node: Reflection335603
-Ref: reflection335706
-Ref: f5335706
-Node: Hygienic Macros338374
-Ref: hygienic macros338498
-Ref: 10b338498
-Ref: hygienic-macros338498
-Node: Stack Size and Tail Recursion339852
-Ref: stack size and tail recursion339998
-Ref: 3f339998
-Ref: stack-size-and-tail-recursion339998
-Ref: 10c340386
-Ref: index-49340386
-Ref: 10d340598
-Ref: index-50340598
-Ref: 10e340886
-Ref: index-51340886
-Node: Handling of Asynchronous Signals341950
-Ref: handling of asynchronous signals342072
-Ref: 40342072
-Ref: handling-of-asynchronous-signals342072
-Node: Author344093
-Ref: author344179
-Ref: 10f344179
-Node: Copying344748
-Ref: copying344837
-Ref: 3344837
-Node: References and Links347199
-Ref: references and links347287
-Ref: 110347287
-Ref: references-and-links347287
-Ref: 7b347336
-Ref: aardappel347336
-Ref: 10a347477
-Ref: alice-ml347477
-Ref: 10347612
-Ref: baader-and-nipkow347612
-Ref: ab347730
-Ref: bertrand347730
-Ref: d0347990
-Ref: clang347990
-Ref: d1348262
-Ref: faust348262
-Ref: 111348349
-Ref: gnu-multiprecision-library348349
-Ref: 73348349
-Ref: gmp348349
-Ref: 112348457
-Ref: gnu-octave348457
-Ref: 98348457
-Ref: octave348457
-Ref: 77348601
-Ref: gnu-scientific-library348601
-Ref: 113348601
-Ref: gsl348601
-Ref: 5e348762
-Ref: haskell348762
-Ref: 7348828
-Ref: llvm348828
-Ref: 101348893
-Ref: miranda348893
-Ref: 5f349064
-Ref: ml349064
-Ref: f349223
-Ref: michael-o-donnell349223
-Ref: 100349373
-Ref: q349373
-Node: Index349458
-Ref: index349530
-Ref: 83361788
-Ref: a2361819
-Ref: 6b361850
-Ref: 6c361881
+Ref: 5942680
+Ref: code-charts42680
+Ref: 5a42680
+Ref: unicode-consortium42680
+Ref: 5c45233
+Ref: id145233
+Node: Definitions and Symbolic Evaluation45233
+Ref: definitions and symbolic evaluation45371
+Ref: 5d45371
+Ref: definitions-and-symbolic-evaluation45371
+Node: Variables in Equations50326
+Ref: variables in equations50466
+Ref: 6850466
+Ref: variables-in-equations50466
+Node: Expression Syntax52657
+Ref: expression syntax52775
+Ref: 6a52775
+Ref: expression-syntax52775
+Node: Primary Expressions56495
+Ref: primary expressions56593
+Ref: 7256593
+Ref: primary-expressions56593
+Node: Simple Expressions68915
+Ref: simple expressions69041
+Ref: 7969041
+Ref: simple-expressions69041
+Node: Special Expressions72155
+Ref: special expressions72253
+Ref: 6f72253
+Ref: if72253
+Ref: 7072253
+Ref: then72253
+Ref: 7172253
+Ref: else72253
+Ref: 6d72253
+Ref: case72253
+Ref: 6e72253
+Ref: when72253
+Ref: 6772253
+Ref: with72253
+Ref: 5872253
+Ref: end72253
+Ref: 7a72253
+Ref: special-expressions72253
+Node: Special Forms74765
+Ref: special forms74869
+Ref: 7574869
+Ref: special-forms74869
+Ref: 7c74869
+Ref: id274869
+Ref: 6275269
+Ref: &&/special75269
+Ref: 6375290
+Ref: ||/special75290
+Ref: 6477008
+Ref: $$77008
+Ref: 6577812
+Ref: &77812
+Ref: 6678825
+Ref: quote78825
+Ref: 7d78847
+Ref: '78847
+Node: Toplevel79521
+Ref: toplevel79621
+Ref: 7f79621
+Ref: def79621
+Ref: 8079621
+Ref: let79621
+Ref: 4379621
+Ref: const79621
+Ref: 8179621
+Ref: otherwise79621
+Ref: 8279621
+Node: Scoping Rules83045
+Ref: scoping rules83123
+Ref: 8583123
+Ref: scoping-rules83123
+Node: Rule Syntax86150
+Ref: rule syntax86238
+Ref: 6186238
+Ref: rule-syntax86238
+Node: Patterns87532
+Ref: patterns87604
+Ref: 8787604
+Node: Type Tags96025
+Ref: type tags96119
+Ref: 6096119
+Ref: type-tags96119
+Ref: 8a96119
+Ref: id496119
+Ref: 8c97690
+Ref: int/type97690
+Ref: 8d97740
+Ref: bigint/type97740
+Ref: 8e97819
+Ref: double/type97819
+Ref: 8f97895
+Ref: string/type97895
+Ref: 8897949
+Ref: matrix/type97949
+Ref: 8b98024
+Ref: pointer/type98024
+Node: General Rules101719
+Ref: general rules101817
+Ref: 91101817
+Ref: general-rules101817
+Node: Simple Rules105049
+Ref: simple rules105148
+Ref: 92105148
+Ref: simple-rules105148
+Node: Type Rules106678
+Ref: type rules106755
+Ref: 86106755
+Ref: type106755
+Ref: 90106755
+Ref: type-rules106755
+Ref: 93106755
+Ref: id5106755
+Node: Examples121959
+Ref: examples122046
+Ref: 78122046
+Node: List Comprehensions123775
+Ref: list comprehensions123873
+Ref: 95123873
+Ref: list-comprehensions123873
+Node: Lazy Evaluation and Streams125511
+Ref: lazy evaluation and streams125637
+Ref: 76125637
+Ref: lazy-evaluation-and-streams125637
+Ref: 96125637
+Ref: id6125637
+Node: Matrix Computations130182
+Ref: matrix computations130306
+Ref: 89130306
+Ref: matrix-computations130306
+Ref: 97130306
+Ref: id7130306
+Node: Symbolic Matrices138540
+Ref: symbolic matrices138648
+Ref: 9b138648
+Ref: symbolic-matrices138648
+Node: Record Data141007
+Ref: record data141105
+Ref: 9d141105
+Ref: record-data141105
+Ref: 9e141105
+Ref: id8141105
+Node: The Quote146629
+Ref: the quote146701
+Ref: 7e146701
+Ref: the-quote146701
+Node: Declarations150961
+Ref: declarations151043
+Ref: 32151043
+Node: Symbol Declarations152145
+Ref: symbol declarations152239
+Ref: a3152239
+Ref: public152239
+Ref: a4152239
+Ref: private152239
+Ref: a5152239
+Ref: infix152239
+Ref: a6152239
+Ref: infixl152239
+Ref: a7152239
+Ref: infixr152239
+Ref: a8152239
+Ref: prefix152239
+Ref: a9152239
+Ref: postfix152239
+Ref: 9c152239
+Ref: outfix152239
+Ref: 69152239
+Ref: nonfix152239
+Ref: 5b152239
+Ref: symbol-declarations152239
+Node: Modules and Imports159380
+Ref: modules and imports159493
+Ref: 31159493
+Ref: using159493
+Ref: ac159493
+Ref: modules-and-imports159493
+Ref: ad162851
+Ref: index-7162851
+Ref: ae162965
+Ref: index-8162965
+Ref: af163263
+Ref: index-9163263
+Ref: b0163550
+Ref: index-10163550
+Ref: b1163578
+Ref: index-11163578
+Ref: b2165165
+Ref: index-12165165
+Node: Namespaces165469
+Ref: namespaces165554
+Ref: a1165554
+Ref: namespace165554
+Ref: 74165554
+Node: Using Namespaces169142
+Ref: using namespaces169238
+Ref: b4169238
+Ref: using-namespace169238
+Ref: b5169238
+Ref: using-namespaces169238
+Node: Symbol Lookup and Creation171677
+Ref: symbol lookup and creation171797
+Ref: 3a171797
+Ref: symbol-lookup-and-creation171797
+Node: Private Symbols178297
+Ref: private symbols178424
+Ref: aa178424
+Ref: private-symbols178424
+Node: Hierarchical Namespaces179598
+Ref: hierarchical namespaces179716
+Ref: b6179716
+Ref: hierarchical-namespaces179716
+Ref: b7180858
+Ref: index-13180858
+Node: Scoped Namespaces181886
+Ref: scoped namespaces181980
+Ref: b3181980
+Ref: scoped-namespaces181980
+Node: Macros185229
+Ref: macros185321
+Ref: 84185321
+Node: Optimization Rules187134
+Ref: optimization rules187218
+Ref: b8187218
+Ref: optimization-rules187218
+Ref: b9187218
+Ref: id10187218
+Node: Recursive Macros191584
+Ref: recursive macros191703
+Ref: 9f191703
+Ref: recursive-macros191703
+Ref: bb194245
+Ref: index-14194245
+Node: User-Defined Special Forms194290
+Ref: user-defined special forms194404
+Ref: bc194404
+Ref: user-defined-special-forms194404
+Node: Macro Hygiene198271
+Ref: macro hygiene198360
+Ref: bd198360
+Ref: macro-hygiene198360
+Node: Exception Handling200759
+Ref: exception handling200850
+Ref: be200850
+Ref: exception-handling200850
+Ref: bf200850
+Ref: id11200850
+Ref: c0201162
+Ref: catch201162
+Ref: c1202330
+Ref: index-15202330
+Node: C Interface205500
+Ref: c interface205601
+Ref: 33205601
+Ref: c-interface205601
+Node: Extern Declarations207079
+Ref: extern declarations207173
+Ref: a0207173
+Ref: extern207173
+Ref: c3207173
+Ref: extern-declarations207173
+Node: Variadic C Functions212228
+Ref: variadic c functions212338
+Ref: c5212338
+Ref: variadic-c-functions212338
+Node: C Types213587
+Ref: c types213705
+Ref: c4213705
+Ref: c-types213705
+Ref: c6213705
+Ref: id12213705
+Node: Basic C Types214945
+Ref: basic c types215022
+Ref: c7215022
+Ref: basic-c-types215022
+Node: Pointer Types217190
+Ref: pointer types217297
+Ref: c8217297
+Ref: pointer-types217297
+Node: Pointers and Matrices220489
+Ref: pointers and matrices220599
+Ref: c9220599
+Ref: pointers-and-matrices220599
+Node: Pointer Examples223775
+Ref: pointer examples223863
+Ref: ca223863
+Ref: pointer-examples223863
+Node: Importing Dynamic Libraries228087
+Ref: importing dynamic libraries228207
+Ref: cb228207
+Ref: importing-dynamic-libraries228207
+Ref: cc229328
+Ref: index-16229328
+Ref: cd229403
+Ref: index-17229403
+Ref: ce229614
+Ref: index-18229614
+Node: Importing LLVM Bitcode230006
+Ref: importing llvm bitcode230130
+Ref: cf230130
+Ref: importing-llvm-bitcode230130
+Node: Inline Code235882
+Ref: inline code235970
+Ref: 55235970
+Ref: inline-code235970
+Ref: d2239300
+Ref: index-19239300
+Ref: d3239414
+Ref: index-20239414
+Ref: d4239615
+Ref: index-21239615
+Ref: d5239627
+Ref: index-22239627
+Ref: d6239641
+Ref: index-23239641
+Ref: d7239861
+Ref: index-24239861
+Node: Standard Library240102
+Ref: standard library240202
+Ref: 56240202
+Ref: standard-library240202
+Node: Interactive Usage244465
+Ref: interactive usage244571
+Ref: a244571
+Ref: interactive-usage244571
+Node: Online Help246564
+Ref: online help246656
+Ref: 4246656
+Ref: online-help246656
+Ref: d9246956
+Ref: index-25246956
+Ref: da246984
+Ref: index-26246984
+Ref: db248757
+Ref: docutils248757
+Node: Interactive Commands249698
+Ref: interactive commands249810
+Ref: d8249810
+Ref: interactive-commands249810
+Ref: dc250041
+Ref: index-27250041
+Ref: dd250088
+Ref: index-28250088
+Ref: de250515
+Ref: index-29250515
+Ref: df250841
+Ref: index-30250841
+Ref: e0250903
+Ref: index-31250903
+Ref: e4251889
+Ref: index-32251889
+Ref: e5252478
+Ref: index-33252478
+Ref: e7253997
+Ref: index-34253997
+Ref: e8254325
+Ref: index-35254325
+Ref: e9254391
+Ref: index-36254391
+Ref: ea254942
+Ref: index-37254942
+Ref: eb255188
+Ref: index-38255188
+Ref: ec255268
+Ref: index-39255268
+Ref: ed255319
+Ref: index-40255319
+Ref: ee257003
+Ref: index-41257003
+Ref: ef257253
+Ref: index-42257253
+Ref: f1257665
+Ref: index-43257665
+Ref: f2258282
+Ref: index-44258282
+Ref: f3258586
+Ref: index-45258586
+Node: Last Result259394
+Ref: last result259523
+Ref: e1259523
+Ref: last-result259523
+Node: Specifying Symbol Selections260233
+Ref: specifying symbol selections260358
+Ref: e3260358
+Ref: specifying-symbol-selections260358
+Node: The show Command263764
+Ref: the show command263895
+Ref: f0263895
+Ref: the-show-command263895
+Ref: f4264997
+Ref: index-46264997
+Node: Definition Levels267763
+Ref: definition levels267875
+Ref: e2267875
+Ref: definition-levels267875
+Node: Debugging273055
+Ref: debugging273170
+Ref: 39273170
+Ref: f6274861
+Ref: index-47274861
+Node: Interactive Startup283673
+Ref: interactive startup283762
+Ref: e6283762
+Ref: interactive-startup283762
+Ref: f7284130
+Ref: index-48284130
+Node: Batch Compilation284986
+Ref: batch compilation285093
+Ref: b285093
+Ref: batch-compilation285093
+Ref: f9290253
+Ref: partial-evaluation290253
+Node: Example290380
+Ref: example290484
+Ref: fa290484
+Node: Code Size and Unstripped Executables293437
+Ref: code size and unstripped executables293575
+Ref: f8293575
+Ref: code-size-and-unstripped-executables293575
+Node: Other Output Code Formats297035
+Ref: other output code formats297195
+Ref: fb297195
+Ref: other-output-code-formats297195
+Ref: fc301704
+Ref: llvm-documentation301704
+Node: Calling Pure Functions From C301704
+Ref: calling pure functions from c301819
+Ref: fd301819
+Ref: calling-pure-functions-from-c301819
+Node: Caveats and Notes303312
+Ref: caveats and notes303408
+Ref: c303408
+Ref: caveats-and-notes303408
+Node: Etymology304034
+Ref: etymology304126
+Ref: fe304126
+Node: Backward Compatibility304955
+Ref: backward compatibility305070
+Ref: ff305070
+Ref: backward-compatibility305070
+Node: Error Recovery312304
+Ref: error recovery312431
+Ref: 102312431
+Ref: error-recovery312431
+Node: The __show__ Function313087
+Ref: the __show__ function313211
+Ref: 9a313211
+Ref: the-show-function313211
+Ref: 99313266
+Ref: __show__313266
+Node: Non-Linear Patterns316907
+Ref: non-linear patterns317030
+Ref: 103317030
+Ref: non-linear-patterns317030
+Node: "As" Patterns318430
+Ref: "as" patterns318547
+Ref: 104318547
+Ref: as-patterns318547
+Node: Head = Function319303
+Ref: head = function319414
+Ref: ba319414
+Ref: head-function319414
+Node: With and when322965
+Ref: with and when323083
+Ref: 105323083
+Ref: with-and-when323083
+Node: Numeric Calculations325209
+Ref: numeric calculations325332
+Ref: 106325332
+Ref: numeric-calculations325332
+Node: Constant Definitions327241
+Ref: constant definitions327371
+Ref: 94327371
+Ref: constant-definitions327371
+Node: External C Functions332376
+Ref: external c functions332507
+Ref: c2332507
+Ref: external-c-functions332507
+Ref: 107333787
+Ref: libffi333787
+Node: Calling Special Forms334172
+Ref: calling special forms334291
+Ref: 108334291
+Ref: calling-special-forms334291
+Node: Laziness334778
+Ref: laziness334887
+Ref: 109334887
+Node: Reflection339394
+Ref: reflection339497
+Ref: f5339497
+Node: Hygienic Macros342165
+Ref: hygienic macros342289
+Ref: 10b342289
+Ref: hygienic-macros342289
+Node: Stack Size and Tail Recursion343643
+Ref: stack size and tail recursion343789
+Ref: 3f343789
+Ref: stack-size-and-tail-recursion343789
+Ref: 10c344177
+Ref: index-49344177
+Ref: 10d344389
+Ref: index-50344389
+Ref: 10e344677
+Ref: index-51344677
+Node: Handling of Asynchronous Signals345741
+Ref: handling of asynchronous signals345863
+Ref: 40345863
+Ref: handling-of-asynchronous-signals345863
+Node: Author347884
+Ref: author347970
+Ref: 10f347970
+Node: Copying348539
+Ref: copying348628
+Ref: 3348628
+Node: References and Links350990
+Ref: references and links351078
+Ref: 110351078
+Ref: references-and-links351078
+Ref: 7b351127
+Ref: aardappel351127
+Ref: 10a351268
+Ref: alice-ml351268
+Ref: 10351403
+Ref: baader-and-nipkow351403
+Ref: ab351521
+Ref: bertrand351521
+Ref: d0351781
+Ref: clang351781
+Ref: d1352053
+Ref: faust352053
+Ref: 111352140
+Ref: gnu-multiprecision-library352140
+Ref: 73352140
+Ref: gmp352140
+Ref: 112352248
+Ref: gnu-octave352248
+Ref: 98352248
+Ref: octave352248
+Ref: 77352392
+Ref: gnu-scientific-library352392
+Ref: 113352392
+Ref: gsl352392
+Ref: 5e352553
+Ref: haskell352553
+Ref: 7352619
+Ref: llvm352619
+Ref: 101352684
+Ref: miranda352684
+Ref: 5f352855
+Ref: ml352855
+Ref: f353014
+Ref: michael-o-donnell353014
+Ref: 100353164
+Ref: q353164
+Node: Index353249
+Ref: index353321
+Ref: 83365579
+Ref: a2365610
+Ref: 6b365641
+Ref: 6c365672
 
 End Tag Table
 

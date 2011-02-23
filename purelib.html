@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.47, February 08, 2011</p>
+<p>Version 0.47, February 23, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2010 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -2672,19 +2672,11 @@ constant time.</p>
 <tt class="descname">lambdap</tt> x<a class="headerlink" href="#lambdap" title="Permalink to this definition">¶</a></dt>
 <dt id="thunkp">
 <tt class="descname">thunkp</tt> x<a class="headerlink" href="#thunkp" title="Permalink to this definition">¶</a></dt>
-<dt id="varp">
-<tt class="descname">varp</tt> x<a class="headerlink" href="#varp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Predicates to check for various kinds of function objects (named,
-anonymous or thunk), and free variable symbols.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="symbolp">
-<tt class="descname">symbolp</tt> x<a class="headerlink" href="#symbolp" title="Permalink to this definition">¶</a></dt>
 <dt id="closurep">
 <tt class="descname">closurep</tt> x<a class="headerlink" href="#closurep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience functions to check for symbols (named function or variable)
-and closures (named function or lambda).</p>
+<dd><p>Predicates to check for various kinds of function objects (named,
+anonymous or thunk). <a class="reference internal" href="#closurep" title="closurep"><tt class="xref pure pure-func docutils literal"><span class="pre">closurep</span></tt></a> checks for any kind of &#8220;normal&#8221;
+closure (i.e., named functions and lambdas, but not thunks).</p>
 </dd></dl>
 
 <dl class="function">
@@ -2693,6 +2685,19 @@ and closures (named function or lambda).</p>
 <dd><p>Convenience function to check for &#8220;callable&#8221; functions. This includes
 any kind of closure with a nonzero argument count as well as partial
 (unsaturated) applications of these.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="symbolp">
+<tt class="descname">symbolp</tt> x<a class="headerlink" href="#symbolp" title="Permalink to this definition">¶</a></dt>
+<dt id="varp">
+<tt class="descname">varp</tt> x<a class="headerlink" href="#varp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicates to check for any kind of symbol (this also includes operator
+and nonfix symbols) and for free variable symbols, respectively. Note
+that varp returns true for any symbol which is not an operator or nonfix
+symbol (i.e., for any symbol that could in principle be bound to a
+value, either globally or locally). This holds even if the symbol is
+currently bound to a function, macro or constant.</p>
 </dd></dl>
 
 </div>
@@ -2736,6 +2741,58 @@ implement the <a class="reference internal" href="#reduce" title="reduce"><tt cl
 <span class="mi">100</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<p>The following functions allow you to inspect or modify the function, type,
+macro, constant and variable definitions of the running program. This uses
+a special meta representation for rewriting rules and definitions. Please
+see the <a class="reference internal" href="pure.html#macros"><em>Macros</em></a> section in the Pure manual for details. Also note
+that these operations are subject to some limitations, please check the
+remarks concerning <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> in the following
+subsection for details.</p>
+<dl class="function">
+<dt id="get_fundef">
+<tt class="descname">get_fundef</tt> sym<a class="headerlink" href="#get_fundef" title="Permalink to this definition">¶</a></dt>
+<dt id="get_typedef">
+<tt class="descname">get_typedef</tt> sym<a class="headerlink" href="#get_typedef" title="Permalink to this definition">¶</a></dt>
+<dt id="get_macdef">
+<tt class="descname">get_macdef</tt> sym<a class="headerlink" href="#get_macdef" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the given symbol is defined as a function, type or macro, return the
+corresponding list of rewriting rules. Otherwise return the empty list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="get_vardef">
+<tt class="descname">get_vardef</tt> sym<a class="headerlink" href="#get_vardef" title="Permalink to this definition">¶</a></dt>
+<dt id="get_constdef">
+<tt class="descname">get_constdef</tt> sym<a class="headerlink" href="#get_constdef" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the given symbol is defined as a variable or constant, return the
+corresponding definition as a singleton list of the form
+<tt class="docutils literal"><span class="pre">[sym</span> <span class="pre">--&gt;</span> <span class="pre">value]</span></tt>. Otherwise return the empty list.</p>
+</dd></dl>
+
+<p>The following functions may fail in case of error, in which case
+<a class="reference internal" href="#lasterr" title="lasterr"><tt class="xref pure pure-func docutils literal"><span class="pre">lasterr</span></tt></a> is set accordingly (see <a class="reference internal" href="#eval-and-friends">Eval and Friends</a> below).</p>
+<dl class="function">
+<dt id="add_fundef">
+<tt class="descname">add_fundef</tt> rules<a class="headerlink" href="#add_fundef" title="Permalink to this definition">¶</a></dt>
+<dt id="add_typedef">
+<tt class="descname">add_typedef</tt> rules<a class="headerlink" href="#add_typedef" title="Permalink to this definition">¶</a></dt>
+<dt id="add_macdef">
+<tt class="descname">add_macdef</tt> rules<a class="headerlink" href="#add_macdef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the given rewriting rules (given in the same format as returned by
+the <a class="reference internal" href="#get_fundef" title="get_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">get_fundef</span></tt></a>, <a class="reference internal" href="#get_typedef" title="get_typedef"><tt class="xref pure pure-func docutils literal"><span class="pre">get_typedef</span></tt></a> and <a class="reference internal" href="#get_macdef" title="get_macdef"><tt class="xref pure pure-func docutils literal"><span class="pre">get_macdef</span></tt></a>
+functions above) to the running program.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="add_vardef">
+<tt class="descname">add_vardef</tt> rules<a class="headerlink" href="#add_vardef" title="Permalink to this definition">¶</a></dt>
+<dt id="add_constdef">
+<tt class="descname">add_constdef</tt> rules<a class="headerlink" href="#add_constdef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define variables and constants. Each rule must take the form
+<tt class="docutils literal"><span class="pre">sym</span> <span class="pre">--&gt;</span> <span class="pre">value</span></tt> with a symbol on the left-hand side (no pattern
+matching is performed by these functions).</p>
 </dd></dl>
 
 <p>The prelude also provides some functions to retrieve various attributes of
@@ -2833,7 +2890,8 @@ string.</p>
 and returns the result as is, without evaluating it. Note that this is
 much more limited than the <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> operation below, as the
 expression must not contain any of the special constructs (conditional
-expressions, <a class="reference internal" href="pure.html#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>, <a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a>, etc.).</p>
+expressions, <a class="reference internal" href="pure.html#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>, <a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a>, etc.), unless they are
+quoted.</p>
 </dd></dl>
 
 <dl class="function">
@@ -2862,21 +2920,103 @@ result string will be empty.)</p>
 <dl class="function">
 <dt id="lasterr">
 <tt class="descname">lasterr</tt><a class="headerlink" href="#lasterr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reports errors in <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a>. This string value
-will be nonempty iff a compilation or execution error was encountered
-during the most recent invokation of <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a>.
-In that case each reported error message is terminated with a newline
+<dd><p>Reports errors in <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well as in
+<a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> et al, described in the previous subsection). This
+string value will be nonempty iff a compilation or execution error was
+encountered during the most recent invokation of these functions. In
+that case each reported error message is terminated with a newline
 character.</p>
 </dd></dl>
 
+<p>Please note that the use of <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well as
+<a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a>, <a class="reference internal" href="#add_typedef" title="add_typedef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_typedef</span></tt></a> etc. from the preceding subsection)
+to modify a running program breaks referential transparency and hence these
+functions should be used with care. Also, none of the inspection and
+mutation capabilities provided by these operations will work in
+batch-compiled programs, please check the <a class="reference internal" href="pure.html#batch-compilation"><em>Batch Compilation</em></a> section
+in the Pure manual for details. Moreover, using these operations to modify
+or delete a function which is currently being executed results in undefined
+behaviour.</p>
+<p>Examples:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>str (<span class="mi">1</span>/<span class="mi">3</span>)<span class="p">;</span>
+<span class="s">&quot;0.333333333333333&quot;</span>
+<span class="gp">&gt; </span>val <span class="s">&quot;1/3&quot;</span><span class="p">;</span>
+<span class="mi">1</span>/<span class="mi">3</span>
+<span class="gp">&gt; </span>eval <span class="s">&quot;1/3&quot;</span><span class="p">;</span>
+<span class="mf">0.333333333333333</span>
+<span class="gp">&gt; </span>eval (&#39;(<span class="mi">1</span>/<span class="mi">3</span>))<span class="p">;</span>
+<span class="mf">0.333333333333333</span>
+<span class="gp">&gt; </span>evalcmd <span class="s">&quot;show evalcmd&quot;</span><span class="p">;</span>
+<span class="s">&quot;extern expr* evalcmd(expr*);</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="gp">&gt; </span>eval <span class="s">&quot;1/3)&quot;</span><span class="p">;</span>
+eval <span class="s">&quot;1/3)&quot;</span>
+<span class="gp">&gt; </span>lasterr<span class="p">;</span>
+<span class="s">&quot;&lt;stdin&gt;, line 1: syntax error, unexpected &#39;)&#39;, expecting &#39;=&#39; or &#39;|&#39;</span><span class="se">\n</span><span class="s">&quot;</span>
+</pre></div>
+</div>
+<p>In addition to <a class="reference internal" href="#str" title="str"><tt class="xref pure pure-func docutils literal"><span class="pre">str</span></tt></a>, the prelude also provides the following
+function for pretty-printing the internal representation used to denote
+quoted specials. This is commonly used in conjunction with the
+<a class="reference internal" href="pure.html#__show__" title="__show__"><tt class="xref pure pure-func docutils literal"><span class="pre">__show__</span></tt></a> function, please see the <a class="reference internal" href="pure.html#macros"><em>Macros</em></a> section in the Pure
+manual for details.</p>
+<dl class="function">
+<dt id="__str__">
+<tt class="descname">__str__</tt> x<a class="headerlink" href="#__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pretty-prints special expressions.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>__str__ (&#39;__lambda__ [x __type__ <span class="kt">int</span>] (x+<span class="mi">1</span>))<span class="p">;</span>
+<span class="s">&quot;</span><span class="se">\\</span><span class="s">x::int -&gt; x+1&quot;</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> function is commonly used to invoke the <tt class="docutils literal"><span class="pre">show</span></tt> and
+<tt class="docutils literal"><span class="pre">clear</span></tt> commands for metaprogramming purposes. The prelude provides the
+following two convenience functions to make this easy:</p>
+<dl class="function">
+<dt id="globsym">
+<tt class="descname">globsym</tt> pat level<a class="headerlink" href="#globsym" title="Permalink to this definition">¶</a></dt>
+<dd><p>This uses <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> with the <tt class="docutils literal"><span class="pre">show</span></tt> command to list all defined
+symbols matching the given glob pattern. A definition level may be
+specified to restrict the context in which the symbol is defined; a
+level of 0 indicates that all symbols are eligible (see the description
+of the <tt class="docutils literal"><span class="pre">show</span></tt> command in the Pure manual for details). The result is
+the list of all matching (quoted) symbols.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="clearsym">
+<tt class="descname">clearsym</tt> sym level<a class="headerlink" href="#clearsym" title="Permalink to this definition">¶</a></dt>
+<dd><p>This uses <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> with the <tt class="docutils literal"><span class="pre">clear</span></tt> command to delete the
+definition of the given symbol at the given definition level. No glob
+patterns are permitted here.  The <tt class="docutils literal"><span class="pre">sym</span></tt> argument may either be a
+string or a literal (quoted) symbol.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> x,y = <span class="mi">77</span>,<span class="mi">99</span><span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> syms = globsym <span class="s">&quot;[a-z]&quot;</span> <span class="mi">0</span><span class="p">;</span> syms<span class="p">;</span>
+[x,y]
+<span class="gp">&gt; </span>map eval syms<span class="p">;</span>
+[<span class="mi">77</span>,<span class="mi">99</span>]
+<span class="gp">&gt; </span>do (flip clearsym <span class="mi">0</span>) syms<span class="p">;</span>
+()
+<span class="gp">&gt; </span>globsym <span class="s">&quot;[a-z]&quot;</span> <span class="mi">0</span><span class="p">;</span>
+[]
+<span class="gp">&gt; </span>x,y<span class="p">;</span>
+x,y
+</pre></div>
+</div>
+<p>The following functions are useful for doing symbolic expression
+simplification.</p>
 <dl class="function">
 <dt id="reduce">
 <tt class="descname">reduce</tt> x<a class="headerlink" href="#reduce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reevaluates an expression in a local environment. This dynamically
 rebinds function symbols in the given expression to whatever local
-definitions are in effect at the point of the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> call. Note
-that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> is actually implemented as a macro which expands to
-the <a class="reference internal" href="#reduce_with" title="reduce_with"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce_with</span></tt></a> primitive (see below), using the
+function definitions are in effect at the point of the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a>
+call. Note that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> is actually implemented as a macro which
+expands to the <a class="reference internal" href="#reduce_with" title="reduce_with"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce_with</span></tt></a> primitive (see below), using the
 <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> builtin to enumerate the bindings which are in effect
 at the call site.</p>
 </dd></dl>
@@ -2889,31 +3029,12 @@ hash pairs <tt class="docutils literal"><span class="pre">u=&gt;v</span></tt>) a
 expands to <tt class="docutils literal"><span class="pre">reduce_with</span> <span class="pre">__locals__</span></tt>.</p>
 </dd></dl>
 
-<p>Examples:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>str (<span class="mi">1</span>/<span class="mi">3</span>)<span class="p">;</span>
-<span class="s">&quot;0.333333333333333&quot;</span>
-<span class="gp">&gt; </span>val <span class="s">&quot;1/3&quot;</span><span class="p">;</span>
-<span class="mi">1</span>/<span class="mi">3</span>
-<span class="gp">&gt; </span>eval <span class="s">&quot;1/3&quot;</span><span class="p">;</span>
-<span class="mf">0.333333333333333</span>
-<span class="gp">&gt; </span>eval (&#39;(<span class="mi">1</span>/<span class="mi">3</span>))<span class="p">;</span>
-<span class="mf">0.333333333333333</span>
-<span class="gp">&gt; </span>evalcmd <span class="s">&quot;show evalcmd&quot;</span><span class="p">;</span>
-<span class="s">&quot;extern expr* evalcmd(expr*);</span><span class="se">\n</span><span class="s">&quot;</span>
-
-<span class="gp">&gt; </span>eval <span class="s">&quot;1/3)&quot;</span><span class="p">;</span>
-eval <span class="s">&quot;1/3)&quot;</span>
-<span class="gp">&gt; </span>lasterr<span class="p">;</span>
-<span class="s">&quot;&lt;stdin&gt;, line 1: syntax error, unexpected &#39;)&#39;, expecting &#39;=&#39; or &#39;|&#39;</span><span class="se">\n</span><span class="s">&quot;</span>
-</pre></div>
-</div>
 <p>The <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro provides a restricted form of dynamic binding
 which is useful to implement local rewriting rules. It is invoked without
 parameters and expands to the curried call <tt class="docutils literal"><span class="pre">reduce_with</span> <span class="pre">__locals__</span></tt> of
 the <a class="reference internal" href="#reduce_with" title="reduce_with"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce_with</span></tt></a> primitive, which takes one additional argument, the
 expression to be rewritten. The following example shows how to expand or
-factorize an expression using local rules for the corresponding laws of
-distributivity:</p>
+factorize an expression using local rules for the laws of distributivity:</p>
 <div class="highlight-pure"><div class="highlight"><pre>expand = reduce <span class="kr">with</span>
   (a+b)*c = a*c+b*c<span class="p">;</span>
   a*(b+c) = a*b+a*c<span class="p">;</span>

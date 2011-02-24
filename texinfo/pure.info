@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.47, February 23, 2011
+  Version 0.47, February 24, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -77,7 +77,7 @@ Invoking Pure
 Pure Overview
 
 * Lexical Matters::
-* Definitions and Symbolic Evaluation::
+* Definitions and Expression Evaluation::
 * Variables in Equations::
 * Expression Syntax::
 * Special Forms::
@@ -130,11 +130,12 @@ Interactive Usage
 
 * Online Help::
 * Interactive Commands::
-* Last Result::
 * Specifying Symbol Selections::
 * The show Command::
 * Definition Levels::
 * Debugging::
+* Last Result::
+* Pretty-Printing::
 * Interactive Startup::
 
 Batch Compilation
@@ -149,10 +150,9 @@ Caveats and Notes
 * Etymology::
 * Backward Compatibility::
 * Error Recovery::
-* The __show__ Function::
 * Non-Linear Patterns::
 * "As" Patterns::
-* Head = Function::
+* "Head = Function" Pitfalls::
 * Recursive Types::
 * With and when::
 * Numeric Calculations::
@@ -160,7 +160,7 @@ Caveats and Notes
 * External C Functions::
 * Calling Special Forms::
 * Laziness::
-* Hygienic Macros::
+* Showing Macro Expansions::
 * Stack Size and Tail Recursion::
 * Handling of Asynchronous Signals::
 
@@ -966,7 +966,7 @@ interpreter's default command prompt):
 * Menu:
 
 * Lexical Matters::
-* Definitions and Symbolic Evaluation::
+* Definitions and Expression Evaluation::
 * Variables in Equations::
 * Expression Syntax::
 * Special Forms::
@@ -974,7 +974,7 @@ interpreter's default command prompt):
 * Scoping Rules::
 
 
-File: pure.info,  Node: Lexical Matters,  Next: Definitions and Symbolic Evaluation,  Up: Pure Overview
+File: pure.info,  Node: Lexical Matters,  Next: Definitions and Expression Evaluation,  Up: Pure Overview
 
 3.1 Lexical Matters
 ===================
@@ -1104,10 +1104,10 @@ these can also be enclosed in parentheses. E.g., `"\(123)4"' is a
 string consisting of the character `\123' followed by the digit `4'.
 
 
-File: pure.info,  Node: Definitions and Symbolic Evaluation,  Next: Variables in Equations,  Prev: Lexical Matters,  Up: Pure Overview
+File: pure.info,  Node: Definitions and Expression Evaluation,  Next: Variables in Equations,  Prev: Lexical Matters,  Up: Pure Overview
 
-3.2 Definitions and Symbolic Evaluation
-=======================================
+3.2 Definitions and Expression Evaluation
+=========================================
 
 On the surface, Pure is quite similar to other modern functional
 languages like *note Haskell: 5f. and *note ML: 60. But under the hood
@@ -1239,7 +1239,7 @@ Example:
 
 
 
-File: pure.info,  Node: Variables in Equations,  Next: Expression Syntax,  Prev: Definitions and Symbolic Evaluation,  Up: Pure Overview
+File: pure.info,  Node: Variables in Equations,  Next: Expression Syntax,  Prev: Definitions and Expression Evaluation,  Up: Pure Overview
 
 3.3 Variables in Equations
 ==========================
@@ -2073,7 +2073,7 @@ form which is simply returned as is:
 This may come as a surprise (other functional languages will give you
 an error in such cases), but is a crucial feature of term rewriting
 languages, as it opens the door to symbolic evaluation techniques, see
-*note Definitions and Symbolic Evaluation: 5e.
+*note Definitions and Expression Evaluation: 5e.
 
   Pretty much any kind of legal Pure expression can be used as a
 pattern; the only exceptions are list and matrix comprehensions. (These
@@ -3169,7 +3169,7 @@ the pivoting step) and to apply a transposition to a permutation
 
 Finally, let us define a convenient print representation of double
 matrices a la *note Octave: 9b. (the meaning of the *note __show__: 9c.
-function is explained in *note The __show__ Function: 9d.):
+function is explained in *note Pretty-Printing: 9d.):
 
     using system;
     __show__ x::matrix
@@ -3514,30 +3514,14 @@ instance, the following macro swaps the arguments in a lambda:
     > def bar (\x y -> z) = __eval__ ('(\y x -> z));
     > show bar
     def bar (__lambda__ [x,y] z) = __eval__ ('__lambda__ [y,x] z);
-    > foo = bar (\a b -> a-b);
-    > show foo
-    foo = \b a -> a-b;
-    > foo 2 3;
+    > baz = bar (\a b -> a-b);
+    > show baz
+    baz = \b a -> a-b;
+    > baz 2 3;
     1
 
 The *note Macros: 86. section explains in detail how this meta
 programming works.
-
-  A useful feature of Lisp's quasiquote is the capability to splice
-arguments into a function application. It is possible to achieve pretty
-much the same in Pure with the following variation of the `$' operator
-which "curries" its second (tuple) operand:
-
-    infixr 0 $@ ;
-    f $@ ()     = f;
-    f $@ (x,xs) = f x $@ xs;
-    f $@ x      = f x;
-
-Now you can write, e.g.:
-
-    > '(foo 1 2) $@ '(2/3,3/4);
-    foo 1 2 (2/3) (3/4)
-
 
 
 File: pure.info,  Node: Declarations,  Next: Macros,  Prev: Examples,  Up: Top
@@ -4577,8 +4561,8 @@ of this example.)
 
 (Note the `f@_', which is an anonymous "as" pattern forcing the
 compiler to recognize `f' as a function variable, rather than a literal
-function symbol. See *note Head = Function: c0. in the *note Caveats
-and Notes: c. section for an explanation of this trick.)
+function symbol. See *note "As" Patterns: c0. in the *note Caveats and
+Notes: c. section for an explanation of this trick.)
 
   The first rule above takes care of "unquoting" embedded subterms. The
 second rule "splices" an argument list into an enclosing function
@@ -4819,9 +4803,10 @@ The `__str__' function can be used to pretty-print quoted specials:
     "dup (1..3) with dup xs@(x:_) = x:xs end"
 
 This is useful to see which expression a quoted special will expand to.
-It can also be used in conjunction with *note __show__: 9c. (see *note
-The __show__ Function: 9d.) if you always want to have quoted specials
-printed that way by the interpreter.
+Note that `__str__' can also be used to define print representations for
+quoted specials with *note __show__: 9c. (described in *note
+Pretty-Printing: 9d.) if you always want to have them printed that way
+by the interpreter.
 
   As quoted specials are just ordinary Pure expressions, they can be
 manipulated by functions just like any other term. For instance, here's
@@ -6201,20 +6186,21 @@ printed in the same form as you'd enter them. However, there are a few
 special kinds of objects like anonymous closures, thunks ("lazy" values
 to be evaluated when needed) and pointers which don't have a textual
 representation in the Pure syntax and will be printed in the format
-`#<'object description`>' by default. It is also possible to override
+`#<'_object description_`>' by default. It is also possible to override
 the print representation of any kind of expression by means of the
-*note __show__: 9c. function, see *note The __show__ Function: 9d. for
+*note __show__: 9c. function, see *note Pretty-Printing: 9d. below for
 details.
 
 * Menu:
 
 * Online Help::
 * Interactive Commands::
-* Last Result::
 * Specifying Symbol Selections::
 * The show Command::
 * Definition Levels::
 * Debugging::
+* Last Result::
+* Pretty-Printing::
 * Interactive Startup::
 
 
@@ -6298,7 +6284,7 @@ provided that your browser program can handle these. For instance:
 
 
 
-File: pure.info,  Node: Interactive Commands,  Next: Last Result,  Prev: Online Help,  Up: Interactive Usage
+File: pure.info,  Node: Interactive Commands,  Next: Specifying Symbol Selections,  Prev: Online Help,  Up: Interactive Usage
 
 11.2 Interactive Commands
 =========================
@@ -6497,36 +6483,9 @@ what `namespace' and `using namespace' declarations are currently in
 effect.
 
 
-File: pure.info,  Node: Last Result,  Next: Specifying Symbol Selections,  Prev: Interactive Commands,  Up: Interactive Usage
+File: pure.info,  Node: Specifying Symbol Selections,  Next: The show Command,  Prev: Interactive Commands,  Up: Interactive Usage
 
-11.3 Last Result
-================
-
-Another convenience for interactive usage is the `ans' function, which
-retrieves the most recent result printed in interactive mode. For
-instance:
-
-    > fact n = if n<=1 then 1 else n*fact (n-1);
-    > map fact (1..10);
-    [1,2,6,24,120,720,5040,40320,362880,3628800]
-    > scanl (+) 0 ans;
-    [0,1,3,9,33,153,873,5913,46233,409113,4037913]
-
-Note that `ans' is just an ordinary function, defined in the prelude,
-not a special command. However, there is a special `clear ans' command
-which purges the `ans' value. This is useful, e.g., if you got a huge
-result which you want to erase from memory before starting the next
-computation.
-
-    > clear ans
-    > ans;
-    ans
-
-
-
-File: pure.info,  Node: Specifying Symbol Selections,  Next: The show Command,  Prev: Last Result,  Up: Interactive Usage
-
-11.4 Specifying Symbol Selections
+11.3 Specifying Symbol Selections
 =================================
 
 The `clear', `dump' and `show' commands all accept the following options
@@ -6608,7 +6567,7 @@ Definition Levels: f3. below for some examples.
 
 File: pure.info,  Node: The show Command,  Next: Definition Levels,  Prev: Specifying Symbol Selections,  Up: Interactive Usage
 
-11.5 The show Command
+11.4 The show Command
 =====================
 
 The `show' command can be used to obtain information about defined
@@ -6724,7 +6683,7 @@ namespaces are available in your program. For instance:
 
 File: pure.info,  Node: Definition Levels,  Next: Debugging,  Prev: The show Command,  Up: Interactive Usage
 
-11.6 Definition Levels
+11.5 Definition Levels
 ======================
 
 To help with incremental development, the interpreter offers some
@@ -6863,13 +6822,12 @@ instance:
 Finally, it is worth noting here that the facilities described above
 are also available to Pure programs, as the `save' and `clear' commands
 can also be executed under program control using the `evalcmd'
-primitive; see *note Reflection: cf. in the *note Macros: 86. section
-for details.
+primitive; see the `purelib' for details.
 
 
-File: pure.info,  Node: Debugging,  Next: Interactive Startup,  Prev: Definition Levels,  Up: Interactive Usage
+File: pure.info,  Node: Debugging,  Next: Last Result,  Prev: Definition Levels,  Up: Interactive Usage
 
-11.7 Debugging
+11.6 Debugging
 ==============
 
 The interpreter provides a simple but reasonably convenient symbolic
@@ -7124,9 +7082,139 @@ in progress. (However, it's possible to set a temporary breakpoint in
 the debugger with the `c' command, see above.)
 
 
-File: pure.info,  Node: Interactive Startup,  Prev: Debugging,  Up: Interactive Usage
+File: pure.info,  Node: Last Result,  Next: Pretty-Printing,  Prev: Debugging,  Up: Interactive Usage
 
-11.8 Interactive Startup
+11.7 Last Result
+================
+
+Another convenience for interactive usage is the `ans' function, which
+retrieves the most recent result printed in interactive mode. For
+instance:
+
+    > fact n = if n<=1 then 1 else n*fact (n-1);
+    > map fact (1..10);
+    [1,2,6,24,120,720,5040,40320,362880,3628800]
+    > scanl (+) 0 ans;
+    [0,1,3,9,33,153,873,5913,46233,409113,4037913]
+
+Note that `ans' is just an ordinary function, defined in the prelude,
+not a special command. However, there is a special `clear ans' command
+which purges the `ans' value. This is useful, e.g., if you got a huge
+result which you want to erase from memory before starting the next
+computation.
+
+    > clear ans
+    > ans;
+    ans
+
+
+
+File: pure.info,  Node: Pretty-Printing,  Next: Interactive Startup,  Prev: Last Result,  Up: Interactive Usage
+
+11.8 Pretty-Printing
+====================
+
+The interpreter provides the following "hook" to override the print
+representations of expressions. This works in a fashion similar to
+Haskell's `show' function.
+
+ -- Function: __show__ x
+     The programmer may define this function to supply custom print
+     representations for certain expressions.
+
+  *note __show__: 9c. is just an ordinary Pure function expected to
+return a string with the desired custom representation of a normal form
+value given as the function's single argument. The interpreter prints
+the strings returned by *note __show__: 9c. just as they are. It will
+not check whether they conform to Pure syntax and/or semantics, or
+modify them in any way. Also, the library doesn't define this function
+anywhere, so you are free to add any rules that you want.
+
+  Custom print representations are most useful for interactive
+purposes, if you're not happy with the default print syntax of some
+kinds of objects. One particularly useful application of *note
+__show__: 9c. is to change the format of numeric values. Here are some
+examples:
+
+    > using system;
+    > __show__ x::double = sprintf "%0.6f" x;
+    > 1/7;
+    0.142857
+    > __show__ x::int = sprintf "0x%0x" x;
+    > 1786;
+    0x6fa
+    > using math;
+    > __show__ (x::double +: y::double) = sprintf "%0.6f+%0.6fi" (x,y);
+    > cis (-pi/2);
+    0.000000+-1.000000i
+
+The prelude function `str', which returns the print representation of
+any Pure expression, calls *note __show__: 9c. as well:
+
+    > str (1/7);
+    "0.142857"
+
+Conversely, you can call the `str' function from *note __show__: 9c, but
+in this case it always returns the default representation of an
+expression. This prevents the expression printer from going recursive,
+and allows you to define your custom representation in terms of the
+default one. E.g., the following rule removes the `L' suffixes from
+bigint values:
+
+    > __show__ x::bigint = init (str x);
+    > fact n = foldl (*) 1L (1..n);
+    > fact 30;
+    265252859812191058636308480000000
+
+Of course, your definition of *note __show__: 9c. can also call *note
+__show__: 9c.  itself recursively to determine the custom
+representation of an object.
+
+  One case which needs special consideration are thunks (futures). The
+printer will _never_ use *note __show__: 9c. for those, to prevent them
+from being forced inadvertently. In fact, you _can_ use *note __show__:
+9c. to define custom representations for thunks, but only in the
+context of a rule for other kinds of objects, such as lists. For
+instance:
+
+    > nonfix ...;
+    > __show__ (x:xs) = str (x:...) if thunkp xs;
+    > 1:2:(3..inf);
+    1:2:3:...
+
+Another case which needs special consideration are numeric matrices. For
+efficiency, the expression printer will always use the default
+representation for these, unless you override the representation of the
+matrix as a whole. E.g., the following rule for double matrices mimics
+Octave's default output format (for the sake of simplicity, this isn't
+perfect, but you get the idea):
+
+    > __show__ x::matrix =
+    >   strcat [printd j (x!(i,j))|i=0..n-1; j=0..m-1] + "\n"
+    > with printd 0 = sprintf "\n%10.5f"; printd _ = sprintf "%10.5f" end
+    > when n,m = dim x end if dmatrixp x;
+    > {1.0,1/2;1/3,4.0};
+       1.00000   0.50000
+       0.33333   4.00000
+
+Finally, by just purging the definition of the *note __show__: 9c.
+function you can easily go back to the standard print syntax:
+
+    > clear __show__
+    > 1/7; 1786; cis (-pi/2);
+    0.142857142857143
+    1786
+    6.12303176911189e-17+:-1.0
+
+Note that if you have a set of definitions for the *note __show__: 9c.
+function which should always be loaded at startup, you can put them
+into the interpreter's interactive startup files, see *note Interactive
+Startup: f7. below.
+
+
+File: pure.info,  Node: Interactive Startup,  Prev: Pretty-Printing,  Up: Interactive Usage
+
+11.9 Interactive Startup
 ========================
 
 In interactive mode, the interpreter also runs some additional scripts
@@ -7605,10 +7693,9 @@ current implementation and how to deal with them.
 * Etymology::
 * Backward Compatibility::
 * Error Recovery::
-* The __show__ Function::
 * Non-Linear Patterns::
 * "As" Patterns::
-* Head = Function::
+* "Head = Function" Pitfalls::
 * Recursive Types::
 * With and when::
 * Numeric Calculations::
@@ -7616,7 +7703,7 @@ current implementation and how to deal with them.
 * External C Functions::
 * Calling Special Forms::
 * Laziness::
-* Hygienic Macros::
+* Showing Macro Expansions::
 * Stack Size and Tail Recursion::
 * Handling of Asynchronous Signals::
 
@@ -7781,7 +7868,7 @@ order to support the advanced metaprogramming capabilities discussed in
 Reflection: cf.
 
 
-File: pure.info,  Node: Error Recovery,  Next: The __show__ Function,  Prev: Backward Compatibility,  Up: Caveats and Notes
+File: pure.info,  Node: Error Recovery,  Next: Non-Linear Patterns,  Prev: Backward Compatibility,  Up: Caveats and Notes
 
 13.3 Error Recovery
 ===================
@@ -7797,109 +7884,9 @@ entering an extra semicolon or two should break the spell, putting you
 back at the toplevel where you can start typing the definition again.
 
 
-File: pure.info,  Node: The __show__ Function,  Next: Non-Linear Patterns,  Prev: Error Recovery,  Up: Caveats and Notes
+File: pure.info,  Node: Non-Linear Patterns,  Next: "As" Patterns,  Prev: Error Recovery,  Up: Caveats and Notes
 
-13.4 The __show__ Function
-==========================
-
- -- Function: __show__ x
-     This function provides a "hook" to override the print
-     representations of expressions at runtime, which works in a
-     fashion similar to Haskell's `show' function.
-
-  *note __show__: 9c. is just an ordinary Pure function expected to
-return a string with the desired custom representation of a normal form
-value given as the function's single argument. The interpreter prints
-the strings returned by *note __show__: 9c. just as they are. It will
-not check whether they conform to Pure syntax and/or semantics, or
-modify them in any way. Also, the library doesn't define this function
-anywhere, so you are free to add any rules that you want.
-
-  Custom print representations are most useful for interactive
-purposes, if you're not happy with the default print syntax of some
-kinds of objects. One particularly useful application of *note
-__show__: 9c. is to change the format of numeric values. Here are some
-examples:
-
-    > using system;
-    > __show__ x::double = sprintf "%0.6f" x;
-    > 1/7;
-    0.142857
-    > __show__ x::int = sprintf "0x%0x" x;
-    > 1786;
-    0x6fa
-    > using math;
-    > __show__ (x::double +: y::double) = sprintf "%0.6f+%0.6fi" (x,y);
-    > cis (-pi/2);
-    0.000000+-1.000000i
-
-The prelude function `str', which returns the print representation of
-any Pure expression, calls *note __show__: 9c. as well:
-
-    > str (1/7);
-    "0.142857"
-
-Conversely, you can call the `str' function from *note __show__: 9c, but
-in this case it always returns the default representation of an
-expression. This prevents the expression printer from going recursive,
-and allows you to define your custom representation in terms of the
-default one. E.g., the following rule removes the `L' suffixes from
-bigint values:
-
-    > __show__ x::bigint = init (str x);
-    > fact n = foldl (*) 1L (1..n);
-    > fact 30;
-    265252859812191058636308480000000
-
-Of course, your definition of *note __show__: 9c. can also call *note
-__show__: 9c.  itself recursively to determine the custom
-representation of an object.
-
-  One case which needs special consideration are thunks (futures). The
-printer will _never_ use *note __show__: 9c. for those, to prevent them
-from being forced inadvertently. In fact, you _can_ use *note __show__:
-9c. to define custom representations for thunks, but only in the
-context of a rule for other kinds of objects, such as lists. For
-instance:
-
-    > nonfix ...;
-    > __show__ (x:xs) = str (x:...) if thunkp xs;
-    > 1:2:(3..inf);
-    1:2:3:...
-
-Another case which needs special consideration are numeric matrices. For
-efficiency, the expression printer will always use the default
-representation for these, unless you override the representation of the
-matrix as a whole. E.g., the following rule for double matrices mimics
-Octave's default output format (for the sake of simplicity, this isn't
-perfect, but you get the idea):
-
-    > __show__ x::matrix =
-    >   strcat [printd j (x!(i,j))|i=0..n-1; j=0..m-1] + "\n"
-    > with printd 0 = sprintf "\n%10.5f"; printd _ = sprintf "%10.5f" end
-    > when n,m = dim x end if dmatrixp x;
-    > {1.0,1/2;1/3,4.0};
-       1.00000   0.50000
-       0.33333   4.00000
-
-Finally, by just purging the definition of the *note __show__: 9c.
-function you can easily go back to the standard print syntax:
-
-    > clear __show__
-    > 1/7; 1786; cis (-pi/2);
-    0.142857142857143
-    1786
-    6.12303176911189e-17+:-1.0
-
-Note that if you have a set of definitions for the *note __show__: 9c.
-function which should always be loaded at startup, you can put them
-into the interpreter's interactive startup files, see *note Interactive
-Usage: a.
-
-
-File: pure.info,  Node: Non-Linear Patterns,  Next: "As" Patterns,  Prev: The __show__ Function,  Up: Caveats and Notes
-
-13.5 Non-Linear Patterns
+13.4 Non-Linear Patterns
 ========================
 
 As explained in section *note Patterns: 89, Pure allows multiple
@@ -7932,9 +7919,9 @@ verified in a finite amount of time. Therefore the interpreter reports a
 "recursive variable" error in such situations.
 
 
-File: pure.info,  Node: "As" Patterns,  Next: Head = Function,  Prev: Non-Linear Patterns,  Up: Caveats and Notes
+File: pure.info,  Node: "As" Patterns,  Next: "Head = Function" Pitfalls,  Prev: Non-Linear Patterns,  Up: Caveats and Notes
 
-13.6 "As" Patterns
+13.5 "As" Patterns
 ==================
 
 In the current implementation, "as" patterns cannot be placed on the
@@ -7954,13 +7941,6 @@ matched is available at runtime. For instance:
 
     > case bar 99 of y@(bar x) = y,x+1; end;
     bar 99,100
-
-
-
-File: pure.info,  Node: Head = Function,  Next: Recursive Types,  Prev: "As" Patterns,  Up: Caveats and Notes
-
-13.7 Head = Function
-====================
 
 "As" patterns are also a useful device if you need to manipulate
 function applications in a generic way. Note that the "head = function"
@@ -7988,7 +7968,13 @@ function applications are not all that common, so having to "escape" a
 variable using the anonymous "as" pattern trick is a small price to pay
 for that convenience.
 
-  Sometimes you may also run into the complementary problem, i.e., to
+
+File: pure.info,  Node: "Head = Function" Pitfalls,  Next: Recursive Types,  Prev: "As" Patterns,  Up: Caveats and Notes
+
+13.6 "Head = Function" Pitfalls
+===============================
+
+Sometimes you may also run into the complementary problem, i.e., to
 match a function argument against a given function. Consider this code
 fragment:
 
@@ -8037,9 +8023,9 @@ anymore. It's usually a good idea to avoid that kind of thing, at least
 for generic symbols, so the above solution is preferred in this case.
 
 
-File: pure.info,  Node: Recursive Types,  Next: With and when,  Prev: Head = Function,  Up: Caveats and Notes
+File: pure.info,  Node: Recursive Types,  Next: With and when,  Prev: "Head = Function" Pitfalls,  Up: Caveats and Notes
 
-13.8 Recursive Types
+13.7 Recursive Types
 ====================
 
 Using the facilities described in *note Type Rules: 92, type tags can
@@ -8134,7 +8120,7 @@ tradeoffs also apply to other recursive types such as trees.
 
 File: pure.info,  Node: With and when,  Next: Numeric Calculations,  Prev: Recursive Types,  Up: Caveats and Notes
 
-13.9 With and when
+13.8 With and when
 ==================
 
 A common source of confusion is that Pure provides two different
@@ -8184,8 +8170,8 @@ above will compile to exactly the same code as:
 
 File: pure.info,  Node: Numeric Calculations,  Next: Constant Definitions,  Prev: With and when,  Up: Caveats and Notes
 
-13.10 Numeric Calculations
-==========================
+13.9 Numeric Calculations
+=========================
 
 If possible, you should decorate numeric variables on the left-hand
 sides of function definitions with the appropriate type tags, like
@@ -8224,7 +8210,7 @@ doubles, but not ints or bigints.
 
 File: pure.info,  Node: Constant Definitions,  Next: External C Functions,  Prev: Numeric Calculations,  Up: Caveats and Notes
 
-13.11 Constant Definitions
+13.10 Constant Definitions
 ==========================
 
 Constants differ from variables in that they cannot be redefined
@@ -8373,7 +8359,7 @@ details.)
 
 File: pure.info,  Node: External C Functions,  Next: Calling Special Forms,  Prev: Constant Definitions,  Up: Caveats and Notes
 
-13.12 External C Functions
+13.11 External C Functions
 ==========================
 
 The interpreter always takes your *note extern: a3. declarations of C
@@ -8407,7 +8393,7 @@ Please refer to `pure-gen' for details.
 
 File: pure.info,  Node: Calling Special Forms,  Next: Laziness,  Prev: External C Functions,  Up: Caveats and Notes
 
-13.13 Calling Special Forms
+13.12 Calling Special Forms
 ===========================
 
 Special forms are recognized at compile time only. Thus the *note
@@ -8419,9 +8405,9 @@ applications, but in this case they lose all their special call-by-name
 argument processing.
 
 
-File: pure.info,  Node: Laziness,  Next: Hygienic Macros,  Prev: Calling Special Forms,  Up: Caveats and Notes
+File: pure.info,  Node: Laziness,  Next: Showing Macro Expansions,  Prev: Calling Special Forms,  Up: Caveats and Notes
 
-13.14 Laziness
+13.13 Laziness
 ==============
 
 Pure does lazy evaluation in the same way as *note Alice ML: 11b,
@@ -8504,10 +8490,10 @@ you should be aware of:
      Streams: 77. for an example.
 
 
-File: pure.info,  Node: Hygienic Macros,  Next: Stack Size and Tail Recursion,  Prev: Laziness,  Up: Caveats and Notes
+File: pure.info,  Node: Showing Macro Expansions,  Next: Stack Size and Tail Recursion,  Prev: Laziness,  Up: Caveats and Notes
 
-13.15 Hygienic Macros
-=====================
+13.14 Showing Macro Expansions
+==============================
 
 As mentioned in the *note Macro Hygiene: c3. section, Pure macros are
 lexically scoped and thus "hygienic". So Pure macros are not suceptible
@@ -8544,9 +8530,9 @@ hopefully be fixed some time. But for the time being you will have to
 correct such glitches manually.
 
 
-File: pure.info,  Node: Stack Size and Tail Recursion,  Next: Handling of Asynchronous Signals,  Prev: Hygienic Macros,  Up: Caveats and Notes
+File: pure.info,  Node: Stack Size and Tail Recursion,  Next: Handling of Asynchronous Signals,  Prev: Showing Macro Expansions,  Up: Caveats and Notes
 
-13.16 Stack Size and Tail Recursion
+13.15 Stack Size and Tail Recursion
 ===================================
 
 Pure programs may need a considerable amount of stack space to handle
@@ -8588,7 +8574,7 @@ program that does deep tail recursion.
 
 File: pure.info,  Node: Handling of Asynchronous Signals,  Prev: Stack Size and Tail Recursion,  Up: Caveats and Notes
 
-13.17 Handling of Asynchronous Signals
+13.16 Handling of Asynchronous Signals
 ======================================
 
 As described in section *note Exception Handling: d0, signals delivered
@@ -8792,15 +8778,14 @@ Index
 * __case__ macro:                        Built-in Macros and Special Expressions.
                                                               (line  20)
 * __eval__ macro:                        Built-in Macros and Special Expressions.
-                                                              (line 197)
+                                                              (line 198)
 * __if__ infix constructor:              Built-in Macros and Special Expressions.
                                                               (line  43)
 * __ifelse__ macro:                      Built-in Macros and Special Expressions.
                                                               (line  13)
 * __lambda__ macro:                      Built-in Macros and Special Expressions.
                                                               (line  17)
-* __show__ function:                     The __show__ Function.
-                                                              (line   6)
+* __show__ function:                     Pretty-Printing.     (line  10)
 * __type__ infix constructor:            Built-in Macros and Special Expressions.
                                                               (line  57)
 * __when__ infix macro:                  Built-in Macros and Special Expressions.
@@ -8989,771 +8974,770 @@ Ref: 1326
 Ref: gpl326
 Ref: 2326
 Ref: lgpl326
-Node: Introduction3393
-Ref: introduction3477
-Ref: 53477
-Ref: the-pure-manual3477
-Ref: 63477
-Node: Further Reading7281
-Ref: further reading7377
-Ref: d7377
-Ref: further-reading7377
-Ref: e7972
-Ref: functional-programming7972
-Node: Typographical Conventions8569
-Ref: typographical conventions8665
-Ref: 118665
-Ref: typographical-conventions8665
-Node: Invoking Pure10538
-Ref: invoking pure10632
-Ref: 810632
-Ref: invoking-pure10632
-Node: Options12650
-Ref: options12735
-Ref: 1512735
-Ref: 1612843
-Ref: cmdoption-pure-c12843
-Ref: 1712883
-Ref: cmdoption-pure--ctags12883
-Ref: 1812903
-Ref: cmdoption-pure--etags12903
-Ref: 1912987
-Ref: cmdoption-pure--eager-jit12987
-Ref: 1a13122
-Ref: cmdoption-pure-fpic13122
-Ref: 1313218
-Ref: cmdoption-pure-g13218
-Ref: 1b13266
-Ref: cmdoption-pure-h13266
-Ref: 1c13281
-Ref: cmdoption-pure--help13281
-Ref: 1d13335
-Ref: cmdoption-pure-i13335
-Ref: 1e13498
-Ref: cmdoption-pure-l13498
-Ref: 1f13655
-Ref: cmdoption-pure--noediting13655
-Ref: 2013715
-Ref: cmdoption-pure-n13715
-Ref: 2113730
-Ref: cmdoption-pure--noprelude13730
-Ref: 2213785
-Ref: cmdoption-pure--norc13785
-Ref: 2313852
-Ref: cmdoption-pure-o13852
-Ref: 1413921
-Ref: cmdoption-pure-q13921
-Ref: 2414006
-Ref: cmdoption-pure-t14006
-Ref: 2514104
-Ref: cmdoption-pure-u14104
-Ref: 2614177
-Ref: cmdoption-pure-v14177
-Ref: 2714249
-Ref: cmdoption-pure--version14249
-Ref: 2814313
-Ref: cmdoption-pure-w14313
-Ref: 2914360
-Ref: cmdoption-pure-x14360
-Ref: 2a14431
-Ref: cmdoption-pure--14431
-Node: Overview of Operation14753
-Ref: overview of operation14864
-Ref: 2c14864
-Ref: overview-of-operation14864
-Ref: 2f16973
-Ref: index-016973
-Ref: 3117021
-Ref: index-117021
-Node: Compiling Scripts17564
-Ref: compiling scripts17683
-Ref: 2e17683
-Ref: compiling-scripts17683
-Ref: 3518509
-Ref: index-218509
-Node: Tagging Scripts21847
-Ref: tagging scripts21966
-Ref: 3821966
-Ref: tagging-scripts21966
-Ref: 3922362
-Ref: tags22362
-Node: Running Interactively23655
-Ref: running interactively23788
-Ref: 1223788
-Ref: running-interactively23788
-Node: Verbosity and Debugging Options25673
-Ref: verbosity and debugging options25814
-Ref: 3725814
-Ref: verbosity-and-debugging-options25814
-Node: Code Generation Options28707
-Ref: code generation options28840
-Ref: 2b28840
-Ref: code-generation-options28840
-Ref: 3c30316
-Ref: cmdoption-pure--checks30316
-Ref: 3d30337
-Ref: cmdoption-pure--nochecks30337
-Ref: 3e30490
-Ref: index-330490
-Ref: 4231127
-Ref: cmdoption-pure--const31127
-Ref: 4331147
-Ref: cmdoption-pure--noconst31147
-Ref: 4531762
-Ref: cmdoption-pure--fold31762
-Ref: 4631781
-Ref: cmdoption-pure--nofold31781
-Ref: 4732472
-Ref: cmdoption-pure--tc32472
-Ref: 4832489
-Ref: cmdoption-pure--notc32489
-Ref: 4933273
-Ref: cmdoption-pure--eager33273
-Ref: 4a33995
-Ref: cmdoption-pure--required33995
-Node: Startup Files34478
-Ref: startup files34591
-Ref: 4b34591
-Ref: startup-files34591
-Node: Environment35077
-Ref: environment35158
-Ref: 4c35158
-Ref: 4d35296
-Ref: envvar-browser35296
-Ref: 4e35328
-Ref: index-435328
-Ref: 3035525
-Ref: envvar-purelib35525
-Ref: 5035617
-Ref: index-535617
-Ref: 3635720
-Ref: envvar-pure_eager_jit35720
-Ref: 4f35867
-Ref: envvar-pure_help35867
-Ref: 5136015
-Ref: envvar-pure_include36015
-Ref: 5236139
-Ref: envvar-pure_library36139
-Ref: 5336264
-Ref: envvar-pure_more36264
-Ref: 5436418
-Ref: index-636418
-Ref: 5536501
-Ref: envvar-pure_ps36501
-Ref: 3f36603
-Ref: envvar-pure_stack36603
-Node: Pure Overview36965
-Ref: pure overview37058
-Ref: 937058
-Ref: pure-overview37058
-Node: Lexical Matters38876
-Ref: lexical matters38983
-Ref: 5838983
-Ref: lexical-matters38983
-Ref: 5a42779
-Ref: code-charts42779
-Ref: 5b42779
-Ref: unicode-consortium42779
-Ref: 5d45332
-Ref: id145332
-Node: Definitions and Symbolic Evaluation45332
-Ref: definitions and symbolic evaluation45470
-Ref: 5e45470
-Ref: definitions-and-symbolic-evaluation45470
-Node: Variables in Equations50425
-Ref: variables in equations50565
-Ref: 6950565
-Ref: variables-in-equations50565
-Node: Expression Syntax52756
-Ref: expression syntax52874
-Ref: 6b52874
-Ref: expression-syntax52874
-Node: Primary Expressions56594
-Ref: primary expressions56692
-Ref: 7356692
-Ref: primary-expressions56692
-Node: Simple Expressions69014
-Ref: simple expressions69140
-Ref: 7a69140
-Ref: simple-expressions69140
-Node: Special Expressions72254
-Ref: special expressions72352
-Ref: 7072352
-Ref: if72352
-Ref: 7172352
-Ref: then72352
-Ref: 7272352
-Ref: else72352
-Ref: 6e72352
-Ref: case72352
-Ref: 6f72352
-Ref: when72352
-Ref: 6872352
-Ref: with72352
-Ref: 5972352
-Ref: end72352
-Ref: 7b72352
-Ref: special-expressions72352
-Node: Special Forms74864
-Ref: special forms74968
-Ref: 7674968
-Ref: special-forms74968
-Ref: 7d74968
-Ref: id274968
-Ref: 6375368
-Ref: &&/special75368
-Ref: 6475389
-Ref: ||/special75389
-Ref: 6577107
-Ref: $$77107
-Ref: 6677911
-Ref: &77911
-Ref: 6778924
-Ref: quote78924
-Ref: 7e78946
-Ref: '78946
-Node: Toplevel79620
-Ref: toplevel79720
-Ref: 8079720
-Ref: def79720
-Ref: 8179720
-Ref: let79720
-Ref: 4479720
-Ref: const79720
-Ref: 8279720
-Ref: otherwise79720
-Ref: 8379720
-Node: Scoping Rules83150
-Ref: scoping rules83228
-Ref: 8783228
-Ref: scoping-rules83228
-Node: Rule Syntax86255
-Ref: rule syntax86343
-Ref: 6286343
-Ref: rule-syntax86343
-Node: Patterns87689
-Ref: patterns87761
-Ref: 8987761
-Node: Type Tags96507
-Ref: type tags96601
-Ref: 6196601
-Ref: type-tags96601
-Ref: 8c96601
-Ref: id496601
-Ref: 8e98172
-Ref: int/type98172
-Ref: 8f98222
-Ref: bigint/type98222
-Ref: 9098301
-Ref: double/type98301
-Ref: 9198377
-Ref: string/type98377
-Ref: 8a98431
-Ref: matrix/type98431
-Ref: 8d98506
-Ref: pointer/type98506
-Node: General Rules102201
-Ref: general rules102299
-Ref: 93102299
-Ref: general-rules102299
-Node: Simple Rules105531
-Ref: simple rules105630
-Ref: 94105630
-Ref: simple-rules105630
-Node: Type Rules107160
-Ref: type rules107237
-Ref: 88107237
-Ref: type107237
-Ref: 92107237
-Ref: type-rules107237
-Ref: 95107237
-Ref: id5107237
-Node: Examples119872
-Ref: examples119959
-Ref: 79119959
-Node: List Comprehensions121688
-Ref: list comprehensions121786
-Ref: 98121786
-Ref: list-comprehensions121786
-Node: Lazy Evaluation and Streams123424
-Ref: lazy evaluation and streams123550
-Ref: 77123550
-Ref: lazy-evaluation-and-streams123550
-Ref: 99123550
-Ref: id6123550
-Node: Matrix Computations128095
-Ref: matrix computations128219
-Ref: 8b128219
-Ref: matrix-computations128219
-Ref: 9a128219
-Ref: id7128219
-Node: Symbolic Matrices136453
-Ref: symbolic matrices136561
-Ref: 9e136561
-Ref: symbolic-matrices136561
-Node: Record Data138920
-Ref: record data139018
-Ref: a0139018
-Ref: record-data139018
-Ref: a1139018
-Ref: id8139018
-Node: The Quote144542
-Ref: the quote144614
-Ref: 7f144614
-Ref: the-quote144614
-Node: Declarations148580
-Ref: declarations148662
-Ref: 33148662
-Node: Symbol Declarations149764
-Ref: symbol declarations149858
-Ref: a6149858
-Ref: public149858
-Ref: a7149858
-Ref: private149858
-Ref: a8149858
-Ref: infix149858
-Ref: a9149858
-Ref: infixl149858
-Ref: aa149858
-Ref: infixr149858
-Ref: ab149858
-Ref: prefix149858
-Ref: ac149858
-Ref: postfix149858
-Ref: 9f149858
-Ref: outfix149858
-Ref: 6a149858
-Ref: nonfix149858
-Ref: 5c149858
-Ref: symbol-declarations149858
-Node: Modules and Imports156999
-Ref: modules and imports157112
-Ref: 32157112
-Ref: using157112
-Ref: af157112
-Ref: modules-and-imports157112
-Ref: b0160470
-Ref: index-7160470
-Ref: b1160584
-Ref: index-8160584
-Ref: b2160882
-Ref: index-9160882
-Ref: b3161169
-Ref: index-10161169
-Ref: b4161197
-Ref: index-11161197
-Ref: b5162784
-Ref: index-12162784
-Node: Namespaces163088
-Ref: namespaces163173
-Ref: a4163173
-Ref: namespace163173
-Ref: 75163173
-Node: Using Namespaces166761
-Ref: using namespaces166857
-Ref: b7166857
-Ref: using-namespace166857
-Ref: b8166857
-Ref: using-namespaces166857
-Node: Symbol Lookup and Creation169296
-Ref: symbol lookup and creation169416
-Ref: 3b169416
-Ref: symbol-lookup-and-creation169416
-Node: Private Symbols175916
-Ref: private symbols176043
-Ref: ad176043
-Ref: private-symbols176043
-Node: Hierarchical Namespaces177217
-Ref: hierarchical namespaces177335
-Ref: b9177335
-Ref: hierarchical-namespaces177335
-Ref: ba178477
-Ref: index-13178477
-Node: Scoped Namespaces179505
-Ref: scoped namespaces179599
-Ref: b6179599
-Ref: scoped-namespaces179599
-Node: Macros182848
-Ref: macros182940
-Ref: 86182940
-Ref: bb182940
-Ref: id10182940
-Node: Optimization Rules184857
-Ref: optimization rules184941
-Ref: bc184941
-Ref: optimization-rules184941
-Ref: bd184941
-Ref: id11184941
-Node: Recursive Macros188187
-Ref: recursive macros188306
-Ref: a2188306
-Ref: recursive-macros188306
-Ref: c1190842
-Ref: index-14190842
-Node: User-Defined Special Forms190888
-Ref: user-defined special forms191002
-Ref: c2191002
-Ref: user-defined-special-forms191002
-Node: Macro Hygiene192398
-Ref: macro hygiene192535
-Ref: c3192535
-Ref: macro-hygiene192535
-Node: Built-in Macros and Special Expressions194934
-Ref: built-in macros and special expressions195066
-Ref: c4195066
-Ref: built-in-macros-and-special-expressions195066
-Ref: c5195544
-Ref: __ifelse__195544
-Ref: c6195678
-Ref: __lambda__195678
-Ref: c7195772
-Ref: __case__195772
-Ref: c9196049
-Ref: __when__196049
-Ref: ca196355
-Ref: __with__196355
-Ref: c8196659
-Ref: -->196659
-Ref: cb196718
-Ref: __if__196718
-Ref: cc197215
-Ref: __as__197215
-Ref: cd197282
-Ref: __type__197282
-Ref: ce202571
-Ref: __eval__202571
-Node: Advanced Optimization203992
-Ref: advanced optimization204121
-Ref: bf204121
-Ref: advanced-optimization204121
-Node: Reflection209008
-Ref: reflection209089
-Ref: cf209089
-Node: Exception Handling213634
-Ref: exception handling213725
-Ref: d0213725
-Ref: exception-handling213725
-Ref: d1213725
-Ref: id12213725
-Ref: d2214037
-Ref: catch214037
-Ref: d3215205
-Ref: index-15215205
-Node: C Interface218375
-Ref: c interface218476
-Ref: 34218476
-Ref: c-interface218476
-Node: Extern Declarations219954
-Ref: extern declarations220048
-Ref: a3220048
-Ref: extern220048
-Ref: d5220048
-Ref: extern-declarations220048
-Node: Variadic C Functions225103
-Ref: variadic c functions225213
-Ref: d7225213
-Ref: variadic-c-functions225213
-Node: C Types226462
-Ref: c types226580
-Ref: d6226580
-Ref: c-types226580
-Ref: d8226580
-Ref: id13226580
-Node: Basic C Types227820
-Ref: basic c types227897
-Ref: d9227897
-Ref: basic-c-types227897
-Node: Pointer Types230065
-Ref: pointer types230172
-Ref: da230172
-Ref: pointer-types230172
-Node: Pointers and Matrices233364
-Ref: pointers and matrices233474
-Ref: db233474
-Ref: pointers-and-matrices233474
-Node: Pointer Examples236650
-Ref: pointer examples236738
-Ref: dc236738
-Ref: pointer-examples236738
-Node: Importing Dynamic Libraries240962
-Ref: importing dynamic libraries241082
-Ref: dd241082
-Ref: importing-dynamic-libraries241082
-Ref: de242203
-Ref: index-16242203
-Ref: df242278
-Ref: index-17242278
-Ref: e0242489
-Ref: index-18242489
-Node: Importing LLVM Bitcode242881
-Ref: importing llvm bitcode243005
-Ref: e1243005
-Ref: importing-llvm-bitcode243005
-Node: Inline Code248757
-Ref: inline code248845
-Ref: 56248845
-Ref: inline-code248845
-Ref: e4252175
-Ref: index-19252175
-Ref: e5252289
-Ref: index-20252289
-Ref: e6252490
-Ref: index-21252490
-Ref: e7252502
-Ref: index-22252502
-Ref: e8252516
-Ref: index-23252516
-Ref: e9252736
-Ref: index-24252736
-Node: Standard Library252977
-Ref: standard library253077
-Ref: 57253077
-Ref: standard-library253077
-Node: Interactive Usage257340
-Ref: interactive usage257446
-Ref: a257446
-Ref: interactive-usage257446
-Node: Online Help259439
-Ref: online help259531
-Ref: 4259531
-Ref: online-help259531
-Ref: ea259831
-Ref: index-25259831
-Ref: eb259859
-Ref: index-26259859
-Ref: ec261632
-Ref: docutils261632
-Node: Interactive Commands262573
-Ref: interactive commands262685
-Ref: be262685
-Ref: interactive-commands262685
-Ref: ed262916
-Ref: index-27262916
-Ref: ee262963
-Ref: index-28262963
-Ref: ef263390
-Ref: index-29263390
-Ref: f0263716
-Ref: index-30263716
-Ref: f1263778
-Ref: index-31263778
-Ref: f5264764
-Ref: index-32264764
-Ref: f6265541
-Ref: index-33265541
-Ref: f8267060
-Ref: index-34267060
-Ref: f9267388
-Ref: index-35267388
-Ref: fa267454
-Ref: index-36267454
-Ref: fb268005
-Ref: index-37268005
-Ref: fc268251
-Ref: index-38268251
-Ref: fd268331
-Ref: index-39268331
-Ref: fe268382
-Ref: index-40268382
-Ref: ff270066
-Ref: index-41270066
-Ref: 100270316
-Ref: index-42270316
-Ref: 102270729
-Ref: index-43270729
-Ref: 103271346
-Ref: index-44271346
-Ref: 104271966
-Ref: index-45271966
-Node: Last Result272774
-Ref: last result272903
-Ref: f2272903
-Ref: last-result272903
-Node: Specifying Symbol Selections273613
-Ref: specifying symbol selections273738
-Ref: f4273738
-Ref: specifying-symbol-selections273738
-Node: The show Command277144
-Ref: the show command277275
-Ref: 101277275
-Ref: the-show-command277275
-Ref: 105278377
-Ref: index-46278377
-Node: Definition Levels281143
-Ref: definition levels281255
-Ref: f3281255
-Ref: definition-levels281255
-Node: Debugging286425
-Ref: debugging286540
-Ref: 3a286540
-Ref: 106288231
-Ref: index-47288231
-Node: Interactive Startup297043
-Ref: interactive startup297132
-Ref: f7297132
-Ref: interactive-startup297132
-Ref: 107297500
-Ref: index-48297500
-Node: Batch Compilation298356
-Ref: batch compilation298463
-Ref: b298463
-Ref: batch-compilation298463
-Ref: 108298463
-Ref: id14298463
-Ref: 10a303591
-Ref: partial-evaluation303591
-Node: Example303718
-Ref: example303822
-Ref: 10b303822
-Ref: 2d305595
-Ref: compiling305595
-Node: Code Size and Unstripped Executables306866
-Ref: code size and unstripped executables307004
-Ref: 109307004
-Ref: code-size-and-unstripped-executables307004
-Node: Other Output Code Formats310464
-Ref: other output code formats310624
-Ref: 10c310624
-Ref: other-output-code-formats310624
-Ref: 10d315133
-Ref: llvm-documentation315133
-Node: Calling Pure Functions From C315133
-Ref: calling pure functions from c315248
-Ref: 10e315248
-Ref: calling-pure-functions-from-c315248
-Node: Caveats and Notes316741
-Ref: caveats and notes316837
-Ref: c316837
-Ref: caveats-and-notes316837
-Node: Etymology317468
-Ref: etymology317560
-Ref: 10f317560
-Node: Backward Compatibility318389
-Ref: backward compatibility318504
-Ref: 110318504
-Ref: backward-compatibility318504
-Node: Error Recovery326167
-Ref: error recovery326294
-Ref: 113326294
-Ref: error-recovery326294
-Node: The __show__ Function326950
-Ref: the __show__ function327074
-Ref: 9d327074
-Ref: the-show-function327074
-Ref: 9c327129
-Ref: __show__327129
-Node: Non-Linear Patterns330770
-Ref: non-linear patterns330893
-Ref: 114330893
-Ref: non-linear-patterns330893
-Node: "As" Patterns332293
-Ref: "as" patterns332410
-Ref: 115332410
-Ref: as-patterns332410
-Node: Head = Function333166
-Ref: head = function333279
-Ref: c0333279
-Ref: head-function333279
-Node: Recursive Types336830
-Ref: recursive types336943
-Ref: 96336943
-Ref: recursive-types336943
-Node: With and when340672
-Ref: with and when340790
-Ref: 116340790
-Ref: with-and-when340790
-Node: Numeric Calculations342916
-Ref: numeric calculations343039
-Ref: 117343039
-Ref: numeric-calculations343039
-Node: Constant Definitions344950
-Ref: constant definitions345080
-Ref: 97345080
-Ref: constant-definitions345080
-Node: External C Functions350852
-Ref: external c functions350983
-Ref: d4350983
-Ref: external-c-functions350983
-Ref: 118352263
-Ref: libffi352263
-Node: Calling Special Forms352648
-Ref: calling special forms352767
-Ref: 119352767
-Ref: calling-special-forms352767
-Node: Laziness353254
-Ref: laziness353368
-Ref: 11a353368
-Node: Hygienic Macros357875
-Ref: hygienic macros357997
-Ref: 11c357997
-Ref: hygienic-macros357997
-Node: Stack Size and Tail Recursion359614
-Ref: stack size and tail recursion359760
-Ref: 40359760
-Ref: stack-size-and-tail-recursion359760
-Ref: 11d360148
-Ref: index-49360148
-Ref: 11e360360
-Ref: index-50360360
-Ref: 11f360648
-Ref: index-51360648
-Node: Handling of Asynchronous Signals361712
-Ref: handling of asynchronous signals361834
-Ref: 41361834
-Ref: handling-of-asynchronous-signals361834
-Node: Author363855
-Ref: author363941
-Ref: 120363941
-Node: Copying364510
-Ref: copying364599
-Ref: 3364599
-Node: References and Links366961
-Ref: references and links367049
-Ref: 121367049
-Ref: references-and-links367049
-Ref: 7c367098
-Ref: aardappel367098
-Ref: 11b367239
-Ref: alice-ml367239
-Ref: 10367374
-Ref: baader-and-nipkow367374
-Ref: ae367492
-Ref: bertrand367492
-Ref: e2367752
-Ref: clang367752
-Ref: e3368024
-Ref: faust368024
-Ref: 122368111
-Ref: gnu-multiprecision-library368111
-Ref: 74368111
-Ref: gmp368111
-Ref: 123368219
-Ref: gnu-octave368219
-Ref: 9b368219
-Ref: octave368219
-Ref: 78368363
-Ref: gnu-scientific-library368363
-Ref: 124368363
-Ref: gsl368363
-Ref: 5f368524
-Ref: haskell368524
-Ref: 7368590
-Ref: llvm368590
-Ref: 112368655
-Ref: miranda368655
-Ref: 60368826
-Ref: ml368826
-Ref: f368985
-Ref: michael-o-donnell368985
-Ref: 111369135
-Ref: q369135
-Node: Index369220
-Ref: index369292
-Ref: 84383173
-Ref: 85383204
-Ref: a5383235
-Ref: 6c383266
-Ref: 6d383297
+Node: Introduction3409
+Ref: introduction3493
+Ref: 53493
+Ref: the-pure-manual3493
+Ref: 63493
+Node: Further Reading7297
+Ref: further reading7393
+Ref: d7393
+Ref: further-reading7393
+Ref: e7988
+Ref: functional-programming7988
+Node: Typographical Conventions8585
+Ref: typographical conventions8681
+Ref: 118681
+Ref: typographical-conventions8681
+Node: Invoking Pure10554
+Ref: invoking pure10648
+Ref: 810648
+Ref: invoking-pure10648
+Node: Options12666
+Ref: options12751
+Ref: 1512751
+Ref: 1612859
+Ref: cmdoption-pure-c12859
+Ref: 1712899
+Ref: cmdoption-pure--ctags12899
+Ref: 1812919
+Ref: cmdoption-pure--etags12919
+Ref: 1913003
+Ref: cmdoption-pure--eager-jit13003
+Ref: 1a13138
+Ref: cmdoption-pure-fpic13138
+Ref: 1313234
+Ref: cmdoption-pure-g13234
+Ref: 1b13282
+Ref: cmdoption-pure-h13282
+Ref: 1c13297
+Ref: cmdoption-pure--help13297
+Ref: 1d13351
+Ref: cmdoption-pure-i13351
+Ref: 1e13514
+Ref: cmdoption-pure-l13514
+Ref: 1f13671
+Ref: cmdoption-pure--noediting13671
+Ref: 2013731
+Ref: cmdoption-pure-n13731
+Ref: 2113746
+Ref: cmdoption-pure--noprelude13746
+Ref: 2213801
+Ref: cmdoption-pure--norc13801
+Ref: 2313868
+Ref: cmdoption-pure-o13868
+Ref: 1413937
+Ref: cmdoption-pure-q13937
+Ref: 2414022
+Ref: cmdoption-pure-t14022
+Ref: 2514120
+Ref: cmdoption-pure-u14120
+Ref: 2614193
+Ref: cmdoption-pure-v14193
+Ref: 2714265
+Ref: cmdoption-pure--version14265
+Ref: 2814329
+Ref: cmdoption-pure-w14329
+Ref: 2914376
+Ref: cmdoption-pure-x14376
+Ref: 2a14447
+Ref: cmdoption-pure--14447
+Node: Overview of Operation14769
+Ref: overview of operation14880
+Ref: 2c14880
+Ref: overview-of-operation14880
+Ref: 2f16989
+Ref: index-016989
+Ref: 3117037
+Ref: index-117037
+Node: Compiling Scripts17580
+Ref: compiling scripts17699
+Ref: 2e17699
+Ref: compiling-scripts17699
+Ref: 3518525
+Ref: index-218525
+Node: Tagging Scripts21863
+Ref: tagging scripts21982
+Ref: 3821982
+Ref: tagging-scripts21982
+Ref: 3922378
+Ref: tags22378
+Node: Running Interactively23671
+Ref: running interactively23804
+Ref: 1223804
+Ref: running-interactively23804
+Node: Verbosity and Debugging Options25689
+Ref: verbosity and debugging options25830
+Ref: 3725830
+Ref: verbosity-and-debugging-options25830
+Node: Code Generation Options28723
+Ref: code generation options28856
+Ref: 2b28856
+Ref: code-generation-options28856
+Ref: 3c30332
+Ref: cmdoption-pure--checks30332
+Ref: 3d30353
+Ref: cmdoption-pure--nochecks30353
+Ref: 3e30506
+Ref: index-330506
+Ref: 4231143
+Ref: cmdoption-pure--const31143
+Ref: 4331163
+Ref: cmdoption-pure--noconst31163
+Ref: 4531778
+Ref: cmdoption-pure--fold31778
+Ref: 4631797
+Ref: cmdoption-pure--nofold31797
+Ref: 4732488
+Ref: cmdoption-pure--tc32488
+Ref: 4832505
+Ref: cmdoption-pure--notc32505
+Ref: 4933289
+Ref: cmdoption-pure--eager33289
+Ref: 4a34011
+Ref: cmdoption-pure--required34011
+Node: Startup Files34494
+Ref: startup files34607
+Ref: 4b34607
+Ref: startup-files34607
+Node: Environment35093
+Ref: environment35174
+Ref: 4c35174
+Ref: 4d35312
+Ref: envvar-browser35312
+Ref: 4e35344
+Ref: index-435344
+Ref: 3035541
+Ref: envvar-purelib35541
+Ref: 5035633
+Ref: index-535633
+Ref: 3635736
+Ref: envvar-pure_eager_jit35736
+Ref: 4f35883
+Ref: envvar-pure_help35883
+Ref: 5136031
+Ref: envvar-pure_include36031
+Ref: 5236155
+Ref: envvar-pure_library36155
+Ref: 5336280
+Ref: envvar-pure_more36280
+Ref: 5436434
+Ref: index-636434
+Ref: 5536517
+Ref: envvar-pure_ps36517
+Ref: 3f36619
+Ref: envvar-pure_stack36619
+Node: Pure Overview36981
+Ref: pure overview37074
+Ref: 937074
+Ref: pure-overview37074
+Node: Lexical Matters38894
+Ref: lexical matters39003
+Ref: 5839003
+Ref: lexical-matters39003
+Ref: 5a42799
+Ref: code-charts42799
+Ref: 5b42799
+Ref: unicode-consortium42799
+Ref: 5d45352
+Ref: id145352
+Node: Definitions and Expression Evaluation45352
+Ref: definitions and expression evaluation45492
+Ref: 5e45492
+Ref: definitions-and-expression-evaluation45492
+Node: Variables in Equations50451
+Ref: variables in equations50593
+Ref: 6950593
+Ref: variables-in-equations50593
+Node: Expression Syntax52784
+Ref: expression syntax52902
+Ref: 6b52902
+Ref: expression-syntax52902
+Node: Primary Expressions56622
+Ref: primary expressions56720
+Ref: 7356720
+Ref: primary-expressions56720
+Node: Simple Expressions69042
+Ref: simple expressions69168
+Ref: 7a69168
+Ref: simple-expressions69168
+Node: Special Expressions72282
+Ref: special expressions72380
+Ref: 7072380
+Ref: if72380
+Ref: 7172380
+Ref: then72380
+Ref: 7272380
+Ref: else72380
+Ref: 6e72380
+Ref: case72380
+Ref: 6f72380
+Ref: when72380
+Ref: 6872380
+Ref: with72380
+Ref: 5972380
+Ref: end72380
+Ref: 7b72380
+Ref: special-expressions72380
+Node: Special Forms74892
+Ref: special forms74996
+Ref: 7674996
+Ref: special-forms74996
+Ref: 7d74996
+Ref: id274996
+Ref: 6375396
+Ref: &&/special75396
+Ref: 6475417
+Ref: ||/special75417
+Ref: 6577135
+Ref: $$77135
+Ref: 6677939
+Ref: &77939
+Ref: 6778952
+Ref: quote78952
+Ref: 7e78974
+Ref: '78974
+Node: Toplevel79648
+Ref: toplevel79748
+Ref: 8079748
+Ref: def79748
+Ref: 8179748
+Ref: let79748
+Ref: 4479748
+Ref: const79748
+Ref: 8279748
+Ref: otherwise79748
+Ref: 8379748
+Node: Scoping Rules83178
+Ref: scoping rules83256
+Ref: 8783256
+Ref: scoping-rules83256
+Node: Rule Syntax86283
+Ref: rule syntax86371
+Ref: 6286371
+Ref: rule-syntax86371
+Node: Patterns87717
+Ref: patterns87789
+Ref: 8987789
+Node: Type Tags96537
+Ref: type tags96631
+Ref: 6196631
+Ref: type-tags96631
+Ref: 8c96631
+Ref: id496631
+Ref: 8e98202
+Ref: int/type98202
+Ref: 8f98252
+Ref: bigint/type98252
+Ref: 9098331
+Ref: double/type98331
+Ref: 9198407
+Ref: string/type98407
+Ref: 8a98461
+Ref: matrix/type98461
+Ref: 8d98536
+Ref: pointer/type98536
+Node: General Rules102231
+Ref: general rules102329
+Ref: 93102329
+Ref: general-rules102329
+Node: Simple Rules105561
+Ref: simple rules105660
+Ref: 94105660
+Ref: simple-rules105660
+Node: Type Rules107190
+Ref: type rules107267
+Ref: 88107267
+Ref: type107267
+Ref: 92107267
+Ref: type-rules107267
+Ref: 95107267
+Ref: id5107267
+Node: Examples119902
+Ref: examples119989
+Ref: 79119989
+Node: List Comprehensions121718
+Ref: list comprehensions121816
+Ref: 98121816
+Ref: list-comprehensions121816
+Node: Lazy Evaluation and Streams123454
+Ref: lazy evaluation and streams123580
+Ref: 77123580
+Ref: lazy-evaluation-and-streams123580
+Ref: 99123580
+Ref: id6123580
+Node: Matrix Computations128125
+Ref: matrix computations128249
+Ref: 8b128249
+Ref: matrix-computations128249
+Ref: 9a128249
+Ref: id7128249
+Node: Symbolic Matrices136477
+Ref: symbolic matrices136585
+Ref: 9e136585
+Ref: symbolic-matrices136585
+Node: Record Data138944
+Ref: record data139042
+Ref: a0139042
+Ref: record-data139042
+Ref: a1139042
+Ref: id8139042
+Node: The Quote144566
+Ref: the quote144638
+Ref: 7f144638
+Ref: the-quote144638
+Node: Declarations148172
+Ref: declarations148254
+Ref: 33148254
+Node: Symbol Declarations149356
+Ref: symbol declarations149450
+Ref: a6149450
+Ref: public149450
+Ref: a7149450
+Ref: private149450
+Ref: a8149450
+Ref: infix149450
+Ref: a9149450
+Ref: infixl149450
+Ref: aa149450
+Ref: infixr149450
+Ref: ab149450
+Ref: prefix149450
+Ref: ac149450
+Ref: postfix149450
+Ref: 9f149450
+Ref: outfix149450
+Ref: 6a149450
+Ref: nonfix149450
+Ref: 5c149450
+Ref: symbol-declarations149450
+Node: Modules and Imports156591
+Ref: modules and imports156704
+Ref: 32156704
+Ref: using156704
+Ref: af156704
+Ref: modules-and-imports156704
+Ref: b0160062
+Ref: index-7160062
+Ref: b1160176
+Ref: index-8160176
+Ref: b2160474
+Ref: index-9160474
+Ref: b3160761
+Ref: index-10160761
+Ref: b4160789
+Ref: index-11160789
+Ref: b5162376
+Ref: index-12162376
+Node: Namespaces162680
+Ref: namespaces162765
+Ref: a4162765
+Ref: namespace162765
+Ref: 75162765
+Node: Using Namespaces166353
+Ref: using namespaces166449
+Ref: b7166449
+Ref: using-namespace166449
+Ref: b8166449
+Ref: using-namespaces166449
+Node: Symbol Lookup and Creation168888
+Ref: symbol lookup and creation169008
+Ref: 3b169008
+Ref: symbol-lookup-and-creation169008
+Node: Private Symbols175508
+Ref: private symbols175635
+Ref: ad175635
+Ref: private-symbols175635
+Node: Hierarchical Namespaces176809
+Ref: hierarchical namespaces176927
+Ref: b9176927
+Ref: hierarchical-namespaces176927
+Ref: ba178069
+Ref: index-13178069
+Node: Scoped Namespaces179097
+Ref: scoped namespaces179191
+Ref: b6179191
+Ref: scoped-namespaces179191
+Node: Macros182440
+Ref: macros182532
+Ref: 86182532
+Ref: bb182532
+Ref: id10182532
+Node: Optimization Rules184449
+Ref: optimization rules184533
+Ref: bc184533
+Ref: optimization-rules184533
+Ref: bd184533
+Ref: id11184533
+Node: Recursive Macros187779
+Ref: recursive macros187898
+Ref: a2187898
+Ref: recursive-macros187898
+Ref: c1190432
+Ref: index-14190432
+Node: User-Defined Special Forms190478
+Ref: user-defined special forms190592
+Ref: c2190592
+Ref: user-defined-special-forms190592
+Node: Macro Hygiene191988
+Ref: macro hygiene192125
+Ref: c3192125
+Ref: macro-hygiene192125
+Node: Built-in Macros and Special Expressions194524
+Ref: built-in macros and special expressions194656
+Ref: c4194656
+Ref: built-in-macros-and-special-expressions194656
+Ref: c5195134
+Ref: __ifelse__195134
+Ref: c6195268
+Ref: __lambda__195268
+Ref: c7195362
+Ref: __case__195362
+Ref: c9195639
+Ref: __when__195639
+Ref: ca195945
+Ref: __with__195945
+Ref: c8196249
+Ref: -->196249
+Ref: cb196308
+Ref: __if__196308
+Ref: cc196805
+Ref: __as__196805
+Ref: cd196872
+Ref: __type__196872
+Ref: ce202207
+Ref: __eval__202207
+Node: Advanced Optimization203628
+Ref: advanced optimization203757
+Ref: bf203757
+Ref: advanced-optimization203757
+Node: Reflection208644
+Ref: reflection208725
+Ref: cf208725
+Node: Exception Handling213270
+Ref: exception handling213361
+Ref: d0213361
+Ref: exception-handling213361
+Ref: d1213361
+Ref: id12213361
+Ref: d2213673
+Ref: catch213673
+Ref: d3214841
+Ref: index-15214841
+Node: C Interface218011
+Ref: c interface218112
+Ref: 34218112
+Ref: c-interface218112
+Node: Extern Declarations219590
+Ref: extern declarations219684
+Ref: a3219684
+Ref: extern219684
+Ref: d5219684
+Ref: extern-declarations219684
+Node: Variadic C Functions224739
+Ref: variadic c functions224849
+Ref: d7224849
+Ref: variadic-c-functions224849
+Node: C Types226098
+Ref: c types226216
+Ref: d6226216
+Ref: c-types226216
+Ref: d8226216
+Ref: id13226216
+Node: Basic C Types227456
+Ref: basic c types227533
+Ref: d9227533
+Ref: basic-c-types227533
+Node: Pointer Types229701
+Ref: pointer types229808
+Ref: da229808
+Ref: pointer-types229808
+Node: Pointers and Matrices233000
+Ref: pointers and matrices233110
+Ref: db233110
+Ref: pointers-and-matrices233110
+Node: Pointer Examples236286
+Ref: pointer examples236374
+Ref: dc236374
+Ref: pointer-examples236374
+Node: Importing Dynamic Libraries240598
+Ref: importing dynamic libraries240718
+Ref: dd240718
+Ref: importing-dynamic-libraries240718
+Ref: de241839
+Ref: index-16241839
+Ref: df241914
+Ref: index-17241914
+Ref: e0242125
+Ref: index-18242125
+Node: Importing LLVM Bitcode242517
+Ref: importing llvm bitcode242641
+Ref: e1242641
+Ref: importing-llvm-bitcode242641
+Node: Inline Code248393
+Ref: inline code248481
+Ref: 56248481
+Ref: inline-code248481
+Ref: e4251811
+Ref: index-19251811
+Ref: e5251925
+Ref: index-20251925
+Ref: e6252126
+Ref: index-21252126
+Ref: e7252138
+Ref: index-22252138
+Ref: e8252152
+Ref: index-23252152
+Ref: e9252372
+Ref: index-24252372
+Node: Standard Library252613
+Ref: standard library252713
+Ref: 57252713
+Ref: standard-library252713
+Node: Interactive Usage256976
+Ref: interactive usage257082
+Ref: a257082
+Ref: interactive-usage257082
+Node: Online Help259097
+Ref: online help259189
+Ref: 4259189
+Ref: online-help259189
+Ref: ea259489
+Ref: index-25259489
+Ref: eb259517
+Ref: index-26259517
+Ref: ec261290
+Ref: docutils261290
+Node: Interactive Commands262231
+Ref: interactive commands262360
+Ref: be262360
+Ref: interactive-commands262360
+Ref: ed262591
+Ref: index-27262591
+Ref: ee262638
+Ref: index-28262638
+Ref: ef263065
+Ref: index-29263065
+Ref: f0263391
+Ref: index-30263391
+Ref: f1263453
+Ref: index-31263453
+Ref: f5264439
+Ref: index-32264439
+Ref: f6265216
+Ref: index-33265216
+Ref: f8266735
+Ref: index-34266735
+Ref: f9267063
+Ref: index-35267063
+Ref: fa267129
+Ref: index-36267129
+Ref: fb267680
+Ref: index-37267680
+Ref: fc267926
+Ref: index-38267926
+Ref: fd268006
+Ref: index-39268006
+Ref: fe268057
+Ref: index-40268057
+Ref: ff269741
+Ref: index-41269741
+Ref: 100269991
+Ref: index-42269991
+Ref: 102270404
+Ref: index-43270404
+Ref: 103271021
+Ref: index-44271021
+Ref: 104271641
+Ref: index-45271641
+Node: Specifying Symbol Selections272449
+Ref: specifying symbol selections272583
+Ref: f4272583
+Ref: specifying-symbol-selections272583
+Node: The show Command275989
+Ref: the show command276120
+Ref: 101276120
+Ref: the-show-command276120
+Ref: 105277222
+Ref: index-46277222
+Node: Definition Levels279988
+Ref: definition levels280100
+Ref: f3280100
+Ref: definition-levels280100
+Node: Debugging285229
+Ref: debugging285336
+Ref: 3a285336
+Ref: 106287027
+Ref: index-47287027
+Node: Last Result295839
+Ref: last result295944
+Ref: f2295944
+Ref: last-result295944
+Node: Pretty-Printing296654
+Ref: pretty-printing296769
+Ref: 9d296769
+Ref: 9c296975
+Ref: __show__296975
+Node: Interactive Startup300565
+Ref: interactive startup300660
+Ref: f7300660
+Ref: interactive-startup300660
+Ref: 107301028
+Ref: index-48301028
+Node: Batch Compilation301884
+Ref: batch compilation301991
+Ref: b301991
+Ref: batch-compilation301991
+Ref: 108301991
+Ref: id14301991
+Ref: 10a307119
+Ref: partial-evaluation307119
+Node: Example307246
+Ref: example307350
+Ref: 10b307350
+Ref: 2d309123
+Ref: compiling309123
+Node: Code Size and Unstripped Executables310394
+Ref: code size and unstripped executables310532
+Ref: 109310532
+Ref: code-size-and-unstripped-executables310532
+Node: Other Output Code Formats313992
+Ref: other output code formats314152
+Ref: 10c314152
+Ref: other-output-code-formats314152
+Ref: 10d318661
+Ref: llvm-documentation318661
+Node: Calling Pure Functions From C318661
+Ref: calling pure functions from c318776
+Ref: 10e318776
+Ref: calling-pure-functions-from-c318776
+Node: Caveats and Notes320269
+Ref: caveats and notes320365
+Ref: c320365
+Ref: caveats-and-notes320365
+Node: Etymology320990
+Ref: etymology321082
+Ref: 10f321082
+Node: Backward Compatibility321911
+Ref: backward compatibility322026
+Ref: 110322026
+Ref: backward-compatibility322026
+Node: Error Recovery329689
+Ref: error recovery329814
+Ref: 113329814
+Ref: error-recovery329814
+Node: Non-Linear Patterns330470
+Ref: non-linear patterns330586
+Ref: 114330586
+Ref: non-linear-patterns330586
+Node: "As" Patterns331986
+Ref: "as" patterns332114
+Ref: c0332114
+Ref: as-patterns332114
+Node: "Head = Function" Pitfalls334249
+Ref: "head = function" pitfalls334373
+Ref: 115334373
+Ref: head-function-pitfalls334373
+Node: Recursive Types336564
+Ref: recursive types336688
+Ref: 96336688
+Ref: recursive-types336688
+Node: With and when340417
+Ref: with and when340535
+Ref: 116340535
+Ref: with-and-when340535
+Node: Numeric Calculations342661
+Ref: numeric calculations342784
+Ref: 117342784
+Ref: numeric-calculations342784
+Node: Constant Definitions344693
+Ref: constant definitions344823
+Ref: 97344823
+Ref: constant-definitions344823
+Node: External C Functions350595
+Ref: external c functions350726
+Ref: d4350726
+Ref: external-c-functions350726
+Ref: 118352006
+Ref: libffi352006
+Node: Calling Special Forms352391
+Ref: calling special forms352510
+Ref: 119352510
+Ref: calling-special-forms352510
+Node: Laziness352997
+Ref: laziness353120
+Ref: 11a353120
+Node: Showing Macro Expansions357627
+Ref: showing macro expansions357758
+Ref: 11c357758
+Ref: showing-macro-expansions357758
+Node: Stack Size and Tail Recursion359393
+Ref: stack size and tail recursion359548
+Ref: 40359548
+Ref: stack-size-and-tail-recursion359548
+Ref: 11d359936
+Ref: index-49359936
+Ref: 11e360148
+Ref: index-50360148
+Ref: 11f360436
+Ref: index-51360436
+Node: Handling of Asynchronous Signals361500
+Ref: handling of asynchronous signals361622
+Ref: 41361622
+Ref: handling-of-asynchronous-signals361622
+Node: Author363643
+Ref: author363729
+Ref: 120363729
+Node: Copying364298
+Ref: copying364387
+Ref: 3364387
+Node: References and Links366749
+Ref: references and links366837
+Ref: 121366837
+Ref: references-and-links366837
+Ref: 7c366886
+Ref: aardappel366886
+Ref: 11b367027
+Ref: alice-ml367027
+Ref: 10367162
+Ref: baader-and-nipkow367162
+Ref: ae367280
+Ref: bertrand367280
+Ref: e2367540
+Ref: clang367540
+Ref: e3367812
+Ref: faust367812
+Ref: 122367899
+Ref: gnu-multiprecision-library367899
+Ref: 74367899
+Ref: gmp367899
+Ref: 123368007
+Ref: gnu-octave368007
+Ref: 9b368007
+Ref: octave368007
+Ref: 78368151
+Ref: gnu-scientific-library368151
+Ref: 124368151
+Ref: gsl368151
+Ref: 5f368312
+Ref: haskell368312
+Ref: 7368378
+Ref: llvm368378
+Ref: 112368443
+Ref: miranda368443
+Ref: 60368614
+Ref: ml368614
+Ref: f368773
+Ref: michael-o-donnell368773
+Ref: 111368923
+Ref: q368923
+Node: Index369008
+Ref: index369080
+Ref: 84382897
+Ref: 85382928
+Ref: a5382959
+Ref: 6c382990
+Ref: 6d383021
 
 End Tag Table
 

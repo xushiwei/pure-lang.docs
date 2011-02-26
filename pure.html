@@ -178,7 +178,7 @@ and the latest sources can be found under the following URLs:</p>
 </li>
 <li><a class="reference internal" href="#batch-compilation" id="id93">Batch Compilation</a><ul>
 <li><a class="reference internal" href="#example" id="id94">Example</a></li>
-<li><a class="reference internal" href="#code-size-and-unstripped-executables" id="id95">Code Size and Unstripped Executables</a></li>
+<li><a class="reference internal" href="#options-affecting-code-size" id="id95">Options Affecting Code Size</a></li>
 <li><a class="reference internal" href="#other-output-code-formats" id="id96">Other Output Code Formats</a></li>
 <li><a class="reference internal" href="#calling-pure-functions-from-c" id="id97">Calling Pure Functions From C</a></li>
 </ul>
@@ -203,8 +203,9 @@ and the latest sources can be found under the following URLs:</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#author" id="id115">Author</a></li>
-<li><a class="reference internal" href="#copying" id="id116">Copying</a></li>
-<li><a class="reference internal" href="#references-and-links" id="id117">References and Links</a></li>
+<li><a class="reference internal" href="#acknowledgements" id="id116">Acknowledgements</a></li>
+<li><a class="reference internal" href="#copying" id="id117">Copying</a></li>
+<li><a class="reference internal" href="#references-and-links" id="id118">References and Links</a></li>
 </ul>
 </div>
 <div class="section" id="introduction">
@@ -530,8 +531,8 @@ the command line. Processing of options and source files ends when either the
 <a class="reference internal" href="#cmdoption-pure--"><em class="xref std std-option">--</em></a> or the <a class="reference internal" href="#cmdoption-pure-x"><em class="xref std std-option">-x</em></a> option is encountered. The <a class="reference internal" href="#cmdoption-pure-x"><em class="xref std std-option">-x</em></a>
 option must be followed by the name of a script to be executed, which becomes
 the &#8220;main script&#8221; of the application. In either case, any remaining parameters
-are passed to the executing script by means of the global <tt class="docutils literal"><span class="pre">argc</span></tt> and
-<tt class="docutils literal"><span class="pre">argv</span></tt> variables, denoting the number of arguments and the list of the
+are passed to the executing script by means of the global <a class="reference internal" href="#argc" title="argc"><tt class="xref pure pure-var docutils literal"><span class="pre">argc</span></tt></a> and
+<a class="reference internal" href="#argv" title="argv"><tt class="xref pure pure-var docutils literal"><span class="pre">argv</span></tt></a> variables, denoting the number of arguments and the list of the
 actual parameter strings, respectively. In the case of <a class="reference internal" href="#cmdoption-pure-x"><em class="xref std std-option">-x</em></a> this also
 includes the script name as <tt class="docutils literal"><span class="pre">argv!0</span></tt>. The <a class="reference internal" href="#cmdoption-pure-x"><em class="xref std std-option">-x</em></a> option is useful, in
 particular, to turn Pure scripts into executable programs by including a
@@ -540,13 +541,34 @@ trick only works with Unix shells, though.)</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#!/usr/local/bin/pure -x</span>
 </pre></div>
 </div>
-<p>On startup, the interpreter also defines the <tt class="xref pure pure-var docutils literal"><span class="pre">version</span></tt> variable, which is
-set to the version string of the Pure interpreter, and the <tt class="xref pure pure-var docutils literal"><span class="pre">sysinfo</span></tt>
-variable, which provides a string identifying the host system. These are
-useful if parts of your script depend on the particular version of the
-interpreter and the system it runs on. (Moreover, Pure 0.21 and later also
-define the variable <a class="reference internal" href="#compiling" title="compiling"><tt class="xref pure pure-var docutils literal"><span class="pre">compiling</span></tt></a> which indicates whether the program is
-executed in a batch compilation, see <a class="reference internal" href="#compiling-scripts">Compiling Scripts</a> below.)</p>
+<p>The following variables are always predefined by the interpreter:</p>
+<dl class="variable">
+<dt id="argc">
+<em class="property">variable </em><tt class="descname">argc</tt><a class="headerlink" href="#argc" title="Permalink to this definition">¶</a></dt>
+<dt id="argv">
+<em class="property">variable </em><tt class="descname">argv</tt><a class="headerlink" href="#argv" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of extra command line arguments and the arguments themselves as
+a list of strings; see above. These are useful if a script is usually run
+non-interactively and takes its input from the command line.</p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="compiling">
+<em class="property">variable </em><tt class="descname">compiling</tt><a class="headerlink" href="#compiling" title="Permalink to this definition">¶</a></dt>
+<dd><p>A flag indicating whether the program is executed in a batch compilation
+(<a class="reference internal" href="#cmdoption-pure-c"><em class="xref std std-option">-c</em></a> option), see <a class="reference internal" href="#compiling-scripts">Compiling Scripts</a> below.</p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="version">
+<em class="property">variable </em><tt class="descname">version</tt><a class="headerlink" href="#version" title="Permalink to this definition">¶</a></dt>
+<dt id="sysinfo">
+<em class="property">variable </em><tt class="descname">sysinfo</tt><a class="headerlink" href="#sysinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>The version string of the Pure interpreter and a string identifying the
+host system. These are useful if parts of your script depend on the
+particular version of the interpreter and the system it runs on.</p>
+</dd></dl>
+
 <p>If available, the prelude script prelude.pure is loaded by the interpreter
 prior to any other definitions, unless the <a class="reference internal" href="#cmdoption-pure-n"><em class="xref std std-option">-n</em></a> or
 <a class="reference internal" href="#cmdoption-pure--noprelude"><em class="xref std std-option">--noprelude</em></a> option is specified. The prelude is searched for in the
@@ -4698,7 +4720,7 @@ course). Here&#8217;s how it looks like when we run the <tt class="docutils lite
 concert to rewrite a &#8220;voided&#8221; comprehension. To these ends, you can rerun the
 right-hand side of <tt class="docutils literal"><span class="pre">g</span></tt> with some tracing enabled, as follows (we omit the
 tracing output here for brevity):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m void __do__
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m void __std__::__do__
 <span class="gp">&gt; </span><span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 </pre></div>
 </div>
@@ -6809,10 +6831,11 @@ interactively, we need to escape the second input line above with leading
 whitespace, so that it&#8217;s not mistaken for an invocation of the built-in <tt class="docutils literal"><span class="pre">ls</span></tt>
 command.)</p>
 <p>To do more interesting things, you should take a look at the reflection
-capabilities discussed in the <a class="reference internal" href="#macros">Macros</a> section. This provides you with some
-powerful tools to implement very useful commands. For instance, let&#8217;s define a
-variation of the built-in <tt class="docutils literal"><span class="pre">clear</span></tt> command which allows us to delete a
-specific rule rather than an entire function definition:</p>
+capabilities discussed in the <a class="reference internal" href="#macros">Macros</a> section, which open up endless
+possibilities for commands to inspect and manipulate the running program in an
+interactive fashion. For instance, let&#8217;s define a variation of the built-in
+<tt class="docutils literal"><span class="pre">clear</span></tt> command which allows us to delete a specific rule rather than an
+entire function definition:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">namespace</span> __cmd__<span class="p">;</span>
 
 clr s = <span class="kr">case</span> val $ <span class="s">&quot;&#39;(0 with &quot;</span>+s+<span class="s">&quot; end)&quot;</span> <span class="kr">of</span>
@@ -6822,7 +6845,7 @@ clr s = <span class="kr">case</span> val $ <span class="s">&quot;&#39;(0 with &q
 </pre></div>
 </div>
 <p>Note that we employ a little trick here to have <a class="reference internal" href="purelib.html#val" title="val"><tt class="xref pure pure-func docutils literal"><span class="pre">val</span></tt></a> do all the hard
-work of parsing the rule specified as argument to the command, so that we
+work of parsing the rule specified as argument to the command, in order to
 translate the Pure rule syntax to the special meta representation used by
 <a class="reference internal" href="purelib.html#del_fundef" title="del_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">del_fundef</span></tt></a>. The following example shows our <tt class="docutils literal"><span class="pre">clr</span></tt> command in
 action:</p>
@@ -6837,16 +6860,13 @@ fact n = n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
 fact n = n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
 </pre></div>
 </div>
-<p>In a similar fashion, you can implement commands which do any kind of
-interactive manipulation of the source program not provided by the built-in
-commands.</p>
 <p>Here&#8217;s another useful command <tt class="docutils literal"><span class="pre">apropos</span></tt> which quickly summarizes the
 information available on a given symbol (as reported by the <tt class="docutils literal"><span class="pre">show</span></tt> and
 <tt class="docutils literal"><span class="pre">help_index</span></tt> commands):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">namespace</span> __cmd__<span class="p">;</span>
 
 apropos s = <span class="kr">case</span> catmap descr $ split <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> $ evalcmd $ <span class="s">&quot;show -s &quot;</span>+s <span class="kr">of</span>
-  [] = <span class="nb">throw</span> <span class="s">&quot;undefined symbol&quot;</span><span class="p">;</span>
+  [] = <span class="nb">throw</span> $ <span class="s">&quot;undefined symbol &#39;&quot;</span>+s+<span class="s">&quot;&#39;&quot;</span><span class="p">;</span>
   info = s+<span class="s">&quot; is a &quot;</span>+join <span class="s">&quot; and a &quot;</span> info+<span class="s">&quot;. \</span>
 <span class="s">Type &#39;show &quot;</span>+s+<span class="s">&quot;&#39; for more information.&quot;</span>+
 (<span class="kr">if</span> null (evalcmd $ <span class="s">&quot;help_index &quot;</span>+s) <span class="kr">then</span> <span class="s">&quot;&quot;</span> <span class="kr">else</span>
@@ -6863,16 +6883,17 @@ apropos s = <span class="kr">case</span> catmap descr $ split <span class="s">&q
 </pre></div>
 </div>
 <p>This command can be used as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>apropos argc
-argc is a variable. Type &#39;show argc&#39; for more information.
-<span class="gp">&gt; </span>apropos foldl
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>apropos foldl
 foldl is a function. Type &#39;show foldl&#39; for more information.
 Documentation for this symbol is available. Type &#39;help foldl&#39;.
 <span class="gp">&gt; </span>apropos $
 $ is a macro and a function. Type &#39;show $&#39; for more information.
 Documentation for this symbol is available. Type &#39;help $&#39;.
-<span class="gp">&gt; </span>apropos junk
-apropos: undefined symbol
+<span class="gp">&gt; </span><span class="kr">let</span> x = <span class="mi">11</span><span class="p">;</span>
+<span class="gp">&gt; </span>apropos x
+x is a variable. Type &#39;show x&#39; for more information.
+<span class="gp">&gt; </span>apropos y
+apropos: undefined symbol &#39;y&#39;
 </pre></div>
 </div>
 <p>More examples can be found in the sample.purerc file distributed with the Pure
@@ -6939,7 +6960,7 @@ function definitions instead. Also, the compiler usually strips unused
 functions from the output code, so that only functions which are actually
 called somewhere in the static program text are available to <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a>.
 (The <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a> option and the <a class="reference internal" href="#cmdoption-pure--required"><em class="xref std std-option">--required</em></a> pragma can be used to
-avoid this, see <a class="reference internal" href="#code-size-and-unstripped-executables">Code Size and Unstripped Executables</a> below.)</li>
+avoid this, see <a class="reference internal" href="#options-affecting-code-size">Options Affecting Code Size</a> below.)</li>
 <li>Code which gets executed to compute constant values at compile time will
 generally <em>not</em> be executed in the compiled executable, so your program
 shouldn&#8217;t rely on side-effects of such computations (this would be bad
@@ -6947,8 +6968,8 @@ practice anyway). There is an exception to this rule, however, namely if a
 constant value contains run time data such as pointers and local functions
 which requires an initialization at run time, then the batch compiler will
 generate code for that. (The same happens if the <a class="reference internal" href="#cmdoption-pure--noconst"><em class="xref std std-option">--noconst</em></a> option
-is used to force computation of constant values at run time, see <a class="reference internal" href="#code-size-and-unstripped-executables">Code Size
-and Unstripped Executables</a>.)</li>
+is used to force computation of constant values at run time, see <a class="reference internal" href="#options-affecting-code-size">Options
+Affecting Code Size</a>.)</li>
 </ul>
 <p>What all this boils down to is that anything which requires the compile time
 or interactive facilities of the interpreter, is unavailable. These
@@ -7024,17 +7045,10 @@ function into a compile time constant, which can be done as follows:</p>
 <p>(Note that we provide <tt class="docutils literal"><span class="pre">10</span></tt> as a default if <tt class="docutils literal"><span class="pre">n</span></tt> isn&#8217;t specified on the
 command line.)</p>
 <p>Moreover, in such a case we usually want to skip the execution of the main
-function at compile time. The Pure runtime provides the following special
-system variable to detect whether this condition holds:</p>
-<dl class="variable">
-<dt id="compiling">
-<em class="property">variable </em><tt class="descname">compiling</tt><a class="headerlink" href="#compiling" title="Permalink to this definition">¶</a></dt>
-<dd><p>This variable holds a truth value indicating whether the program is
-actually running under the auspices of the batch compiler, so that it can
-adjust accordingly.</p>
-</dd></dl>
-
-<p>In our example, the evaluation of <tt class="docutils literal"><span class="pre">main</span></tt> becomes:</p>
+function at compile time. To these ends, the predefined <a class="reference internal" href="#compiling" title="compiling"><tt class="xref pure pure-var docutils literal"><span class="pre">compiling</span></tt></a>
+variable holds a truth value indicating whether the program is actually
+running under the auspices of the batch compiler, so that it can adjust
+accordingly. In our example, the evaluation of <tt class="docutils literal"><span class="pre">main</span></tt> becomes:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">if</span> compiling <span class="kr">then</span> () <span class="kr">else</span> main n<span class="p">;</span>
 </pre></div>
 </div>
@@ -7075,16 +7089,16 @@ Hello, world!
 like our simple first example will do the trick. But, as you&#8217;ve seen, Pure can
 easily do it.</p>
 </div>
-<div class="section" id="code-size-and-unstripped-executables">
-<h3><a class="toc-backref" href="#id95">Code Size and Unstripped Executables</a><a class="headerlink" href="#code-size-and-unstripped-executables" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="options-affecting-code-size">
+<h3><a class="toc-backref" href="#id95">Options Affecting Code Size</a><a class="headerlink" href="#options-affecting-code-size" title="Permalink to this headline">¶</a></h3>
 <p>By default, the batch compiler strips unused functions from the output code,
 to keep the code size small. You can disable this with the <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a>
 option, in which case the output code includes <em>all</em> functions defined in the
-compiled program or imported through a <a class="reference internal" href="#using"><tt class="xref std std-keyword docutils literal"><span class="pre">using</span></tt></a> clause, even if they
-don&#8217;t seem to be used anywhere. This considerably increases compilation times
-and makes the compiled executable much larger. For instance, on a 64 bit Linux
-systems with ELF binaries the executable of our hello.pure example is about
-thrice as large:</p>
+compiled program, the prelude and any other module imported with a
+<a class="reference internal" href="#using"><tt class="xref std std-keyword docutils literal"><span class="pre">using</span></tt></a> clause, even if they don&#8217;t seem to be used anywhere. This
+considerably increases compilation times and makes the compiled executable
+much larger. For instance, on a 64 bit Linux systems with ELF binaries the
+executable of our hello.pure example is about thrice as large:</p>
 <div class="highlight-none"><div class="highlight"><pre>$ pure -o hello -c -x hello.pure 7 &amp;&amp; ls -l hello
 -rwxr-xr-x 1 ag users 178484 2010-01-12 06:21 hello
 $ pure -o hello -c -u -x hello.pure 7 &amp;&amp; ls -l hello
@@ -7104,9 +7118,9 @@ from the executable, as if they were never defined at all. If such a function
 is then being called using <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> at runtime, it will evaluate to a
 plain constructor symbol.</p>
 <p>If this is a problem then you can either use the <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a> option to
-produce an unstripped executable, or you can force functions to be included in
-the stripped executable with the <a class="reference internal" href="#cmdoption-pure--required"><em class="xref std std-option">--required</em></a> pragma (cf. <a class="reference internal" href="#code-generation-options">Code
-Generation Options</a>). For instance:</p>
+produce an unstripped executable, or you can force specific functions to be
+included in the stripped executable with the <a class="reference internal" href="#cmdoption-pure--required"><em class="xref std std-option">--required</em></a> pragma
+(cf. <a class="reference internal" href="#code-generation-options">Code Generation Options</a>). For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --required foo</span>
 foo x = bar (x-<span class="mi">1</span>)<span class="p">;</span>
 eval <span class="s">&quot;foo 99&quot;</span><span class="p">;</span>
@@ -7114,8 +7128,8 @@ eval <span class="s">&quot;foo 99&quot;</span><span class="p">;</span>
 </div>
 <p>There is another code generation option which may have a substantial effect on
 code size, namely the <a class="reference internal" href="#cmdoption-pure--noconst"><em class="xref std std-option">--noconst</em></a> option. Normally, constant values
-defined in a <tt class="xref pure pure-func docutils literal"><span class="pre">const</span></tt> definition are precomputed at compile time and then
-stored in the generated executable; this reduces startup times but may
+defined in a <a class="reference internal" href="#const"><tt class="xref std std-keyword docutils literal"><span class="pre">const</span></tt></a> definition are precomputed at compile time and
+then stored in the generated executable; this reduces startup times but may
 increase the code size considerably if your program contains big constant
 values such as lists. If you prefer smaller executables then you can use the
 <a class="reference internal" href="#cmdoption-pure--noconst"><em class="xref std std-option">--noconst</em></a> option to force the value of the constant to be recomputed
@@ -7293,11 +7307,12 @@ rewriting without sacrificing practicality. It&#8217;s possible and in fact quit
 easy to write purely functional programs in Pure, and you&#8217;re encouraged to do
 so whenever this is possible or at least reasonable. On the other hand, Pure
 doesn&#8217;t get in your way if you want to call external operations with side
-effects; it does allow you to call any C function after all.</p>
-<p>The short (and true) answer is that I simply liked the name, and there wasn&#8217;t
-any programming language named &#8220;Pure&#8221; yet (quite a feat nowadays), so there&#8217;s
-one now. If you insist on a (recursive) backronym, just take &#8220;PURE&#8221; to stand
-for the &#8220;Pure Universal Rewriting Engine&#8221;.</p>
+effects; after all, it does allow you to call any C function at any point in a
+Pure program.</p>
+<p>The short answer is that I simply liked the name, and there wasn&#8217;t any
+programming language named &#8220;Pure&#8221; yet (quite a feat nowadays), so there&#8217;s one
+now. If you insist on a (recursive) backronym, just take &#8220;Pure&#8221; to stand for
+the &#8220;Pure universal rewriting engine&#8221;.</p>
 </div>
 <div class="section" id="backward-compatibility">
 <h3><a class="toc-backref" href="#id100">Backward Compatibility</a><a class="headerlink" href="#backward-compatibility" title="Permalink to this headline">¶</a></h3>
@@ -7356,10 +7371,10 @@ either the operands are already normalized, or you&#8217;ll have to normalize th
 result yourself.</p>
 <p>Also, as of Pure 0.41 the batch compiler produces stripped executables by
 default. To create unstripped executables you now have to use the <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a>
-option, see <a class="reference internal" href="#code-size-and-unstripped-executables">Code Size and Unstripped Executables</a> for details. The
-<em class="xref std std-option">-s</em> option to produce stripped executables is still provided for
-backward compatibility, but it won&#8217;t have any effect unless you use it to
-override a previous <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a> option.</p>
+option, see <a class="reference internal" href="#options-affecting-code-size">Options Affecting Code Size</a> for details. The <em class="xref std std-option">-s</em>
+option to produce stripped executables is still provided for backward
+compatibility, but it won&#8217;t have any effect unless you use it to override a
+previous <a class="reference internal" href="#cmdoption-pure-u"><em class="xref std std-option">-u</em></a> option.</p>
 <p>Pure 0.43 changed the rules for looking up symbols in user-defined namespaces.
 Unqualified symbols are now created in the current (rather than the global)
 namespace by default, see <a class="reference internal" href="#symbol-lookup-and-creation">Symbol Lookup and Creation</a> for details. The
@@ -7376,37 +7391,40 @@ the matrix data can now be modified in-place and type checking is more strict
 (<tt class="docutils literal"><span class="pre">int*</span></tt> requires an int matrix, etc.). Also, there&#8217;s now support for
 <tt class="docutils literal"><span class="pre">argv</span></tt>-style vector arguments (<tt class="docutils literal"><span class="pre">char**</span></tt> and <tt class="docutils literal"><span class="pre">void**</span></tt>). Please see the <a class="reference internal" href="#c-types">C
 Types</a> section for details.</p>
-<p>Pure 0.47 added support for declaring variadic externs, so functions like
-<tt class="docutils literal"><span class="pre">printf</span></tt> can now be called without much ado; see <a class="reference internal" href="#variadic-c-functions">Variadic C Functions</a> for
-details. Also, the syntax used to denote <a class="reference internal" href="#inline-code">inline code</a> sections was changed
-from <tt class="docutils literal"><span class="pre">%{...%}</span></tt> to <tt class="docutils literal"><span class="pre">%&lt;...%&gt;</span></tt>. This resolves an ambiguity in the syntax
-(note that <tt class="docutils literal"><span class="pre">%{</span></tt> is legal Pure syntax; it could denote a <tt class="docutils literal"><span class="pre">%</span></tt> operator
-followed by a matrix value), and also makes it easier to properly support this
-construct in Emacs Pure mode.</p>
-<p>Simple kinds of matrix patterns like <tt class="docutils literal"><span class="pre">{x,y}</span></tt>, <tt class="docutils literal"><span class="pre">{x::int,y}</span></tt>, <tt class="docutils literal"><span class="pre">{x,y;z,t}</span></tt>,
-<tt class="docutils literal"><span class="pre">{{x,y},z}</span></tt> are also supported beginning with Pure 0.47. This facility is
-somewhat limited, however, as variables in matrix patterns match only single
-elements (not rows or columns), and thus the subject term to be matched must
-have exactly the same shape as the pattern; non-rectangular patterns like
-<tt class="docutils literal"><span class="pre">{x,y;z}</span></tt> will produce an error message.</p>
-<p>Pure 0.47 also introduced a new, more flexible type tag feature, which defines
-type tags as unary predicates, using normal rewriting rules just as with
-ordinary functions; cf. section <a class="reference internal" href="#type-rules">Type Rules</a> for details. To these ends, a
-new keyword <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> was added (if you used this as an ordinary
-identifier, you will have to rename these). Note that the old-style type tags
-were just a syntactic shortcut for &#8220;as&#8221; patterns involving unary constructor
-symbols. These aren&#8217;t supported any more, so you&#8217;ll have to fix up your old
-scripts accordingly. To assist with this, the Pure interpreter can be run with
-the <a class="reference internal" href="#cmdoption-pure-w"><em class="xref std std-option">-w</em></a> option in order to identify occurrences of undefined
-(presumably old-style) type tags. You should either change these to the
-corresponding &#8220;as&#8221; pattern (i.e., <tt class="docutils literal"><span class="pre">x::foo</span></tt> to <tt class="docutils literal"><span class="pre">x&#64;(foo</span> <span class="pre">_)</span></tt>), or just add a
-proper type definition for the tag (like <tt class="docutils literal"><span class="pre">type</span> <span class="pre">foo</span> <span class="pre">(foo</span> <span class="pre">_);</span></tt>).</p>
-<p>Last but not least, Pure 0.47 also changed the meaning of quoted specials such
-as lambdas and local definitions. Previously these would be evaluated even in
-the middle of a quoted expression. Now they will produce a special meta
-representation in terms of built-in macros, in order to support the advanced
-metaprogramming capabilities discussed in <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros and Special
-Expressions</a> and <a class="reference internal" href="#reflection">Reflection</a>.</p>
+<p>Pure 0.47 added a bunch of new features which have been on the wishlist for
+the forthcoming 1.0 release:</p>
+<ul class="simple">
+<li>You can now define your own interactive commands by placing suitable
+function definitions in the special <tt class="docutils literal"><span class="pre">__cmd__</span></tt> namespace; see <a class="reference internal" href="#user-defined-commands">User-Defined
+Commands</a> for details.</li>
+<li>The syntax used to denote <a class="reference internal" href="#inline-code">inline code</a> sections was changed from
+<tt class="docutils literal"><span class="pre">%{...%}</span></tt> to <tt class="docutils literal"><span class="pre">%&lt;...%&gt;</span></tt>. This resolves an ambiguity in the syntax (note
+that <tt class="docutils literal"><span class="pre">%{</span></tt> is legal Pure syntax; it could denote a <tt class="docutils literal"><span class="pre">%</span></tt> operator followed
+by a matrix value), and also makes it easier to properly support this
+construct in Emacs Pure mode.</li>
+<li>It is now possible to declare variadic externs, so that functions like
+<tt class="docutils literal"><span class="pre">printf</span></tt> can be called without much ado; see <a class="reference internal" href="#variadic-c-functions">Variadic C Functions</a>.</li>
+<li>Support for simple kinds of matrix <a class="reference internal" href="#patterns">patterns</a> like <tt class="docutils literal"><span class="pre">{x,y}</span></tt>, <tt class="docutils literal"><span class="pre">{x::int,y}</span></tt>,
+<tt class="docutils literal"><span class="pre">{x,y;z,t}</span></tt>, <tt class="docutils literal"><span class="pre">{{x,y},z}</span></tt> was added.</li>
+<li>The meaning of quoted specials such as lambdas and local definitions was
+changed. Previously these would be evaluated even in the middle of a quoted
+expression. Now they will produce a special meta representation in terms of
+built-in macros, in order to support the advanced metaprogramming
+capabilities discussed in <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros and Special Expressions</a> and
+<a class="reference internal" href="#reflection">Reflection</a>.</li>
+<li>Last but not least, Pure 0.47 sports a new, more flexible type tag feature
+which defines type tags as unary predicates implemented using normal
+rewriting rules; cf. section <a class="reference internal" href="#type-rules">Type Rules</a> for details. To these ends, a new
+keyword <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> was added (if you used this as an ordinary
+identifier, you will have to rename these). Note that the old-style type
+tags, which were just a syntactic shortcut for &#8220;as&#8221; patterns involving unary
+constructor symbols, aren&#8217;t supported any more, so you&#8217;ll have to fix up
+your old scripts accordingly. To assist with this, the Pure interpreter can
+be run with the <a class="reference internal" href="#cmdoption-pure-w"><em class="xref std std-option">-w</em></a> option in order to identify occurrences of
+undefined (presumably old-style) type tags. You should either change these
+to the corresponding &#8220;as&#8221; pattern (i.e., <tt class="docutils literal"><span class="pre">x::foo</span></tt> to <tt class="docutils literal"><span class="pre">x&#64;(foo</span> <span class="pre">_)</span></tt>), or
+just add a proper type definition for the tag (like <tt class="docutils literal"><span class="pre">type</span> <span class="pre">foo</span> <span class="pre">(foo</span> <span class="pre">_);</span></tt>).</li>
+</ul>
 </div>
 <div class="section" id="error-recovery">
 <h3><a class="toc-backref" href="#id101">Error Recovery</a><a class="headerlink" href="#error-recovery" title="Permalink to this headline">¶</a></h3>
@@ -7564,7 +7582,8 @@ ordinary predicate, since those <em>will</em> be optimized to run in constant st
 space if they are tail-recursive (cf. <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail Recursion</a>). For
 instance, here is how the proper list type <a class="reference internal" href="purelib.html#rlist/type" title="rlist"><tt class="xref pure pure-type docutils literal"><span class="pre">rlist</span></tt></a> is actually
 implemented in the prelude:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> rlist xs<span class="p">@</span>[] | rlist xs<span class="p">@</span>(_:_) = true <span class="kr">if</span> check xs <span class="kr">with</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> rlist []<span class="p">;</span>
+<span class="kr">type</span> rlist (_:xs) = true <span class="kr">if</span> check xs <span class="kr">with</span>
   check [] = true<span class="p">;</span>
   check (_:xs) = check xs<span class="p">;</span>
   check _ = false<span class="p">;</span>
@@ -7823,8 +7842,7 @@ determined at compile time. If a constant contains run time objects such as
 (non-null) pointers and (local) functions, this is impossible, and the batch
 compiler will instead create code to recompute the value of the constant at
 run time.  For instance, consider:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> system<span class="p">;</span>
-<span class="kr">const</span> p = malloc <span class="mi">100</span><span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">const</span> p = malloc <span class="mi">100</span><span class="p">;</span>
 foo p<span class="p">;</span>
 </pre></div>
 </div>
@@ -7835,8 +7853,8 @@ initialization, so the compiler generates the appropriate run time
 initialization code in this case. For all practical purposes, this turns the
 constant into a read-only variable. (There&#8217;s also a code generation option to
 force this behaviour even for &#8220;normal&#8221; constants for which it&#8217;s not strictly
-necessary, in order to create smaller executables; see <a class="reference internal" href="#code-size-and-unstripped-executables">Code Size and
-Unstripped Executables</a> for details.)</p>
+necessary, in order to create smaller executables; see <a class="reference internal" href="#options-affecting-code-size">Options Affecting Code
+Size</a> for details.)</p>
 </div>
 <div class="section" id="external-c-functions">
 <h3><a class="toc-backref" href="#id109">External C Functions</a><a class="headerlink" href="#external-c-functions" title="Permalink to this headline">¶</a></h3>
@@ -7912,8 +7930,8 @@ need something like Haskell&#8217;s irrefutable matches, you&#8217;ll have to co
 explicitly using futures. See the definition of the <a class="reference internal" href="purelib.html#unzip" title="unzip"><tt class="xref pure pure-func docutils literal"><span class="pre">unzip</span></tt></a> function
 in the prelude for an example showing how to do this.</li>
 </ul>
-<p>Here are some common pitfalls with lazy data structures in Pure that you
-should be aware of:</p>
+<p>There are two other pitfalls with lazy data structures that you should be
+aware of:</p>
 <ul>
 <li><p class="first">Laziness and side effects don&#8217;t go well together, as most of the time you
 can&#8217;t be sure when a given thunk will be executed. So as a general guideline
@@ -8056,15 +8074,29 @@ process x = printf <span class="s">&quot;counting: %d</span><span class="se">\n<
 <h2><a class="toc-backref" href="#id115">Author</a><a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;, Dept. of Computer Music, Johannes
 Gutenberg University of Mainz, Germany.</p>
-<p>The author gratefully acknowledges the contributions by Scott E. Dillard,
-Rooslan S. Khayrov, Eddie Rucker, Libor Spacek, Jiri Spitz and Sergei
-Winitzki, as well as Toni Graffy, Michel Salim and Ryan Schmidt who maintain
-the SUSE Linux, Fedora Core and OSX packages, respectively. Thanks are also
-due to Vili Aapro, Alvaro Castro Castilla, John Cowan, Chris Double, Tim
-Haynes, Roman Neuhauser, Wm Leler, John Lunney and Max Wolf.</p>
+</div>
+<div class="section" id="acknowledgements">
+<h2><a class="toc-backref" href="#id116">Acknowledgements</a><a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>Pure wouldn&#8217;t be what it is without its users and other people interested in
+the language. In particular, I&#8217;d like to thank Scott E. Dillard, Rooslan
+S. Khayrov, Eddie Rucker, Libor Spacek, Jiri Spitz, Peter Summerland and
+Sergei Winitzki for their significant contributions of code, patches and
+documentation. Thanks are also due to Toni Graffy, Michel Salim and Ryan
+Schmidt who maintain the SUSE Linux, Fedora Core and OSX packages, as well as
+to Vili Aapro, Jason E. Aten, Alvaro Castro Castilla, John Cowan, Chris
+Double, Tim Haynes, Roman Neuhauser, Wm Leler, John Lunney and Max Wolf for
+suggesting improvements and mercilessly decrying shortcomings, misfeatures and
+outright bugs. If it wasn&#8217;t for all these people and others who contribute to
+the lively discussions on the mailing list, this project probably wouldn&#8217;t
+have got anywhere.</p>
+<p>Last but not least, a big thank you goes to Chris Lattner and the entire LLVM
+team. <a class="reference internal" href="#llvm">LLVM</a> really changed the game for us compiler writers, as we can now
+stop worrying about all the nitty-gritty details of code generation and
+concentrate on the design and implementation of the programming language at
+hand.</p>
 </div>
 <div class="section" id="copying">
-<h2><a class="toc-backref" href="#id116">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id117">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
 <p>Pure comes with a fairly liberal license which lets you distribute your own
 Pure programs and extensions under a license of your choice and permits
 linking of commercial applications against the Pure runtime and the Pure
@@ -8101,7 +8133,7 @@ distribution for the exact licensing terms. You can also find the LLVM license
 at the <a class="reference internal" href="#llvm">LLVM</a> website.</p>
 </div>
 <div class="section" id="references-and-links">
-<h2><a class="toc-backref" href="#id117">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id118">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils" id="aardappel">
 <dt>Aardappel</dt>
 <dd>Wouter van Oortmerssen&#8217;s functional programming language based on term
@@ -8291,7 +8323,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 </li>
 <li><a class="reference internal" href="#batch-compilation">Batch Compilation</a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
-<li><a class="reference internal" href="#code-size-and-unstripped-executables">Code Size and Unstripped Executables</a></li>
+<li><a class="reference internal" href="#options-affecting-code-size">Options Affecting Code Size</a></li>
 <li><a class="reference internal" href="#other-output-code-formats">Other Output Code Formats</a></li>
 <li><a class="reference internal" href="#calling-pure-functions-from-c">Calling Pure Functions From C</a></li>
 </ul>
@@ -8316,6 +8348,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 </ul>
 </li>
 <li><a class="reference internal" href="#author">Author</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
 <li><a class="reference internal" href="#copying">Copying</a></li>
 <li><a class="reference internal" href="#references-and-links">References and Links</a></li>
 </ul>

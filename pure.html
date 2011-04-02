@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.47, March 29, 2011</p>
+<p>Version 0.47, April 02, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -93,8 +93,10 @@ and the latest sources can be found under the following URLs:</p>
 </li>
 <li><a class="reference internal" href="#pure-overview" id="id28">Pure Overview</a><ul>
 <li><a class="reference internal" href="#lexical-matters" id="id29">Lexical Matters</a></li>
-<li><a class="reference internal" href="#definitions-and-expression-evaluation" id="id30">Definitions and Expression Evaluation</a></li>
+<li><a class="reference internal" href="#definitions-and-expression-evaluation" id="id30">Definitions and Expression Evaluation</a><ul>
 <li><a class="reference internal" href="#variables-in-equations" id="id31">Variables in Equations</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#expression-syntax" id="id32">Expression Syntax</a><ul>
 <li><a class="reference internal" href="#primary-expressions" id="id33">Primary Expressions</a></li>
 <li><a class="reference internal" href="#simple-expressions" id="id34">Simple Expressions</a></li>
@@ -1008,17 +1010,13 @@ the container data structures, are distributed with the interpreter, others
 are available as separate add-on packages from the Pure website. A (very)
 brief overview of some of the modules distributed with the Pure interpreter
 can be found in the <a class="reference internal" href="#standard-library">Standard Library</a> section.</p>
-<p>Here&#8217;s a first example which demonstrates how to define a simple recursive
-function in Pure, entered interactively in the interpreter (note that the &#8216;&gt; &#8216;
-symbol at the beginning of each input line is the interpreter&#8217;s default
-command prompt):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="c1">// my first Pure example</span>
-<span class="gp">&gt; </span>fact <span class="mi">0</span> = <span class="mi">1</span><span class="p">;</span>
-<span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = n*fact (n-<span class="mi">1</span>) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
-<span class="gp">&gt; </span><span class="kr">let</span> x = fact <span class="mi">10</span><span class="p">;</span> x<span class="p">;</span>
-<span class="mi">3628800</span>
-</pre></div>
-</div>
+<p>In this section we first give a brief overview of the most important elements
+of the Pure language. After starting out with a discussion of the lexical
+syntax, we proceed by explaining definitions and expressions, which are the
+major ingredients of Pure programs. After studying this section you should be
+able to write simple Pure programs. Subsequent sections then describe the
+concepts and notions introduced here in much greater detail and also cover the
+more advanced language elements which we only gloss over here.</p>
 <div class="section" id="lexical-matters">
 <h3><a class="toc-backref" href="#id29">Lexical Matters</a><a class="headerlink" href="#lexical-matters" title="Permalink to this headline">¶</a></h3>
 <p>Pure is a <strong class="dfn">free-format</strong> language, i.e., whitespace is insignificant (unless it
@@ -1134,12 +1132,43 @@ parentheses. E.g., <tt class="docutils literal"><span class="pre">&quot;\(123)4&
 </div>
 <div class="section" id="definitions-and-expression-evaluation">
 <h3><a class="toc-backref" href="#id30">Definitions and Expression Evaluation</a><a class="headerlink" href="#definitions-and-expression-evaluation" title="Permalink to this headline">¶</a></h3>
+<p>The real meat of a Pure program is in its definitions. In Pure these generally
+take the form of equations which tell the interpreter how expressions are to
+be evaluated. For instance, the following two equations together define a
+function <tt class="docutils literal"><span class="pre">fact</span></tt> which computes, for each given integer <tt class="docutils literal"><span class="pre">n</span></tt>, the factorial
+of <tt class="docutils literal"><span class="pre">n</span></tt>:</p>
+<div class="highlight-pure"><div class="highlight"><pre>fact <span class="mi">0</span> = <span class="mi">1</span><span class="p">;</span>
+fact n<span class="p">::</span><span class="kt">int</span> = n*fact (n-<span class="mi">1</span>) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that the first equation covers the case that <tt class="docutils literal"><span class="pre">n</span></tt> is zero, in which case
+the result is <tt class="docutils literal"><span class="pre">1</span></tt>. The second equation handles the case of a positive
+integer. Note the <tt class="docutils literal"><span class="pre">n::int</span></tt> on the left-hand side of the equation which
+stipulates that the given value <tt class="docutils literal"><span class="pre">n</span></tt> must be a (machine) integer, and the
+<tt class="docutils literal"><span class="pre">n&gt;0</span></tt> in the condition part of the equation which ensures that <tt class="docutils literal"><span class="pre">n</span></tt> is
+positive. If these conditions hold, the equation becomes applicable and we
+recursively compute <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">(n-1)</span></tt> and multply by <tt class="docutils literal"><span class="pre">n</span></tt> to obtain the result.
+The <tt class="docutils literal"><span class="pre">fact</span></tt> function thus computes the product of all positive integers up to
+<tt class="docutils literal"><span class="pre">n</span></tt>, which is indeed just how the factorial is defined in mathematics.</p>
+<p>To give this definition a try, you can just enter it at the command prompt of
+the interpreter as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mi">0</span> = <span class="mi">1</span><span class="p">;</span>
+<span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = n*fact (n-<span class="mi">1</span>) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> x = fact <span class="mi">10</span><span class="p">;</span> x<span class="p">;</span>
+<span class="mi">3628800</span>
+</pre></div>
+</div>
+<p>Note that the last command we typed computes the factorial of 10 and assigns
+it to the global variable <tt class="docutils literal"><span class="pre">x</span></tt>. At the end of the line we also typed the
+variable <tt class="docutils literal"><span class="pre">x</span></tt> again to have its value printed by the interpreter.</p>
 <p>On the surface, Pure is quite similar to other modern functional languages
 like <a class="reference internal" href="#haskell">Haskell</a> and <a class="reference internal" href="#ml">ML</a>. But under the hood it is a much more dynamic language,
 more akin to Lisp. In particular, Pure is dynamically typed, so functions can
-be fully polymorphic and you can add to the definition of an existing function
-at any time. For instance, we can extend our first example above to make the
-<tt class="docutils literal"><span class="pre">fact</span></tt> function work with floating point numbers, too:</p>
+process arguments of as many different types as you like (using FP parlance,
+we say that functions are &#8220;polymorphic&#8221;). In fact, you can add to the
+definition of an existing function at any time. For instance, we can extend
+our example above to make the <tt class="docutils literal"><span class="pre">fact</span></tt> function work with floating point
+numbers, too:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mf">0.0</span> = <span class="mf">1.0</span><span class="p">;</span>
 <span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">double</span> = n*fact (n-<span class="mi">1</span>) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
 <span class="gp">&gt; </span>fact <span class="mf">10.0</span><span class="p">;</span>
@@ -1148,34 +1177,43 @@ at any time. For instance, we can extend our first example above to make the
 <span class="mi">3628800</span>
 </pre></div>
 </div>
-<p>Note the <tt class="docutils literal"><span class="pre">n::double</span></tt> construct on the left-hand side of the second
-equation, which means that the equation is only to be applied for (double
-precision) floating point values <tt class="docutils literal"><span class="pre">n</span></tt>. This construct is also called a &#8220;type
-tag&#8221; in Pure parlance, which is actually a simple form of pattern matching
-(see below). Similarly, our previous definition at the beginning of this
-section employed the <tt class="docutils literal"><span class="pre">int</span></tt> tag to indicate that the <tt class="docutils literal"><span class="pre">n</span></tt> parameter is an
-integer value. The <tt class="docutils literal"><span class="pre">int</span></tt> and <tt class="docutils literal"><span class="pre">double</span></tt> types are built into the Pure
-language, but it is also possible to introduce your own type tags for
-user-defined data structures. This will be explained in more detail under
-<a class="reference internal" href="#type-tags">Type Tags</a> in the <a class="reference internal" href="#rule-syntax">Rule Syntax</a> section below.</p>
+<p>Note the <tt class="docutils literal"><span class="pre">n::double</span></tt> construct on the left-hand side of the second equation,
+which means that the equation is only to be applied for (double precision)
+floating point values <tt class="docutils literal"><span class="pre">n</span></tt>. This construct is also called a &#8220;type tag&#8221; in
+Pure parlance, which is actually a simple form of pattern matching (see
+below). Similarly, our previous definition above employed the <tt class="docutils literal"><span class="pre">int</span></tt> tag to
+indicate that the <tt class="docutils literal"><span class="pre">n</span></tt> parameter is an integer value. The <tt class="docutils literal"><span class="pre">int</span></tt> and
+<tt class="docutils literal"><span class="pre">double</span></tt> types are built into the Pure language.</p>
 <p>Expressions are generally evaluated from left to right, innermost expressions
-first, i.e., using call by value semantics. Pure also has a few built-in
-special forms (most notably, conditional expressions, the short-circuit
-logical connectives <a class="reference internal" href="#&amp;&amp;/special" title="&amp;&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;&amp;</span></tt></a> and <a class="reference internal" href="#||/special" title="||"><tt class="xref pure pure-func docutils literal"><span class="pre">||</span></tt></a>, the sequencing
-operator <a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a>, the lazy evaluation operator <a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>, and the
-<a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a>) which take some or all of their arguments unevaluated, using
-call by name.</p>
+first, i.e., using &#8220;call by value&#8221; semantics. E.g., in the above definition of
+the factorial this means that in the second equation first <tt class="docutils literal"><span class="pre">n-1</span></tt> (being the
+argument of <tt class="docutils literal"><span class="pre">fact</span></tt>) is evaluated, then <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">(n-1)</span></tt> (which is an argument
+to the <tt class="docutils literal"><span class="pre">*</span></tt> operator), and finally <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">(n-1)</span></tt> is multiplied by <tt class="docutils literal"><span class="pre">n</span></tt> to
+give the value of <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">n</span></tt>.</p>
+<p>We mention in passing here that Pure also has a few built-in special forms
+(most notably, conditional expressions, the short-circuit logical connectives
+<a class="reference internal" href="#&amp;&amp;/special" title="&amp;&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;&amp;</span></tt></a> and <a class="reference internal" href="#||/special" title="||"><tt class="xref pure pure-func docutils literal"><span class="pre">||</span></tt></a>, the sequencing operator <a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a>,
+the lazy evaluation operator <a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>, and the <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a>) which take some
+or all of their arguments unevaluated, using &#8220;call by name&#8221;. We&#8217;ll discuss
+these later.</p>
 <p>Like in Haskell and ML, functions are often defined by pattern matching, i.e.,
-the left-hand side of a definition is compared to the target expression,
-binding the variables in the pattern to their actual values accordingly:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo (bar x) = x-<span class="mi">1</span><span class="p">;</span>
-<span class="gp">&gt; </span>foo (bar <span class="mi">99</span>)<span class="p">;</span>
-<span class="mi">98</span>
+the left-hand side of a definition is matched against the target expression,
+binding the variables in the pattern to their actual values accordingly. This
+is frequently used in definitions involving aggregate arguments such as lists.
+For instance, we might compute the product of the elements of a list as
+follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>prod [] = <span class="mi">1</span><span class="p">;</span>
+<span class="gp">&gt; </span>prod (x:xs) = x*prod xs<span class="p">;</span>
+<span class="gp">&gt; </span>prod (<span class="mi">1</span>..<span class="mi">10</span>)<span class="p">;</span>
+<span class="mi">3628800</span>
 </pre></div>
 </div>
-<p>Due to its term rewriting semantics, Pure goes beyond most other functional
-languages in that it can do symbolic evaluations just as well as &#8220;normal&#8221;
-computations:</p>
+<p>Note that <tt class="docutils literal"><span class="pre">1..10</span></tt> denotes the list of all positive integers up to 10 here.
+This operation is provided in Pure&#8217;s prelude, i.e., it is part of the standard
+library.</p>
+<p>Due to its term rewriting semantics, Pure actually goes beyond most other
+functional languages in that it can do symbolic evaluations just as well as
+&#8220;normal&#8221; computations:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>square x = x*x<span class="p">;</span>
 <span class="gp">&gt; </span>square <span class="mi">4</span><span class="p">;</span>
 <span class="mi">16</span>
@@ -1200,63 +1238,16 @@ algebraic rules like associativity and distributivity in a direct fashion:</p>
 a*a+a*b+b*a+b*b
 </pre></div>
 </div>
-<p>Here&#8217;s another basic symbolic algebra example, which lets you compute the
-disjunctive normal form of logical expressions:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="c1">// eliminate double negations:</span>
-~~a           = a<span class="p">;</span>
-
-<span class="c1">// de Morgan&#39;s laws:</span>
-~(a || b)     = ~a &amp;&amp; ~b<span class="p">;</span>
-~(a &amp;&amp; b)     = ~a || ~b<span class="p">;</span>
-
-<span class="c1">// distributivity:</span>
-a &amp;&amp; (b || c) = a &amp;&amp; b || a &amp;&amp; c<span class="p">;</span>
-(a || b) &amp;&amp; c = a &amp;&amp; c || b &amp;&amp; c<span class="p">;</span>
-
-<span class="c1">// associativity:</span>
-(a &amp;&amp; b) &amp;&amp; c = a &amp;&amp; (b &amp;&amp; c)<span class="p">;</span>
-(a || b) || c = a || (b || c)<span class="p">;</span>
-</pre></div>
-</div>
-<p>Example:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>a || ~(b || (c &amp;&amp; ~d))<span class="p">;</span>
-a||~b&amp;&amp;~c||~b&amp;&amp;d
-</pre></div>
-</div>
 <p>Note that the above isn&#8217;t possible in languages like Haskell and ML which
 always enforce the so-called &#8220;constructor discipline&#8221;, which stipulates that
 only pure constructor symbols (without any defining equations) may occur as a
 subterm on the left-hand side of a definition. Thus equational definitions
-like the above are forbidden in these languages. It&#8217;s possible to work around
-this, but only at the cost of an extra layer of interpretation, which treats
-the expressions to be evaluated as data manipulated by an evaluation function.</p>
-<p>In Pure this extra layer is not necessary, you can just add equations like the
-above to your Pure program. In addition, you can also reduce an expression in
-a local context of algebraic equations specified in a <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clause.
-This can be done with the <a class="reference internal" href="purelib.html#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> macro defined in the prelude:</p>
-<div class="highlight-pure"><div class="highlight"><pre>expand = reduce <span class="kr">with</span>
-  (a+b)*c = a*c+b*c<span class="p">;</span>
-  a*(b+c) = a*b+a*c<span class="p">;</span>
-<span class="kr">end</span><span class="p">;</span>
-
-factor = reduce <span class="kr">with</span>
-  a*c+b*c = (a+b)*c<span class="p">;</span>
-  a*b+a*c = a*(b+c)<span class="p">;</span>
-<span class="kr">end</span><span class="p">;</span>
-</pre></div>
-</div>
-<p>Example:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>expand ((a+b)*<span class="mi">2</span>)<span class="p">;</span>
-a*<span class="mi">2</span>+b*<span class="mi">2</span>
-<span class="gp">&gt; </span>factor (a*<span class="mi">2</span>+b*<span class="mi">2</span>)<span class="p">;</span>
-(a+b)*<span class="mi">2</span>
-</pre></div>
-</div>
-</div>
+like the above are forbidden in these languages. In Pure they are just normal
+business.</p>
 <div class="section" id="variables-in-equations">
-<h3><a class="toc-backref" href="#id31">Variables in Equations</a><a class="headerlink" href="#variables-in-equations" title="Permalink to this headline">¶</a></h3>
-<p>Taking a look at the above examples, you might have been wondering how the
-Pure interpreter figures out what the parameters (a.k.a. &#8220;variables&#8221;) in an
+<h4><a class="toc-backref" href="#id31">Variables in Equations</a><a class="headerlink" href="#variables-in-equations" title="Permalink to this headline">¶</a></h4>
+<p>Taking another look at the examples above, you might be wondering how the Pure
+interpreter figures out what the parameters (a.k.a. &#8220;variables&#8221;) in an
 equation are. This is quite obvious in rules involving just variables and
 special operator symbols, such as <tt class="docutils literal"><span class="pre">(x+y)*z</span> <span class="pre">=</span> <span class="pre">x*z+y*z</span></tt>. However, what about
 an equation like <tt class="docutils literal"><span class="pre">foo</span> <span class="pre">(foo</span> <span class="pre">bar)</span> <span class="pre">=</span> <span class="pre">bar</span></tt>? Since most of the time we don&#8217;t
@@ -1285,6 +1276,7 @@ particular, Pure allows you to declare special constant symbols, if you need a
 symbol to be recognized as a literal even if it occurs in a variable
 position. This is done by means of a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> declaration, see
 <a class="reference internal" href="#symbol-declarations">Symbol Declarations</a> for details.)</p>
+</div>
 </div>
 <div class="section" id="expression-syntax">
 <h3><a class="toc-backref" href="#id32">Expression Syntax</a><a class="headerlink" href="#expression-syntax" title="Permalink to this headline">¶</a></h3>
@@ -8569,8 +8561,10 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 </li>
 <li><a class="reference internal" href="#pure-overview">Pure Overview</a><ul>
 <li><a class="reference internal" href="#lexical-matters">Lexical Matters</a></li>
-<li><a class="reference internal" href="#definitions-and-expression-evaluation">Definitions and Expression Evaluation</a></li>
+<li><a class="reference internal" href="#definitions-and-expression-evaluation">Definitions and Expression Evaluation</a><ul>
 <li><a class="reference internal" href="#variables-in-equations">Variables in Equations</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#expression-syntax">Expression Syntax</a><ul>
 <li><a class="reference internal" href="#primary-expressions">Primary Expressions</a></li>
 <li><a class="reference internal" href="#simple-expressions">Simple Expressions</a></li>

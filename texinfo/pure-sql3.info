@@ -14,7 +14,7 @@ File: pure-sql3.info,  Node: Top,  Next: Introduction,  Up: (dir)
 pure-sql3
 *********
 
-  Version 0.3, April 08, 2011
+  Version 0.4, April 18, 2011
 
     Peter Summerland <<p.summerland@gmail.com>> 
     Albert Graef <<Dr.Graef@t-online.de>> 
@@ -95,17 +95,11 @@ and executes a query.
 
     > let dbp = open "readme.db";
 
-    > typep db_ptr dbp;
-    1
-
     > exec dbp "create table if not exists RM (name text, age integer)";
 
     > exec dbp "delete from RM";
 
     > let sp1 = prep dbp "ci" "insert into RM values (?,?)";
-
-    > typep stmt_ptr sp1;
-    1
 
     > exec sp1 ("Sam",20);
 
@@ -206,7 +200,7 @@ File: pure-sql3.info,  Node: Installation,  Next: Data Structure,  Prev: Copying
 **************
 
 Get the latest source from
-<http://pure-lang.googlecode.com/files/pure-sql3-0.3.tar.gz>.
+<http://pure-lang.googlecode.com/files/pure-sql3-0.4.tar.gz>.
 
   Unless you already have them on your machine, download SQLite and
 sqlite3 from the SQLite website and install as indicated. To install
@@ -220,17 +214,16 @@ File: pure-sql3.info,  Node: Data Structure,  Next: Core Database Operations,  P
 ****************
 
 From a client's perspective, the most important of SQLite's data
-structures are the database connection object named "sqlite3" and the
-prepared statement object named sqlite3_stmt. These are opaque data
+structures are the database connection object "sqlite3" and the
+prepared statement object "sqlite3_stmt". These are opaque data
 structures that are made available to users of SQLite's C interface via
 pointers, sqlite3* and sqlite3_stmt*. At appropriate times, Sql3
-creates pointers whose pointer types are "sqlite3" or "sqlite3_stmt*",
-and these pointers can be used (with care) to call native C functions
-exposed by SQLite's C interface.
+creates "cooked" versions of these pointers that can be used (with
+care) to call native C functions exposed by SQLite's C interface.
 
-  Sql3 introduces two new data types, "db_ptr" and "stmt_ptr" which are
-merely "cooked" pointers of type sqlite3* and sqlite3_stmt*,
-respectively. These two new data types are defined using :func: *type*,
+  Sql3 introduces two new data types, "db_ptr" and "stmt_ptr" which
+refer to the cooked versions of sqlite3* and sqlite3_stmt*,
+respectively. These two new data types are defined using :func: `type',
 and therefore can be used as type tags in rule patterns or as the first
 parameter passed to in the typep function. It follows that all db_ptrs
 are sqlite3* pointers and all stmt_ptrs are sqlite3_stmt* pointers.
@@ -243,7 +236,7 @@ Thus, using dbp and sp1 from the introductory example:
     1, "sqlite3_stmt*"
 
 The converse, of course, is not true, as SQLite knows nothing about
-Sql3, and dbps and stmt_ptrs carry a lot of information in addtion to
+Sql3, and db_ptrs and stmt_ptrs carry other information in addtion to
 the underlying pointers provided to them by SQLite.
 
 
@@ -357,11 +350,9 @@ File: pure-sql3.info,  Node: Testing a db_ptr,  Next: Closing a Database Connect
 5.1.3 Testing a db_ptr
 ----------------------
 
-You can test any object to see if it is a db_ptr using (typep db_ptr)
+You can test any object to see if it is a db_ptr using (typep db_ptr):
 
-    .. function:: typep db_ptr x
-
-
+ -- Function: sql3::typep db_ptr x
      returns 1 if x is a db_ptr returned by open, and 0 if it is not.
 
   You can also determine if a db_ptr's data connection is open.
@@ -382,7 +373,7 @@ closed so that SQLite can free the associated resources.
      if the database connection referenced by the db_ptr dbp is open,
      close it using sqlite3_close; otherwise do nothing.
 
-  Before calling `sqlite3_close', *note close: 1a. finalizes all
+  Before calling `sqlite3_close', *note close: 1b. finalizes all
 prepared statements associated with the connection being closed. Sql3
 will detect and throw a db_error if an attempt is subsequently made to
 execute a statement associated with the closed database connection.
@@ -399,7 +390,10 @@ execute a statement associated with the closed database connection.
 
 If a db_ptr goes out of scope, Sql3 will automatically call
 `sqlite3_close' to close the referenced database connection, but only
-if the connection has not already been closed by *note close: 1a.
+if the connection has not already been closed by *note close: 1b. Thus,
+for example, it is not necessary to use a catch statement to ensure
+that Sqlite3 resources are properly finalized when a db_ptr is passed
+into code that could throw an exception.
 
   When debugging, this activity can be observed by editing sql3.pure,
 changing "const SHOW_OPEN_CLOSE = 0;" to "const SHOW_OPEN_CLOSE = 1;"
@@ -410,7 +404,7 @@ or finalized.
   N.B. You should never call the native C interface
 function"sqlite3_close" with a db_ptr. If the referenced database
 connection is closed by such a call, a subsequent call to *note close:
-1a. on this db_ptr (including the call that will automatically occur
+1b. on this db_ptr (including the call that will automatically occur
 when the db_ptr goes out of scope) will cause a seg fault.
 
 
@@ -419,8 +413,8 @@ File: pure-sql3.info,  Node: Prepared Statements,  Next: Exceptions,  Prev: Data
 5.2 Prepared Statements
 =======================
 
-In SQLite, prepared statement objects are used to execute SQL
-statements using the following SQLite C interface functions.
+The native SQLite C interface provides five core functions needed to
+execute a SQL statement.
 
    * sqlite3_prepare_v2
 
@@ -444,7 +438,7 @@ each of the basic data types recognized by SQLite. Thus, for example,
 statement with an argument of type double.
 
   Sql3 encapsulates these procedures in four functions: *note prep: 8,
-*note exec: 9, *note lexec: 1c. and *note finalize: 1d.
+*note exec: 9, *note lexec: 1d. and *note finalize: 1e.
 
 * Menu:
 
@@ -558,7 +552,7 @@ File: pure-sql3.info,  Node: Executing Prepared Statements,  Next: Executing Laz
 -----------------------------------
 
 In Sql3, the bind, step, column, step, column ... cycle is encapsulated
-in the *note exec: 9. and *note lexec: 1c. functions.
+in the *note exec: 9. and *note lexec: 1d. functions.
 
  -- Function: sql3::exec sp::stmt_ptr args
      use `args' to bind the prepared statement referenced by `sp',
@@ -615,7 +609,7 @@ File: pure-sql3.info,  Node: Executing Lazily,  Next: Executing Directly on a db
 
 The *note exec: 9. function returns result sets as eager lists which can
 sometimes be inefficient or simply not feasible for large result sets.
-In such cases it is preferable to use *note lexec: 1c. instead of *note
+In such cases it is preferable to use *note lexec: 1d. instead of *note
 exec: 9.
 
  -- Function: sql3::lexec stmp::stmt_ptr args
@@ -627,7 +621,7 @@ exec: 9.
     ["Sam",20]:#<thunk 0xb6475ab0>
 
 Note that no changes to `sp2' were required. In addition, for most
-purposes the lazy list returned by *note lexec: 1c. can be processed by
+purposes the lazy list returned by *note lexec: 1d. can be processed by
 the same code that processed the eager list returned by *note exec: 9.
 
 
@@ -662,7 +656,7 @@ database file for the duration of its update.
   When the native SQLite C interface function `sqlite3_step' (used by
 `exec') tries to access a file that is locked by another process, it
 treats the database as "busy" and returns the SQLITE_BUSY error code.
-If this happens in a call to *note exec: 9. or *note lexec: 1c, a *note
+If this happens in a call to *note exec: 9. or *note lexec: 1d, a *note
 db_busy: 25. exception will be thrown.
 
   You can adjust SQLite's behavior using `sqlite3_busy_handler' or
@@ -720,9 +714,9 @@ dbp' is exactly the same as `exec dbp "BEGIN"'.
 
  -- Function: sql3::rollback_to dbp::db_ptr save_point::string
 
-  Note that transactions created using :func: *begin* and :func:
-*commit* do not nest. For nested transactions, use :func: *savepoint*
-and :func: *release*.
+  Note that transactions created using :func: `begin' and :func:
+`commit' do not nest. For nested transactions, use :func: `savepoint'
+and :func: `release'.
 
 
 File: pure-sql3.info,  Node: Finalizing Prepared Statements,  Prev: Grouping Execution with Transactions,  Up: Prepared Statements
@@ -737,7 +731,7 @@ that SQLite can free the associated resources.
      finalize the prepared statement referenced by `sp', which must be a
      stmt_ptr previously returned by *note prep: 8.
 
-  Often there is no need to call *note finalize: 1d. for a given
+  Often there is no need to call *note finalize: 1e. for a given
 stmt_ptr because it will be automatically called when the stmt_ptr goes
 out of scope.
 
@@ -749,13 +743,13 @@ stmt_ptr goes out of scope, will cause an exception to be thrown.
     > catch error (finalize dbp2_sp);
     error (sql3::db_error 0 "finalize: STMT attached to a closed db_ptr.")
 
-Multiple calls to *note finalize: 1d. are fine. In contrast, the
+Multiple calls to *note finalize: 1e. are fine. In contrast, the
 corresponding native C interface function, `sqlite3_finalize' will
 cause a seg fault if called with a pointer to a finalized prepared
 statement object. This is the main reason why you should never call
 `sqlite3_finalize' with a stmt_ptr. If the prepared statement
 referenced by the stmt_ptr is finalized by such a call, a subsequent
-call to *note finalize: 1d. with the stmt_ptr (including the call that
+call to *note finalize: 1e. with the stmt_ptr (including the call that
 will automatically occur when the stmt_ptr goes out of scope) will
 cause a seg fault.
 
@@ -789,7 +783,7 @@ for database "busy" conditions.
 
 
  -- constructor: sql3::db_busy dbp
-     Sql3 functions *note exec: 9. and *note lexec: 1c. throw
+     Sql3 functions *note exec: 9. and *note lexec: 1d. throw
      exceptions of the form "`db_busy dbp'", where `dbp' is a db_ptr,
      if they are prevented from executing successfully because the
      database referenced by `dbp' is locked (See *note Executing
@@ -1157,7 +1151,7 @@ Index
                                                                (line  9)
 * sql3 finalize function:                Finalizing Prepared Statements.
                                                                (line  9)
-* sql3 is_open function:                 Testing a db_ptr.     (line 15)
+* sql3 is_open function:                 Testing a db_ptr.     (line 13)
 * sql3 lexec function:                   Executing Lazily.     (line 11)
 * sql3 module:                           Top.                  (line  6)
 * sql3 open function:                    Opening a Database Connection.
@@ -1172,7 +1166,8 @@ Index
                                                                (line 45)
 * sql3 savepoint function:               Grouping Execution with Transactions.
                                                                (line 41)
-* sql3 typep function:                   Testing a stmt_ptr.   (line  8)
+* sql3 typep function <1>:               Testing a stmt_ptr.   (line  8)
+* sql3 typep function:                   Testing a db_ptr.     (line  8)
 
 
 
@@ -1194,173 +1189,173 @@ Node: Simple Example1957
 Ref: simple example2045
 Ref: 62045
 Ref: simple-example2045
-Node: More Examples2933
-Ref: more examples3050
-Ref: a3050
-Ref: more-examples3050
-Node: SQLite Documentation3489
-Ref: sqlite documentation3633
-Ref: b3633
-Ref: sqlite-documentation3633
-Ref: c4222
-Ref: sqlite-site-map4222
-Ref: d4409
-Ref: an-introduction-to-the-sqlite-c-c-interface4409
-Node: Sqlite3 - The SQLite Command-Line Utility4409
-Ref: sqlite3 - the sqlite command-line utility4531
-Ref: e4531
-Ref: sqlite3-the-sqlite-command-line-utility4531
-Node: Copying5467
-Ref: copying5559
-Ref: f5559
-Node: Installation6144
-Ref: installation6238
-Ref: 106238
-Node: Data Structure6591
-Ref: data structure6702
-Ref: 116702
-Ref: data-structure6702
-Node: Core Database Operations8044
-Ref: core database operations8160
-Ref: 128160
-Ref: core-database-operations8160
-Node: Database Connections8430
-Ref: database connections8542
-Ref: 138542
-Ref: database-connections8542
-Node: Opening a Database Connection9137
-Ref: opening a database connection9272
-Ref: 149272
-Ref: opening-a-database-connection9272
-Ref: 79454
-Ref: sql3 open9454
-Node: Failure to Open a Database Connection11119
-Ref: failure to open a database connection11279
-Ref: 1611279
-Ref: failure-to-open-a-database-connection11279
-Node: Testing a db_ptr11935
-Ref: testing a db_ptr12095
-Ref: 1712095
-Ref: testing-a-db-ptr12095
-Ref: 1812384
-Ref: sql3 is_open12384
-Node: Closing a Database Connection12494
-Ref: closing a database connection12608
-Ref: 1912608
-Ref: closing-a-database-connection12608
-Ref: 1a12807
-Ref: sql3 close12807
-Node: Prepared Statements14288
-Ref: prepared statements14419
-Ref: 1b14419
-Ref: prepared-statements14419
-Node: Constructing Prepared Statements15770
-Ref: constructing prepared statements15888
-Ref: 1e15888
-Ref: constructing-prepared-statements15888
-Ref: 816078
-Ref: sql3 prep16078
-Node: Testing a stmt_ptr19878
-Ref: testing a stmt_ptr20034
-Ref: 1f20034
-Ref: testing-a-stmt-ptr20034
-Ref: 2020153
-Ref: sql3 typep20153
-Node: Executing Prepared Statements20249
-Ref: executing prepared statements20389
-Ref: 2120389
-Ref: executing-prepared-statements20389
-Ref: 920589
-Ref: sql3 exec20589
-Node: Executing Lazily22206
-Ref: executing lazily22358
-Ref: 2222358
-Ref: executing-lazily22358
-Ref: 1c22631
-Ref: sql3 lexec22631
-Node: Executing Directly on a db_ptr23021
-Ref: executing directly on a db_ptr23177
-Ref: 2323177
-Ref: executing-directly-on-a-db-ptr23177
-Node: Executing Against a Busy Database23687
-Ref: executing against a busy database23863
-Ref: 2423863
-Ref: executing-against-a-busy-database23863
-Node: Grouping Execution with Transactions24780
-Ref: grouping execution with transactions24956
-Ref: 2624956
-Ref: grouping-execution-with-transactions24956
-Ref: 2726383
-Ref: sql3 begin26383
-Ref: 2826422
-Ref: sql3 begin_exclusive26422
-Ref: 2926471
-Ref: sql3 begin_immediate26471
-Ref: 2a26520
-Ref: sql3 commit26520
-Ref: 2b26560
-Ref: sql3 rollback26560
-Ref: 2c26602
-Ref: sql3 savepoint26602
-Ref: 2d26664
-Ref: sql3 release26664
-Ref: 2e26724
-Ref: sql3 rollback_to26724
-Node: Finalizing Prepared Statements26946
-Ref: finalizing prepared statements27080
-Ref: 2f27080
-Ref: finalizing-prepared-statements27080
-Ref: 1d27275
-Ref: sql3 finalize27275
-Node: Exceptions28544
-Ref: exceptions28646
-Ref: 3028646
-Ref: 3128779
-Ref: sql3 db_error28779
-Ref: 2529585
-Ref: sql3 db_busy29585
-Node: SQLite Error Codes29954
-Ref: sqlite error codes30022
-Ref: 3230022
-Ref: sqlite-error-codes30022
-Node: Advanced Features32006
-Ref: advanced features32123
-Ref: 3332123
-Ref: advanced-features32123
-Node: Custom SQL Functions32447
-Ref: custom sql functions32575
-Ref: 3432575
-Ref: custom-sql-functions32575
-Node: Scalar SQL Functions33149
-Ref: scalar sql functions33261
-Ref: 3633261
-Ref: scalar-sql-functions33261
-Ref: 3533432
-Ref: sql3 create_function33432
-Node: Aggregate SQL Functions35673
-Ref: aggregate sql functions35785
-Ref: 3735785
-Ref: aggregate-sql-functions35785
-Node: Accessing the Rest of SQLite's C Interface37075
-Ref: accessing the rest of sqlite's c interface37256
-Ref: 3837256
-Ref: accessing-the-rest-of-sqlite-s-c-interface37256
-Node: Custom Binding Types for Prepared Statements39700
-Ref: custom binding types for prepared statements39852
-Ref: 1539852
-Ref: custom-binding-types-for-prepared-statements39852
-Node: Threading Modes41628
-Ref: threading modes41726
-Ref: 3941726
-Ref: threading-modes41726
-Ref: 3a43614
-Ref: is-sqlite-threadsafe43614
-Ref: 3b43614
-Ref: opening-a-new-database-connection43614
-Ref: 3c43614
-Ref: test-to-see-if-the-library-is-threadsafe43614
-Node: Index43614
-Ref: index43686
+Node: More Examples2869
+Ref: more examples2986
+Ref: a2986
+Ref: more-examples2986
+Node: SQLite Documentation3425
+Ref: sqlite documentation3569
+Ref: b3569
+Ref: sqlite-documentation3569
+Ref: c4158
+Ref: sqlite-site-map4158
+Ref: d4345
+Ref: an-introduction-to-the-sqlite-c-c-interface4345
+Node: Sqlite3 - The SQLite Command-Line Utility4345
+Ref: sqlite3 - the sqlite command-line utility4467
+Ref: e4467
+Ref: sqlite3-the-sqlite-command-line-utility4467
+Node: Copying5403
+Ref: copying5495
+Ref: f5495
+Node: Installation6080
+Ref: installation6174
+Ref: 106174
+Node: Data Structure6527
+Ref: data structure6638
+Ref: 116638
+Ref: data-structure6638
+Node: Core Database Operations7924
+Ref: core database operations8040
+Ref: 128040
+Ref: core-database-operations8040
+Node: Database Connections8310
+Ref: database connections8422
+Ref: 138422
+Ref: database-connections8422
+Node: Opening a Database Connection9017
+Ref: opening a database connection9152
+Ref: 149152
+Ref: opening-a-database-connection9152
+Ref: 79334
+Ref: sql3 open9334
+Node: Failure to Open a Database Connection10999
+Ref: failure to open a database connection11159
+Ref: 1611159
+Ref: failure-to-open-a-database-connection11159
+Node: Testing a db_ptr11815
+Ref: testing a db_ptr11975
+Ref: 1711975
+Ref: testing-a-db-ptr11975
+Ref: 1812094
+Ref: sql3 typep12094
+Ref: 1912265
+Ref: sql3 is_open12265
+Node: Closing a Database Connection12375
+Ref: closing a database connection12489
+Ref: 1a12489
+Ref: closing-a-database-connection12489
+Ref: 1b12688
+Ref: sql3 close12688
+Node: Prepared Statements14354
+Ref: prepared statements14485
+Ref: 1c14485
+Ref: prepared-statements14485
+Node: Constructing Prepared Statements15807
+Ref: constructing prepared statements15925
+Ref: 1f15925
+Ref: constructing-prepared-statements15925
+Ref: 816115
+Ref: sql3 prep16115
+Node: Testing a stmt_ptr19915
+Ref: testing a stmt_ptr20071
+Ref: 2020071
+Ref: testing-a-stmt-ptr20071
+Node: Executing Prepared Statements20286
+Ref: executing prepared statements20426
+Ref: 2120426
+Ref: executing-prepared-statements20426
+Ref: 920626
+Ref: sql3 exec20626
+Node: Executing Lazily22243
+Ref: executing lazily22395
+Ref: 2222395
+Ref: executing-lazily22395
+Ref: 1d22668
+Ref: sql3 lexec22668
+Node: Executing Directly on a db_ptr23058
+Ref: executing directly on a db_ptr23214
+Ref: 2323214
+Ref: executing-directly-on-a-db-ptr23214
+Node: Executing Against a Busy Database23724
+Ref: executing against a busy database23900
+Ref: 2423900
+Ref: executing-against-a-busy-database23900
+Node: Grouping Execution with Transactions24817
+Ref: grouping execution with transactions24993
+Ref: 2624993
+Ref: grouping-execution-with-transactions24993
+Ref: 2726420
+Ref: sql3 begin26420
+Ref: 2826459
+Ref: sql3 begin_exclusive26459
+Ref: 2926508
+Ref: sql3 begin_immediate26508
+Ref: 2a26557
+Ref: sql3 commit26557
+Ref: 2b26597
+Ref: sql3 rollback26597
+Ref: 2c26639
+Ref: sql3 savepoint26639
+Ref: 2d26701
+Ref: sql3 release26701
+Ref: 2e26761
+Ref: sql3 rollback_to26761
+Node: Finalizing Prepared Statements26983
+Ref: finalizing prepared statements27117
+Ref: 2f27117
+Ref: finalizing-prepared-statements27117
+Ref: 1e27312
+Ref: sql3 finalize27312
+Node: Exceptions28581
+Ref: exceptions28683
+Ref: 3028683
+Ref: 3128816
+Ref: sql3 db_error28816
+Ref: 2529622
+Ref: sql3 db_busy29622
+Node: SQLite Error Codes29991
+Ref: sqlite error codes30059
+Ref: 3230059
+Ref: sqlite-error-codes30059
+Node: Advanced Features32043
+Ref: advanced features32160
+Ref: 3332160
+Ref: advanced-features32160
+Node: Custom SQL Functions32484
+Ref: custom sql functions32612
+Ref: 3432612
+Ref: custom-sql-functions32612
+Node: Scalar SQL Functions33186
+Ref: scalar sql functions33298
+Ref: 3633298
+Ref: scalar-sql-functions33298
+Ref: 3533469
+Ref: sql3 create_function33469
+Node: Aggregate SQL Functions35710
+Ref: aggregate sql functions35822
+Ref: 3735822
+Ref: aggregate-sql-functions35822
+Node: Accessing the Rest of SQLite's C Interface37112
+Ref: accessing the rest of sqlite's c interface37293
+Ref: 3837293
+Ref: accessing-the-rest-of-sqlite-s-c-interface37293
+Node: Custom Binding Types for Prepared Statements39737
+Ref: custom binding types for prepared statements39889
+Ref: 1539889
+Ref: custom-binding-types-for-prepared-statements39889
+Node: Threading Modes41665
+Ref: threading modes41763
+Ref: 3941763
+Ref: threading-modes41763
+Ref: 3a43651
+Ref: is-sqlite-threadsafe43651
+Ref: 3b43651
+Ref: opening-a-new-database-connection43651
+Ref: 3c43651
+Ref: test-to-see-if-the-library-is-threadsafe43651
+Node: Index43651
+Ref: index43723
 
 End Tag Table
 

@@ -14,7 +14,7 @@ File: pd-pure.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-pure
 *******
 
-  Version 0.13, May 14, 2011
+  Version 0.14, May 24, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -56,6 +56,7 @@ Control Objects
 Advanced Features
 
 * Asynchronous Messages::
+* Wireless Messaging::
 * Reading and Writing Audio Data::
 * Controlling the Runtime::
 * Livecoding::
@@ -81,7 +82,7 @@ File: pd-pure.info,  Node: Installation,  Next: Usage,  Prev: Copying,  Up: Top
 MS Windows users please see *note pd-pure on Windows: 4. below.
 
   Get the latest source from
-<http://pure-lang.googlecode.com/files/pd-pure-0.13.tar.gz>.
+<http://pure-lang.googlecode.com/files/pd-pure-0.14.tar.gz>.
 
   Usually, `make && sudo make install' should do the trick. This will
 compile the external (you need to have GNU make, Pd and Pure installed
@@ -119,7 +120,7 @@ the time of this writing, the available packages are:
 
    * <http://pure-lang.googlecode.com/files/pd-mingw-0.42-5.msi>
 
-   * <http://pure-lang.googlecode.com/files/pd-pure-0.13.msi>
+   * <http://pure-lang.googlecode.com/files/pd-pure-0.14.msi>
 
   Make sure that you get the latest versions of these packages. After
 installing the packages, you still have to configure Pd to load the
@@ -347,12 +348,12 @@ inlet to the right outlet and vice versa:
     cross = 2,2,cross with cross (k,x) = (1-k,x) end;
 
 You can also emit multiple messages, possibly to different outlets, in
-one go. These must be encoded as lists of values or `index,value'
-pairs, which are emitted in the order in which they are written. E.g.,
-the following `[fan]' object implements an "n-fan" which routes its
-input to `n' outlets simultaneously:
+one go. These must be encoded as Pure vectors (or matrices) of values or
+`index,value' pairs, which are emitted in the order in which they are
+written. E.g., the following `[fan]' object implements an "n-fan" which
+routes its input to `n' outlets simultaneously:
 
-    fan n = 1,n,fan with fan x = reverse [k,x | k = 0..n-1] end;
+    fan n = 1,n,fan with fan x = reverse {k,x | k = 0..n-1} end;
 
 (Note that, because of the use of `reverse', the `n' outlets are served
 in right-to-left order here. This is not strictly necessary, but
@@ -361,22 +362,26 @@ matches the Pd convention.)
   Another example is the following `[dup]' object with a single inlet
 and outlet, which just sends out each received message twice:
 
-    dup x = [x,x];
+    dup x = {x,x};
 
-Note that if you want to output a _real_ list value to an outlet, you'll
-either have to specify the outlet index explicitly, or enclose the list
-in an extra pair of brackets, since otherwise the list elements will be
-sent as separate messages instead (like in the `dup' example). Thus, to
-output the list `[x,x]' literally, rather than sending `x' twice, use
-the following code:
+Note that this is different from the following, which outputs a list
+value to the outlet instead:
 
-    dup2 x = [[x,x]]; // or: 0,[x,x]
+    dup2 x = [x,x];
 
-An object can also just "swallow" messages and generate no output at
-all. To these ends, make the object return either an empty list `[]' or
-the empty tuple `()'. For instance, the following object `[echo]'
-implements a sink which just prints received messages on standard
-output, which is useful for debugging purposes:
+(Also, please note that this behaviour is new in pd-pure 0.14.
+Previously, a list return value by itself would output multiple values
+instead. However, this made it very awkward to deal with Pd list values
+in pd-pure, and so as of pd-pure 0.14 Pure matrices must now be used to
+output multiple values.)
+
+  An object can also just "swallow" messages and generate no output at
+all. To these ends, make the object return either an empty vector `{}'
+or the empty tuple `()'. (Note that, in contrast, returning the empty
+list `[]' does send a value back to Pd, namely an empty list value.)
+For instance, the following object `[echo]' implements a sink which
+just prints received messages on standard output, which is useful for
+debugging purposes:
 
     using system;
     echo x = () when puts (str x) end;
@@ -515,12 +520,15 @@ block.
 
 Control messages for the control outlet of the object may be added by
 returning a pair `sig,msg' where `sig' is the output signal matrix and
-`msg' is a single control message or list of such messages (using the
+`msg' is a single control message or vector of such messages (using the
 same format as with control objects). The signal matrix can also be
-omitted if no signal output is needed, and the object function may also
-return `()' if neither signal nor control output is required. (This may
-be the case, e.g., for dsps which just analyze the incoming signal data
-and store the results somewhere for later retrieval.)
+omitted if no signal output is needed (unless the control data takes
+the form of a double matrix, which would be interpreted as signal data;
+in such a case you'd have to specify an empty signal matrix instead).
+The object function may also return `()' if neither signal nor control
+output is required. (This may be the case, e.g., for dsps which just
+analyze the incoming signal data and store the results somewhere for
+later retrieval.)
 
   Audio objects can also process control messages and generate
 responses on the leftmost inlet/outlet pair as usual. This is commonly
@@ -702,7 +710,7 @@ braces is Faust code.)
       // each processed block of samples on the control outlet, using messages of
       // the form left <value> and right <value>, respectively.
       amp in::matrix = amp::compute dsp n in out $$
-        out,[left (get_control left_meter),right (get_control right_meter)];
+        out,{left (get_control left_meter),right (get_control right_meter)};
       // Respond to control messages of the form <control> <value>. <control> may
       // be any of the input controls supported by the Faust program (bass,
       // treble, gain, etc.).
@@ -713,9 +721,9 @@ braces is Faust code.)
       // Get the number of inputs and outputs and the control variables.
       k,l,ui = amp::info dsp;
       ui = control_map $ controls ui;
-      [left_meter,right_meter] = list $ ui!!["left","right"];
+      {left_meter,right_meter} = ui!!["left","right"];
       // Create a buffer large enough to hold the output from the dsp.
-      out = {0.0 | i = 1..l; j = 1..n};
+      out = dmatrix (l,n);
     end;
 
 Note that it is possible to load the above Faust program directly in
@@ -734,13 +742,14 @@ File: pd-pure.info,  Node: Advanced Features,  Next: Index,  Prev: Audio Objects
 *******************
 
 This section discusses some advanced features of the Pd Pure loader. It
-explains the use of timer callbacks and wave arrays, and the livecoding
-and interactive control facilities. We also give an overview of the API
-provided for pd-pure programmers.
+explains the use of timer callbacks, wireless connections and wave
+arrays, and the livecoding and interactive control facilities. We also
+give an overview of the API provided for pd-pure programmers.
 
 * Menu:
 
 * Asynchronous Messages::
+* Wireless Messaging::
 * Reading and Writing Audio Data::
 * Controlling the Runtime::
 * Livecoding::
@@ -748,7 +757,7 @@ provided for pd-pure programmers.
 * Programming Interface::
 
 
-File: pd-pure.info,  Node: Asynchronous Messages,  Next: Reading and Writing Audio Data,  Up: Advanced Features
+File: pd-pure.info,  Node: Asynchronous Messages,  Next: Wireless Messaging,  Up: Advanced Features
 
 6.1 Asynchronous Messages
 =========================
@@ -812,7 +821,7 @@ track of the times at which messages in the queue are to be delivered:
     extern double pd_time();
     mypipe t = process (ref []) with
       process q () = case dequeue q of
-                       x,(t,_):_ = [x,pd_delay (t-pd_time) ()];
+                       x,(t,_):_ = {x,pd_delay (t-pd_time) ()};
                        x,_ = x;
                      end;
       process q x  = enqueue q x $$ pd_delay t () if null (get q);
@@ -823,9 +832,77 @@ track of the times at which messages in the queue are to be delivered:
 
 
 
-File: pd-pure.info,  Node: Reading and Writing Audio Data,  Next: Controlling the Runtime,  Prev: Asynchronous Messages,  Up: Advanced Features
+File: pd-pure.info,  Node: Wireless Messaging,  Next: Reading and Writing Audio Data,  Prev: Asynchronous Messages,  Up: Advanced Features
 
-6.2 Reading and Writing Audio Data
+6.2 Wireless Messaging
+======================
+
+As of version 0.14, pd-pure offers some facilities for sending and
+receiving messages directly, without any wired connections to the
+inlets and outlets of an object (similar to what the Pd `[send]' and
+`[receive]' objects provide). See the description for the *note
+pd_send: 16. and *note pd_receive: 17. routines in the *note
+Programming Interface: 14. section.
+
+  For instance, here's how you can use the `pd_send' function to send
+messages to the Pd runtime:
+
+    pd_send "pd" (dsp 1); // turn on audio processing
+
+This function also enables you to perform dynamic patching, by sending
+the appropriate messages to patches (i.e., `"pd-patch"' receivers, where
+`patch' is the name of the target patch). Useful messages to patches are
+listed in the Tips and Tricks
+(http://puredata.info/docs/tutorials/TipsAndTricks#patch-messages)
+section on the Pd community website, and some examples can be found
+here
+(http://pure-data.svn.sourceforge.net/svnroot/pure-data/trunk/doc/additional/pd-msg/).
+For instance, the following Pure object, when banged, inserts a few
+objects into a subpatch named `test' and connects them to each other:
+
+    extern void pd_send(char*, expr*);
+
+    pd_send_test _ = () when
+      pd_send "pd-test" (obj 10 0 "osc~" 220);
+      pd_send "pd-test" (obj 10 30 "*~" 0.1);
+      pd_send "pd-test" (obj 10 60 "dac~");
+      pd_send "pd-test" (connect 0 0 1 0);
+      pd_send "pd-test" (connect 1 0 2 0);
+      pd_send "pd-test" (connect 1 0 2 1);
+    end;
+
+An object can also receive messages from any named source by means of
+the `pd_receive' function. This function must be called either at object
+creation time or when one of the dsp or control processing methods of
+the object is invoked. For instance, the following object calls
+`pd_receive' at creation time in order to receive messages sent to the
+`left' and `right' receivers, and outputs them on its left or right
+outlet, respectively:
+
+    extern void pd_receive(char*);
+
+    pd_receive_test = 1,2,process with
+      process (left x) = 0,x;
+      process (right x) = 1,x;
+    end when
+      do pd_receive ["left","right"];
+    end;
+
+Please note that `pd_receive' itself doesn't return any message, it
+merely registers a receiver symbol so that messages sent to that symbol
+may be received later. The received messages are always delivered to
+the leftmost inlet when Pd does its control processing. Moreover, the
+symbol identifying the source of the message is applied to the message
+itself, so that the receiver can figure out where the message came from
+and adjust accordingly.  This operation is useful, in particular, to
+provide communication channels between Pd GUI elements and Pure
+objects. Wireless connections are often preferred in such cases, to
+reduce display clutter.
+
+
+File: pd-pure.info,  Node: Reading and Writing Audio Data,  Next: Controlling the Runtime,  Prev: Wireless Messaging,  Up: Advanced Features
+
+6.3 Reading and Writing Audio Data
 ==================================
 
 Besides the realtime processing of audio data, Pd also provides a means
@@ -838,7 +915,7 @@ loop, or as waveshaping functions used to implement distortion effects.
   Each array has a name (Pd symbol) under which it can be accessed from
 Pure code. pd-pure makes it possible to transfer audio data directly
 between Pd arrays and Pure double vectors by means of the *note
-pd_getbuffer: 16. and *note pd_setbuffer: 17. routines. Please see
+pd_getbuffer: 1b. and *note pd_setbuffer: 1c. routines. Please see
 *note Programming Interface: 14. below for a closer description of the
 provided routines.
 
@@ -863,7 +940,7 @@ response to a `bang' message:
 
 File: pd-pure.info,  Node: Controlling the Runtime,  Next: Livecoding,  Prev: Reading and Writing Audio Data,  Up: Advanced Features
 
-6.3 Controlling the Runtime
+6.4 Controlling the Runtime
 ===========================
 
 pd-pure provides a predefined `[pure-runtime]' object which makes it
@@ -899,7 +976,7 @@ described in the following subsection.
 
 File: pd-pure.info,  Node: Livecoding,  Next: Remote Control,  Prev: Controlling the Runtime,  Up: Advanced Features
 
-6.4 Livecoding
+6.5 Livecoding
 ==============
 
 Livecoding means changing Pure objects on the fly while a patch is
@@ -990,7 +1067,7 @@ additions to support the `pd_save'/`pd_restore' protocol:
 
 File: pd-pure.info,  Node: Remote Control,  Next: Programming Interface,  Prev: Livecoding,  Up: Advanced Features
 
-6.5 Remote Control
+6.6 Remote Control
 ==================
 
 The distribution also includes an abstraction pure-remote.pd which you
@@ -1040,11 +1117,13 @@ applications.
 
 File: pd-pure.info,  Node: Programming Interface,  Prev: Remote Control,  Up: Advanced Features
 
-6.6 Programming Interface
+6.7 Programming Interface
 =========================
 
 The Pure loader provides a number of interface routines which can be
-called by Pure scripts running in the Pd environment.
+called by Pure scripts running in the Pd environment. Note that in
+order to access these functions, you'll have to add the corresponding
+`extern' declarations to your scripts.
 
  -- Function: extern char *pd_version_s ()
      Returns the Pd version number as a string. Note that this routine
@@ -1078,28 +1157,46 @@ called by Pure scripts running in the Pd environment.
      asynchronous message facility described under *note Asynchronous
      Messages: 12.
 
+ -- Function: extern void pd_send (char *sym, expr *x)
+     Sends a message, specified as a Pure term `x', to the receiver
+     given by the symbol `sym' (specified as a string). This is a no-op
+     if the receiver doesn't exist.
+
+ -- Function: extern void pd_receive (char *sym)
+     Prepares an object so that it can receive messages sent to the
+     given symbol `sym'. This function must be called during object
+     creation or method calls. It can be called for different symbols,
+     as many times as needed. The messages are always delivered to the
+     leftmost inlet, and the given symbol is applied to the original
+     message, so that the receiver can figure out where the message
+     came from.
+
+ -- Function: extern void pd_unreceive (char *sym)
+     Switches off receiving messages for the given symbol `sym'. Use
+     this to undo the effects of a previous `pd_receive' call.
+
  -- Function: extern expr *pd_getbuffer (char *name)
  -- Function: extern void pd_setbuffer (char *name, expr *x)
  -- Function: extern int pd_getbuffersize (char *name)
  -- Function: extern void pd_setbuffersize (char *name, uint32_t sz)
      Routines to access the Pd array (sample buffer) with the given
      name. These functions can be used to transfer audio data between
-     Pd and Pure scripts; see *note Reading and Writing Audio Data: 15.
+     Pd and Pure scripts; see *note Reading and Writing Audio Data: 1a.
      above for an example.
 
-     *note pd_getbuffersize: 1d. and *note pd_setbuffersize: 1e. gets
+     *note pd_getbuffersize: 23. and *note pd_setbuffersize: 24. gets
      or sets the size of the given buffer, respectively.
 
-     *note pd_getbuffer: 16. reads the contents of the buffer and
+     *note pd_getbuffer: 1b. reads the contents of the buffer and
      returns it as a Pure vector (or fails if the array with the given
      name doesn't exist).
 
-     *note pd_setbuffer: 17. sets the contents of the buffer from the
+     *note pd_setbuffer: 1c. sets the contents of the buffer from the
      given Pure vector `x'. If the size of the vector exceeds the size
      of the buffer, the former is truncated. Conversely, if the size of
      the buffer exceeds the size of the Pure vector, the trailing
      samples are unaffected. _Note:_ The second argument of *note
-     pd_setbuffer: 17. can also be a pair `(i,x)' denoting an offset
+     pd_setbuffer: 1c. can also be a pair `(i,x)' denoting an offset
      `i' into the array at which the sample data is to be written, so
      that this routine allows you to overwrite any part of the array.
 
@@ -1113,23 +1210,29 @@ Index
 * Menu:
 
 * pd_getbuffer C function:               Programming Interface.
-                                                               (line 41)
+                                                               (line 61)
 * pd_getbuffersize C function:           Programming Interface.
-                                                               (line 41)
+                                                               (line 61)
 * pd_libdir_s C function:                Programming Interface.
-                                                               (line 19)
+                                                               (line 21)
 * pd_path_sl C function:                 Programming Interface.
-                                                               (line 24)
+                                                               (line 26)
 * pd_post C function:                    Programming Interface.
-                                                               (line 29)
+                                                               (line 31)
+* pd_receive C function:                 Programming Interface.
+                                                               (line 48)
+* pd_send C function:                    Programming Interface.
+                                                               (line 43)
 * pd_setbuffer C function:               Programming Interface.
-                                                               (line 41)
+                                                               (line 61)
 * pd_setbuffersize C function:           Programming Interface.
-                                                               (line 41)
+                                                               (line 61)
 * pd_time C function:                    Programming Interface.
-                                                               (line 35)
+                                                               (line 37)
+* pd_unreceive C function:               Programming Interface.
+                                                               (line 57)
 * pd_version_s C function:               Programming Interface.
-                                                               (line  9)
+                                                               (line 11)
 
 
 
@@ -1137,100 +1240,114 @@ Tag Table:
 Node: Top261
 Ref: 0549
 Ref: pd549
-Node: Copying1490
-Ref: copying1571
-Ref: 11571
-Ref: pd-pure-pd-loader-for-pure-scripts1571
-Ref: 21571
-Node: Installation1738
-Ref: installation1821
-Ref: 31821
-Node: pd-pure on Windows2775
-Ref: pd-pure on windows2843
-Ref: 42843
-Ref: pd-pure-on-windows2843
-Ref: 54143
-Ref: mingw4143
-Node: Usage4143
-Ref: usage4234
-Ref: 64234
-Node: Control Objects7328
-Ref: control objects7420
-Ref: 77420
-Ref: control-objects7420
-Node: Simple Objects10230
-Ref: simple objects10324
-Ref: a10324
-Ref: simple-objects10324
-Node: Creation Arguments10739
-Ref: creation arguments10859
-Ref: b10859
-Ref: creation-arguments10859
-Node: The [pure] Object11173
-Ref: the [pure] object11309
-Ref: c11309
-Ref: the-pure-object11309
-Node: Configuring Inlets and Outlets12388
-Ref: configuring inlets and outlets12517
-Ref: e12517
-Ref: configuring-inlets-and-outlets12517
-Node: Local State15145
-Ref: local state15248
-Ref: f15248
-Ref: local-state15248
-Node: Audio Objects15883
-Ref: audio objects15987
-Ref: 815987
-Ref: audio-objects15987
-Ref: 1023935
-Ref: faust23935
-Node: Advanced Features29771
-Ref: advanced features29865
-Ref: 929865
-Ref: advanced-features29865
-Node: Asynchronous Messages30316
-Ref: asynchronous messages30431
-Ref: 1230431
-Ref: asynchronous-messages30431
-Node: Reading and Writing Audio Data33848
-Ref: reading and writing audio data33995
-Ref: 1533995
-Ref: reading-and-writing-audio-data33995
-Node: Controlling the Runtime35373
-Ref: controlling the runtime35509
-Ref: d35509
-Ref: controlling-the-runtime35509
-Node: Livecoding37081
-Ref: livecoding37201
-Ref: 1137201
-Node: Remote Control41737
-Ref: remote control41855
-Ref: 1841855
-Ref: remote-control41855
-Node: Programming Interface44485
-Ref: programming interface44584
-Ref: 1444584
-Ref: programming-interface44584
-Ref: 1944761
-Ref: pd_version_s44761
-Ref: 1a45165
-Ref: pd_libdir_s45165
-Ref: 1b45359
-Ref: pd_path_sl45359
-Ref: 1c45615
-Ref: pd_post45615
-Ref: 1345887
-Ref: pd_time45887
-Ref: 1646157
-Ref: pd_getbuffer46157
-Ref: 1746211
-Ref: pd_setbuffer46211
-Ref: 1d46274
-Ref: pd_getbuffersize46274
-Ref: 1e46330
-Ref: pd_setbuffersize46330
-Node: Index47486
-Ref: index47558
+Node: Copying1513
+Ref: copying1594
+Ref: 11594
+Ref: pd-pure-pd-loader-for-pure-scripts1594
+Ref: 21594
+Node: Installation1761
+Ref: installation1844
+Ref: 31844
+Node: pd-pure on Windows2798
+Ref: pd-pure on windows2866
+Ref: 42866
+Ref: pd-pure-on-windows2866
+Ref: 54166
+Ref: mingw4166
+Node: Usage4166
+Ref: usage4257
+Ref: 64257
+Node: Control Objects7351
+Ref: control objects7443
+Ref: 77443
+Ref: control-objects7443
+Node: Simple Objects10253
+Ref: simple objects10347
+Ref: a10347
+Ref: simple-objects10347
+Node: Creation Arguments10762
+Ref: creation arguments10882
+Ref: b10882
+Ref: creation-arguments10882
+Node: The [pure] Object11196
+Ref: the [pure] object11332
+Ref: c11332
+Ref: the-pure-object11332
+Node: Configuring Inlets and Outlets12411
+Ref: configuring inlets and outlets12540
+Ref: e12540
+Ref: configuring-inlets-and-outlets12540
+Node: Local State15313
+Ref: local state15416
+Ref: f15416
+Ref: local-state15416
+Node: Audio Objects16051
+Ref: audio objects16155
+Ref: 816155
+Ref: audio-objects16155
+Ref: 1024273
+Ref: faust24273
+Node: Advanced Features30089
+Ref: advanced features30183
+Ref: 930183
+Ref: advanced-features30183
+Node: Asynchronous Messages30679
+Ref: asynchronous messages30782
+Ref: 1230782
+Ref: asynchronous-messages30782
+Node: Wireless Messaging34199
+Ref: wireless messaging34341
+Ref: 1534341
+Ref: wireless-messaging34341
+Ref: 1835864
+Ref: tips-and-tricks35864
+Ref: 1935864
+Ref: id135864
+Node: Reading and Writing Audio Data37148
+Ref: reading and writing audio data37292
+Ref: 1a37292
+Ref: reading-and-writing-audio-data37292
+Node: Controlling the Runtime38670
+Ref: controlling the runtime38806
+Ref: d38806
+Ref: controlling-the-runtime38806
+Node: Livecoding40378
+Ref: livecoding40498
+Ref: 1140498
+Node: Remote Control45034
+Ref: remote control45152
+Ref: 1d45152
+Ref: remote-control45152
+Node: Programming Interface47782
+Ref: programming interface47881
+Ref: 1447881
+Ref: programming-interface47881
+Ref: 1e48180
+Ref: pd_version_s48180
+Ref: 1f48584
+Ref: pd_libdir_s48584
+Ref: 2048778
+Ref: pd_path_sl48778
+Ref: 2149034
+Ref: pd_post49034
+Ref: 1349306
+Ref: pd_time49306
+Ref: 1649576
+Ref: pd_send49576
+Ref: 1749810
+Ref: pd_receive49810
+Ref: 2250292
+Ref: pd_unreceive50292
+Ref: 1b50477
+Ref: pd_getbuffer50477
+Ref: 1c50531
+Ref: pd_setbuffer50531
+Ref: 2350594
+Ref: pd_getbuffersize50594
+Ref: 2450650
+Ref: pd_setbuffersize50650
+Node: Index51806
+Ref: index51878
 
 End Tag Table
 

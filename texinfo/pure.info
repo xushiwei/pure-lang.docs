@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.48, May 14, 2011
+  Version 0.48, May 28, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -6349,6 +6349,7 @@ side:
     extern void instanceInit(struct_dsp_llvm*, int) = example::instanceInit;
     extern struct_dsp_llvm* new() = example::new;
     extern struct_dsp_llvm* newinit(int) = example::newinit;
+    extern int samplingFreq(struct_dsp_llvm*) = example::samplingFreq;
 
 The most important interface routines are `new', `init' and `delete'
 (used to create, initialize and destroy an instance of the dsp) and
@@ -6358,12 +6359,18 @@ useful convenience functions are added by the Pure compiler: `newinit'
 information about the dsp as a Pure tuple containing the number of
 input and output channels and the Faust control descriptions. The
 latter are provided in a symbolic format ready to be used in Pure; more
-about that below. Also note that there's usually no need to explicitly
-invoke the `delete' routine in Pure programs; the Pure compiler makes
-sure that this routine is added automatically as a finalizer (see
-`sentry') to all dsp pointers created through the `new' and `newinit'
-routines so that dsp instances are destroyed automatically when the
-corresponding Pure objects are garbage-collected.
+about that below. Finally, the Pure compiler also adds the
+`samplingFreq' function which can be used to query a dsp for its
+sampling rate (which is set with the `init' and `newinit' functions).
+
+  Note that there's usually no need to explicitly invoke the `delete'
+routine in Pure programs; the Pure compiler makes sure that this
+routine is added automatically as a finalizer (see `sentry') to all dsp
+pointers created through the `new' and `newinit' routines so that dsp
+instances are destroyed automatically when the corresponding Pure
+objects are garbage-collected. (If you prefer to do the finalization
+manually then you must also remove the sentry from the dsp object, so
+that it doesn't get deleted twice.)
 
   Another point worth mentioning here is that despite the generic
 `struct_dsp_llvm' pointer type used by the interface routines, the Pure
@@ -6525,6 +6532,16 @@ Pure interpreter to do this.
   More Faust-related examples can be found in the Pure distribution.
 Also, have a look at `pd-pure' to see how these facilities can be used
 in Pd modules written in Pure.
+
+  Finally, note that there's also an alternative interface to Faust
+which is available as a separate package and works with either Faust2
+or the stable Faust version. Please check the `pure-faust' package for
+details. This package also provides the `faust2' compatibility module
+which implements the pure-faust API on top of Pure's built-in Faust
+interface, so that you can also use the operations of this module
+instead. (The pure-faust API can in fact be more convenient to use in
+some cases, especially if you want to load a lot of different Faust
+modules dynamically at runtime.)
 
 
 File: pure.info,  Node: Interactive Usage,  Next: Batch Compilation,  Prev: C Interface,  Up: Top
@@ -10123,255 +10140,255 @@ Ref: ec261567
 Ref: interfacing-to-faust261567
 Ref: f4262710
 Ref: llvm-backend-for-faust262710
-Node: Interactive Usage273349
-Ref: interactive usage273450
-Ref: a273450
-Ref: interactive-usage273450
-Node: Online Help276879
-Ref: online help276971
-Ref: 4276971
-Ref: online-help276971
-Ref: f6277440
-Ref: index-27277440
-Ref: f7277468
-Ref: index-28277468
-Ref: f8278971
-Ref: docutils278971
-Node: Interactive Commands279912
-Ref: interactive commands280041
-Ref: c6280041
-Ref: interactive-commands280041
-Ref: f9280293
-Ref: index-29280293
-Ref: fa280340
-Ref: index-30280340
-Ref: fb280767
-Ref: index-31280767
-Ref: fc281093
-Ref: index-32281093
-Ref: fd281155
-Ref: index-33281155
-Ref: 101282142
-Ref: index-34282142
-Ref: 102282919
-Ref: index-35282919
-Ref: 104284439
-Ref: index-36284439
-Ref: 105284767
-Ref: index-37284767
-Ref: 106284833
-Ref: index-38284833
-Ref: 107285384
-Ref: index-39285384
-Ref: 108285630
-Ref: index-40285630
-Ref: 109285710
-Ref: index-41285710
-Ref: 10a285761
-Ref: index-42285761
-Ref: 10b287446
-Ref: index-43287446
-Ref: 10c287696
-Ref: index-44287696
-Ref: 10e288110
-Ref: index-45288110
-Ref: 10f288727
-Ref: index-46288727
-Ref: 110289347
-Ref: index-47289347
-Node: Specifying Symbol Selections290330
-Ref: specifying symbol selections290464
-Ref: 100290464
-Ref: specifying-symbol-selections290464
-Node: The show Command293870
-Ref: the show command294001
-Ref: 10d294001
-Ref: the-show-command294001
-Ref: 111295103
-Ref: index-48295103
-Node: Definition Levels297869
-Ref: definition levels297981
-Ref: ff297981
-Ref: definition-levels297981
-Node: Debugging303231
-Ref: debugging303338
-Ref: 42303338
-Ref: 112305029
-Ref: index-49305029
-Node: Last Result314152
-Ref: last result314257
-Ref: fe314257
-Ref: last-result314257
-Node: Pretty-Printing314967
-Ref: pretty-printing315084
-Ref: a5315084
-Ref: a4315290
-Ref: __show__315290
-Node: User-Defined Commands318881
-Ref: user-defined commands319006
-Ref: f5319006
-Ref: user-defined-commands319006
-Node: Interactive Startup324944
-Ref: interactive startup325045
-Ref: 103325045
-Ref: interactive-startup325045
-Ref: 113325410
-Ref: index-50325410
-Node: Batch Compilation326368
-Ref: batch compilation326475
-Ref: b326475
-Ref: batch-compilation326475
-Ref: 114326475
-Ref: id14326475
-Ref: 116331580
-Ref: partial-evaluation331580
-Node: Example331698
-Ref: example331793
-Ref: 117331793
-Node: Options Affecting Code Size334737
-Ref: options affecting code size334866
-Ref: 115334866
-Ref: options-affecting-code-size334866
-Node: Other Output Code Formats338354
-Ref: other output code formats338505
-Ref: 118338505
-Ref: other-output-code-formats338505
-Ref: 119343014
-Ref: llvm-documentation343014
-Node: Calling Pure Functions From C343014
-Ref: calling pure functions from c343129
-Ref: 11a343129
-Ref: calling-pure-functions-from-c343129
-Node: Caveats and Notes344622
-Ref: caveats and notes344718
-Ref: c344718
-Ref: caveats-and-notes344718
-Node: Etymology345343
-Ref: etymology345435
-Ref: 11b345435
-Node: Backward Compatibility346285
-Ref: backward compatibility346400
-Ref: 11c346400
-Ref: backward-compatibility346400
-Node: Error Recovery354138
-Ref: error recovery354263
-Ref: 11f354263
-Ref: error-recovery354263
-Node: Non-Linear Patterns354919
-Ref: non-linear patterns355035
-Ref: 120355035
-Ref: non-linear-patterns355035
-Node: "As" Patterns356435
-Ref: "as" patterns356563
-Ref: c8356563
-Ref: as-patterns356563
-Node: "Head = Function" Pitfalls358698
-Ref: "head = function" pitfalls358822
-Ref: 121358822
-Ref: head-function-pitfalls358822
-Node: Recursive Types361013
-Ref: recursive types361137
-Ref: 9e361137
-Ref: recursive-types361137
-Node: With and when364869
-Ref: with and when364987
-Ref: 122364987
-Ref: with-and-when364987
-Node: Numeric Calculations367113
-Ref: numeric calculations367236
-Ref: 123367236
-Ref: numeric-calculations367236
-Node: Constant Definitions369145
-Ref: constant definitions369275
-Ref: 9f369275
-Ref: constant-definitions369275
-Node: External C Functions375020
-Ref: external c functions375151
-Ref: dc375151
-Ref: external-c-functions375151
-Ref: 124376431
-Ref: libffi376431
-Node: Calling Special Forms376816
-Ref: calling special forms376935
-Ref: 125376935
-Ref: calling-special-forms376935
-Node: Laziness377422
-Ref: laziness377545
-Ref: 126377545
-Node: Showing Macro Expansions382043
-Ref: showing macro expansions382174
-Ref: 128382174
-Ref: showing-macro-expansions382174
-Node: Stack Size and Tail Recursion383809
-Ref: stack size and tail recursion383964
-Ref: 48383964
-Ref: stack-size-and-tail-recursion383964
-Ref: 129384352
-Ref: index-51384352
-Ref: 12a384564
-Ref: index-52384564
-Ref: 12b384852
-Ref: index-53384852
-Node: Handling of Asynchronous Signals385916
-Ref: handling of asynchronous signals386038
-Ref: 49386038
-Ref: handling-of-asynchronous-signals386038
-Node: Author388059
-Ref: author388154
-Ref: 12c388154
-Node: Acknowledgements388289
-Ref: acknowledgements388374
-Ref: 12d388374
-Node: Copying389573
-Ref: copying389672
-Ref: 3389672
-Node: References and Links392034
-Ref: references and links392122
-Ref: 12e392122
-Ref: references-and-links392122
-Ref: 83392171
-Ref: aardappel392171
-Ref: 127392312
-Ref: alice-ml392312
-Ref: 10392447
-Ref: baader-and-nipkow392447
-Ref: b6392565
-Ref: bertrand392565
-Ref: ea392825
-Ref: clang392825
-Ref: eb393097
-Ref: faust393097
-Ref: 12f393184
-Ref: gnu-multiprecision-library393184
-Ref: 7b393184
-Ref: gmp393184
-Ref: 130393292
-Ref: gnu-octave393292
-Ref: a3393292
-Ref: octave393292
-Ref: 7f393436
-Ref: gnu-scientific-library393436
-Ref: 131393436
-Ref: gsl393436
-Ref: 67393597
-Ref: haskell393597
-Ref: 7393663
-Ref: llvm393663
-Ref: 11e393728
-Ref: miranda393728
-Ref: 68393899
-Ref: ml393899
-Ref: f394058
-Ref: michael-o-donnell394058
-Ref: 11d394208
-Ref: q394208
-Node: Index394293
-Ref: index394365
-Ref: 8b409232
-Ref: 8c409263
-Ref: ad409294
-Ref: 72409325
-Ref: 71409356
+Node: Interactive Usage274323
+Ref: interactive usage274424
+Ref: a274424
+Ref: interactive-usage274424
+Node: Online Help277853
+Ref: online help277945
+Ref: 4277945
+Ref: online-help277945
+Ref: f6278414
+Ref: index-27278414
+Ref: f7278442
+Ref: index-28278442
+Ref: f8279945
+Ref: docutils279945
+Node: Interactive Commands280886
+Ref: interactive commands281015
+Ref: c6281015
+Ref: interactive-commands281015
+Ref: f9281267
+Ref: index-29281267
+Ref: fa281314
+Ref: index-30281314
+Ref: fb281741
+Ref: index-31281741
+Ref: fc282067
+Ref: index-32282067
+Ref: fd282129
+Ref: index-33282129
+Ref: 101283116
+Ref: index-34283116
+Ref: 102283893
+Ref: index-35283893
+Ref: 104285413
+Ref: index-36285413
+Ref: 105285741
+Ref: index-37285741
+Ref: 106285807
+Ref: index-38285807
+Ref: 107286358
+Ref: index-39286358
+Ref: 108286604
+Ref: index-40286604
+Ref: 109286684
+Ref: index-41286684
+Ref: 10a286735
+Ref: index-42286735
+Ref: 10b288420
+Ref: index-43288420
+Ref: 10c288670
+Ref: index-44288670
+Ref: 10e289084
+Ref: index-45289084
+Ref: 10f289701
+Ref: index-46289701
+Ref: 110290321
+Ref: index-47290321
+Node: Specifying Symbol Selections291304
+Ref: specifying symbol selections291438
+Ref: 100291438
+Ref: specifying-symbol-selections291438
+Node: The show Command294844
+Ref: the show command294975
+Ref: 10d294975
+Ref: the-show-command294975
+Ref: 111296077
+Ref: index-48296077
+Node: Definition Levels298843
+Ref: definition levels298955
+Ref: ff298955
+Ref: definition-levels298955
+Node: Debugging304205
+Ref: debugging304312
+Ref: 42304312
+Ref: 112306003
+Ref: index-49306003
+Node: Last Result315126
+Ref: last result315231
+Ref: fe315231
+Ref: last-result315231
+Node: Pretty-Printing315941
+Ref: pretty-printing316058
+Ref: a5316058
+Ref: a4316264
+Ref: __show__316264
+Node: User-Defined Commands319855
+Ref: user-defined commands319980
+Ref: f5319980
+Ref: user-defined-commands319980
+Node: Interactive Startup325918
+Ref: interactive startup326019
+Ref: 103326019
+Ref: interactive-startup326019
+Ref: 113326384
+Ref: index-50326384
+Node: Batch Compilation327342
+Ref: batch compilation327449
+Ref: b327449
+Ref: batch-compilation327449
+Ref: 114327449
+Ref: id14327449
+Ref: 116332554
+Ref: partial-evaluation332554
+Node: Example332672
+Ref: example332767
+Ref: 117332767
+Node: Options Affecting Code Size335711
+Ref: options affecting code size335840
+Ref: 115335840
+Ref: options-affecting-code-size335840
+Node: Other Output Code Formats339328
+Ref: other output code formats339479
+Ref: 118339479
+Ref: other-output-code-formats339479
+Ref: 119343988
+Ref: llvm-documentation343988
+Node: Calling Pure Functions From C343988
+Ref: calling pure functions from c344103
+Ref: 11a344103
+Ref: calling-pure-functions-from-c344103
+Node: Caveats and Notes345596
+Ref: caveats and notes345692
+Ref: c345692
+Ref: caveats-and-notes345692
+Node: Etymology346317
+Ref: etymology346409
+Ref: 11b346409
+Node: Backward Compatibility347259
+Ref: backward compatibility347374
+Ref: 11c347374
+Ref: backward-compatibility347374
+Node: Error Recovery355112
+Ref: error recovery355237
+Ref: 11f355237
+Ref: error-recovery355237
+Node: Non-Linear Patterns355893
+Ref: non-linear patterns356009
+Ref: 120356009
+Ref: non-linear-patterns356009
+Node: "As" Patterns357409
+Ref: "as" patterns357537
+Ref: c8357537
+Ref: as-patterns357537
+Node: "Head = Function" Pitfalls359672
+Ref: "head = function" pitfalls359796
+Ref: 121359796
+Ref: head-function-pitfalls359796
+Node: Recursive Types361987
+Ref: recursive types362111
+Ref: 9e362111
+Ref: recursive-types362111
+Node: With and when365843
+Ref: with and when365961
+Ref: 122365961
+Ref: with-and-when365961
+Node: Numeric Calculations368087
+Ref: numeric calculations368210
+Ref: 123368210
+Ref: numeric-calculations368210
+Node: Constant Definitions370119
+Ref: constant definitions370249
+Ref: 9f370249
+Ref: constant-definitions370249
+Node: External C Functions375994
+Ref: external c functions376125
+Ref: dc376125
+Ref: external-c-functions376125
+Ref: 124377405
+Ref: libffi377405
+Node: Calling Special Forms377790
+Ref: calling special forms377909
+Ref: 125377909
+Ref: calling-special-forms377909
+Node: Laziness378396
+Ref: laziness378519
+Ref: 126378519
+Node: Showing Macro Expansions383017
+Ref: showing macro expansions383148
+Ref: 128383148
+Ref: showing-macro-expansions383148
+Node: Stack Size and Tail Recursion384783
+Ref: stack size and tail recursion384938
+Ref: 48384938
+Ref: stack-size-and-tail-recursion384938
+Ref: 129385326
+Ref: index-51385326
+Ref: 12a385538
+Ref: index-52385538
+Ref: 12b385826
+Ref: index-53385826
+Node: Handling of Asynchronous Signals386890
+Ref: handling of asynchronous signals387012
+Ref: 49387012
+Ref: handling-of-asynchronous-signals387012
+Node: Author389033
+Ref: author389128
+Ref: 12c389128
+Node: Acknowledgements389263
+Ref: acknowledgements389348
+Ref: 12d389348
+Node: Copying390547
+Ref: copying390646
+Ref: 3390646
+Node: References and Links393008
+Ref: references and links393096
+Ref: 12e393096
+Ref: references-and-links393096
+Ref: 83393145
+Ref: aardappel393145
+Ref: 127393286
+Ref: alice-ml393286
+Ref: 10393421
+Ref: baader-and-nipkow393421
+Ref: b6393539
+Ref: bertrand393539
+Ref: ea393799
+Ref: clang393799
+Ref: eb394071
+Ref: faust394071
+Ref: 12f394158
+Ref: gnu-multiprecision-library394158
+Ref: 7b394158
+Ref: gmp394158
+Ref: 130394266
+Ref: gnu-octave394266
+Ref: a3394266
+Ref: octave394266
+Ref: 7f394410
+Ref: gnu-scientific-library394410
+Ref: 131394410
+Ref: gsl394410
+Ref: 67394571
+Ref: haskell394571
+Ref: 7394637
+Ref: llvm394637
+Ref: 11e394702
+Ref: miranda394702
+Ref: 68394873
+Ref: ml394873
+Ref: f395032
+Ref: michael-o-donnell395032
+Ref: 11d395182
+Ref: q395182
+Node: Index395267
+Ref: index395339
+Ref: 8b410206
+Ref: 8c410237
+Ref: ad410268
+Ref: 72410299
+Ref: 71410330
 
 End Tag Table
 

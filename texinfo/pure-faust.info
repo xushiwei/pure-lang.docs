@@ -14,7 +14,7 @@ File: pure-faust.info,  Node: Top,  Next: Copying,  Up: (dir)
 pure-faust
 **********
 
-  Version 0.4, April 08, 2011
+  Version 0.5, May 28, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -25,18 +25,24 @@ functional programming language for real-time sound processing and
 synthesis developed at Grame (http://www.grame.fr/) and distributed as
 GPL'ed software.
 
-     Note: This module is now largely obsolete as there's much better
-     direct support for Faust interoperability in the Pure core (as of
-     Pure 0.45), including the ability to inline Faust code in Pure
-     programs. This requires faust2 (the latest Faust incarnation from
-     Faust's git repository), however, so this package is still
-     provided for those who are stuck with older faust versions.
+     Note: As of Pure 0.45, there's also built-in support for Faust
+     interoperability in the Pure core, including the ability to inline
+     Faust code in Pure programs. The built-in Faust interface requires
+     Faust2 (http://www.grame.fr/~letz/faust_llvm.html) which is still
+     under development and available as a separate package in the Faust
+     git repository. Both interfaces provide pretty much the same basic
+     capabilities and should work equally well for most applications.
+     In fact, as of version 0.5 pure-faust comes with a compatibility
+     module which provides the pure-faust API on top of the built-in
+     Faust interface, see the description of the *note faust2: 0.
+     module below for details..
 
 * Menu:
 
 * Copying::
 * Installation::
 * Usage::
+* Faust2 Compatibility::
 * Acknowledgements::
 * Index::
 
@@ -46,9 +52,9 @@ File: pure-faust.info,  Node: Copying,  Next: Installation,  Prev: Top,  Up: Top
 1 Copying
 *********
 
-Unless explicitly stated otherwise, this software is Copyright (c) 2009
-by Albert Graef. Please also see the source for the copyright and
-license notes pertaining to individual source files.
+Unless explicitly stated otherwise, this software is Copyright (c)
+2009-2011 by Albert Graef. Please also see the source for the copyright
+and license notes pertaining to individual source files.
 
   pure-faust is free software: you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published
@@ -71,19 +77,19 @@ File: pure-faust.info,  Node: Installation,  Next: Usage,  Prev: Copying,  Up: T
 **************
 
 Get the latest source from
-<http://pure-lang.googlecode.com/files/pure-faust-0.4.tar.gz>.
+<http://pure-lang.googlecode.com/files/pure-faust-0.5.tar.gz>.
 
   Binary packages can be found at <http://pure-lang.googlecode.com/>.
 To install from source, run the usual `make && sudo make install'. This
-requires Pure, of course. The Makefile tries to guess the installation
-prefix under which Pure is installed. If it guesses wrong, you can tell
-it the right prefix with `make prefix=/some/path'. Or you can specify
-the exact path of the `lib/pure' directory with `make
-libdir=/some/path'; by default the Makefile assumes
-`$(prefix)/lib/pure'. The Makefile also tries to guess the host system
-type and set up some platform-specific things accordingly. If this
-doesn't work for your system then you'll have to edit the Makefile
-accordingly.
+requires Pure, of course (the present version will work with Pure 0.48
+and later). The Makefile tries to guess the installation prefix under
+which Pure is installed. If it guesses wrong, you can tell it the right
+prefix with `make prefix=/some/path'. Or you can specify the exact path
+of the `lib/pure' directory with `make libdir=/some/path'; by default
+the Makefile assumes `$(prefix)/lib/pure'. The Makefile also tries to
+guess the host system type and set up some platform-specific things
+accordingly. If this doesn't work for your system then you'll have to
+edit the Makefile accordingly.
 
   The Faust compiler is not required to compile this module, but of
 course you'll need it to build the examples in the `examples'
@@ -101,7 +107,7 @@ is distributed under a simple all-permissive license, so you can use it
 for pretty much any purpose, including commercial applications.)
 
 
-File: pure-faust.info,  Node: Usage,  Next: Acknowledgements,  Prev: Installation,  Up: Top
+File: pure-faust.info,  Node: Usage,  Next: Faust2 Compatibility,  Prev: Installation,  Up: Top
 
 3 Usage
 *******
@@ -201,8 +207,11 @@ tuple which indicates the arguments the control was created with in the
 Faust program. The first parameter is a C `double*' which points to the
 current value of the control variable. You can inspect and change this
 value with the `get_double' and `put_double' routines available in the
-Pure prelude. (Note that changes of control variables only take effect
-between different invokations of `faust_compute'.) Example:
+Pure prelude. (Note that, for compatibility with the internal Faust
+interface which supports both single and double precision controls, you
+can also use the `get_control' and `put_control' functions instead.)
+Changes of control variables only take effect between different
+invokations of `faust_compute'. Example:
 
     > let gain = control_ref (controls ui!0);
     > get_double gain;
@@ -221,9 +230,31 @@ can be found in the examples subdirectory. Please send bug reports,
 patches, comments and suggestions to: <Dr.Graef@t-online.de>.
 
 
-File: pure-faust.info,  Node: Acknowledgements,  Next: Index,  Prev: Usage,  Up: Top
+File: pure-faust.info,  Node: Faust2 Compatibility,  Next: Acknowledgements,  Prev: Usage,  Up: Top
 
-4 Acknowledgements
+4 Faust2 Compatibility
+**********************
+
+As of version 0.5, pure-faust includes a Faust2 compatibility module
+which lets you use the pure-faust API on top of Pure's new Faust
+bitcode interface, using the same operations as described under *note
+Usage: 9. above. This module is invoked with the following import
+clause:
+
+    using faust2;
+
+Note that only one of the `faust' and `faust2' modules may be imported
+into a program; trying to use both modules in the same program will
+_not_ work. Also note that the `faust2' module requires Faust2
+(http://www.grame.fr/~letz/faust_llvm.html) and a fairly recent Pure
+version to work, whereas the `faust' module works with both Faust2 and
+the mainline Faust version and doesn't rely on the Faust bitcode loader
+(only the `pure.cpp' architecture is needed).
+
+
+File: pure-faust.info,  Node: Acknowledgements,  Next: Index,  Prev: Faust2 Compatibility,  Up: Top
+
+5 Acknowledgements
 ******************
 
 Many thanks to Yann Olarey at Grame, the principal author of Faust!
@@ -238,35 +269,43 @@ Index
 * Menu:
 
 * faust module:                          Top.                   (line 6)
+* faust2 module:                         Faust2 Compatibility.  (line 6)
 
 
 
 Tag Table:
 Node: Top284
-Ref: 01210
-Ref: faust1210
-Ref: 11210
-Ref: grame1210
-Ref: 21210
-Ref: pure1210
-Node: Copying1290
-Ref: copying1374
-Ref: 31374
-Ref: module-faust1374
-Ref: 41374
-Ref: pure-faust-run-faust-programs-in-pure-scripts1374
-Ref: 51374
-Node: Installation2225
-Ref: installation2311
-Ref: 62311
-Node: Usage3941
-Ref: usage4036
-Ref: 74036
-Node: Acknowledgements8888
-Ref: acknowledgements8976
-Ref: 88976
-Node: Index9084
-Ref: index9158
+Ref: 11533
+Ref: faust1533
+Ref: 21533
+Ref: faust21533
+Ref: 31533
+Ref: grame1533
+Ref: 41533
+Ref: pure1533
+Node: Copying1638
+Ref: copying1722
+Ref: 51722
+Ref: module-faust1722
+Ref: 61722
+Ref: 71722
+Node: Installation2578
+Ref: installation2664
+Ref: 82664
+Node: Usage4351
+Ref: usage4450
+Ref: 94450
+Node: Faust2 Compatibility9485
+Ref: faust2 compatibility9588
+Ref: 09588
+Ref: module-faust29588
+Ref: a9588
+Ref: faust2-compatibility9588
+Node: Acknowledgements10394
+Ref: acknowledgements10497
+Ref: b10497
+Node: Index10605
+Ref: index10679
 
 End Tag Table
 

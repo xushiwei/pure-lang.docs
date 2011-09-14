@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.48, May 14, 2011</p>
+<p>Version 0.48, September 06, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2010 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -391,15 +391,14 @@ Manual.</p>
 <dl class="type">
 <dt id="var/type">
 <em class="property">type </em><tt class="descname">var</tt><a class="headerlink" href="#var/type" title="Permalink to this definition">¶</a></dt>
-<dd><p>A free variable. This can be any kind of unevaluated global symbol which
-isn&#8217;t bound to a function.</p>
+<dd><p>A free variable. This can be any kind of symbol that could in principle
+be bound to a value (excluding operator and nonfix symbols).</p>
 </dd></dl>
 
 <dl class="type">
 <dt id="symbol/type">
 <em class="property">type </em><tt class="descname">symbol</tt><a class="headerlink" href="#symbol/type" title="Permalink to this definition">¶</a></dt>
-<dd><p>A free variable or a named function, i.e., an unevaluated symbol. This
-is the union of the <a class="reference internal" href="#fun/type" title="fun"><tt class="xref pure pure-type docutils literal"><span class="pre">fun</span></tt></a> and <a class="reference internal" href="#var/type" title="var"><tt class="xref pure pure-type docutils literal"><span class="pre">var</span></tt></a> types.</p>
+<dd><p>Any kind of symbol (this also includes operator and nonfix symbols).</p>
 </dd></dl>
 
 <p>Corresponding type predicates are provided for all of the above, see
@@ -2755,22 +2754,62 @@ evaluating &#39;__func__&#39;
 </dd></dl>
 
 <dl class="function">
+<dt id="__namespace__">
+<tt class="descname">__namespace__</tt><a class="headerlink" href="#__namespace__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the current namespace at the point of the call. This is
+implemented as a macro which expands to a string. The empty string is
+returned in the default namespace. Example:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">namespace</span> foo<span class="p">;</span>
+<span class="gp">&gt; </span>foo = __namespace__<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">namespace</span><span class="p">;</span>
+<span class="gp">&gt; </span>show foo::foo
+foo<span class="p">::</span>foo = <span class="s">&quot;foo&quot;</span><span class="p">;</span>
+<span class="gp">&gt; </span>foo<span class="p">::</span>foo<span class="p">;</span>
+<span class="s">&quot;foo&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
 <dt id="__locals__">
 <tt class="descname">__locals__</tt><a class="headerlink" href="#__locals__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list with the local function bindings (<a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clauses)
 visible at this point in the program. This is actually implemented as a
 built-in. The return value is a list of hash pairs <tt class="docutils literal"><span class="pre">x=&gt;f</span></tt> where <tt class="docutils literal"><span class="pre">x</span></tt>
-is the (quoted) symbol denoting the function and <tt class="docutils literal"><span class="pre">f</span></tt> is the function
-itself (or its value, if <tt class="docutils literal"><span class="pre">f</span></tt> is a parameterless function). The
-<a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> function is useful for debugging purposes, as well as
-to implement dynamic environments. It is also used internally to
-implement the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro, see <a class="reference internal" href="#eval-and-friends">Eval and Friends</a>. Example:</p>
+is the global symbol denoting the function (the symbol is always quoted)
+and <tt class="docutils literal"><span class="pre">f</span></tt> is the function value itself. Example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>__locals__ <span class="kr">with</span> foo x = x+<span class="mi">1</span><span class="p">;</span> x = a+b <span class="kr">end</span><span class="p">;</span>
 [x=&gt;a+b,foo=&gt;foo]
 <span class="gp">&gt; </span>f <span class="mi">99</span> <span class="kr">when</span> _=&gt;f = ans!<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
 <span class="mi">100</span>
 </pre></div>
 </div>
+<p>The <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> function is useful for debugging purposes, as
+well as to implement dynamic environments. It is also used internally to
+implement the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro, see <a class="reference internal" href="#eval-and-friends">Eval and Friends</a>.</p>
+<p>Note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> always evaluates parameterless functions
+and returns the resulting value instead of a closure (as can be seen in
+the binding <tt class="docutils literal"><span class="pre">x=&gt;a+b</span></tt> in the example above). Normally this is what you
+want, but it can be a problem with parameterless functions involving
+side effects. In such a case, if you want to evaluate the function at a
+later time, you&#8217;ll either have to use a thunk or massage the local
+function so that it takes a dummy argument such as <tt class="docutils literal"><span class="pre">()</span></tt>.</p>
+<p>Also note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> will use as keys in the resulting list
+whatever global symbols are in scope at the point of the call. By
+default, i.e., if no global symbol with the same print name as the local
+is visible at the point of the call, a symbol in the default namespace
+is used, as we&#8217;ve seen above. Otherwise the result may be also be a
+qualified symbol if such a symbol has already been declared or defined
+at the point of the call. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">namespace</span> foo<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">public</span> foo<span class="p">;</span>
+<span class="gp">&gt; </span>__locals__ <span class="kr">with</span> foo x = x+<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
+[foo<span class="p">::</span>foo=&gt;foo]
+</pre></div>
+</div>
+<p>This behaviour may be a bit surprising at first sight, but is consistent
+with the way the interpreter performs its symbol lookup, see
+<a class="reference internal" href="pure.html#symbol-lookup-and-creation"><em>Symbol Lookup and Creation</em></a> for details.</p>
 </dd></dl>
 
 <p>The following functions allow you to inspect or modify the function, type,

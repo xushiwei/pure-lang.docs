@@ -57,7 +57,7 @@
             
   <div class="section" id="module-stlvec">
 <span id="pure-stlvec"></span><h1>pure-stlvec<a class="headerlink" href="#module-stlvec" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, September 14, 2011</p>
+<p>Version 0.1, September 15, 2011</p>
 <div class="line-block">
 <div class="line">Peter Summerland &lt;<a class="reference external" href="mailto:p&#46;summerland&#37;&#52;&#48;gmail&#46;com">p<span>&#46;</span>summerland<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</div>
 </div>
@@ -276,22 +276,22 @@ at the nth position in the sequence of expressions stored in the stlvec is
 referred to as its nth member or nth element. The nth member of a stlvec, sv,
 is sometimes denoted by sv!n.  The sequence of members of sv starting at
 position i up to but not including j is denoted by sv[i,j). There is a
-&#8220;past-the-end&#8221; symbol, svend, that denotes the position after that occupied by
-the last member contained by a stlvec.</p>
+&#8220;past-the-end&#8221; symbol, stl::svend, that denotes the position after that
+occupied by the last member contained by a stlvec.</p>
 <p>For example, if sv contains the sequence &#8220;a&#8221;, &#8220;b&#8221;, &#8220;c&#8221; &#8220;d&#8221; and &#8220;e&#8221;, sv!0 is
 &#8220;a&#8221;, sv[1,3) is the sequence consisting of &#8220;b&#8221; followed by &#8220;c&#8221; and
 v[3,stl::svend) denotes the sequence consisting of &#8220;d&#8221; followed by &#8220;e&#8221;.</p>
 </div>
 <div class="section" id="stl-iterators-and-value-semantics">
 <h3><a class="toc-backref" href="#id29">STL Iterators and Value Semantics</a><a class="headerlink" href="#stl-iterators-and-value-semantics" title="Permalink to this headline">¶</a></h3>
-<p>In C++ programmers accesses a STL container&#8217;s elements by means of
-&#8220;iterators&#8221;, which can be thought of as pointers to the containers elements. A
-single iterators can be used to access a specific element, and a pairs of
-iterators can be used to access a &#8220;range&#8221; of elements. By convention, such a
-range includes the members in the slots pointed to by the first iterator and
-all succeeding slots up to but not including the slot pointed to by the second
+<p>In C++ a programmer accesses a STL container&#8217;s elements by means of
+&#8220;iterators&#8221;, which can be thought of as pointers to the container&#8217;s
+elements. A single iterator can be used to access a specific element, and a
+pair of iterators can be used to access a &#8220;range&#8221; of elements. By convention,
+such a range includes the member pointed to by the first iterator and all
+succeeding members up to but not including the member pointed to by the second
 iterator. Each container has a past-the-end iterator that can be used to
-specifiy ranges that include the its last member.</p>
+specifiy ranges that include the container&#8217;s last member.</p>
 <p>In the case of vectors there is an obvious correspondence between an iterator
 that points to an element and the element&#8217;s position (starting at zero) in the
 vector.  pure-stlvec uses this correspondence to designate a stlvec&#8217;s members
@@ -303,7 +303,7 @@ sv&#8217;s underlying STL vector. If, in addition, k is an int, stl::sort (sv,j,
 (&lt;) uses the STL to sort the elements in the range designated by the &#8220;jth&#8221; and
 &#8220;kth&#8221; iterators for sv&#8217;s underlying STL vector. This range, written as
 sv[j,k), is the subsequence of sv that begins with the element at position j
-and ends with the element at positon (k-1).</p>
+and ends with the element at position (k-1).</p>
 <p>Besides iterators, another cornerstone of the STL is its &#8220;value semantics&#8221;,
 i.e., all of the STL containers are mutable and if a container is copied, all
 of its elements are copied. pure-stlvec deals with the STL&#8217;s value semantics
@@ -327,11 +327,12 @@ by comp. Its C++ signature looks like this:</p>
 this:</p>
 <blockquote>
 <div>stable_sort (msv, first, last) comp</div></blockquote>
-<p>where msv is a mutable stlvec, and first and last are integers. The first
-thing that the Pure stable_sort does is create a pair of C++ iterators that
-point to the first and last positions in msv&#8217;s underlying STL vector.  Next it
-wraps the Pure comp function in a C++ function object that, along with the two
-iterators can be passed to the C++ stable_sort function.</p>
+<p>where msv is a mutable stlvec, and first and last are ints. The first thing
+that the Pure stable_sort does is create a pair of C++ iterators that point to
+the elements in msv&#8217;s underlying STL vector that occupy the positions
+designated by first and last.  Next it wraps the Pure comp function in a C++
+function object that, along with the two iterators, is passed to the C++
+stable_sort function.</p>
 <p>For convenience, (sv,stl::svbeg, stl::svend) can be written simply as
 sv. Thus, if first were stl::svbeg (or 0), and last were stl::svend (or #msv,
 the number of elements in msv), the last Pure call could be written:</p>
@@ -391,9 +392,9 @@ stlvec. E.g.,:</p>
 </pre></div>
 </div>
 <p>This is great for C++ programmers, but for Pure programmers it is almost
-always preferable to append the copied items to the end of a new empty target
-stlvec, rather than overwriting all or part or part of it. This can be
-accomplished using stl::svback. E.g.,:</p>
+always preferable to append the copied items to the end of a target stlvec,
+rather than overwriting all or part or part of it. This can be accomplished
+using stl::svback. E.g.,:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> v3 = emptystlvec<span class="p">;</span>
 
 <span class="gp">&gt; </span>stl<span class="p">::</span>copy v1 (v3,stl<span class="p">::</span>svback) $$ members v3<span class="p">;</span>
@@ -405,7 +406,7 @@ accomplished using stl::svback. E.g.,:</p>
 </div>
 <p>In short, when a pure-stlvec function detects &#8220;stl::svback&#8221; in a target
 iterator tuple, it constructs a STL &#8220;back inserter iterator&#8221; and passes it on
-to the STL function.</p>
+to the corresponding wrapped STL function.</p>
 </div>
 <div class="section" id="documentation">
 <h3><a class="toc-backref" href="#id33">Documentation</a><a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h3>
@@ -451,7 +452,7 @@ stl::svback) used in a two element iterator tuple (e.g., (sv,p))</dd>
 <dt>(sv,p)</dt>
 <dd>an iterator tuple that will be mapped to an iterator that points
 to the pth position of sv&#8217;s underlying STL vector, v, (or to a
-back iterator on v if p is stl::svback</dd>
+back iterator on v if p is stl::svback)</dd>
 <dt>(sv,f,l)</dt>
 <dd>an iterator tuple that will be mapped to the pair of iterators
 that are designated by (sv,f) and (sv,l)</dd>
@@ -589,7 +590,7 @@ to your program:</p>
 <div class="section" id="data-structure">
 <h3><a class="toc-backref" href="#id40">Data Structure</a><a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h3>
 <p>Currently, stlvecs are of the form (STLVEC x) or (CONST_STLVEC x), where x is
-a pointer to the underlying STL vector. E.g.,:</p>
+a pointer to the underlying STL vector. E.g.:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> v1 = stlvec (<span class="mi">0</span>..<span class="mi">3</span>)<span class="p">;</span> v1<span class="p">;</span>
 STLVEC <span class="kt">#&lt;pointer 0x915c8e0&gt;</span>
 
@@ -634,11 +635,12 @@ update (CONST_STLVEC <span class="kt">#&lt;pointer 0x9f07690&gt;</span>) <span c
 </div>
 <div class="section" id="support-for-copy-on-write-semantics">
 <h3><a class="toc-backref" href="#id41">Support for Copy-On-Write Semantics</a><a class="headerlink" href="#support-for-copy-on-write-semantics" title="Permalink to this headline">¶</a></h3>
-<p>The functions that create new stlvecs (emptystlvec, stlvec, and mkstlvec)
-return a mutable stlvec. The new stlvecs can be converted to immutable stlvecs
-(usually after they have been modified) by the <tt class="docutils literal"><span class="pre">stlconst</span></tt> function. This
-function converts a mutable stlvec to an immutable stlvec without changing
-the underlying STL vector.</p>
+<p>The functions that create new stlvecs (emptystlvec, stlvec, and mkstlvec) all
+return mutable stlvecs. For those that prefer immutable data structures,
+stlvecs can be converted to immutable stlvecs (usually after they have been
+created and modified within a function) by the <tt class="docutils literal"><span class="pre">stlconst</span></tt> function. This
+function converts a mutable stlvec to an immutable stlvec without changing the
+underlying STL vector.</p>
 <p>Using a copy-on-write strategy it is possible to use stlvecs in a manner that
 is consistent with functional programming.  Typically, a function that
 &#8220;updates&#8221; a stlvec passed to it as an argument will copy the input stlvec to a
@@ -743,7 +745,7 @@ sv <tt class="descname">!</tt> i<a class="headerlink" href="#!" title="Permalink
 <dl class="function">
 <dt id="update">
 <tt class="descname">update</tt> msv i x<a class="headerlink" href="#update" title="Permalink to this definition">¶</a></dt>
-<dd><p>replace the ith member of msv by x</p>
+<dd><p>replace the ith member of msv by x and return msv</p>
 </dd></dl>
 
 <dl class="function">
@@ -777,8 +779,8 @@ to make room for the inserted members</p>
 <tt class="descname">erase</tt> (msv,p)</dt>
 <dt>
 <tt class="descname">erase</tt> msv</dt>
-<dd><p>remove msv[first,last), msv[p,p+1) or all of
-msv frommsv.</p>
+<dd><p>remove msv[first,last) from msv, remove msv!p from msv, or make msv
+empty. Members are shifted to occupy vacated slots</p>
 </dd></dl>
 
 <dl class="function">
@@ -888,13 +890,13 @@ module.</p>
 </div>
 <div class="section" id="id1">
 <h3><a class="toc-backref" href="#id44">Examples</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>See ut_stvec in the ut subfolder.</p>
+<p>See ut_stvec in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="stl-nonmodifying-algorithms">
 <h2><a class="toc-backref" href="#id45">STL Nonmodifying Algorithms</a><a class="headerlink" href="#stl-nonmodifying-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>The sv_nonmodifying.pure module provides an interface to the STL&#8217;s
-non-modifying sequence operations.</p>
+<p>The sv_nonmodifying module provides an interface to the STL&#8217;s non-modifying
+sequence operations.</p>
 <div class="section" id="id2">
 <h3><a class="toc-backref" href="#id46">Imports</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>To use the operations of this module, add the following import declaration
@@ -916,14 +918,14 @@ to your program:</p>
 <dt id="stl::find">
 <tt class="descclassname">stl::</tt><tt class="descname">find</tt> (sv, first, last) x<a class="headerlink" href="#stl::find" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the position of the first element in sv[first,last)
-for which (==x) is true (or svend if not found)</p>
+for which (==x) is true (or stl::svend if not found)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::find_if">
 <tt class="descclassname">stl::</tt><tt class="descname">find_if</tt> (sv, first, last) unary_pred<a class="headerlink" href="#stl::find_if" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns the position of the first element in sv[first,last)
-for which unary_pred is true (or svend if not found)</p>
+for which unary_pred is true (or stl::svend if not found)</p>
 </dd></dl>
 
 <dl class="function">
@@ -931,7 +933,7 @@ for which unary_pred is true (or svend if not found)</p>
 <tt class="descclassname">stl::</tt><tt class="descname">find_first_of</tt> (sv1, first1, last1) (sv2, first2, last2) bin_pred<a class="headerlink" href="#stl::find_first_of" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the position of the first element, x, in
 sv1[first1,last1) for which there exists y in
-sv2[first2,last2) and (bin_pred x y) is true (or svend if
+sv2[first2,last2) and (bin_pred x y) is true (or stl::svend if
 no such x exists).</p>
 </dd></dl>
 
@@ -940,7 +942,7 @@ no such x exists).</p>
 <tt class="descclassname">stl::</tt><tt class="descname">adjacent_find</tt> (sv, first, last) bin_pred<a class="headerlink" href="#stl::adjacent_find" title="Permalink to this definition">¶</a></dt>
 <dd><p>search sv[first,last) for the first occurrence of two
 consecutive elements (x,y) for which (bin_pred x y) is
-true. Returns the position of x, if found, or svend if not found)</p>
+true. Returns the position of x, if found, or stl::svend if not found)</p>
 </dd></dl>
 
 <dl class="function">
@@ -965,7 +967,7 @@ sv1[first1,last1) and (sv2,first2,first2 + n), with
 n equal to last1-first1 until it finds i and j such
 that bin_pred (sv1!i) (sv2!j) is false and returns
 (i,j). If bin_pred is true for all of the pairs of elements,
-i will be svend and j will be first2 + n (or svend)</p>
+i will be stl::svend and j will be first2 + n (or stl::svend)</p>
 </dd></dl>
 
 <dl class="function">
@@ -983,7 +985,7 @@ true for each pair</p>
 <dd><p>using bin_pred to determine equality of the elements, searches
 sv1[first1,last1) for the first occurrence of the sequence
 defined by sv2[first2,last2), and returns the position in sv1
-of its first element (or svend if not found)</p>
+of its first element (or stl::svend if not found)</p>
 </dd></dl>
 
 <dl class="function">
@@ -992,7 +994,7 @@ of its first element (or svend if not found)</p>
 <dd><p>using bin_pred to determine equality of the elements, searches
 sv[first,last) for a sequence of count elements that equal
 x. If such a sequence is found, it returns the position of the
-first of its elements, otherwise it returns svend</p>
+first of its elements, otherwise it returns stl::svend</p>
 </dd></dl>
 
 <dl class="function">
@@ -1001,13 +1003,13 @@ first of its elements, otherwise it returns svend</p>
 <dd><p>using bin_pred to determine equality of the elements, searches
 sv1[first1,last1) for the last occurrence of
 sv2[first2,last2). Returns the position of the first element in
-sv1 of the occurrence (or svend if not found).</p>
+sv1 of the occurrence (or stl::svend if not found).</p>
 </dd></dl>
 
 </div>
 <div class="section" id="id4">
 <h3><a class="toc-backref" href="#id48">Examples</a><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_nonmodifying.pure</p>
+<p>See ut_sv_nonmodifying.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="stl-modifying-algorithms">
@@ -1028,7 +1030,7 @@ to your program:</p>
 <dl class="function">
 <dt id="stl::copy">
 <tt class="descclassname">stl::</tt><tt class="descname">copy</tt> (sv, first1, last1) (msv, first2)<a class="headerlink" href="#stl::copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>copies the elements in sv[first1,last1) into a range whose
+<dd><p>copies the elements in sv[first1,last1) into the range whose
 first element is (msv,first2)</p>
 </dd></dl>
 
@@ -1131,7 +1133,7 @@ generated by successive calls to gen_fen</p>
 unary_pred. If n elements satisfy unary_pred, they are moved to
 msv[first,first+n), preserving their relative order. The
 content of msv[first+n,svend) is undefined. Returns
-first+n, or svend if first+n is greater than the number of
+first+n, or stl::svend if first+n is greater than the number of
 elements in msv</p>
 </dd></dl>
 
@@ -1145,7 +1147,7 @@ elements in msv</p>
 <dl class="function">
 <dt id="stl::remove_copy_if">
 <tt class="descclassname">stl::</tt><tt class="descname">remove_copy_if</tt> (sv,first,last) (msv,first) unary_pred<a class="headerlink" href="#stl::remove_copy_if" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as <a class="reference internal" href="#stl::remove_if" title="stl::remove_if"><tt class="xref pure pure-func docutils literal"><span class="pre">remove_if</span></tt></a> except that the purged sequence is copied to
+<dd><p>same as <a class="reference internal" href="#stl::remove_if" title="stl::remove_if"><tt class="xref pure pure-func docutils literal"><span class="pre">remove_if</span></tt></a> except that the purged sequence is copied to
 (msv,first) and sv[first,last) is not changed</p>
 </dd></dl>
 
@@ -1155,14 +1157,14 @@ elements in msv</p>
 <dd><p>eliminates consecutive duplicates from sv[first,last), using
 bin_pred to test for equality. The purged sequence is moved to
 sv[first,first+n) preserving their relative order, where n
-is the size of the purged sequence. Returns first+n or svend if
+is the size of the purged sequence. Returns first+n or stl::svend if
 first+n is greater than the number of elements in msv</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::unique_copy">
 <tt class="descclassname">stl::</tt><tt class="descname">unique_copy</tt> (sv,first,last) (msv,first) bin_pred<a class="headerlink" href="#stl::unique_copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as <a class="reference internal" href="#stl::unique" title="stl::unique"><tt class="xref pure pure-func docutils literal"><span class="pre">unique</span></tt></a> except that the purged sequence is copied to
+<dd><p>same as <a class="reference internal" href="#stl::unique" title="stl::unique"><tt class="xref pure pure-func docutils literal"><span class="pre">unique</span></tt></a> except that the purged sequence is copied to
 (msv,first) and sv[first,last) is not changed</p>
 </dd></dl>
 
@@ -1196,7 +1198,7 @@ middle becomes the first element of msv[first,last].</p>
 <dl class="function">
 <dt id="stl::random_shuffle">
 <tt class="descclassname">stl::</tt><tt class="descname">random_shuffle</tt> (msv,first,last)<a class="headerlink" href="#stl::random_shuffle" title="Permalink to this definition">¶</a></dt>
-<dd><p>randomly reorders the elements in msv[first,last).</p>
+<dd><p>randomly reorders the elements in msv[first,last)</p>
 </dd></dl>
 
 <dl class="function">
@@ -1218,12 +1220,12 @@ each group are preserved</p>
 </div>
 <div class="section" id="id7">
 <h3><a class="toc-backref" href="#id52">Examples</a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_modifying.pure</p>
+<p>See ut_sv_modifying.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="stl-sort-algorithms">
 <h2><a class="toc-backref" href="#id53">STL Sort Algorithms</a><a class="headerlink" href="#stl-sort-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>The sv_sort.pure module provides an interface to the STL&#8217;s sorting and binary
+<p>The sv_sort module provides an interface to the STL&#8217;s sorting and binary
 search algorithms.</p>
 <div class="section" id="id8">
 <h3><a class="toc-backref" href="#id54">Imports</a><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
@@ -1248,64 +1250,58 @@ functions, comp (as for the Pure library sort function). The functions (&lt;) an
 <dl class="function">
 <dt id="stl::stable_sort">
 <tt class="descclassname">stl::</tt><tt class="descname">stable_sort</tt> (msv, first, last) comp<a class="headerlink" href="#stl::stable_sort" title="Permalink to this definition">¶</a></dt>
-<dd><p>sorts msv[first, last), preservint the relative order of equal
+<dd><p>sorts msv[first, last), preserving the relative order of equal
 members</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::partial_sort">
 <tt class="descclassname">stl::</tt><tt class="descname">partial_sort</tt> (msv, first, middle, last) comp<a class="headerlink" href="#stl::partial_sort" title="Permalink to this definition">¶</a></dt>
-<dd><p>fills msv[first, middle) with the elements of
-msv[first,last) that would appear there if
-msv[first,last) were sorted using comp and fills
-msv[middle,last) with the remaining elements in unspecified
-order</p>
+<dd><p>fills msv[first, middle) with the elements of msv[first,last) that would
+appear there if msv[first,last) were sorted using comp and fills
+msv[middle,last) with the remaining elements in unspecified order</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::partial_sort_copy">
 <tt class="descclassname">stl::</tt><tt class="descname">partial_sort_copy</tt> (sv, first1, last1) (msv, first2, last2) comp<a class="headerlink" href="#stl::partial_sort_copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>let n be the number of elements in sv[first1, last1) and r
-be the number of elements in msv[first2, last2). If r &lt; n,
-<a class="reference internal" href="#stl::partial_sort_copy" title="stl::partial_sort_copy"><tt class="xref pure pure-func docutils literal"><span class="pre">partial_sort_copy</span></tt></a> fills msv[first2, last2) with the
-first r elements of what sv[first1, last1) would be if it
-had been sorted. If r &gt;= n, it fills msv[first2,
-first2+n) with the elements of sv[first1, last1) in
-sorted order. sv[first1,last1) is unchanged</p>
+<dd><p>let n be the number of elements in sv[first1, last1) and r be the number of
+elements in msv[first2, last2). If r &lt; n, <a class="reference internal" href="#stl::partial_sort_copy" title="stl::partial_sort_copy"><tt class="xref pure pure-func docutils literal"><span class="pre">partial_sort_copy</span></tt></a> fills
+msv[first2, last2) with the first r elements of what sv[first1, last1)
+would be if it had been sorted. If r &gt;= n, it fills msv[first2, first2+n)
+with the elements of sv[first1, last1) in sorted order. sv[first1,last1) is
+unchanged</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::nth_element">
 <tt class="descclassname">stl::</tt><tt class="descname">nth_element</tt> (msv, first, middle, last) comp<a class="headerlink" href="#stl::nth_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>rearranges the elements of msv[first, last) as follows. Let n
-be middle - first, an x nth smallest element of
-msv[first, last). Sfter the function is called,
-sv!middle will be x. All of the elements of msv[first,
-middle) will be less than x and all of the elements of
-msv[middle+1, last) will be greater than x</p>
+<dd><p>rearranges the elements of msv[first, last) as follows. Let n be middle -
+first, and let x be the nth smallest element of msv[first, last). After the
+function is called, sv!middle will be x. All of the elements of msv[first,
+middle) will be less than x and all of the elements of msv[middle+1, last)
+will be greater than x</p>
 </dd></dl>
 
 <p>The next four functions assume that sv[first, last) is ordered by comp.</p>
 <dl class="function">
 <dt id="stl::lower_bound">
 <tt class="descclassname">stl::</tt><tt class="descname">lower_bound</tt> (sv, first, last) x comp<a class="headerlink" href="#stl::lower_bound" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns an integer p that such that (sv,p) is the first position
-into which x can be inserted into sv[first, last) while
-maintaining the sorted ordering</p>
+<dd><p>returns an int designating the first position into which x can be inserted
+into sv[first, last) while maintaining the sorted ordering</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::upper_bound">
 <tt class="descclassname">stl::</tt><tt class="descname">upper_bound</tt> (sv, first, last) x comp<a class="headerlink" href="#stl::upper_bound" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns an integer p that such that (sv,p) is the last position
-into which x can be inserted into sv[first, last) while
-maintaining the sorted ordering</p>
+<dd><p>returns an int designating the last position into which x can be inserted
+into sv[first, last) while maintaining the sorted ordering</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::equal_range">
 <tt class="descclassname">stl::</tt><tt class="descname">equal_range</tt> (sv, first, last) x comp<a class="headerlink" href="#stl::equal_range" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns a tuple, (lower, upper) where lower and upper would have
+<dd><p>returns a pair of ints, (lower, upper) where lower and upper would have
 been returned by separate calls to lower_bound and upper_bound.</p>
 </dd></dl>
 
@@ -1343,20 +1339,19 @@ properly on input ranges that have been previously sorted using comp.</p>
 <dl class="function">
 <dt id="stl::merge">
 <tt class="descclassname">stl::</tt><tt class="descname">merge</tt> (sv1,first1,last1) (sv2,first2,last2) (msv,p) comp<a class="headerlink" href="#stl::merge" title="Permalink to this definition">¶</a></dt>
-<dd><p>merges the two sorted ranges into the range msv[p,p+n) where n is
+<dd><p>merges the two sorted ranges into the sorted range msv[p,p+n) where n is
 the total length of the merged sequence</p>
 </dd></dl>
 
 </div>
 <div class="section" id="id13">
 <h3><a class="toc-backref" href="#id60">Examples</a><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_merge.pure</p>
+<p>See ut_sv_merge.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="stl-heap-algorithms">
 <h2><a class="toc-backref" href="#id61">STL Heap Algorithms</a><a class="headerlink" href="#stl-heap-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>The sv_heap.pure module provides an interface to the STL&#8217;s heap
-operations.</p>
+<p>The sv_heap module provides an interface to the STL&#8217;s heap operations.</p>
 <div class="section" id="id14">
 <h3><a class="toc-backref" href="#id62">Imports</a><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
 <p>To use the operations of this module, add the following import declaration
@@ -1382,16 +1377,14 @@ msv[first,last), and push_heap and pop_heap will work properly</p>
 <dl class="function">
 <dt id="stl::push_heap">
 <tt class="descclassname">stl::</tt><tt class="descname">push_heap</tt> (msv,first,last) comp<a class="headerlink" href="#stl::push_heap" title="Permalink to this definition">¶</a></dt>
-<dd><p>makes msv[first,last) a heap (assuming that
-msv[first,last-1) was a heap)</p>
+<dd><p>makes msv[first,last) a heap (assuming that msv[first,last-1) was a heap)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::pop_heap">
 <tt class="descclassname">stl::</tt><tt class="descname">pop_heap</tt> (msv,first,last) comp<a class="headerlink" href="#stl::pop_heap" title="Permalink to this definition">¶</a></dt>
-<dd><p>swaps msv!first with msv!(last-1), and makes
-msv[first,last-1) a heap (assuming that
-msv[first,last) was a heap)</p>
+<dd><p>swaps msv!first with msv!(last-1), and makes msv[first,last-1) a heap
+(assuming that msv[first,last) was a heap)</p>
 </dd></dl>
 
 <dl class="function">
@@ -1403,13 +1396,12 @@ msv[first,last) was a heap)</p>
 </div>
 <div class="section" id="id16">
 <h3><a class="toc-backref" href="#id64">Examples</a><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_heap.pure</p>
+<p>See ut_sv_heap.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="min-max-stl-algorithms">
 <h2><a class="toc-backref" href="#id65">Min/Max STL Algorithms</a><a class="headerlink" href="#min-max-stl-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>The sv_minmax.pure module provides an interface to a few additional STL
-algorithms.</p>
+<p>The sv_minmax module provides an interface to a few additional STL algorithms.</p>
 <div class="section" id="id17">
 <h3><a class="toc-backref" href="#id66">Imports</a><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
 <p>To use the operations of this module, add the following import declaration
@@ -1427,29 +1419,29 @@ and (&gt;) are commonly passed as comp.</p>
 <dl class="function">
 <dt id="stl::min_element">
 <tt class="descclassname">stl::</tt><tt class="descname">min_element</tt> (sv,first,last) comp<a class="headerlink" href="#stl::min_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the position of the minimal element of sv[first,last)
-under the ordering defined by comp</p>
+<dd><p>returns the position of the minimal element of sv[first,last) under the
+ordering defined by comp</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::max_element">
 <tt class="descclassname">stl::</tt><tt class="descname">max_element</tt> (sv,first,last) comp<a class="headerlink" href="#stl::max_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the position of the maximal element of sv[first,last)
-under the ordering defined by comp</p>
+<dd><p>returns the position of the maximal element of sv[first,last) under the
+ordering defined by comp</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::lexicographical_compare">
 <tt class="descclassname">stl::</tt><tt class="descname">lexicographical_compare</tt> (sv1,first1,last1) (sv2,first2,last2) comp<a class="headerlink" href="#stl::lexicographical_compare" title="Permalink to this definition">¶</a></dt>
-<dd><p>compares sv1[first1,last1) and sv2[first2,last2) element
-by element according to the ordering defined by comp, and returns true if
-the first sequence is less than the second</p>
+<dd><p>compares sv1[first1,last1) and sv2[first2,last2) element by element
+according to the ordering defined by comp, and returns true if the first
+sequence is less than the second</p>
 </dd></dl>
 
 <p>Algorithms are provided for stepping through all the permutations the elements
 of a stlvec. For these purposes, the first permutation has the elements of
-msv[first,last) in ascending order and the last has the elements in descending
-order.</p>
+msv[first,last) sorted in ascending order and the last has the elements sorted
+in descending order.</p>
 <dl class="function">
 <dt id="stl::next_permutation">
 <tt class="descclassname">stl::</tt><tt class="descname">next_permutation</tt> (msv,first,last) comp<a class="headerlink" href="#stl::next_permutation" title="Permalink to this definition">¶</a></dt>
@@ -1469,13 +1461,12 @@ permutation and return true</p>
 </div>
 <div class="section" id="id19">
 <h3><a class="toc-backref" href="#id68">Examples</a><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_minmax.pure</p>
+<p>See ut_sv_minmax.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="stl-numeric-algorithms">
 <h2><a class="toc-backref" href="#id69">STL Numeric Algorithms</a><a class="headerlink" href="#stl-numeric-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>The sv_numeric.pure module provides an interface to the STL&#8217;s numeric
-algorithms.</p>
+<p>The sv_numeric module provides an interface to the STL&#8217;s numeric algorithms.</p>
 <div class="section" id="id20">
 <h3><a class="toc-backref" href="#id70">Imports</a><a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
 <p>To use the operations of this module, add the following import declaration
@@ -1490,50 +1481,47 @@ to your program:</p>
 <dl class="function">
 <dt id="stl::accumulate">
 <tt class="descclassname">stl::</tt><tt class="descname">accumulate</tt> (sv,first,last) x bin_fun<a class="headerlink" href="#stl::accumulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>accumulate bin_fun over x and the members of
-sv[first,last)</p>
+<dd><p>accumulate bin_fun over x and the members of sv[first,last), like foldl</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::inner_product">
 <tt class="descclassname">stl::</tt><tt class="descname">inner_product</tt> (sv1,first1,last1) (sv2,first2,last2) x bin_fun1 bin_fun2<a class="headerlink" href="#stl::inner_product" title="Permalink to this definition">¶</a></dt>
-<dd><p>initialize ret with x. Traverse pairs of elements of
-sv1[first1,last1) and sv2[first2,last2), denoted by
-(e1, e2), replacing ret with (bin_fun1 ret $ bin_fun2 e1 e2). The number
-pairs traversed is equal to the size of sv1[first1,last1)</p>
+<dd><p>initialize ret with x. Traverse pairs of elements of sv1[first1,last1) and
+sv2[first2,last2), denoted by (e1, e2), replacing ret with (bin_fun1 ret $
+bin_fun2 e1 e2). The number pairs traversed is equal to the size of
+sv1[first1,last1)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::partial_sum">
 <tt class="descclassname">stl::</tt><tt class="descname">partial_sum</tt> (sv,first,last) (msv, p) bin_fun<a class="headerlink" href="#stl::partial_sum" title="Permalink to this definition">¶</a></dt>
-<dd><p>accumulates bin_fun f over the elements of
-sv1[first1,last1), as with foldl1, places itermediate results
-in msv[p,p+N), where N is last - first, and returns q
-where M is q - N and msv[M,q) is the intermediate sequence</p>
+<dd><p>accumulate bin_fun f over the elements of sv1[first1,last1), placing
+itermediate results in msv[p,p+n), where n is last - first, and returns q
+where m is q - n and msv[m,q) is the intermediate sequence</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stl::adjacent_difference">
 <tt class="descclassname">stl::</tt><tt class="descname">adjacent_difference</tt> (sv,first,last) (msv, p) bin_fun<a class="headerlink" href="#stl::adjacent_difference" title="Permalink to this definition">¶</a></dt>
-<dd><p>produces a sequence of new elements by applying bin_fun to adjacent
-elements of sv[first,last), places the new elements in
-msv[p,p+N), where N is last - first, with the
-intermediate results, and returns q where M is q - N and msv[M,q) is
-the new sequence</p>
+<dd><p>produce a sequence of new elements by applying bin_fun to adjacent elements
+of sv[first,last), placing the new elements in msv[p,p+n), where n is last
+- first, with the intermediate results, and returns q where m is q - n and
+msv[m,q) is the new sequence</p>
 </dd></dl>
 
 </div>
 <div class="section" id="id22">
 <h3><a class="toc-backref" href="#id72">Examples</a><a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
-<p>See ut_sv_numeric.pure in the ut subfolder.</p>
+<p>See ut_sv_numeric.pure in the pure-stl/ut directory.</p>
 </div>
 </div>
 <div class="section" id="trace-mode">
 <h2><a class="toc-backref" href="#id73">Trace Mode</a><a class="headerlink" href="#trace-mode" title="Permalink to this headline">¶</a></h2>
-<p>If the pure-stl dlls are built using &#8216;make debug&#8217; (as opposed to &#8216;make&#8217; or
-&#8216;make dlls&#8217;), the pure-stl tracing functions will be enabled. These functions,
-all of which are defined in the stl namespace, can be used to trace the
-creation and deletion of stlvecs as well as the changes in ref counts that
+<p>If the pure-stl dlls are built using &#8216;make debug&#8217; (as opposed to &#8216;make&#8217;, &#8216;make
+all&#8217; or &#8216;make dlls&#8217;), the pure-stl tracing functions will be enabled. These
+functions, all of which are defined in the stl namespace, can be used to trace
+the creation and deletion of stlvecs as well as the changes in ref counts that
 occur as Pure objects are moved and copied. In addition to being useful for
 maintaining the pure-stl modules, these functions can be used to observe the
 STL copy semantics.</p>

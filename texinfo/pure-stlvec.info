@@ -14,7 +14,7 @@ File: pure-stlvec.info,  Node: Top,  Next: Copying,  Up: (dir)
 pure-stlvec
 ***********
 
-  Version 0.1, September 19, 2011
+  Version 0.1, September 22, 2011
 
     Peter Summerland <<p.summerland@gmail.com>> 
   Pure's interface to C++ vectors, specialized to hold pointers to
@@ -61,6 +61,7 @@ Basic Operations
 
 * Imports::
 * Data Structure::
+* Types::
 * Support for Copy-On-Write Semantics::
 * Operations::
 * Convenience Functions::
@@ -133,15 +134,16 @@ File: pure-stlvec.info,  Node: Installation,  Next: Overview,  Prev: Copying,  U
 Get the latest source from
 <http://pure-lang.googlecode.com/files/pure-stlvec-0.1.tar.gz>.
 
-  To install pure-stlvec (on Linux), extract the source, cd to the
-pure-stlvec-0.1 directory, and run `make'. After this you can (and
-should) also run `make test' to run a few unit tests to make sure that
-pure-stlvec works properly on your system. If `make test' works, run
-`sudo make install' to install pure-stlvec on your system.  `make'
-tries to guess your Pure installation directory and platform-specific
-setup. If it gets this wrong, you can set some variables manually. In
-particular, `make install prefix=/usr' sets the installation prefix.
-Please see the Makefile for details.
+  To install pure-stlvec (on Linux), extract the source code (e.g., tar
+-xzf pure-stlvec-0.1.tar.gz), cd to the pure-stlvec-0.1 directory, and
+run `make'. After this you can (and should) also run `make test' to run
+a few unit tests to make sure that pure-stlvec works properly on your
+system. If `make test' works, run `sudo make install' to install
+pure-stlvec on your system.  `make' tries to guess your Pure
+installation directory and platform-specific setup. If it gets this
+wrong, you can set some variables manually. In particular, `make
+install prefix=/usr' sets the installation prefix. Please see the
+Makefile for details.
 
 
 File: pure-stlvec.info,  Node: Overview,  Next: Error Handling,  Prev: Installation,  Up: Top
@@ -224,13 +226,22 @@ stlvec module.
     STLVEC #<pointer 0xaf4d2c0>
     [0,1,2,33,4,5,6,7]
 
-    > erase (sv1,2,5); members sv1;
+    > stlvec_erase (sv1,2,5); members sv1;
     STLVEC #<pointer 0xaf4d2c0>
     [0,1,5,6,7]
 
     > insert (sv1,2) [2,3,4];  members sv1;
     STLVEC #<pointer 0xaf4d2c0>
     [0,1,2,3,4,5,6,7]
+
+    > let pure_vector = stlvec_vector (sv1,1,5); pure_vector;
+    {1,2,3,4}
+
+    > stlvec pure_vector;
+    STLVEC #<pointer 0x9145a38>
+
+    > members ans;
+    [1,2,3,4]
 
      > map (+10) sv1;
     [10,11,12,13,14,15,16,17]
@@ -486,8 +497,8 @@ function descriptions represent specific types of Pure objects:
 sv
      stlvec (mutable or immutable)
 
-imsv
-     immutable stlvec
+csv
+     const (i.e., immutable) stlvec
 
 msv
      mutable stlvec
@@ -657,6 +668,7 @@ modifying stlvecs. They are all in the global namespace.
 
 * Imports::
 * Data Structure::
+* Types::
 * Support for Copy-On-Write Semantics::
 * Operations::
 * Convenience Functions::
@@ -675,7 +687,7 @@ declaration to your program:
 
 
 
-File: pure-stlvec.info,  Node: Data Structure,  Next: Support for Copy-On-Write Semantics,  Prev: Imports,  Up: Basic Operations
+File: pure-stlvec.info,  Node: Data Structure,  Next: Types,  Prev: Imports,  Up: Basic Operations
 
 5.2 Data Structure
 ==================
@@ -689,14 +701,27 @@ where x is a pointer to the underlying STL vector. E.g.:
     > members v1;
     [0,1,2,3]
 
-    > let v2 = stlconst $ stlvec (0..3); v2;
+    > let v2 = stlvec_const $ stlvec (0..3); v2;
     CONST_STLVEC #<pointer 0x8c1dbf0>
 
 This representation may change in the future, and must not be relied
 upon by client modules. In particular, one must never attempt to use the
 embedded pointer directly.
 
-  Three type tags are provided:
+  Functions that modify a stlvec will simply fail unless the stlvec is
+mutable:
+
+    > update v2 0 100;
+    update (CONST_STLVEC #<pointer 0x9f07690>) 0 100
+
+
+
+File: pure-stlvec.info,  Node: Types,  Next: Support for Copy-On-Write Semantics,  Prev: Data Structure,  Up: Basic Operations
+
+5.3 Types
+=========
+
+Three type tags are provided for stlvecs:
 
  -- type: mutable_stlvec
      The type for a mutable stlvec. The stlvec must have been
@@ -710,32 +735,39 @@ embedded pointer directly.
      The type for a stlvec, mutable or immutable. The stvec can be
      constructed with STLVEC or CONST_STLVEC.
 
-  Functions that modify a stlvec will simply fail unless the stlvec is
-mutable:
+  In addition there are three type tags for stlvec iterator tuples:
 
-    > update v2 0 100;
-    update (CONST_STLVEC #<pointer 0x9f07690>) 0 100
+ -- type: mutable_svit
+          The type for an iterator tuple whose underlying stlvec is
+          mutable.
 
+      -- type: const_svit
+          The type for an iterator tuple whose underlying stlvec is
+          immutable.
+
+ -- type: svit
+     The type for an iterator tuple. The underlying stlvec can be
+     mutable or immutable.
 
 
-File: pure-stlvec.info,  Node: Support for Copy-On-Write Semantics,  Next: Operations,  Prev: Data Structure,  Up: Basic Operations
+File: pure-stlvec.info,  Node: Support for Copy-On-Write Semantics,  Next: Operations,  Prev: Types,  Up: Basic Operations
 
-5.3 Support for Copy-On-Write Semantics
+5.4 Support for Copy-On-Write Semantics
 =======================================
 
 The functions that create new stlvecs (emptystlvec, stlvec, and
 mkstlvec) all return mutable stlvecs. For those that prefer immutable
 data structures, stlvecs can be converted to immutable stlvecs (usually
 after they have been created and modified within a function) by the
-`stlconst' function. This function converts a mutable stlvec to an
+`stlvec_const' function. This function converts a mutable stlvec to an
 immutable stlvec without changing the underlying STL vector.
 
   Using a copy-on-write strategy it is possible to use stlvecs in a
 manner that is consistent with functional programming.  Typically, a
 function that "updates" a stlvec passed to it as an argument will copy
 the input stlvec to a new locally scoped mutable stlvec, modify the new
-stlvec and use stlconst to make the new stlvec immutable before it is
-returned. It should be noted that several of the STL algorithms have
+stlvec and use stlvec_const to make the new stlvec immutable before it
+is returned. It should be noted that several of the STL algorithms have
 "copy" versions which place their results directly into a new stlvec,
 which can eliminate the need to copy the input stlvec. E.g.:
 
@@ -752,40 +784,57 @@ sv2.
 
 File: pure-stlvec.info,  Node: Operations,  Next: Convenience Functions,  Prev: Support for Copy-On-Write Semantics,  Up: Basic Operations
 
-5.4 Operations
+5.5 Operations
 ==============
 
 When reading the function descriptions that follow, please bear in mind
 that whenever a function is passed an iterator tuple of the form
 (sv,first, last), first and last can be dropped, leaving (sv), or
 simply sv. The function will treat the "unary" iterator tuple (sv) as
-(sv, stl::svbeg, stl::svend).
+(sv, stl::svbeg, stl::svend). You might notice that some of the
+function names are prefixed with "*note stlvec: 27.". These denote
+functions that do not have a corresponding function in the Pure
+Standard Library. Thus, map does not have a "*note stlvec: 27." prefix,
+while stlvec_reserve does. This was done primarily to avoid polluting
+the global namespace with new function names.
 
  -- Function: emptystlvec
      return an empty stlvec
 
- -- Function: stlvec (sv,first,last)
-     create a new stlvec consisting of the elements in sv[first,last)
-
- -- Function: stlvec xs
-     create a new stlvec from a list of values
+ -- Function: stlvec source
+     create a new stlvec that contains the elements of source. source
+     can be a stlvec, an iterator tuple(sv,first,last), a list or a
+     vector (i.e., a matrix consisting of a single row or column)
 
  -- Function: mkstlvec x count
      create a new stlvec consisting of count x's.
 
- -- Function: stlconst sv
+ -- Function: stlvec_const sv
      create an immutable stlvec that shares the same underlying STL
      vector with sv
 
- -- Function: # sv
-     return the size of sv
+ -- Function: stlvec_vector (sv,first,last)
+     create a Pure vector that contains the members of sv[first,last)
 
- -- Function: reserve msv count
+ -- Function: # sv
+     return the number of elements in sv.
+
+  Note that # applied to an iterator tuple like (sv,b,e) will just
+return the number of elements in the tuple. Use stlvec_bounds if you
+need to know the number of elements in the range denoted by a tuple.
+
+ -- Function: stlvec_bounds (sv,first,last)
+     throws out-of-bounds if first or last is out of bounds. returns
+     the tuple (sv,first,last) except that if first is stl::begin it
+     will be replaced by 0 and if last is stl::svend it will be
+     replaced by the number of elements in sv.
+
+ -- Function: stlvec_reserve msv count
      modify the underlying STL vector to have at least count slots,
      useful for packing data into a fixed size vector and possibly to
      speed up the addition of new members
 
- -- Function: capacity sv
+ -- Function: stlvec_capacity sv
      return the total amount of slots held by the underlying STL vector
 
  -- Function: null sv
@@ -794,12 +843,25 @@ simply sv. The function will treat the "unary" iterator tuple (sv) as
  -- Function: sv ! i
      return the ith member of sv
 
+  Note that !k applied to an iterator tuple like (sv,b,e) will just
+return the kth element of the tuple. In addition, in stlvec, integers
+used to denote postions (as in !k) or in iterators, _always_, are
+relative to the beginning of the underlying vector. So it makes no
+sense to apply ! to an iterator tuple.
+
  -- Function: first sv
  -- Function: last sv
      first and last member of sv
 
  -- Function: members (sv, first, last)
      return a list of values stored in sv[first,last)
+
+ -- Function: list sv
+     return a list of values stored in sv.
+
+  Note that if list is applied to an iterator tuple, it will return a
+list holding the elements of the tuple not the elements of the range
+denoted by the tuple. It is recommended that you use members instead.
 
  -- Function: update msv i x
      replace the ith member of msv by x and return msv
@@ -815,25 +877,23 @@ simply sv. The function will treat the "unary" iterator tuple (sv) as
 
  -- Function: rmfirst msv
  -- Function: rmlast msv
-     remove first and last member from msv
+     remove the first or last member from msv
 
- -- Function: erase (msv,first,last)
- -- Function: erase (msv,p)
- -- Function: erase msv
+ -- Function: stlvec_erase (msv,first,last)
+ -- Function: stlvec_erase (msv,p)
+ -- Function: stlvec_erase msv
      remove msv[first,last) from msv, remove msv!p from msv, or make msv
      empty. Members are shifted to occupy vacated slots
 
- -- Function: clear msv
-     remove all of msv's members
-
- -- Function: all_equal comp (sv1, first1, last1) (sv2, first2, last2)
+ -- Function: stlvec_equal comp (sv1, first1, last1) (sv2, first2,
+          last2)
      returns true if comp returns true for all corresponding members of
      sv1[first1, last1) and sv1[first1, last1)
 
  -- Function: sv1 == sv2
  -- Function: sv1 ~= sv2
-     (x == y) is the same as equal (==) x y. (x ~= y is simply ~(equal
-     (==) x y)
+     (x == y) is the same as stlvec_equal x y and x ~= y is simply
+     ~(stlvec_equal x y)
 
   Note that `==' and `~==' are not defined for iterator tuples (the
 rules would never be executed because == is defined on tuples in the
@@ -842,7 +902,7 @@ Prelude)
 
 File: pure-stlvec.info,  Node: Convenience Functions,  Next: Examples<2>,  Prev: Operations,  Up: Basic Operations
 
-5.5 Convenience Functions
+5.6 Convenience Functions
 =========================
 
 The stlvec module provides convenience functions that apply map, catmap,
@@ -890,7 +950,7 @@ found in the stlvec::modifying module.
 
 File: pure-stlvec.info,  Node: Examples<2>,  Prev: Convenience Functions,  Up: Basic Operations
 
-5.6 Examples
+5.7 Examples
 ============
 
 See ut_stvec in the pure-stlvec/ut directory.
@@ -1059,18 +1119,18 @@ File: pure-stlvec.info,  Node: Operations<3>,  Next: Examples<4>,  Prev: Imports
      (msv,p+n)
 
  -- Function: stl::replace (msv,first,last) x y
-     same as *note replace_if: 5f. (msv,first,last) (x==) y
+     same as *note replace_if: 66. (msv,first,last) (x==) y
 
  -- Function: stl::replace_if (msv,first,last) unary_pred x
      replace the elements of msv[first,last) that satistfy unary_pred
      with x
 
  -- Function: stl::replace_copy (sv,first,last) (msv,p) x y
-     same as *note replace: 5e. (msv,first,last) x y except that the
+     same as *note replace: 65. (msv,first,last) x y except that the
      modified sequence is placed in msv[p,p+last-first)
 
  -- Function: stl::replace_copy_if (sv,first,last) (msv,p) unary_pred x
-     same as *note replace_if: 5f. except that the modified sequence is
+     same as *note replace_if: 66. except that the modified sequence is
      placed in msv[p,p+last-first)
 
  -- Function: stl::fill (msv,first,last) x
@@ -1096,7 +1156,7 @@ File: pure-stlvec.info,  Node: Operations<3>,  Next: Examples<4>,  Prev: Imports
      generated by successive calls to gen_fen
 
  -- Function: stl::remove (msv,first,last) x
-     same as *note remove_if: 67. (msv,first,last) (==x).
+     same as *note remove_if: 6e. (msv,first,last) (==x).
 
  -- Function: stl::remove_if (msv,first,last) unary_pred
      remove elements in msv[first,last) that satisfy unary_pred. If n
@@ -1106,11 +1166,11 @@ File: pure-stlvec.info,  Node: Operations<3>,  Next: Examples<4>,  Prev: Imports
      if first+n is greater than the number of elements in msv
 
  -- Function: stl::remove_copy (sv,first,last) (msv,first) x
-     same as *note remove: 66. except that the purged sequence is
+     same as *note remove: 6d. except that the purged sequence is
      copied to (msv,first) and sv[first,last) is not changed
 
  -- Function: stl::remove_copy_if (sv,first,last) (msv,first) unary_pred
-     same as *note remove_if: 67. except that the purged sequence is
+     same as *note remove_if: 6e. except that the purged sequence is
      copied to (msv,first) and sv[first,last) is not changed
 
  -- Function: stl::unique (msv,first,last) bin_pred
@@ -1121,14 +1181,14 @@ File: pure-stlvec.info,  Node: Operations<3>,  Next: Examples<4>,  Prev: Imports
      first+n is greater than the number of elements in msv
 
  -- Function: stl::unique_copy (sv,first,last) (msv,first) bin_pred
-     same as *note unique: 6a. except that the purged sequence is
+     same as *note unique: 71. except that the purged sequence is
      copied to (msv,first) and sv[first,last) is not changed
 
  -- Function: stl::reverse (msv,first,last)
      Reverses the order of the elements in sv[first,last).
 
  -- Function: stl::reverse_copy (sv,first,last) (msv,first)
-     same as *note reverse: 6c. except that the reversed sequence is
+     same as *note reverse: 73. except that the reversed sequence is
      copied to (msv,first) and sv[first,last) is not changed.
 
  -- Function: stl::rotate (msv,first,middle,last)
@@ -1195,8 +1255,8 @@ File: pure-stlvec.info,  Node: Operations<4>,  Next: Examples<5>,  Prev: Imports
 ==============
 
 All of the functions in this module require the caller to supply an
-ordering functions, comp (as for the Pure library sort function). The
-functions (<) and (>) are commonly passed as comp.
+ordering function, comp. The functions (<) and (>) are commonly passed
+as comp.
 
  -- Function: stl::sort (msv, first, last) comp
      sorts msv[first, last)
@@ -1215,7 +1275,7 @@ functions (<) and (>) are commonly passed as comp.
           last2) comp
      let n be the number of elements in sv[first1, last1) and r be the
      number of elements in msv[first2, last2). If r < n, *note
-     partial_sort_copy: 7a. fills msv[first2, last2) with the first r
+     partial_sort_copy: 81. fills msv[first2, last2) with the first r
      elements of what sv[first1, last1) would be if it had been sorted.
      If r >= n, it fills msv[first2, first2+n) with the elements of
      sv[first1, last1) in sorted order. sv[first1,last1) is unchanged
@@ -1292,7 +1352,12 @@ File: pure-stlvec.info,  Node: Operations<5>,  Next: Examples<6>,  Prev: Imports
 All of the functions in this module require the caller to supply an
 ordering functions, comp (as for the Pure library sort function). They
 only work properly on input ranges that have been previously sorted
-using comp.
+using comp. The set operations generally do not check for range
+overflow because it is not generally possible to determine the length
+of the result of a set operation until after it is completed. In most
+cases you will get a nasty segmentation fault if the result is bigger
+than the target range. The best way to avoid this possibility it to use
+a back iterator to specifify the target range.
 
   See parameter naming conventions at ..
 
@@ -1589,50 +1654,48 @@ Index
  [index ]
 * Menu:
 
-* # prefix function:                     Operations.          (line  28)
-* == infix function:                     Operations.          (line  81)
-* all_equal function:                    Operations.          (line  77)
-* append function:                       Operations.          (line  55)
+* # prefix function:                     Operations.          (line  35)
+* == infix function:                     Operations.          (line 109)
+* append function:                       Operations.          (line  85)
 * bad_argument constructor:              Exception Symbols.   (line   6)
 * bad_function constructor:              Exception Symbols.   (line  11)
-* capacity function:                     Operations.          (line  36)
 * catmap function:                       Convenience Functions.
                                                               (line  15)
-* clear function:                        Operations.          (line  74)
 * colcatmap function:                    Convenience Functions.
                                                               (line  40)
 * colmap function:                       Convenience Functions.
                                                               (line  38)
-* const_stlvec type:                     Data Structure.      (line  28)
+* const_stlvec type:                     Types.               (line  12)
+* const_svit type:                       Types.               (line  26)
 * do function:                           Convenience Functions.
                                                               (line  18)
-* emptystlvec function:                  Operations.          (line  12)
-* erase function:                        Operations.          (line  68)
+* emptystlvec function:                  Operations.          (line  17)
 * failed_cond constructor:               Exception Symbols.   (line  15)
 * filter function:                       Convenience Functions.
                                                               (line  27)
-* first function:                        Operations.          (line  45)
+* first function:                        Operations.          (line  68)
 * foldl function:                        Convenience Functions.
                                                               (line  21)
 * foldl1 function:                       Convenience Functions.
                                                               (line  24)
-* infix function:                        Operations.          (line  42)
-* insert function:                       Operations.          (line  58)
-* last function:                         Operations.          (line  45)
+* infix function:                        Operations.          (line  59)
+* insert function:                       Operations.          (line  88)
+* last function:                         Operations.          (line  68)
+* list function:                         Operations.          (line  75)
 * listmap function:                      Convenience Functions.
                                                               (line  12)
 * map function:                          Convenience Functions.
                                                               (line   9)
-* members function:                      Operations.          (line  49)
-* mkstlvec function:                     Operations.          (line  21)
-* mutable_stlvec type:                   Data Structure.      (line  24)
-* null function:                         Operations.          (line  39)
+* members function:                      Operations.          (line  72)
+* mkstlvec function:                     Operations.          (line  25)
+* mutable_stlvec type:                   Types.               (line   8)
+* mutable_svit type:                     Types.               (line  22)
+* null function:                         Operations.          (line  56)
 * out_of_bounds constructor:             Exception Symbols.   (line  19)
 * range_overflow constructor:            Exception Symbols.   (line  22)
 * range_overlap constructor:             Exception Symbols.   (line  27)
-* reserve function:                      Operations.          (line  31)
-* rmfirst function:                      Operations.          (line  64)
-* rmlast function:                       Operations.          (line  64)
+* rmfirst function:                      Operations.          (line  94)
+* rmlast function:                       Operations.          (line  94)
 * rowcatmap function:                    Convenience Functions.
                                                               (line  36)
 * rowmap function:                       Convenience Functions.
@@ -1656,14 +1719,14 @@ Index
 * stl for_each function:                 Operations<2>.       (line   6)
 * stl generate function:                 Operations<3>.       (line  52)
 * stl generate_n function:               Operations<3>.       (line  64)
-* stl includes function:                 Operations<5>.       (line  22)
+* stl includes function:                 Operations<5>.       (line  27)
 * stl inner_product function:            Operations<8>.       (line  10)
-* stl inplace_merge function:            Operations<5>.       (line  18)
+* stl inplace_merge function:            Operations<5>.       (line  23)
 * stl lexicographical_compare function:  Operations<7>.       (line  18)
 * stl lower_bound function:              Operations<4>.       (line  43)
 * stl make_heap function:                Operations<6>.       (line  10)
 * stl max_element function:              Operations<7>.       (line  14)
-* stl merge function:                    Operations<5>.       (line  13)
+* stl merge function:                    Operations<5>.       (line  18)
 * stl min_element function:              Operations<7>.       (line  10)
 * stl mismatch function:                 Operations<2>.       (line  36)
 * stl next_permutation function:         Operations<7>.       (line  29)
@@ -1692,12 +1755,12 @@ Index
 * stl rotate_copy function:              Operations<3>.       (line 108)
 * stl search function:                   Operations<2>.       (line  49)
 * stl search_n function:                 Operations<2>.       (line  55)
-* stl set_difference function:           Operations<5>.       (line  39)
-* stl set_intersection function:         Operations<5>.       (line  32)
+* stl set_difference function:           Operations<5>.       (line  44)
+* stl set_intersection function:         Operations<5>.       (line  37)
 * stl set_px_trace function:             Trace Mode.          (line  20)
 * stl set_sv_trace function:             Trace Mode.          (line  14)
-* stl set_symmetric_difference function: Operations<5>.       (line  46)
-* stl set_union function:                Operations<5>.       (line  26)
+* stl set_symmetric_difference function: Operations<5>.       (line  51)
+* stl set_union function:                Operations<5>.       (line  31)
 * stl sort function:                     Operations<4>.       (line  10)
 * stl sort_heap function:                Operations<6>.       (line  23)
 * stl stable_partition function:         Operations<3>.       (line 121)
@@ -1715,12 +1778,19 @@ Index
 * stl unique function:                   Operations<3>.       (line  86)
 * stl unique_copy function:              Operations<3>.       (line  93)
 * stl upper_bound function:              Operations<4>.       (line  47)
-* stlconst function:                     Operations.          (line  24)
-* stlvec function:                       Operations.          (line  15)
+* stlvec function:                       Operations.          (line  20)
 * stlvec module:                         Top.                 (line   6)
-* stlvec type:                           Data Structure.      (line  32)
-* update function:                       Operations.          (line  52)
-* ~= infix function:                     Operations.          (line  81)
+* stlvec type:                           Types.               (line  16)
+* stlvec_bounds function:                Operations.          (line  42)
+* stlvec_capacity function:              Operations.          (line  53)
+* stlvec_const function:                 Operations.          (line  28)
+* stlvec_equal function:                 Operations.          (line 104)
+* stlvec_erase function:                 Operations.          (line  98)
+* stlvec_reserve function:               Operations.          (line  48)
+* stlvec_vector function:                Operations.          (line  32)
+* svit type:                             Types.               (line  30)
+* update function:                       Operations.          (line  82)
+* ~= infix function:                     Operations.          (line 109)
 
 
 
@@ -1728,441 +1798,456 @@ Tag Table:
 Node: Top253
 Ref: 0591
 Ref: pure591
-Node: Copying2093
-Ref: copying2178
-Ref: 12178
-Ref: module-stlvec2178
-Ref: 22178
-Ref: 32178
-Node: Installation2566
-Ref: installation2656
-Ref: 42656
-Node: Overview3367
-Ref: overview3464
-Ref: 53464
-Node: Modules4259
-Ref: modules4340
-Ref: 64340
-Node: Simple Examples5437
-Ref: simple examples5559
-Ref: 75559
-Ref: simple-examples5559
-Node: Members and Sequences of Members7119
-Ref: members and sequences of members7267
-Ref: 87267
-Ref: members-and-sequences-of-members7267
-Node: STL Iterators and Value Semantics8058
-Ref: stl iterators and value semantics8206
-Ref: 98206
-Ref: stl-iterators-and-value-semantics8206
-Node: Iterator Tuples10127
-Ref: iterator tuples10276
-Ref: a10276
-Ref: iterator-tuples10276
-Node: Predefined Iterator Tuple Indexes12694
-Ref: predefined iterator tuple indexes12831
-Ref: b12831
-Ref: predefined-iterator-tuple-indexes12831
-Ref: c13002
-Ref: stl svbeg13002
-Ref: d13031
-Ref: stl svend13031
-Ref: e13061
-Ref: stl svback13061
-Node: Back Insert Iterators13480
-Ref: back insert iterators13615
-Ref: f13615
-Ref: back-insert-iterators13615
-Node: Documentation14605
-Ref: documentation14722
-Ref: 1014722
-Node: Parameter Names15699
-Ref: parameter names15786
-Ref: 1115786
-Ref: parameter-names15786
-Node: Error Handling17884
-Ref: error handling17985
-Ref: 1217985
-Ref: error-handling17985
-Node: Exception Symbols18139
-Ref: exception symbols18229
-Ref: 1318229
-Ref: exception-symbols18229
-Ref: 1418274
-Ref: bad_argument18274
-Ref: 1518497
-Ref: bad_function18497
-Ref: 1618626
-Ref: failed_cond18626
-Ref: 1718759
-Ref: out_of_bounds18759
-Ref: 1818862
-Ref: range_overflow18862
-Ref: 1919060
-Ref: range_overlap19060
-Node: Examples19425
-Ref: examples19515
-Ref: 1a19515
-Node: Basic Operations20496
-Ref: basic operations20616
-Ref: 1b20616
-Ref: basic-operations20616
-Node: Imports20925
-Ref: imports21013
-Ref: 1c21013
-Node: Data Structure21151
-Ref: data structure21283
-Ref: 1d21283
-Ref: data-structure21283
-Ref: 1e21834
-Ref: mutable_stlvec/type21834
-Ref: 1f21952
-Ref: const_stlvec/type21952
-Ref: 2022077
-Ref: stlvec/type22077
-Node: Support for Copy-On-Write Semantics22367
-Ref: support for copy-on-write semantics22502
-Ref: 2122502
-Ref: support-for-copy-on-write-semantics22502
-Node: Operations23767
-Ref: operations23909
-Ref: 2223909
-Ref: 2324244
-Ref: emptystlvec24244
-Ref: 2424299
-Ref: stlvec24299
-Ref: 2524479
-Ref: mkstlvec24479
-Ref: 2624561
-Ref: stlconst24561
-Ref: 2724676
-Ref: #24676
-Ref: 2824723
-Ref: reserve24723
-Ref: 2924936
-Ref: capacity24936
-Ref: 2a25035
-Ref: null25035
-Ref: 2b25088
-Ref: !25088
-Ref: 2c25143
-Ref: first25143
-Ref: 2d25166
-Ref: last25166
-Ref: 2e25222
-Ref: members25222
-Ref: 2f25317
-Ref: update25317
-Ref: 3025402
-Ref: append25402
-Ref: 3125460
-Ref: insert25460
-Ref: 3225717
-Ref: rmfirst25717
-Ref: 3325743
-Ref: rmlast25743
-Ref: 3425812
-Ref: erase25812
-Ref: 3526031
-Ref: clear26031
-Ref: 3626089
-Ref: all_equal26089
-Ref: 3726280
-Ref: ==26280
-Ref: 3826305
-Ref: ~=26305
-Node: Convenience Functions26564
-Ref: convenience functions26682
-Ref: 3926682
-Ref: convenience-functions26682
-Ref: 3a26877
-Ref: map/stlvec26877
-Ref: 3b26994
-Ref: listmap/stlvec26994
-Ref: 3c27091
-Ref: catmap/stlvec27091
-Ref: 3d27214
-Ref: do/stlvec27214
-Ref: 3e27329
-Ref: foldl/stlvec27329
-Ref: 3f27450
-Ref: foldl1/stlvec27450
-Ref: 4027569
-Ref: filter/stlvec27569
-Ref: 4127826
-Ref: rowmap/stlvec27826
-Ref: 4227876
-Ref: rowcatmap/stlvec27876
-Ref: 4327929
-Ref: colmap/stlvec27929
-Ref: 4427979
-Ref: colcatmap/stlvec27979
-Node: Examples<2>28347
-Ref: examples<2>28446
-Ref: 4528446
-Ref: id128446
-Node: STL Nonmodifying Algorithms28520
-Ref: stl nonmodifying algorithms28650
-Ref: 4628650
-Ref: stl-nonmodifying-algorithms28650
-Node: Imports<2>28901
-Ref: imports<2>29002
-Ref: 4729002
-Ref: id229002
-Node: Operations<2>29201
-Ref: operations<2>29322
-Ref: 4829322
-Ref: id329322
-Ref: 4929353
-Ref: stl for_each29353
-Ref: 4a29475
-Ref: stl find29475
-Ref: 4b29643
-Ref: stl find_if29643
-Ref: 4c29828
-Ref: stl find_first_of29828
-Ref: 4d30115
-Ref: stl adjacent_find30115
-Ref: 4e30371
-Ref: stl count30371
-Ref: 4f30510
-Ref: stl count_if30510
-Ref: 5030666
-Ref: stl mismatch30666
-Ref: 5131092
-Ref: stl equal31092
-Ref: 5231350
-Ref: stl search31350
-Ref: 5331675
-Ref: stl search_n31675
-Ref: 5431999
-Ref: stl find_end31999
-Node: Examples<3>32333
-Ref: examples<3>32435
-Ref: 5532435
-Ref: id432435
-Node: STL Modifying Algorithms32521
-Ref: stl modifying algorithms32654
-Ref: 5632654
-Ref: stl-modifying-algorithms32654
-Node: Imports<3>32883
-Ref: imports<3>32981
-Ref: 5732981
-Ref: id532981
-Node: Operations<3>33177
-Ref: operations<3>33295
-Ref: 5833295
-Ref: id633295
-Ref: 5933326
-Ref: stl copy33326
-Ref: 5a33486
-Ref: stl copy_backward33486
-Ref: 5b33740
-Ref: stl swap_ranges33740
-Ref: 5c33899
-Ref: stl transform33899
-Ref: 5d34176
-Ref: stl transform_234176
-Ref: 5e34471
-Ref: stl replace34471
-Ref: 5f34580
-Ref: stl replace_if34580
-Ref: 6034723
-Ref: stl replace_copy34723
-Ref: 6134909
-Ref: stl replace_copy_if34909
-Ref: 6235089
-Ref: stl fill35089
-Ref: 6335185
-Ref: stl fill_n35185
-Ref: 6435283
-Ref: stl generate35283
-Ref: 6535643
-Ref: stl generate_n35643
-Ref: 6635808
-Ref: stl remove35808
-Ref: 6735912
-Ref: stl remove_if35912
-Ref: 6836303
-Ref: stl remove_copy36303
-Ref: 6936492
-Ref: stl remove_copy_if36492
-Ref: 6a36696
-Ref: stl unique36696
-Ref: 6b37080
-Ref: stl unique_copy37080
-Ref: 6c37276
-Ref: stl reverse37276
-Ref: 6d37380
-Ref: stl reverse_copy37380
-Ref: 6e37572
-Ref: stl rotate37572
-Ref: 6f37741
-Ref: stl rotate_copy37741
-Ref: 7037927
-Ref: stl random_shuffle37927
-Ref: 7138034
-Ref: stl partition38034
-Ref: 7238344
-Ref: stl stable_partition38344
-Node: Examples<4>38516
-Ref: examples<4>38615
-Ref: 7338615
-Ref: id738615
-Node: STL Sort Algorithms38698
-Ref: stl sort algorithms38824
-Ref: 7438824
-Ref: stl-sort-algorithms38824
-Node: Imports<4>39054
-Ref: imports<4>39147
-Ref: 7539147
-Ref: id839147
-Node: Operations<4>39338
-Ref: operations<4>39451
-Ref: 7639451
-Ref: id939451
-Ref: 7739672
-Ref: stl sort39672
-Ref: 7839749
-Ref: stl stable_sort39749
-Ref: 7939886
-Ref: stl partial_sort39886
-Ref: 7a40175
-Ref: stl partial_sort_copy40175
-Ref: 7b40683
-Ref: stl nth_element40683
-Ref: 7c41175
-Ref: stl lower_bound41175
-Ref: 7d41376
-Ref: stl upper_bound41376
-Ref: 7e41576
-Ref: stl equal_range41576
-Ref: 7f41784
-Ref: stl binary_search41784
-Node: Examples<5>41899
-Ref: examples<5>41993
-Ref: 8041993
-Ref: id1041993
-Node: STL Merge Algorithms42071
-Ref: stl merge algorithms42192
-Ref: 8142192
-Ref: stl-merge-algorithms42192
-Node: Imports<5>42448
-Ref: imports<5>42542
-Ref: 8242542
-Ref: id1142542
-Node: Operations<5>42734
-Ref: operations<5>42848
-Ref: 8342848
-Ref: id1242848
-Ref: 8443141
-Ref: stl merge43141
-Ref: 8543351
-Ref: stl inplace_merge43351
-Ref: 8643510
-Ref: stl includes43510
-Ref: 8743678
-Ref: stl set_union43678
-Ref: 8843980
-Ref: stl set_intersection43980
-Ref: 8944297
-Ref: stl set_difference44297
-Ref: 8a44608
-Ref: stl set_symmetric_difference44608
-Node: Examples<6>44957
-Ref: examples<6>45052
-Ref: 8b45052
-Ref: id1345052
-Node: STL Heap Algorithms45131
-Ref: stl heap algorithms45255
-Ref: 8c45255
-Ref: stl-heap-algorithms45255
-Node: Imports<6>45466
-Ref: imports<6>45559
-Ref: 8d45559
-Ref: id1445559
-Node: Operations<6>45752
-Ref: operations<6>45865
-Ref: 8e45865
-Ref: id1545865
-Ref: 8f46088
-Ref: stl make_heap46088
-Ref: 9046344
-Ref: stl push_heap46344
-Ref: 9146480
-Ref: stl pop_heap46480
-Ref: 9246654
-Ref: stl sort_heap46654
-Node: Examples<7>46749
-Ref: examples<7>46843
-Ref: 9346843
-Ref: id1646843
-Node: Min/Max STL Algorithms46923
-Ref: min/max stl algorithms47049
-Ref: 9447049
-Ref: min-max-stl-algorithms47049
-Node: Imports<7>47274
-Ref: imports<7>47370
-Ref: 9547370
-Ref: id1747370
-Node: Operations<7>47565
-Ref: operations<7>47681
-Ref: 9647681
-Ref: id1847681
-Ref: 9747904
-Ref: stl min_element47904
-Ref: 9848064
-Ref: stl max_element48064
-Ref: 9948224
-Ref: stl lexicographical_compare48224
-Ref: 9a48767
-Ref: stl next_permutation48767
-Ref: 9b49118
-Ref: stl prev_permutation49118
-Node: Examples<8>49210
-Ref: examples<8>49307
-Ref: 9c49307
-Ref: id1949307
-Node: STL Numeric Algorithms49389
-Ref: stl numeric algorithms49506
-Ref: 9d49506
-Ref: stl-numeric-algorithms49506
-Node: Imports<8>49729
-Ref: imports<8>49825
-Ref: 9e49825
-Ref: id2049825
-Node: Operations<8>50021
-Ref: operations<8>50137
-Ref: 9f50137
-Ref: id2150137
-Ref: a050170
-Ref: stl accumulate50170
-Ref: a150309
-Ref: stl inner_product50309
-Ref: a250667
-Ref: stl partial_sum50667
-Ref: a350954
-Ref: stl adjacent_difference50954
-Node: Examples<9>51307
-Ref: examples<9>51404
-Ref: a451404
-Ref: id2251404
-Node: Trace Mode51487
-Ref: trace mode51587
-Ref: a551587
-Ref: trace-mode51587
-Ref: a652112
-Ref: stl set_sv_trace52112
-Ref: a752227
-Ref: stl sv_trace_enabled52227
-Ref: a852316
-Ref: stl set_px_trace52316
-Ref: a952424
-Ref: stl px_trace_enabled52424
-Ref: aa52642
-Ref: stl refc52642
-Node: Index52776
-Ref: index52845
+Node: Copying2103
+Ref: copying2188
+Ref: 12188
+Ref: module-stlvec2188
+Ref: 22188
+Ref: 32188
+Node: Installation2576
+Ref: installation2666
+Ref: 42666
+Node: Overview3422
+Ref: overview3519
+Ref: 53519
+Node: Modules4314
+Ref: modules4395
+Ref: 64395
+Node: Simple Examples5492
+Ref: simple examples5614
+Ref: 75614
+Ref: simple-examples5614
+Node: Members and Sequences of Members7351
+Ref: members and sequences of members7499
+Ref: 87499
+Ref: members-and-sequences-of-members7499
+Node: STL Iterators and Value Semantics8290
+Ref: stl iterators and value semantics8438
+Ref: 98438
+Ref: stl-iterators-and-value-semantics8438
+Node: Iterator Tuples10359
+Ref: iterator tuples10508
+Ref: a10508
+Ref: iterator-tuples10508
+Node: Predefined Iterator Tuple Indexes12926
+Ref: predefined iterator tuple indexes13063
+Ref: b13063
+Ref: predefined-iterator-tuple-indexes13063
+Ref: c13234
+Ref: stl svbeg13234
+Ref: d13263
+Ref: stl svend13263
+Ref: e13293
+Ref: stl svback13293
+Node: Back Insert Iterators13712
+Ref: back insert iterators13847
+Ref: f13847
+Ref: back-insert-iterators13847
+Node: Documentation14837
+Ref: documentation14954
+Ref: 1014954
+Node: Parameter Names15931
+Ref: parameter names16018
+Ref: 1116018
+Ref: parameter-names16018
+Node: Error Handling18129
+Ref: error handling18230
+Ref: 1218230
+Ref: error-handling18230
+Node: Exception Symbols18384
+Ref: exception symbols18474
+Ref: 1318474
+Ref: exception-symbols18474
+Ref: 1418519
+Ref: bad_argument18519
+Ref: 1518742
+Ref: bad_function18742
+Ref: 1618871
+Ref: failed_cond18871
+Ref: 1719004
+Ref: out_of_bounds19004
+Ref: 1819107
+Ref: range_overflow19107
+Ref: 1919305
+Ref: range_overlap19305
+Node: Examples19670
+Ref: examples19760
+Ref: 1a19760
+Node: Basic Operations20741
+Ref: basic operations20861
+Ref: 1b20861
+Ref: basic-operations20861
+Node: Imports21180
+Ref: imports21268
+Ref: 1c21268
+Node: Data Structure21406
+Ref: data structure21508
+Ref: 1d21508
+Ref: data-structure21508
+Node: Types22189
+Ref: types22319
+Ref: 1e22319
+Ref: 1f22383
+Ref: mutable_stlvec/type22383
+Ref: 2022501
+Ref: const_stlvec/type22501
+Ref: 2122626
+Ref: stlvec/type22626
+Ref: 2222826
+Ref: mutable_svit/type22826
+Ref: 2322937
+Ref: const_svit/type22937
+Ref: 2423053
+Ref: svit/type23053
+Node: Support for Copy-On-Write Semantics23162
+Ref: support for copy-on-write semantics23288
+Ref: 2523288
+Ref: support-for-copy-on-write-semantics23288
+Node: Operations24561
+Ref: operations24703
+Ref: 2624703
+Ref: 2825391
+Ref: emptystlvec25391
+Ref: 2725446
+Ref: stlvec25446
+Ref: 2925679
+Ref: mkstlvec25679
+Ref: 2a25761
+Ref: stlvec_const25761
+Ref: 2b25880
+Ref: stlvec_vector25880
+Ref: 2c25995
+Ref: #/stlvec25995
+Ref: 2d26263
+Ref: stlvec_bounds26263
+Ref: 2e26557
+Ref: stlvec_reserve26557
+Ref: 2f26777
+Ref: stlvec_capacity26777
+Ref: 3026883
+Ref: null/stlvec26883
+Ref: 3126936
+Ref: !/stlvec26936
+Ref: 3227302
+Ref: first/stlvec27302
+Ref: 3327325
+Ref: last/stlvec27325
+Ref: 3427381
+Ref: members/stlvec27381
+Ref: 3527476
+Ref: list/stlvec27476
+Ref: 3627752
+Ref: update/stlvec27752
+Ref: 3727837
+Ref: append/stlvec27837
+Ref: 3827895
+Ref: insert/stlvec27895
+Ref: 3927927
+Ref: insert27927
+Ref: 3a28152
+Ref: rmfirst/stlvec28152
+Ref: 3b28178
+Ref: rmlast/stlvec28178
+Ref: 3c28250
+Ref: stlvec_erase28250
+Ref: 3d28490
+Ref: stlvec_equal28490
+Ref: 3e28694
+Ref: ==/stlvec28694
+Ref: 3f28719
+Ref: ~=/stlvec28719
+Node: Convenience Functions28984
+Ref: convenience functions29102
+Ref: 4029102
+Ref: convenience-functions29102
+Ref: 4129297
+Ref: map/stlvec29297
+Ref: 4229414
+Ref: listmap/stlvec29414
+Ref: 4329511
+Ref: catmap/stlvec29511
+Ref: 4429634
+Ref: do/stlvec29634
+Ref: 4529749
+Ref: foldl/stlvec29749
+Ref: 4629870
+Ref: foldl1/stlvec29870
+Ref: 4729989
+Ref: filter/stlvec29989
+Ref: 4830246
+Ref: rowmap/stlvec30246
+Ref: 4930296
+Ref: rowcatmap/stlvec30296
+Ref: 4a30349
+Ref: colmap/stlvec30349
+Ref: 4b30399
+Ref: colcatmap/stlvec30399
+Node: Examples<2>30767
+Ref: examples<2>30866
+Ref: 4c30866
+Ref: id130866
+Node: STL Nonmodifying Algorithms30940
+Ref: stl nonmodifying algorithms31070
+Ref: 4d31070
+Ref: stl-nonmodifying-algorithms31070
+Node: Imports<2>31321
+Ref: imports<2>31422
+Ref: 4e31422
+Ref: id231422
+Node: Operations<2>31621
+Ref: operations<2>31742
+Ref: 4f31742
+Ref: id331742
+Ref: 5031773
+Ref: stl for_each31773
+Ref: 5131895
+Ref: stl find31895
+Ref: 5232063
+Ref: stl find_if32063
+Ref: 5332248
+Ref: stl find_first_of32248
+Ref: 5432535
+Ref: stl adjacent_find32535
+Ref: 5532791
+Ref: stl count32791
+Ref: 5632930
+Ref: stl count_if32930
+Ref: 5733086
+Ref: stl mismatch33086
+Ref: 5833512
+Ref: stl equal33512
+Ref: 5933770
+Ref: stl search33770
+Ref: 5a34095
+Ref: stl search_n34095
+Ref: 5b34419
+Ref: stl find_end34419
+Node: Examples<3>34753
+Ref: examples<3>34855
+Ref: 5c34855
+Ref: id434855
+Node: STL Modifying Algorithms34941
+Ref: stl modifying algorithms35074
+Ref: 5d35074
+Ref: stl-modifying-algorithms35074
+Node: Imports<3>35303
+Ref: imports<3>35401
+Ref: 5e35401
+Ref: id535401
+Node: Operations<3>35597
+Ref: operations<3>35715
+Ref: 5f35715
+Ref: id635715
+Ref: 6035746
+Ref: stl copy35746
+Ref: 6135906
+Ref: stl copy_backward35906
+Ref: 6236160
+Ref: stl swap_ranges36160
+Ref: 6336319
+Ref: stl transform36319
+Ref: 6436596
+Ref: stl transform_236596
+Ref: 6536891
+Ref: stl replace36891
+Ref: 6637000
+Ref: stl replace_if37000
+Ref: 6737143
+Ref: stl replace_copy37143
+Ref: 6837329
+Ref: stl replace_copy_if37329
+Ref: 6937509
+Ref: stl fill37509
+Ref: 6a37605
+Ref: stl fill_n37605
+Ref: 6b37703
+Ref: stl generate37703
+Ref: 6c38063
+Ref: stl generate_n38063
+Ref: 6d38228
+Ref: stl remove38228
+Ref: 6e38332
+Ref: stl remove_if38332
+Ref: 6f38723
+Ref: stl remove_copy38723
+Ref: 7038912
+Ref: stl remove_copy_if38912
+Ref: 7139116
+Ref: stl unique39116
+Ref: 7239500
+Ref: stl unique_copy39500
+Ref: 7339696
+Ref: stl reverse39696
+Ref: 7439800
+Ref: stl reverse_copy39800
+Ref: 7539992
+Ref: stl rotate39992
+Ref: 7640161
+Ref: stl rotate_copy40161
+Ref: 7740347
+Ref: stl random_shuffle40347
+Ref: 7840454
+Ref: stl partition40454
+Ref: 7940764
+Ref: stl stable_partition40764
+Node: Examples<4>40936
+Ref: examples<4>41035
+Ref: 7a41035
+Ref: id741035
+Node: STL Sort Algorithms41118
+Ref: stl sort algorithms41244
+Ref: 7b41244
+Ref: stl-sort-algorithms41244
+Node: Imports<4>41474
+Ref: imports<4>41567
+Ref: 7c41567
+Ref: id841567
+Node: Operations<4>41758
+Ref: operations<4>41871
+Ref: 7d41871
+Ref: id941871
+Ref: 7e42051
+Ref: stl sort42051
+Ref: 7f42128
+Ref: stl stable_sort42128
+Ref: 8042265
+Ref: stl partial_sort42265
+Ref: 8142554
+Ref: stl partial_sort_copy42554
+Ref: 8243062
+Ref: stl nth_element43062
+Ref: 8343554
+Ref: stl lower_bound43554
+Ref: 8443755
+Ref: stl upper_bound43755
+Ref: 8543955
+Ref: stl equal_range43955
+Ref: 8644163
+Ref: stl binary_search44163
+Node: Examples<5>44278
+Ref: examples<5>44372
+Ref: 8744372
+Ref: id1044372
+Node: STL Merge Algorithms44450
+Ref: stl merge algorithms44571
+Ref: 8844571
+Ref: stl-merge-algorithms44571
+Node: Imports<5>44827
+Ref: imports<5>44921
+Ref: 8944921
+Ref: id1144921
+Node: Operations<5>45113
+Ref: operations<5>45227
+Ref: 8a45227
+Ref: id1245227
+Ref: 8b45901
+Ref: stl merge45901
+Ref: 8c46111
+Ref: stl inplace_merge46111
+Ref: 8d46270
+Ref: stl includes46270
+Ref: 8e46438
+Ref: stl set_union46438
+Ref: 8f46740
+Ref: stl set_intersection46740
+Ref: 9047057
+Ref: stl set_difference47057
+Ref: 9147368
+Ref: stl set_symmetric_difference47368
+Node: Examples<6>47717
+Ref: examples<6>47812
+Ref: 9247812
+Ref: id1347812
+Node: STL Heap Algorithms47891
+Ref: stl heap algorithms48015
+Ref: 9348015
+Ref: stl-heap-algorithms48015
+Node: Imports<6>48226
+Ref: imports<6>48319
+Ref: 9448319
+Ref: id1448319
+Node: Operations<6>48512
+Ref: operations<6>48625
+Ref: 9548625
+Ref: id1548625
+Ref: 9648848
+Ref: stl make_heap48848
+Ref: 9749104
+Ref: stl push_heap49104
+Ref: 9849240
+Ref: stl pop_heap49240
+Ref: 9949414
+Ref: stl sort_heap49414
+Node: Examples<7>49509
+Ref: examples<7>49603
+Ref: 9a49603
+Ref: id1649603
+Node: Min/Max STL Algorithms49683
+Ref: min/max stl algorithms49809
+Ref: 9b49809
+Ref: min-max-stl-algorithms49809
+Node: Imports<7>50034
+Ref: imports<7>50130
+Ref: 9c50130
+Ref: id1750130
+Node: Operations<7>50325
+Ref: operations<7>50441
+Ref: 9d50441
+Ref: id1850441
+Ref: 9e50664
+Ref: stl min_element50664
+Ref: 9f50824
+Ref: stl max_element50824
+Ref: a050984
+Ref: stl lexicographical_compare50984
+Ref: a151527
+Ref: stl next_permutation51527
+Ref: a251878
+Ref: stl prev_permutation51878
+Node: Examples<8>51970
+Ref: examples<8>52067
+Ref: a352067
+Ref: id1952067
+Node: STL Numeric Algorithms52149
+Ref: stl numeric algorithms52266
+Ref: a452266
+Ref: stl-numeric-algorithms52266
+Node: Imports<8>52489
+Ref: imports<8>52585
+Ref: a552585
+Ref: id2052585
+Node: Operations<8>52781
+Ref: operations<8>52897
+Ref: a652897
+Ref: id2152897
+Ref: a752930
+Ref: stl accumulate52930
+Ref: a853069
+Ref: stl inner_product53069
+Ref: a953427
+Ref: stl partial_sum53427
+Ref: aa53714
+Ref: stl adjacent_difference53714
+Node: Examples<9>54067
+Ref: examples<9>54164
+Ref: ab54164
+Ref: id2254164
+Node: Trace Mode54247
+Ref: trace mode54347
+Ref: ac54347
+Ref: trace-mode54347
+Ref: ad54872
+Ref: stl set_sv_trace54872
+Ref: ae54987
+Ref: stl sv_trace_enabled54987
+Ref: af55076
+Ref: stl set_px_trace55076
+Ref: b055184
+Ref: stl px_trace_enabled55184
+Ref: b155402
+Ref: stl refc55402
+Node: Index55536
+Ref: index55605
 
 End Tag Table
 

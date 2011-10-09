@@ -52,7 +52,8 @@ primitive arithmetic and logical operations can be found in
 primitives.pure. Note that since the prelude module gets imported
 automatically (unless the interpreter is invoked with the ``--no-prelude``
 option), all operations discussed in this section are normally available in
-Pure programs without requiring any explicit import declarations.
+Pure programs without requiring any explicit import declarations, unless
+explicitly noted otherwise.
 
 Constants and Operators
 -----------------------
@@ -1823,8 +1824,8 @@ are implemented either directly by machine instructions or by C functions
 provided in the runtime. In particular, this module defines the basic
 arithmetic and logic operations on machine integers, bigints and floating
 point numbers, as well as various type checking predicates and conversions
-between different types. Some low-level pointer operations are also
-provided, as well as "sentries" (Pure's flavour of object finalizers) and
+between different types. Some basic pointer operations are also provided,
+as well as "sentries" (Pure's flavour of object finalizers) and
 "references" (mutable expression pointers).
 
 Special Constants
@@ -1879,13 +1880,11 @@ different meaning in Pure; it's the exact division operator, see `Rational
 Numbers`_.)
 
 The above operations are implemented for int, bigint and, where
-appropriate, double and pointer operands. (Pointer arithmetic comprises
-``+`` and ``-`` and works in the usual way, i.e., ``p-q`` returns the byte
-offset between two pointers ``p`` and ``q``, and ``p+n`` or ``p-n`` offsets
-a pointer ``p`` by the given integer ``n`` denoting the amount of bytes.) 
-The math module (see `Mathematical Functions`_) also provides
-implementations of the arithmetic and comparison operators for rational,
-complex and complex rational numbers.
+appropriate, double operands. (Pointer arithmetic and comparisons are
+provided in a separate module, see `Pointer Arithmetic`_.) The math module
+(see `Mathematical Functions`_) also provides implementations of the
+arithmetic and comparison operators for rational, complex and complex
+rational numbers.
 
 Note that the logical operations are actually implemented as special forms
 in order to provide for short-circuit evaluation. This needs special
@@ -2003,9 +2002,16 @@ These operations convert between various types of Pure values.
 .. function:: int x
               bigint x
               double x
-              pointer x
 
-   Conversions between the different numeric and pointer types.
+   Conversions between the different numeric types.
+
+.. function:: pointer x
+
+   Convert a string, int or bigint to a pointer value. Converting a string
+   returns a pointer to the underlying UTF8-encoded C string so that it can
+   be passed to the appropriate C functions. Converting an integer gives a
+   pointer with the given numeric address. This may be used to construct
+   special pointer values such as the null pointer (``pointer 0``).
 
 .. function:: ubyte x
               ushort x
@@ -2685,8 +2691,10 @@ Other Special Primitives
 Pointer Operations
 ~~~~~~~~~~~~~~~~~~
 
-These are lowlevel operations dealing with pointer values. The usual
-caveats apply, so *only* use these directly if you know what you're doing!
+The prelude provides a few basic operations on pointers which make it easy
+to interface to external C functions. For more advanced uses, the library
+also includes the :mod:`pointers` module which can be imported explicitly
+if needed, see `Pointer Arithmetic`_ below.
 
 .. function:: addr symbol
 
@@ -2703,8 +2711,17 @@ caveats apply, so *only* use these directly if you know what you're doing!
               free ptr
 
    Interface to ``malloc``, ``free`` and friends. These let you allocate
-   dynamic buffers (represented as Pure pointer values) for various nasty
+   dynamic buffers (represented as Pure pointer values) for various
    purposes.
+
+..
+
+The following functions perform direct memory accesses through pointers.
+Their primary use is to interface to certain C library functions which take
+or return data through pointers. It goes without saying that these
+operations should be used with utmost care. No checking is done on the
+pointer types, so it is the programmer's responsibility to ensure that the
+pointers actually refer to the corresponding type of data.
 
 .. function:: get_byte ptr
               get_short ptr
@@ -2715,7 +2732,11 @@ caveats apply, so *only* use these directly if you know what you're doing!
               get_double ptr
               get_string ptr
               get_pointer ptr
-              put_byte ptr x
+
+   Return the integer, floating point, string or generic pointer value at
+   the memory location indicated by ``ptr``.
+
+.. function:: put_byte ptr x
               put_short ptr x
               put_int ptr x
               put_int64 ptr x
@@ -2725,8 +2746,8 @@ caveats apply, so *only* use these directly if you know what you're doing!
               put_string ptr x
               put_pointer ptr x
 
-   These operations perform direct memory accesses. Use with care ... or
-   else!
+   Change the integer, floating point, string or generic pointer value at
+   the memory location indicated by ``ptr`` to the given value ``x``.
 
 ..
 
@@ -3054,6 +3075,61 @@ parameter. This may even be useful at times.
 Note that manually removing the :func:`unref` sentry of a reference turns
 the reference into just a normal pointer object and renders it unusable as
 a reference. Doing this will also leak memory, so don't!
+
+.. module:: pointers
+
+Pointer Arithmetic
+~~~~~~~~~~~~~~~~~~
+
+The pointers.pure module provides the usual C-style pointer arithmetic and
+comparisons of pointer values. This module normally is not included in the
+prelude, so to use these operations, you have to add the following import
+declaration to your program::
+
+  using pointers;
+
+The module overloads the comparison and some of the arithmetic operators
+(cf. Arithmetic_) so that they can be used to compare pointers and to
+perform C-style pointer arithmetic. To these ends, some conversions between
+pointers and numeric types are also provided.
+
+.. function:: int /pointer p
+              bigint /pointer p
+
+   Convert a pointer to an int or bigint, giving its numeric address value,
+   which usually denotes a byte offset relative to the beginning of the
+   memory of the executing process. This value can then be used in
+   arithmetic operations and converted back to a pointer using the
+   :func:`pointer` function from the prelude. (Note that to make this work
+   on 64 bit systems, you'll have to convert the pointer values to
+   bigints.)
+
+.. function:: infix + /pointer p n
+              infix - /pointer p n
+              infix - /pointerdiff p q
+
+   Pointer arithmetic. ``p+n`` and ``p-n`` offsets a pointer ``p`` by the
+   given integer ``n`` denoting the amount of bytes. In addition, ``p-q``
+   returns the byte offset between two pointers ``p`` and ``q``. Note that,
+   in contrast to C pointer arithmetic which also takes into account the
+   base type of the pointer, the Pure operations always use byte offsets,
+   no matter what type of pointer (as given by the pointer tag) is passed
+   to these operations.
+
+.. function:: infix == /pointer p q
+              infix ~= /pointer p q
+
+   Pointer equality and inequality. This is exactly the same as syntactic
+   equality on pointers.
+
+.. function:: infix <= /pointer p q
+              infix >= /pointer p q
+              infix > /pointer p q
+              infix < /pointer p q
+
+   Pointer comparisons. One pointer ``p`` is considered to be "less" than
+   another pointer ``q`` if it represents a "lower" address in memory,
+   i.e., if the byte offset ``p-q`` is negative.
 
 ..
 

@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.47',
+        VERSION:     '0.48',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.48, October 08, 2011</p>
+<p>Version 0.48, October 12, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2010 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -156,7 +156,7 @@ language and the operation of the Pure interpreter.</p>
 <li><a class="reference internal" href="#stat-and-friends" id="id82">Stat and Friends</a></li>
 <li><a class="reference internal" href="#reading-directories" id="id83">Reading Directories</a></li>
 <li><a class="reference internal" href="#shell-globbing" id="id84">Shell Globbing</a></li>
-<li><a class="reference internal" href="#regex-matching" id="id85">Regex Matching</a><ul>
+<li><a class="reference internal" href="#module-regex" id="id85">Regex Matching</a><ul>
 <li><a class="reference internal" href="#basic-examples" id="id86">Basic Examples</a></li>
 <li><a class="reference internal" href="#regex-substitutions-and-splitting" id="id87">Regex Substitutions and Splitting</a></li>
 <li><a class="reference internal" href="#empty-matches" id="id88">Empty Matches</a></li>
@@ -5127,7 +5127,8 @@ to your program:</p>
 </pre></div>
 </div>
 <p>Some functions of the system interface are provided in separate modules;
-see <a class="reference internal" href="#additional-posix-functions">Additional POSIX Functions</a> and <a class="reference internal" href="#option-parsing">Option Parsing</a>.</p>
+see <a class="reference internal" href="#regex-matching">Regex Matching</a>, <a class="reference internal" href="#additional-posix-functions">Additional POSIX Functions</a> and <a class="reference internal" href="#option-parsing">Option
+Parsing</a>.</p>
 </div>
 <div class="section" id="errno-and-friends">
 <h3><a class="toc-backref" href="#id76">Errno and Friends</a><a class="headerlink" href="#errno-and-friends" title="Permalink to this headline">¶</a></h3>
@@ -5703,10 +5704,15 @@ Hello, world!
 </pre></div>
 </div>
 <p>C-style formatted I/O is provided through the following wrappers for the C
-<tt class="docutils literal"><span class="pre">printf</span></tt> and <tt class="docutils literal"><span class="pre">scanf</span></tt> functions. Our wrapper functions take or return a
-tuple of values, and check these against the format specifiers, so they
-shouldn&#8217;t segfault. However, only simple formats derived from <tt class="docutils literal"><span class="pre">%cdioux</span></tt>,
-<tt class="docutils literal"><span class="pre">%efg</span></tt>, <tt class="docutils literal"><span class="pre">%s</span></tt> and <tt class="docutils literal"><span class="pre">%p</span></tt> are supported right now.</p>
+<tt class="docutils literal"><span class="pre">printf</span></tt> and <tt class="docutils literal"><span class="pre">scanf</span></tt> functions. These wrapper functions take or return
+a tuple of values and are fully type-safe, so they should never segfault.
+All basic formats derived from <tt class="docutils literal"><span class="pre">%cdioux</span></tt>, <tt class="docutils literal"><span class="pre">%efg</span></tt>, <tt class="docutils literal"><span class="pre">%s</span></tt> and <tt class="docutils literal"><span class="pre">%p</span></tt> are
+supported, albeit without the standard length modifiers such as <tt class="docutils literal"><span class="pre">h</span></tt> and
+<tt class="docutils literal"><span class="pre">l</span></tt>, which aren&#8217;t of much use in Pure. (However, in addition to C
+<tt class="docutils literal"><span class="pre">printf</span></tt> and <tt class="docutils literal"><span class="pre">scanf</span></tt>, the Pure versions also support the modifiers
+<tt class="docutils literal"><span class="pre">Z</span></tt> and <tt class="docutils literal"><span class="pre">R</span></tt> of the <a class="reference external" href="http://gmplib.org">GMP</a> and <a class="reference external" href="http://www.mpfr.org">MPFR</a> libraries, which are used for
+converting multiprecision integer and floating point values, as shown in
+the examples below.)</p>
 <dl class="function">
 <dt id="printf">
 <tt class="descname">printf</tt> format args<a class="headerlink" href="#printf" title="Permalink to this definition">¶</a></dt>
@@ -5716,17 +5722,18 @@ shouldn&#8217;t segfault. However, only simple formats derived from <tt class="d
 respectively. Normally, these functions return the result of the
 underlying C routines (number of characters written, or negative on
 error). However, in case of an abnormal condition in the wrapper
-function (error in format string, argument mismatch), they will throw an
-exception.</p>
+function, such as argument mismatch, they will throw an exception.  (In
+particular, an <a class="reference internal" href="#out_of_bounds" title="out_of_bounds"><tt class="xref pure pure-cons docutils literal"><span class="pre">out_of_bounds</span></tt></a> exception will be thrown if there
+are not enough arguments for the given format string.)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="sprintf">
 <tt class="descname">sprintf</tt> format args<a class="headerlink" href="#sprintf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print a formatted string to a buffer and return the result as a string.
-Unlike the C routine, this wrapper just returns the string result, or a
-null pointer in case of an error; otherwise, the error handling is the
-same as with <a class="reference internal" href="#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> and <a class="reference internal" href="#fprintf" title="fprintf"><tt class="xref pure pure-func docutils literal"><span class="pre">fprintf</span></tt></a>. The implementation
+Note that, unlike the C routine, the Pure version just returns the
+string result in the case of success; otherwise, the error handling is
+the same as with <a class="reference internal" href="#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> and <a class="reference internal" href="#fprintf" title="fprintf"><tt class="xref pure pure-func docutils literal"><span class="pre">fprintf</span></tt></a>. The implementation
 actually uses the C routine <tt class="docutils literal"><span class="pre">snprintf</span></tt> for safety, and a suitable
 output buffer is provided automatically.</p>
 </dd></dl>
@@ -5742,13 +5749,12 @@ values. An exception of the form <tt class="docutils literal"><span class="pre">
 the tuple of successfully converted values (which may be less than the
 number of requested input items), is thrown if end-of-file was met or
 another error occurred while still reading. The handling of other
-abnormal conditions (e.g., error in format string) is analogous to
-<a class="reference internal" href="#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> et al. Also note that our implementation here doesn&#8217;t
-accept any of the length modifiers used by the C routines. Floating
-point values will <em>always</em> be read in double precision, so you just
-specify <tt class="docutils literal"><span class="pre">&quot;e&quot;</span></tt>, <tt class="docutils literal"><span class="pre">&quot;g&quot;</span></tt> etc. for these. However, the &#8220;assignment
-suppression&#8221; flag <tt class="docutils literal"><span class="pre">&quot;*&quot;</span></tt> <em>is</em> understood; the corresponding items will
-not be returned.</p>
+abnormal conditions is analogous to <a class="reference internal" href="#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> et al. Also note that
+this implementation doesn&#8217;t accept any of the standard length modifiers;
+in particular, floating point values will <em>always</em> be read in double
+precision and you just specify <tt class="docutils literal"><span class="pre">e</span></tt>, <tt class="docutils literal"><span class="pre">g</span></tt> etc. for these. The
+&#8220;assignment suppression&#8221; flag <tt class="docutils literal"><span class="pre">*</span></tt> is understood, however; the
+corresponding items will not be returned.</p>
 </dd></dl>
 
 <dl class="function">
@@ -5766,6 +5772,34 @@ catch22
 <span class="gp">&gt; </span>sscanf <span class="s">&quot;foo 5 22&quot;</span> <span class="s">&quot;%s %d %g&quot;</span><span class="p">;</span>
 <span class="s">&quot;foo&quot;</span>,<span class="mi">5</span>,<span class="mf">22.0</span>
 </pre></div>
+</div>
+<p>As mentioned above, special argument formats are provided for bigints and
+multiprecision floats:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sscanf <span class="s">&quot;a(5) = 1234&quot;</span> <span class="s">&quot;a(%d) = %Zd&quot;</span><span class="p">;</span>
+<span class="mi">5</span>,<span class="mi">1234L</span>
+<span class="gp">&gt; </span>sprintf <span class="s">&quot;a(%d) = %Zd&quot;</span> ans<span class="p">;</span>
+<span class="s">&quot;a(5) = 1234&quot;</span>
+
+<span class="gp">&gt; </span><span class="kr">using</span> mpfr<span class="p">;</span>
+<span class="gp">&gt; </span>mpfr_set_default_prec <span class="mi">113</span><span class="p">;</span>
+()
+<span class="gp">&gt; </span>printf <span class="s">&quot;pi = %0.30Rg</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">4</span>*atan (mpfr <span class="mi">1</span>))<span class="p">;</span>
+pi = <span class="mf">3.14159265358979323846264338328</span>
+<span class="mi">37</span>
+</pre></div>
+</div>
+<p>There are a number of other options for these conversions, please check the
+<a class="reference external" href="http://gmplib.org">GMP</a> and <a class="reference external" href="http://www.mpfr.org">MPFR</a> documentation for details.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In contrast to bigints, multiprecision floats aren&#8217;t directly
+supported by the Pure language. If you would like to use these numbers,
+you&#8217;ll have to install the <a class="reference internal" href="pure-mpfr.html#module-mpfr"><tt class="xref pure pure-mod docutils literal"><span class="pre">mpfr</span></tt></a> addon module which is not
+included in the standard library yet. Also note that, at the time of
+this writing, <a class="reference external" href="http://www.mpfr.org">MPFR</a> only provides formatted output, so multiprecision
+floats are not supported by the <tt class="docutils literal"><span class="pre">scanf</span></tt> functions. To work around this
+limitation, it is possible to read the number as a string and then
+convert it using the <a class="reference internal" href="pure-mpfr.html#mpfr" title="mpfr"><tt class="xref pure pure-func docutils literal"><span class="pre">mpfr</span></tt></a> function.</p>
 </div>
 </div>
 <div class="section" id="stat-and-friends">
@@ -5873,16 +5907,25 @@ of these.</p>
 </pre></div>
 </div>
 </div>
-<div class="section" id="regex-matching">
-<h3><a class="toc-backref" href="#id85">Regex Matching</a><a class="headerlink" href="#regex-matching" title="Permalink to this headline">¶</a></h3>
-<p>The POSIX regex functions (<tt class="docutils literal"><span class="pre">regcomp</span></tt> and <tt class="docutils literal"><span class="pre">regexec</span></tt>) have a somewhat
-difficult calling sequence, hence we provide a couple of rather elaborate
-high-level wrapper functions for use in Pure programs. These are
-implemented in terms of a low-level interface provided in the runtime. (The
-low-level interface isn&#8217;t documented here, but these functions are also
-callable if you want to create your own regular expression engines in Pure.
-You might wish to take a look at the implementation of the high-level
-functions in system.pure to see how this can be done.)</p>
+<div class="section" id="module-regex">
+<span id="regex-matching"></span><h3><a class="toc-backref" href="#id85">Regex Matching</a><a class="headerlink" href="#module-regex" title="Permalink to this headline">¶</a></h3>
+<p>Please note that, as of Pure 0.48, this part of the system interface is not
+included in the system module any more, but is provided as a separate regex
+module which can be used independently of the system module. To use the
+operations of this module, add the following import declaration to your
+program:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> regex<span class="p">;</span>
+</pre></div>
+</div>
+<p>Since the POSIX regex functions (<tt class="docutils literal"><span class="pre">regcomp</span></tt> and <tt class="docutils literal"><span class="pre">regexec</span></tt>) have a
+somewhat difficult calling sequence, this module provides a couple of
+rather elaborate high-level wrapper functions for use in Pure programs.
+These are implemented in terms of a low-level interface provided in the
+runtime. (The low-level interface isn&#8217;t documented here, but these
+functions are also callable if you want to create your own regular
+expression engines in Pure.  You might wish to take a look at the
+implementation of the high-level functions in regex.pure to see how this
+can be done.)</p>
 <dl class="function">
 <dt id="regex">
 <tt class="descname">regex</tt> pat cflags s eflags<a class="headerlink" href="#regex" title="Permalink to this definition">¶</a></dt>
@@ -6078,7 +6121,8 @@ need&#8221; fashion:</p>
 </pre></div>
 </div>
 <p>Let&#8217;s verify that the processing is really done lazily:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>test x = printf <span class="s">&quot;got: %s</span><span class="se">\n</span><span class="s">&quot;</span> (str x) $$ x<span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> system<span class="p">;</span>
+<span class="gp">&gt; </span>test x = printf <span class="s">&quot;got: %s</span><span class="se">\n</span><span class="s">&quot;</span> (str x) $$ x<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> xs = regexgs test pat <span class="mi">0</span> s <span class="mi">0</span><span class="p">;</span>
 got: <span class="mi">1</span>,<span class="s">&quot;var&quot;</span>
 <span class="gp">&gt; </span>xs!<span class="mi">1</span><span class="p">;</span>
@@ -6177,7 +6221,8 @@ we can retrieve that as follows:</p>
 </pre></div>
 </div>
 <p>We can get hold of the real process environment as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> env = parse_env $ fget $ popen <span class="s">&quot;set&quot;</span> <span class="s">&quot;r&quot;</span><span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> system<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> env = parse_env $ fget $ popen <span class="s">&quot;set&quot;</span> <span class="s">&quot;r&quot;</span><span class="p">;</span>
 <span class="gp">&gt; </span>#env<span class="p">;</span>
 <span class="mi">109</span>
 <span class="gp">&gt; </span>head env<span class="p">;</span>
@@ -6416,7 +6461,7 @@ copied to the result lists as is.</p>
 <li><a class="reference internal" href="#stat-and-friends">Stat and Friends</a></li>
 <li><a class="reference internal" href="#reading-directories">Reading Directories</a></li>
 <li><a class="reference internal" href="#shell-globbing">Shell Globbing</a></li>
-<li><a class="reference internal" href="#regex-matching">Regex Matching</a><ul>
+<li><a class="reference internal" href="#module-regex">Regex Matching</a><ul>
 <li><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
 <li><a class="reference internal" href="#regex-substitutions-and-splitting">Regex Substitutions and Splitting</a></li>
 <li><a class="reference internal" href="#empty-matches">Empty Matches</a></li>

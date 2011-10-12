@@ -4269,7 +4269,8 @@ to your program::
   using system;
 
 Some functions of the system interface are provided in separate modules;
-see `Additional POSIX Functions`_ and `Option Parsing`_.
+see `Regex Matching`_, `Additional POSIX Functions`_ and `Option
+Parsing`_.
 
 ..
 
@@ -4798,10 +4799,18 @@ Examples::
 ..
 
 C-style formatted I/O is provided through the following wrappers for the C
-``printf`` and ``scanf`` functions. Our wrapper functions take or return a
-tuple of values, and check these against the format specifiers, so they
-shouldn't segfault. However, only simple formats derived from ``%cdioux``,
-``%efg``, ``%s`` and ``%p`` are supported right now.
+``printf`` and ``scanf`` functions. These wrapper functions take or return
+a tuple of values and are fully type-safe, so they should never segfault.
+All basic formats derived from ``%cdioux``, ``%efg``, ``%s`` and ``%p`` are
+supported, albeit without the standard length modifiers such as ``h`` and
+``l``, which aren't of much use in Pure. (However, in addition to C
+``printf`` and ``scanf``, the Pure versions also support the modifiers
+``Z`` and ``R`` of the GMP_ and MPFR_ libraries, which are used for
+converting multiprecision integer and floating point values, as shown in
+the examples below.)
+
+.. _GMP: http://gmplib.org
+.. _MPFR: http://www.mpfr.org
 
 .. function:: printf format args
               fprintf fp format args
@@ -4810,15 +4819,16 @@ shouldn't segfault. However, only simple formats derived from ``%cdioux``,
    respectively. Normally, these functions return the result of the
    underlying C routines (number of characters written, or negative on
    error). However, in case of an abnormal condition in the wrapper
-   function (error in format string, argument mismatch), they will throw an
-   exception.
+   function, such as argument mismatch, they will throw an exception.  (In
+   particular, an :cons:`out_of_bounds` exception will be thrown if there
+   are not enough arguments for the given format string.)
 
 .. function:: sprintf format args
 
    Print a formatted string to a buffer and return the result as a string.
-   Unlike the C routine, this wrapper just returns the string result, or a
-   null pointer in case of an error; otherwise, the error handling is the
-   same as with :func:`printf` and :func:`fprintf`. The implementation
+   Note that, unlike the C routine, the Pure version just returns the
+   string result in the case of success; otherwise, the error handling is
+   the same as with :func:`printf` and :func:`fprintf`. The implementation
    actually uses the C routine ``snprintf`` for safety, and a suitable
    output buffer is provided automatically.
 
@@ -4831,13 +4841,12 @@ shouldn't segfault. However, only simple formats derived from ``%cdioux``,
    the tuple of successfully converted values (which may be less than the
    number of requested input items), is thrown if end-of-file was met or
    another error occurred while still reading. The handling of other
-   abnormal conditions (e.g., error in format string) is analogous to
-   :func:`printf` et al. Also note that our implementation here doesn't
-   accept any of the length modifiers used by the C routines. Floating
-   point values will *always* be read in double precision, so you just
-   specify ``"e"``, ``"g"`` etc. for these. However, the "assignment
-   suppression" flag ``"*"`` *is* understood; the corresponding items will
-   not be returned.
+   abnormal conditions is analogous to :func:`printf` et al. Also note that
+   this implementation doesn't accept any of the standard length modifiers;
+   in particular, floating point values will *always* be read in double
+   precision and you just specify ``e``, ``g`` etc. for these. The
+   "assignment suppression" flag ``*`` is understood, however; the
+   corresponding items will not be returned.
 
 .. function:: sscanf s format
 
@@ -4852,6 +4861,33 @@ Examples::
   ()
   > sscanf "foo 5 22" "%s %d %g";
   "foo",5,22.0
+
+As mentioned above, special argument formats are provided for bigints and
+multiprecision floats::
+
+  > sscanf "a(5) = 1234" "a(%d) = %Zd";
+  5,1234L
+  > sprintf "a(%d) = %Zd" ans;
+  "a(5) = 1234"
+
+  > using mpfr;
+  > mpfr_set_default_prec 113;
+  ()
+  > printf "pi = %0.30Rg\n" (4*atan (mpfr 1));
+  pi = 3.14159265358979323846264338328
+  37
+
+There are a number of other options for these conversions, please check the
+GMP_ and MPFR_ documentation for details.
+
+.. note:: In contrast to bigints, multiprecision floats aren't directly
+   supported by the Pure language. If you would like to use these numbers,
+   you'll have to install the :mod:`mpfr` addon module which is not
+   included in the standard library yet. Also note that, at the time of
+   this writing, MPFR_ only provides formatted output, so multiprecision
+   floats are not supported by the ``scanf`` functions. To work around this
+   limitation, it is possible to read the number as a string and then
+   convert it using the :func:`mpfr` function.
 
 ..
 
@@ -4959,14 +4995,25 @@ Example::
 Regex Matching
 --------------
 
-The POSIX regex functions (``regcomp`` and ``regexec``) have a somewhat
-difficult calling sequence, hence we provide a couple of rather elaborate
-high-level wrapper functions for use in Pure programs. These are
-implemented in terms of a low-level interface provided in the runtime. (The
-low-level interface isn't documented here, but these functions are also
-callable if you want to create your own regular expression engines in Pure.
-You might wish to take a look at the implementation of the high-level
-functions in system.pure to see how this can be done.)
+.. module:: regex
+
+Please note that, as of Pure 0.48, this part of the system interface is not
+included in the system module any more, but is provided as a separate regex
+module which can be used independently of the system module. To use the
+operations of this module, add the following import declaration to your
+program::
+
+  using regex;
+
+Since the POSIX regex functions (``regcomp`` and ``regexec``) have a
+somewhat difficult calling sequence, this module provides a couple of
+rather elaborate high-level wrapper functions for use in Pure programs.
+These are implemented in terms of a low-level interface provided in the
+runtime. (The low-level interface isn't documented here, but these
+functions are also callable if you want to create your own regular
+expression engines in Pure.  You might wish to take a look at the
+implementation of the high-level functions in regex.pure to see how this
+can be done.)
 
 .. function:: regex pat cflags s eflags
 
@@ -5150,6 +5197,7 @@ need" fashion::
 
 Let's verify that the processing is really done lazily::
 
+  > using system;
   > test x = printf "got: %s\n" (str x) $$ x;
   > let xs = regexgs test pat 0 s 0;
   got: 1,"var"
@@ -5249,6 +5297,7 @@ we can retrieve that as follows::
 
 We can get hold of the real process environment as follows::
 
+  > using system;
   > let env = parse_env $ fget $ popen "set" "r";
   > #env;
   109

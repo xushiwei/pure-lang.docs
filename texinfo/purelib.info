@@ -14,7 +14,7 @@ File: purelib.info,  Node: Top,  Next: Prelude,  Up: (dir)
 Pure Library Manual
 *******************
 
-  Version 0.48, October 08, 2011
+  Version 0.48, October 12, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -4299,7 +4299,8 @@ declaration to your program:
     using system;
 
 Some functions of the system interface are provided in separate modules;
-see *note Additional POSIX Functions: 28c. and *note Option Parsing: b8.
+see *note Regex Matching: aa, *note Additional POSIX Functions: 28c.
+and *note Option Parsing: b8.
 
 
 File: purelib.info,  Node: Errno and Friends,  Next: POSIX Locale,  Prev: Imports<6>,  Up: System Interface
@@ -4814,10 +4815,16 @@ library routines.
     "quasiquote.pure","set.pure","strings.pure","system.pure",""]
 
 C-style formatted I/O is provided through the following wrappers for
-the C `printf' and `scanf' functions. Our wrapper functions take or
-return a tuple of values, and check these against the format
-specifiers, so they shouldn't segfault. However, only simple formats
-derived from `%cdioux', `%efg', `%s' and `%p' are supported right now.
+the C `printf' and `scanf' functions. These wrapper functions take or
+return a tuple of values and are fully type-safe, so they should never
+segfault.  All basic formats derived from `%cdioux', `%efg', `%s' and
+`%p' are supported, albeit without the standard length modifiers such
+as `h' and `l', which aren't of much use in Pure. (However, in addition
+to C `printf' and `scanf', the Pure versions also support the modifiers
+`Z' and `R' of the GMP (http://gmplib.org) and MPFR
+(http://www.mpfr.org) libraries, which are used for converting
+multiprecision integer and floating point values, as shown in the
+examples below.)
 
  -- Function: printf format args
  -- Function: fprintf fp format args
@@ -4825,15 +4832,17 @@ derived from `%cdioux', `%efg', `%s' and `%p' are supported right now.
      respectively. Normally, these functions return the result of the
      underlying C routines (number of characters written, or negative on
      error). However, in case of an abnormal condition in the wrapper
-     function (error in format string, argument mismatch), they will
-     throw an exception.
+     function, such as argument mismatch, they will throw an exception.
+     (In particular, an *note out_of_bounds: 10. exception will be
+     thrown if there are not enough arguments for the given format
+     string.)
 
  -- Function: sprintf format args
      Print a formatted string to a buffer and return the result as a
-     string.  Unlike the C routine, this wrapper just returns the
-     string result, or a null pointer in case of an error; otherwise,
-     the error handling is the same as with *note printf: 2d0. and
-     *note fprintf: 2d1. The implementation actually uses the C routine
+     string.  Note that, unlike the C routine, the Pure version just
+     returns the string result in the case of success; otherwise, the
+     error handling is the same as with *note printf: 2d2. and *note
+     fprintf: 2d3. The implementation actually uses the C routine
      `snprintf' for safety, and a suitable output buffer is provided
      automatically.
 
@@ -4845,17 +4854,16 @@ derived from `%cdioux', `%efg', `%s' and `%p' are supported right now.
      where `ret' is the tuple of successfully converted values (which
      may be less than the number of requested input items), is thrown
      if end-of-file was met or another error occurred while still
-     reading. The handling of other abnormal conditions (e.g., error in
-     format string) is analogous to *note printf: 2d0. et al. Also note
-     that our implementation here doesn't accept any of the length
-     modifiers used by the C routines. Floating point values will
-     _always_ be read in double precision, so you just specify `"e"',
-     `"g"' etc. for these. However, the "assignment suppression" flag
-     `"*"' _is_ understood; the corresponding items will not be
-     returned.
+     reading. The handling of other abnormal conditions is analogous to
+     *note printf: 2d2. et al. Also note that this implementation
+     doesn't accept any of the standard length modifiers; in
+     particular, floating point values will _always_ be read in double
+     precision and you just specify `e', `g' etc. for these. The
+     "assignment suppression" flag `*' is understood, however; the
+     corresponding items will not be returned.
 
  -- Function: sscanf s format
-     This works exactly like *note fscanf: 2d4, but input comes from a
+     This works exactly like *note fscanf: 2d6, but input comes from a
      string (first argument) rather than a file.
 
   Examples:
@@ -4867,6 +4875,34 @@ derived from `%cdioux', `%efg', `%s' and `%p' are supported right now.
     > sscanf "foo 5 22" "%s %d %g";
     "foo",5,22.0
 
+As mentioned above, special argument formats are provided for bigints
+and multiprecision floats:
+
+    > sscanf "a(5) = 1234" "a(%d) = %Zd";
+    5,1234L
+    > sprintf "a(%d) = %Zd" ans;
+    "a(5) = 1234"
+
+    > using mpfr;
+    > mpfr_set_default_prec 113;
+    ()
+    > printf "pi = %0.30Rg\n" (4*atan (mpfr 1));
+    pi = 3.14159265358979323846264338328
+    37
+
+There are a number of other options for these conversions, please check
+the GMP (http://gmplib.org) and MPFR (http://www.mpfr.org)
+documentation for details.
+
+     Note: In contrast to bigints, multiprecision floats aren't directly
+     supported by the Pure language. If you would like to use these
+     numbers, you'll have to install the `mpfr' addon module which is
+     not included in the standard library yet. Also note that, at the
+     time of this writing, MPFR (http://www.mpfr.org) only provides
+     formatted output, so multiprecision floats are not supported by
+     the `scanf' functions. To work around this limitation, it is
+     possible to read the number as a string and then convert it using
+     the `mpfr' function.
 
 
 File: purelib.info,  Node: Stat and Friends,  Next: Reading Directories,  Prev: Basic I/O Interface,  Up: System Interface
@@ -4888,11 +4924,11 @@ File: purelib.info,  Node: Stat and Friends,  Next: Reading Directories,  Prev: 
  -- Function: lstat path
      Return information about the given symbolic link (rather than the
      file it points to). On systems where this function isn't supported
-     (e.g., Windows), *note lstat: 2d8. is identical to *note stat: 2d7.
+     (e.g., Windows), *note lstat: 2da. is identical to *note stat: 2d9.
 
  -- Function: fstat fp
      Return information about the given file object. Same as *note
-     stat: 2d7, but here the file is given as a file pointer created
+     stat: 2d9, but here the file is given as a file pointer created
      with *note fopen: 2b8.  (see *note Basic I/O Interface: 2b4.
      above). Note that the corresponding system function actually takes
      a file descriptor, so the Pure implementation is equivalent to the
@@ -4978,15 +5014,23 @@ File: purelib.info,  Node: Regex Matching,  Next: Additional POSIX Functions,  P
 4.11 Regex Matching
 ===================
 
-The POSIX regex functions (`regcomp' and `regexec') have a somewhat
-difficult calling sequence, hence we provide a couple of rather
-elaborate high-level wrapper functions for use in Pure programs. These
-are implemented in terms of a low-level interface provided in the
+Please note that, as of Pure 0.48, this part of the system interface is
+not included in the system module any more, but is provided as a
+separate regex module which can be used independently of the system
+module. To use the operations of this module, add the following import
+declaration to your program:
+
+    using regex;
+
+Since the POSIX regex functions (`regcomp' and `regexec') have a
+somewhat difficult calling sequence, this module provides a couple of
+rather elaborate high-level wrapper functions for use in Pure programs.
+These are implemented in terms of a low-level interface provided in the
 runtime. (The low-level interface isn't documented here, but these
 functions are also callable if you want to create your own regular
 expression engines in Pure.  You might wish to take a look at the
-implementation of the high-level functions in system.pure to see how
-this can be done.)
+implementation of the high-level functions in regex.pure to see how this
+can be done.)
 
  -- Function: regex pat cflags s eflags
      Compiles and matches a regex in one go, and returns the list of
@@ -5011,7 +5055,7 @@ this can be done.)
 values, see the regcomp(3) manpage for an explanation of these. Two
 particularly important compilation flags (to be included in the `cflags'
 argument) are `REG_NOSUB', which prevents submatches to be computed,
-and `REG_EXTENDED', which switches *note regex: 2df. from "basic" to
+and `REG_EXTENDED', which switches *note regex: 2e2. from "basic" to
 "extended" regular expressions so that it understands all the regular
 expression elements of egrep(1) in the pattern argument.
 
@@ -5056,10 +5100,10 @@ string. Other submatches may not participate in the match at all, in
 which case the pair `(-1,"")' is returned.
 
   The following helper functions are provided to analyze the result
-returned by *note regex: 2df.
+returned by *note regex: 2e2.
 
  -- Function: reg_result res
-     Returns the result of a *note regex: 2df. call, i.e., a `regerr'
+     Returns the result of a *note regex: 2e2. call, i.e., a `regerr'
      term if compilation failed, and a flag indicating whether the
      match was successful otherwise.
 
@@ -5068,7 +5112,7 @@ returned by *note regex: 2df.
 
  -- Function: reg n info
      Returns the `n'th submatch of the given submatch info, where `info'
-     is the result of a *note reg_info: 2e1. call.
+     is the result of a *note reg_info: 2e4. call.
 
  -- Function: regs info
      Returns all valid submatches, i.e., the list of all triples
@@ -5086,16 +5130,16 @@ tokenize a string according to a given delimiter regex.
      `REG_NOSUB' flag with this function, it needs the submatch info.
 
  -- Function: regexgg f pat cflags s eflags
-     This works like *note regexg: 2e4, but allows overlapping matches.
+     This works like *note regexg: 2e7, but allows overlapping matches.
 
  -- Function: regsub f pat cflags s eflags
      Replaces all non-overlapping instances of a pattern with a computed
      substitution string. To these ends, the given function `f' is
-     applied to the *note reg_info: 2e1. for each match. The result
+     applied to the *note reg_info: 2e4. for each match. The result
      string is then obtained by concatenating `f info' for all matches,
      with the unmatched portions of the string in between. To make this
      work, `f' must always return a string value; otherwise, *note
-     regsub: 2e6. throws a *note bad_string_value: e. exception.
+     regsub: 2e9. throws a *note bad_string_value: e. exception.
 
  -- Function: regsplit pat cflags s eflags
      Splits a string into constituents delimited by substrings matching
@@ -5109,8 +5153,8 @@ the following lazy alternatives are available:
  -- Function: regexgs f pat cflags s eflags
  -- Function: regexggs f pat cflags s eflags
  -- Function: regsplits pat cflags s eflags
-     These work like *note regexg: 2e4, *note regexgg: 2e5. and *note
-     regsplit: 2e7.  above, but return a stream result which enables
+     These work like *note regexg: 2e7, *note regexgg: 2e8. and *note
+     regsplit: 2ea.  above, but return a stream result which enables
      you to process the matches one by one, using "call by need"
      evaluation.
 
@@ -5161,7 +5205,7 @@ match info:
     > regexg (!1) pat 0 s 0;
     ["var","foo","BAR"]
 
-Lazy versions of both *note regexg: 2e4. and *note regexgg: 2e5. are
+Lazy versions of both *note regexg: 2e7. and *note regexgg: 2e8. are
 provided which return the result as a stream instead. These can be
 processed in a "call by need" fashion:
 
@@ -5172,6 +5216,7 @@ processed in a "call by need" fashion:
 
 Let's verify that the processing is really done lazily:
 
+    > using system;
     > test x = printf "got: %s\n" (str x) $$ x;
     > let xs = regexgs test pat 0 s 0;
     got: 1,"var"
@@ -5219,7 +5264,7 @@ pattern):
     > regsplit delim REG_EXTENDED "The   quick brown    fox" 0;
     ["The","quick","brown","fox"]
 
-The *note regsplit: 2e7. operation also has a lazy variation:
+The *note regsplit: 2ea. operation also has a lazy variation:
 
     > regsplits "[[:space:]]+" REG_EXTENDED "The   quick brown    fox" 0;
     "The":#<thunk 0x7fb1b79775b0>
@@ -5285,6 +5330,7 @@ we can retrieve that as follows:
 
 We can get hold of the real process environment as follows:
 
+    > using system;
     > let env = parse_env $ fget $ popen "set" "r";
     > #env;
     109
@@ -5361,7 +5407,7 @@ The following operation is provided:
      `args', return the parsed options along with a list of the
      remaining (non-option) command line arguments.
 
-  The *note getopt: 2f4. function takes two arguments: `opts', a list
+  The *note getopt: 2f7. function takes two arguments: `opts', a list
 of option descriptions in the format described below, and `args', a
 list of strings containing the command line parameters to be parsed for
 options. The result is a pair `(opts_return,args_return)' where
@@ -5369,7 +5415,7 @@ options. The result is a pair `(opts_return,args_return)' where
 is the list of remaining (non-option) arguments. Options are parsed
 using the rules of GNU getopt(1). If an invalid option is encountered
 (unrecognized option, missing or extra argument, etc.), *note getopt:
-2f4. throws the offending option string as an exception.
+2f7. throws the offending option string as an exception.
 
   The `opts_return' value is a list of "hash pairs" `opt=>val' where
 `opt' is the (long) option name (as given by the `long_opt' field given
@@ -5763,13 +5809,13 @@ Index
                                                               (line  12)
 * fork function:                         Additional POSIX Functions.
                                                               (line  20)
-* fprintf function:                      Basic I/O Interface. (line 142)
+* fprintf function:                      Basic I/O Interface. (line 148)
 * fputs function:                        Basic I/O Interface. (line  67)
 * frac function:                         Conversions.         (line  53)
 * fread function:                        Basic I/O Interface. (line  74)
 * free function:                         Pointer Operations.  (line  19)
 * freopen function:                      Basic I/O Interface. (line  31)
-* fscanf function:                       Basic I/O Interface. (line 160)
+* fscanf function:                       Basic I/O Interface. (line 168)
 * fseek function:                        Basic I/O Interface. (line  79)
 * fstat function:                        Stat and Friends.    (line  22)
 * ftell function:                        Basic I/O Interface. (line  79)
@@ -6019,7 +6065,7 @@ Index
                                                               (line   8)
 * pow function:                          Arithmetic.          (line 132)
 * pred function:                         Arithmetic.          (line 122)
-* printf function:                       Basic I/O Interface. (line 142)
+* printf function:                       Basic I/O Interface. (line 148)
 * ptrtag function:                       Tagged Pointers.     (line  16)
 * put function:                          Expression References.
                                                               (line  17)
@@ -6071,18 +6117,19 @@ Index
                                                               (line  14)
 * refp function:                         Expression References.
                                                               (line  28)
-* reg function:                          Regex Matching.      (line  94)
-* reg_info function:                     Regex Matching.      (line  91)
-* reg_result function:                   Regex Matching.      (line  86)
-* regex function:                        Regex Matching.      (line  16)
-* regexg function:                       Regex Matching.      (line 106)
-* regexgg function:                      Regex Matching.      (line 113)
-* regexggs function:                     Regex Matching.      (line 134)
-* regexgs function:                      Regex Matching.      (line 134)
-* regs function:                         Regex Matching.      (line  98)
-* regsplit function:                     Regex Matching.      (line 125)
-* regsplits function:                    Regex Matching.      (line 134)
-* regsub function:                       Regex Matching.      (line 116)
+* reg function:                          Regex Matching.      (line 102)
+* reg_info function:                     Regex Matching.      (line  99)
+* reg_result function:                   Regex Matching.      (line  94)
+* regex function:                        Regex Matching.      (line  24)
+* regex module:                          Regex Matching.      (line   6)
+* regexg function:                       Regex Matching.      (line 114)
+* regexgg function:                      Regex Matching.      (line 121)
+* regexggs function:                     Regex Matching.      (line 142)
+* regexgs function:                      Regex Matching.      (line 142)
+* regs function:                         Regex Matching.      (line 106)
+* regsplit function:                     Regex Matching.      (line 133)
+* regsplits function:                    Regex Matching.      (line 142)
+* regsub function:                       Regex Matching.      (line 124)
 * repeat function:                       List Generators.     (line  31)
 * repeatn function:                      List Generators.     (line  34)
 * reverse function <1>:                  Matrix Inspection and Manipulation.
@@ -6116,7 +6163,7 @@ Index
 * rowvectorseq function:                 Matrix Construction and Conversions.
                                                               (line  44)
 * same function:                         Predicates.          (line  11)
-* scanf function:                        Basic I/O Interface. (line 160)
+* scanf function:                        Basic I/O Interface. (line 168)
 * scanl function:                        Common List Functions.
                                                               (line  79)
 * scanl1 function:                       Common List Functions.
@@ -6159,12 +6206,12 @@ Index
 * spawnvp function:                      Process Functions.   (line  32)
 * split function:                        Basic String Functions.
                                                               (line 130)
-* sprintf function:                      Basic I/O Interface. (line 151)
+* sprintf function:                      Basic I/O Interface. (line 159)
 * sqrt function:                         Basic Math Functions.
                                                               (line  48)
 * srandom function:                      Basic Math Functions.
                                                               (line  38)
-* sscanf function:                       Basic I/O Interface. (line 177)
+* sscanf function:                       Basic I/O Interface. (line 184)
 * stack_fault constructor:               Constants and Operators.
                                                               (line  23)
 * stat function:                         Stat and Friends.    (line   6)
@@ -7711,253 +7758,259 @@ Node: Imports<6>150190
 Ref: imports<6>150280
 Ref: 28b150280
 Ref: id18150280
-Node: Errno and Friends150564
-Ref: errno and friends150675
-Ref: 28d150675
-Ref: errno-and-friends150675
-Ref: 28e150720
-Ref: errno150720
-Ref: 28f150740
-Ref: set_errno150740
-Ref: 290150766
-Ref: perror150766
-Ref: 291150791
-Ref: strerror150791
-Node: POSIX Locale151251
-Ref: posix locale151367
-Ref: 292151367
-Ref: posix-locale151367
-Ref: 293151402
-Ref: setlocale151402
-Node: Signal Handling152796
-Ref: signal handling152909
-Ref: 294152909
-Ref: signal-handling152909
-Ref: 295152950
-Ref: trap152950
-Node: Time Functions153778
-Ref: time functions153896
-Ref: 296153896
-Ref: time-functions153896
-Ref: 297154156
-Ref: time154156
-Ref: 298154381
-Ref: gettimeofday154381
-Ref: 299154855
-Ref: clock154855
-Ref: 29a155143
-Ref: sleep155143
-Ref: 29b155165
-Ref: nanosleep155165
-Ref: 29c156178
-Ref: tzset156178
-Ref: 29d156238
-Ref: tzname156238
-Ref: 29e156259
-Ref: timezone156259
-Ref: 29f156282
-Ref: daylight156282
-Ref: 2a0157099
-Ref: ctime157099
-Ref: 2a1157225
-Ref: gmtime157225
-Ref: 2a2157248
-Ref: localtime157248
-Ref: 2a5157621
-Ref: mktime157621
-Ref: 2a3157781
-Ref: asctime157781
-Ref: 2a4157806
-Ref: strftime157806
-Ref: 2a6158027
-Ref: strptime158027
-Node: Process Functions162368
-Ref: process functions162490
-Ref: 2a7162490
-Ref: process-functions162490
-Ref: 2ad162815
-Ref: system162815
-Ref: 2ae162871
-Ref: execv162871
-Ref: 2af162901
-Ref: execvp162901
-Ref: 2b0162932
-Ref: execve162932
-Ref: 2b1163817
-Ref: spawnv163817
-Ref: 2b2163853
-Ref: spawnvp163853
-Ref: 2b3163890
-Ref: spawnve163890
-Node: Basic I/O Interface165253
-Ref: basic i/o interface165377
-Ref: 2b4165377
-Ref: basic-i-o-interface165377
-Ref: 2b5165781
-Ref: stdin165781
-Ref: 2b6165801
-Ref: stdout165801
-Ref: 2b7165822
-Ref: stderr165822
-Ref: 2b8165875
-Ref: fopen165875
-Ref: 2b9165905
-Ref: popen165905
-Ref: 2ba166220
-Ref: fdopen166220
-Ref: 2bb166443
-Ref: freopen166443
-Ref: 2bc166667
-Ref: fclose166667
-Ref: 2bd166691
-Ref: pclose166691
-Ref: 2be166745
-Ref: tmpfile166745
-Ref: 2bf166934
-Ref: feof166934
-Ref: 2c0166956
-Ref: ferror166956
-Ref: 2c1166980
-Ref: clearerr166980
-Ref: 2c2167098
-Ref: fileno167098
-Ref: 2c3167188
-Ref: fflush167188
-Ref: 2c4167294
-Ref: fgets167294
-Ref: 2c5167317
-Ref: gets167317
-Ref: 2c6167452
-Ref: fget167452
-Ref: 2c7167563
-Ref: fputs167563
-Ref: 2c8167588
-Ref: puts167588
-Ref: 2c9167833
-Ref: fread167833
-Ref: 2ca167871
-Ref: fwrite167871
-Ref: 2cb168039
-Ref: fseek168039
-Ref: 2cc168076
-Ref: ftell168076
-Ref: 2cd168099
-Ref: rewind168099
-Ref: 2ce168486
-Ref: setbuf168486
-Ref: 2cf168514
-Ref: setvbuf168514
-Ref: 2d0170533
-Ref: printf170533
-Ref: 2d1170566
-Ref: fprintf170566
-Ref: 2d2170982
-Ref: sprintf170982
-Ref: 2d3171450
-Ref: scanf171450
-Ref: 2d4171477
-Ref: fscanf171477
-Ref: 2d5172420
-Ref: sscanf172420
-Node: Stat and Friends172720
-Ref: stat and friends172846
-Ref: 2d6172846
-Ref: stat-and-friends172846
-Ref: 2d7172889
-Ref: stat172889
-Ref: 2d8173473
-Ref: lstat173473
-Ref: 2d9173715
-Ref: fstat173715
-Node: Reading Directories175538
-Ref: reading directories175659
-Ref: 2da175659
-Ref: reading-directories175659
-Ref: 2db175708
-Ref: readdir175708
-Node: Shell Globbing175895
-Ref: shell globbing176014
-Ref: 2dc176014
-Ref: shell-globbing176014
-Ref: 2dd176055
-Ref: fnmatch176055
-Ref: 2de176218
-Ref: glob176218
-Node: Regex Matching176832
-Ref: regex matching176958
-Ref: aa176958
-Ref: regex-matching176958
-Ref: 2df177557
-Ref: regex177557
-Ref: 2e0180941
-Ref: reg_result180941
-Ref: 2e1181145
-Ref: reg_info181145
-Ref: 2e2181239
-Ref: reg181239
-Ref: 2e3181389
-Ref: regs181389
-Ref: 2e4181722
-Ref: regexg181722
-Ref: 2e5182114
-Ref: regexgg182114
-Ref: 2e6182231
-Ref: regsub182231
-Ref: 2e7182759
-Ref: regsplit182759
-Ref: 2e8183154
-Ref: regexgs183154
-Ref: 2e9183198
-Ref: regexggs183198
-Ref: 2ea183243
-Ref: regsplits183243
-Node: Basic Examples183609
-Ref: basic examples183717
-Ref: 2eb183717
-Ref: basic-examples183717
-Node: Regex Substitutions and Splitting185609
-Ref: regex substitutions and splitting185739
-Ref: 2ec185739
-Ref: regex-substitutions-and-splitting185739
-Node: Empty Matches186435
-Ref: empty matches186561
-Ref: 2ed186561
-Ref: empty-matches186561
-Node: Submatches187469
-Ref: submatches187553
-Ref: 2ee187553
-Node: Additional POSIX Functions188909
-Ref: additional posix functions189035
-Ref: 2ac189035
-Ref: module-posix189035
-Ref: 28c189035
-Ref: additional-posix-functions189035
-Ref: 2a8189635
-Ref: fork189635
-Ref: 2ef189680
-Ref: getpid189680
-Ref: 2f0189701
-Ref: getppid189701
-Ref: 2aa189814
-Ref: wait189814
-Ref: 2ab189840
-Ref: waitpid189840
-Ref: 2a9190059
-Ref: kill190059
-Ref: 2f1190136
-Ref: raise190136
-Ref: 2f2190213
-Ref: pause190213
-Ref: 2f3190271
-Ref: module-getopt190271
-Node: Option Parsing190271
-Ref: option parsing190374
-Ref: b8190374
-Ref: option-parsing190374
-Ref: 2f4190660
-Ref: getopt190660
-Node: Index193798
-Ref: index193869
+Node: Errno and Friends150590
+Ref: errno and friends150701
+Ref: 28d150701
+Ref: errno-and-friends150701
+Ref: 28e150746
+Ref: errno150746
+Ref: 28f150766
+Ref: set_errno150766
+Ref: 290150792
+Ref: perror150792
+Ref: 291150817
+Ref: strerror150817
+Node: POSIX Locale151277
+Ref: posix locale151393
+Ref: 292151393
+Ref: posix-locale151393
+Ref: 293151428
+Ref: setlocale151428
+Node: Signal Handling152822
+Ref: signal handling152935
+Ref: 294152935
+Ref: signal-handling152935
+Ref: 295152976
+Ref: trap152976
+Node: Time Functions153804
+Ref: time functions153922
+Ref: 296153922
+Ref: time-functions153922
+Ref: 297154182
+Ref: time154182
+Ref: 298154407
+Ref: gettimeofday154407
+Ref: 299154881
+Ref: clock154881
+Ref: 29a155169
+Ref: sleep155169
+Ref: 29b155191
+Ref: nanosleep155191
+Ref: 29c156204
+Ref: tzset156204
+Ref: 29d156264
+Ref: tzname156264
+Ref: 29e156285
+Ref: timezone156285
+Ref: 29f156308
+Ref: daylight156308
+Ref: 2a0157125
+Ref: ctime157125
+Ref: 2a1157251
+Ref: gmtime157251
+Ref: 2a2157274
+Ref: localtime157274
+Ref: 2a5157647
+Ref: mktime157647
+Ref: 2a3157807
+Ref: asctime157807
+Ref: 2a4157832
+Ref: strftime157832
+Ref: 2a6158053
+Ref: strptime158053
+Node: Process Functions162394
+Ref: process functions162516
+Ref: 2a7162516
+Ref: process-functions162516
+Ref: 2ad162841
+Ref: system162841
+Ref: 2ae162897
+Ref: execv162897
+Ref: 2af162927
+Ref: execvp162927
+Ref: 2b0162958
+Ref: execve162958
+Ref: 2b1163843
+Ref: spawnv163843
+Ref: 2b2163879
+Ref: spawnvp163879
+Ref: 2b3163916
+Ref: spawnve163916
+Node: Basic I/O Interface165279
+Ref: basic i/o interface165403
+Ref: 2b4165403
+Ref: basic-i-o-interface165403
+Ref: 2b5165807
+Ref: stdin165807
+Ref: 2b6165827
+Ref: stdout165827
+Ref: 2b7165848
+Ref: stderr165848
+Ref: 2b8165901
+Ref: fopen165901
+Ref: 2b9165931
+Ref: popen165931
+Ref: 2ba166246
+Ref: fdopen166246
+Ref: 2bb166469
+Ref: freopen166469
+Ref: 2bc166693
+Ref: fclose166693
+Ref: 2bd166717
+Ref: pclose166717
+Ref: 2be166771
+Ref: tmpfile166771
+Ref: 2bf166960
+Ref: feof166960
+Ref: 2c0166982
+Ref: ferror166982
+Ref: 2c1167006
+Ref: clearerr167006
+Ref: 2c2167124
+Ref: fileno167124
+Ref: 2c3167214
+Ref: fflush167214
+Ref: 2c4167320
+Ref: fgets167320
+Ref: 2c5167343
+Ref: gets167343
+Ref: 2c6167478
+Ref: fget167478
+Ref: 2c7167589
+Ref: fputs167589
+Ref: 2c8167614
+Ref: puts167614
+Ref: 2c9167859
+Ref: fread167859
+Ref: 2ca167897
+Ref: fwrite167897
+Ref: 2cb168065
+Ref: fseek168065
+Ref: 2cc168102
+Ref: ftell168102
+Ref: 2cd168125
+Ref: rewind168125
+Ref: 2ce168512
+Ref: setbuf168512
+Ref: 2cf168540
+Ref: setvbuf168540
+Ref: 2d0170913
+Ref: gmp170913
+Ref: 2d1170913
+Ref: mpfr170913
+Ref: 2d2170913
+Ref: printf170913
+Ref: 2d3170946
+Ref: fprintf170946
+Ref: 2d4171488
+Ref: sprintf171488
+Ref: 2d5171955
+Ref: scanf171955
+Ref: 2d6171982
+Ref: fscanf171982
+Ref: 2d7172878
+Ref: sscanf172878
+Node: Stat and Friends174278
+Ref: stat and friends174404
+Ref: 2d8174404
+Ref: stat-and-friends174404
+Ref: 2d9174447
+Ref: stat174447
+Ref: 2da175031
+Ref: lstat175031
+Ref: 2db175273
+Ref: fstat175273
+Node: Reading Directories177096
+Ref: reading directories177217
+Ref: 2dc177217
+Ref: reading-directories177217
+Ref: 2dd177266
+Ref: readdir177266
+Node: Shell Globbing177453
+Ref: shell globbing177572
+Ref: 2de177572
+Ref: shell-globbing177572
+Ref: 2df177613
+Ref: fnmatch177613
+Ref: 2e0177776
+Ref: glob177776
+Node: Regex Matching178390
+Ref: regex matching178516
+Ref: 2e1178516
+Ref: module-regex178516
+Ref: aa178516
+Ref: regex-matching178516
+Ref: 2e2179448
+Ref: regex179448
+Ref: 2e3182832
+Ref: reg_result182832
+Ref: 2e4183036
+Ref: reg_info183036
+Ref: 2e5183130
+Ref: reg183130
+Ref: 2e6183280
+Ref: regs183280
+Ref: 2e7183613
+Ref: regexg183613
+Ref: 2e8184005
+Ref: regexgg184005
+Ref: 2e9184122
+Ref: regsub184122
+Ref: 2ea184650
+Ref: regsplit184650
+Ref: 2eb185045
+Ref: regexgs185045
+Ref: 2ec185089
+Ref: regexggs185089
+Ref: 2ed185134
+Ref: regsplits185134
+Node: Basic Examples185500
+Ref: basic examples185608
+Ref: 2ee185608
+Ref: basic-examples185608
+Node: Regex Substitutions and Splitting187520
+Ref: regex substitutions and splitting187650
+Ref: 2ef187650
+Ref: regex-substitutions-and-splitting187650
+Node: Empty Matches188346
+Ref: empty matches188472
+Ref: 2f0188472
+Ref: empty-matches188472
+Node: Submatches189380
+Ref: submatches189464
+Ref: 2f1189464
+Node: Additional POSIX Functions190840
+Ref: additional posix functions190966
+Ref: 2ac190966
+Ref: module-posix190966
+Ref: 28c190966
+Ref: additional-posix-functions190966
+Ref: 2a8191566
+Ref: fork191566
+Ref: 2f2191611
+Ref: getpid191611
+Ref: 2f3191632
+Ref: getppid191632
+Ref: 2aa191745
+Ref: wait191745
+Ref: 2ab191771
+Ref: waitpid191771
+Ref: 2a9191990
+Ref: kill191990
+Ref: 2f4192067
+Ref: raise192067
+Ref: 2f5192144
+Ref: pause192144
+Ref: 2f6192202
+Ref: module-getopt192202
+Node: Option Parsing192202
+Ref: option parsing192305
+Ref: b8192305
+Ref: option-parsing192305
+Ref: 2f7192591
+Ref: getopt192591
+Node: Index195729
+Ref: index195800
 
 End Tag Table
 

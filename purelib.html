@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.48, October 12, 2011</p>
+<p>Version 0.48, October 15, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2010 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -3019,6 +3019,14 @@ Pure code. In that case it will return the last computed expression, if
 any.  Alternatively, <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> can also be invoked on a (quoted) Pure
 expression, which is recompiled and then evaluated. Exceptions during
 evaluation are reported back to the caller.</p>
+<p>Please note that the use of <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well as
+<a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a>, <a class="reference internal" href="#add_typedef" title="add_typedef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_typedef</span></tt></a> etc. from the preceding
+subsection) to modify a running program breaks referential transparency
+and hence these functions should be used with care. Also, none of the
+inspection and mutation capabilities provided by these operations will
+work in batch-compiled programs, please check the <a class="reference internal" href="pure.html#batch-compilation"><em>Batch Compilation</em></a> section in the Pure manual for details. Moreover, using
+these operations to modify or delete a function which is currently being
+executed results in undefined behaviour.</p>
 </dd></dl>
 
 <dl class="function">
@@ -3036,23 +3044,38 @@ result string will be empty.)</p>
 <dl class="function">
 <dt id="lasterr">
 <tt class="descname">lasterr</tt><a class="headerlink" href="#lasterr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reports errors in <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well as in
-<a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> et al, described in the previous subsection). This
-string value will be nonempty iff a compilation or execution error was
-encountered during the most recent invokation of these functions. In
+<dd><p>Reports errors in <a class="reference internal" href="#val" title="val"><tt class="xref pure pure-func docutils literal"><span class="pre">val</span></tt></a>, <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well
+as in <a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> et al, described in the previous subsection).
+This string value will be nonempty iff a compilation or execution error
+was encountered during the most recent invokation of these functions. In
 that case each reported error message is terminated with a newline
 character.</p>
 </dd></dl>
 
-<p>Please note that the use of <a class="reference internal" href="#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> and <a class="reference internal" href="#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> (as well as
-<a class="reference internal" href="#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a>, <a class="reference internal" href="#add_typedef" title="add_typedef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_typedef</span></tt></a> etc. from the preceding subsection)
-to modify a running program breaks referential transparency and hence these
-functions should be used with care. Also, none of the inspection and
-mutation capabilities provided by these operations will work in
-batch-compiled programs, please check the <a class="reference internal" href="pure.html#batch-compilation"><em>Batch Compilation</em></a> section
-in the Pure manual for details. Moreover, using these operations to modify
-or delete a function which is currently being executed results in undefined
-behaviour.</p>
+<dl class="function">
+<dt id="lasterrpos">
+<tt class="descname">lasterrpos</tt><a class="headerlink" href="#lasterrpos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gives more detailed error information. This returns a list of the
+individual error messages in <a class="reference internal" href="#lasterr" title="lasterr"><tt class="xref pure pure-func docutils literal"><span class="pre">lasterr</span></tt></a>, along with the position of
+each error (if available). Each list item is either just a string (the
+error message, with any trailing newline stripped off) if no error
+position is available, or a tuple of the form <tt class="docutils literal"><span class="pre">msg,file,l1,c1,l2,c2</span></tt>
+where <tt class="docutils literal"><span class="pre">msg</span></tt> is the error message, <tt class="docutils literal"><span class="pre">file</span></tt> the name of the file
+containing the error (which will usually be <tt class="docutils literal"><span class="pre">&quot;&lt;stdin&gt;&quot;</span></tt> indicating
+that the error is in the source string, but may also be a proper
+filename of a module imported in the evaluated code), <tt class="docutils literal"><span class="pre">l1,c1</span></tt> denotes
+the beginning of the range with the errorneous construct (given as line
+and column indices) and <tt class="docutils literal"><span class="pre">l2,c2</span></tt> its end. For convenience, both line
+and column indices are zero-based, in order to facilitate extraction of
+the text from the actual source string.</p>
+<p>Please note that the indicated error positions are only approximate, and
+may in many cases span an entire syntactic construct (such as a
+subexpression or even an entire function definition) containing the
+error. Also, the end of the range may sometimes point one token past the
+actual end of the construct. (These limitations are due to technical
+restrictions in the parser; don&#8217;t expect them to go away anytime soon.)</p>
+</dd></dl>
+
 <p>Examples:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>str (<span class="mi">1</span>/<span class="mi">3</span>)<span class="p">;</span>
 <span class="s">&quot;0.333333333333333&quot;</span>
@@ -3068,6 +3091,9 @@ behaviour.</p>
 eval <span class="s">&quot;1/3)&quot;</span>
 <span class="gp">&gt; </span>lasterr<span class="p">;</span>
 <span class="s">&quot;&lt;stdin&gt;, line 1: syntax error, unexpected &#39;)&#39;, expecting &#39;=&#39; or &#39;|&#39;</span><span class="se">\n</span><span class="s">&quot;</span>
+<span class="gp">&gt; </span>lasterrpos<span class="p">;</span>
+<span class="gr">[(&quot;&lt;stdin&gt;, line 1: </span>syntax error, unexpected &#39;)&#39;, expecting &#39;=&#39; or &#39;|&#39;&quot;,
+<span class="s">&quot;&lt;stdin&gt;&quot;</span>,<span class="mi">0</span>,<span class="mi">3</span>,<span class="mi">0</span>,<span class="mi">4</span>)]
 </pre></div>
 </div>
 <p>In addition to <a class="reference internal" href="#str" title="str"><tt class="xref pure pure-func docutils literal"><span class="pre">str</span></tt></a>, the prelude also provides the following

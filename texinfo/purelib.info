@@ -14,7 +14,7 @@ File: purelib.info,  Node: Top,  Next: Prelude,  Up: (dir)
 Pure Library Manual
 *******************
 
-  Version 0.48, October 12, 2011
+  Version 0.48, October 15, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -2450,6 +2450,17 @@ which provide a more compact binary serialization format.)
      and then evaluated. Exceptions during evaluation are reported back
      to the caller.
 
+     Please note that the use of *note eval: 178. and *note evalcmd:
+     179. (as well as *note add_fundef: 180, *note add_typedef: 181.
+     etc. from the preceding subsection) to modify a running program
+     breaks referential transparency and hence these functions should
+     be used with care. Also, none of the inspection and mutation
+     capabilities provided by these operations will work in
+     batch-compiled programs, please check the _Batch Compilation_
+     section in the Pure manual for details. Moreover, using these
+     operations to modify or delete a function which is currently being
+     executed results in undefined behaviour.
+
  -- Function: evalcmd x
      Like *note eval: 178, but allows execution of interactive commands
      and returns their captured output as a string. No other results are
@@ -2460,22 +2471,36 @@ which provide a more compact binary serialization format.)
      otherwise the result string will be empty.)
 
  -- Function: lasterr
-     Reports errors in *note eval: 178. and *note evalcmd: 179. (as
-     well as in *note add_fundef: 180. et al, described in the previous
-     subsection). This string value will be nonempty iff a compilation
-     or execution error was encountered during the most recent
-     invokation of these functions. In that case each reported error
-     message is terminated with a newline character.
+     Reports errors in *note val: 5a, *note eval: 178. and *note
+     evalcmd: 179. (as well as in *note add_fundef: 180. et al,
+     described in the previous subsection).  This string value will be
+     nonempty iff a compilation or execution error was encountered
+     during the most recent invokation of these functions. In that case
+     each reported error message is terminated with a newline character.
 
-  Please note that the use of *note eval: 178. and *note evalcmd: 179.
-(as well as *note add_fundef: 180, *note add_typedef: 181. etc. from
-the preceding subsection) to modify a running program breaks
-referential transparency and hence these functions should be used with
-care. Also, none of the inspection and mutation capabilities provided
-by these operations will work in batch-compiled programs, please check
-the _Batch Compilation_ section in the Pure manual for details.
-Moreover, using these operations to modify or delete a function which
-is currently being executed results in undefined behaviour.
+ -- Function: lasterrpos
+     Gives more detailed error information. This returns a list of the
+     individual error messages in *note lasterr: 17f, along with the
+     position of each error (if available). Each list item is either
+     just a string (the error message, with any trailing newline
+     stripped off) if no error position is available, or a tuple of the
+     form `msg,file,l1,c1,l2,c2' where `msg' is the error message,
+     `file' the name of the file containing the error (which will
+     usually be `"<stdin>"' indicating that the error is in the source
+     string, but may also be a proper filename of a module imported in
+     the evaluated code), `l1,c1' denotes the beginning of the range
+     with the errorneous construct (given as line and column indices)
+     and `l2,c2' its end. For convenience, both line and column indices
+     are zero-based, in order to facilitate extraction of the text from
+     the actual source string.
+
+     Please note that the indicated error positions are only
+     approximate, and may in many cases span an entire syntactic
+     construct (such as a subexpression or even an entire function
+     definition) containing the error. Also, the end of the range may
+     sometimes point one token past the actual end of the construct.
+     (These limitations are due to technical restrictions in the
+     parser; don't expect them to go away anytime soon.)
 
   Examples:
 
@@ -2493,6 +2518,9 @@ is currently being executed results in undefined behaviour.
     eval "1/3)"
     > lasterr;
     "<stdin>, line 1: syntax error, unexpected ')', expecting '=' or '|'\n"
+    > lasterrpos;
+    [("<stdin>, line 1: syntax error, unexpected ')', expecting '=' or '|'",
+    "<stdin>",0,3,0,4)]
 
 In addition to *note str: 174, the prelude also provides the following
 function for pretty-printing the internal representation used to denote
@@ -2549,7 +2577,7 @@ simplification.
      function definitions are in effect at the point of the *note
      reduce: 177.  call. Note that *note reduce: 177. is actually
      implemented as a macro which expands to the *note reduce_with:
-     195. primitive (see below), using the *note __locals__: 176.
+     196. primitive (see below), using the *note __locals__: 176.
      builtin to enumerate the bindings which are in effect at the call
      site.
 
@@ -2561,7 +2589,7 @@ simplification.
   The *note reduce: 177. macro provides a restricted form of dynamic
 binding which is useful to implement local rewriting rules. It is
 invoked without parameters and expands to the curried call `reduce_with
-__locals__' of the *note reduce_with: 195. primitive, which takes one
+__locals__' of the *note reduce_with: 196. primitive, which takes one
 additional argument, the expression to be rewritten. The following
 example shows how to expand or factorize an expression using local
 rules for the laws of distributivity:
@@ -2608,7 +2636,7 @@ turning the `when' into a `with' clause:
     > reduce y with x = u+v end;
     [u+v,(u+v)^2,(u+v)^3]
 
-Or you can just invoke the underlying *note reduce_with: 195. builtin
+Or you can just invoke the underlying *note reduce_with: 196. builtin
 directly, with the desired substitutions given as hash pairs in the
 first argument:
 
@@ -2623,10 +2651,10 @@ File: purelib.info,  Node: Expression Serialization,  Next: Other Special Primit
 -------------------------------
 
 Like *note str: 174. and *note eval: 178, the following *note blob:
-196. and *note val: 5a. operations can be used to safely transfer
+197. and *note val: 5a. operations can be used to safely transfer
 expression data to/from persistent storage and between different
 processes (using, e.g., POSIX shared memory, pipes or sockets).
-However, *note blob: 196. and *note val: 5a. use a binary format which
+However, *note blob: 197. and *note val: 5a. use a binary format which
 is usually much more compact and gets processed much faster than the
 string representations used by *note str: 174.  and *note eval: 178.
 Also, *note val: 5a. offers some additional protection against
@@ -2641,12 +2669,12 @@ syntax.)
 
  -- Function: val p
      Reconstructs a serialized expression from the result of a previous
-     invocation of the *note blob: 196. function.
+     invocation of the *note blob: 197. function.
 
  -- Function: blobp p
-     Checks for a valid *note blob: 196. object. (Note that *note val:
-     5a. may fail even if *note blobp: 198. returns `true', because for
-     performance reasons *note blobp: 198. only does a quick
+     Checks for a valid *note blob: 197. object. (Note that *note val:
+     5a. may fail even if *note blobp: 199. returns `true', because for
+     performance reasons *note blobp: 199. only does a quick
      plausibility check on the header information of the blob, whereas
      *note val: 5a. also performs a crc check and verifies data
      integrity.)
@@ -2655,10 +2683,10 @@ syntax.)
  -- Function: blob_size p
  -- Function: blob_crc p
      Determines the size (in bytes) and crc checksum of a blob,
-     respectively.  *note blob_size: 19a. always returns a bigint,
-     *note blob_crc: 19b. a machine int (use *note uint: 14c. on the
+     respectively.  *note blob_size: 19b. always returns a bigint,
+     *note blob_crc: 19c. a machine int (use *note uint: 14c. on the
      latter to get a proper unsigned 32 bit value). For convenience,
-     `#p' is defined as an alias for `blob_size p' on *note blob: 196.
+     `#p' is defined as an alias for `blob_size p' on *note blob: 197.
      pointers.
 
   Example:
@@ -2675,7 +2703,7 @@ Please note that the current implementation has some limitations:
 
    * Just as with *note str: 174. and *note eval: 178, runtime data
      (local closures and pointers other than the *note NULL: 52.
-     pointer) can't be serialized, causing *note blob: 196. to fail.
+     pointer) can't be serialized, causing *note blob: 197. to fail.
      However, it _is_ possible to transfer a global function, provided
      that the function exists (and is the same) in both the sending and
      the receiving process. (This condition can't be verified by *note
@@ -2715,7 +2743,7 @@ File: purelib.info,  Node: Pointer Operations,  Next: Sentries,  Prev: Other Spe
 
 The prelude provides a few basic operations on pointers which make it
 easy to interface to external C functions. For more advanced uses, the
-library also includes the *note pointers: 1a1. module which can be
+library also includes the *note pointers: 1a2. module which can be
 imported explicitly if needed, see *note Pointer Arithmetic: 125. below.
 
  -- Function: addr symbol
@@ -2819,7 +2847,7 @@ needed.
  -- Function: cooked ptr
      Create a pointer which disposes itself after use. This is just a
      shorthand for `sentry free'. The given pointer `ptr' must be *note
-     malloc: 1a4.ed to make this work.
+     malloc: 1a5.ed to make this work.
 
   Example:
 
@@ -2961,7 +2989,7 @@ tags, and set, get or verify the tag of a pointer value.
     0
 
 Note that in the case of a non-*note NULL: 52. pointer, *note
-check_ptrtag: 1c3.  just tests the tags for equality. On the other
+check_ptrtag: 1c4.  just tests the tags for equality. On the other
 hand, a generic *note NULL: 52. pointer, like in C, is considered
 compatible with all pointer types:
 
@@ -2987,15 +3015,15 @@ high-level operations provide these capabilities.
      string, or the given pointer value `x'. In the former case, the
      type should be specified in the C-like syntax used in `extern'
      declarations; a new tag will be created using *note make_ptrtag:
-     1c4. if needed. In the latter case, *note pointer_tag: 1c5. simply
-     acts as a frontend for *note get_ptrtag: 1c2. above.
+     1c5. if needed. In the latter case, *note pointer_tag: 1c6. simply
+     acts as a frontend for *note get_ptrtag: 1c3. above.
 
  -- Function: pointer_type tag
  -- Function: pointer_type x
      Returns the type name associated with the given int value `tag' or
      pointer value `x'. Please note that this may be *note NULL: 52. in
      the case of an "anonymous" tag, which may have been created with
-     *note make_ptrtag: 1c4. above, or if the tag is simply unknown
+     *note make_ptrtag: 1c5. above, or if the tag is simply unknown
      because it hasn't been created yet.
 
  -- Function: pointer_cast tag x
@@ -3025,14 +3053,14 @@ general non-contiguous.)
 
   If you have to do many casts to a given type, you can avoid the
 overhead of repeatedly looking up the type name by assigning the tag to
-a variable, which can then be passed to *note pointer_cast: 1c7.
+a variable, which can then be passed to *note pointer_cast: 1c8.
 instead:
 
     > let ty = pointer_tag "long*";
     > pointer_cast ty p, pointer_cast ty q;
 
 Note that you have to be careful when casting a cooked pointer, because
-*note pointer_cast: 1c7. may have to create a copy of the original
+*note pointer_cast: 1c8. may have to create a copy of the original
 pointer value in order not to globber the original type tag. The sentry
 will then still be with the original cooked pointer value, thus you
 have to ensure that this value survives its type-cast duplicate. It's
@@ -3044,7 +3072,7 @@ passed to an external function, e.g.:
     > gets (pointer_cast "char*" p);
 
 Such usage is always safe. If this approach isn't possible, you might
-want to use the lowlevel *note ptrtag: 1c1. operation instead. (This
+want to use the lowlevel *note ptrtag: 1c2. operation instead. (This
 will globber the type tag of the pointer, but you can always change it
 back afterwards.)
 
@@ -3079,7 +3107,7 @@ expects a `pure_expr**' parameter. This may even be useful at times.
  -- Function: refp x
      Predicate to check for reference values.
 
-  Note that manually removing the *note unref: 1cc. sentry of a
+  Note that manually removing the *note unref: 1cd. sentry of a
 reference turns the reference into just a normal pointer object and
 renders it unusable as a reference. Doing this will also leak memory,
 so don't!
@@ -3187,9 +3215,9 @@ generators present in some C libraries.
   Please note that as of Pure 0.41, the runtime library includes a newer
 release of the Mersenne twister which fixes issues with some kinds of
 seed values, and will yield different values for given seeds. Also, the
-*note random31: 1dd. and *note random53: 1de. functions have been added
+*note random31: 1de. and *note random53: 1df. functions have been added
 as a convenience to compute unsigned 31 bit integers and 53 bit double
-values, and the *note srandom: 1df. function now also accepts an int
+values, and the *note srandom: 1e0. function now also accepts an int
 matrix as seed value.
 
  -- Function: random
@@ -3268,14 +3296,14 @@ operators and are non-associative.
   The polar representation `r<:t' is normalized so that `r' is always
 nonnegative and `t' falls in the range `-pi<t<=pi'.
 
-  The constant *note i: 1f4. is provided to denote the imaginary unit
+  The constant *note i: 1f5. is provided to denote the imaginary unit
 `0+:1'.
 
   The arithmetic operations *note +: 41, *note *: 128. etc. and the
 equality relations *note ==: 46. and *note ~=: 12e. work as expected,
 and the square root, exponential, logarithms, trigonometric and
 hyperbolic trigonometric functions (see *note Basic Math Functions:
-1da.) are extended to complex numbers accordingly. These do _not_ rely
+1db.) are extended to complex numbers accordingly. These do _not_ rely
 on complex number support in the C library, but should still conform to
 IEEE 754 and POSIX, provided that the C library provides a
 standards-compliant implementation of the basic math functions.
@@ -3343,23 +3371,23 @@ File: purelib.info,  Node: Rational Numbers,  Next: Semantic Number Predicates a
      Exact division operator and rational number constructor.
 
   Pure's rational numbers are constructed with the *exact division*
-operator *note %: 1fe. (declared in the prelude) which has the same
+operator *note %: 1ff. (declared in the prelude) which has the same
 precedence and fixity as the other division operators.
 
-  The *note %: 1fe. operator returns a rational or complex rational for
+  The *note %: 1ff. operator returns a rational or complex rational for
 any combination of integer, rational and complex integer/rational
 arguments, provided that the denominator is nonzero (otherwise it
 behaves like `x div 0', which will raise an exception). Machine int
 operands are always promoted to bigints, thus normalized rationals
 always take the form `x%y' where both the numerator `x' and the
-denominator `y' are bigints. For other numeric operands *note %: 1fe.
+denominator `y' are bigints. For other numeric operands *note %: 1ff.
 works just like *note /: 129. Rational results are normalized so that
 the sign is always in the numerator and numerator and denominator are
 relatively prime. In particular, a rational zero is always represented
 as `0L%1L'.
 
   The usual arithmetic operations and equality/order relations are
-extended accordingly, as well as the *note basic math functions: 1da.
+extended accordingly, as well as the *note basic math functions: 1db.
 and the *note rounding functions: 14f, and will return exact (rational
 or complex rational) results where appropriate. Rational operations are
 implemented using the GMP bigint functions where possible, and thus are
@@ -3374,8 +3402,8 @@ reasonably fast.
      rational back to a double reconstructs the original value.
 
      Conversely, the *note int: 146, *note bigint: 147, *note double:
-     148, *note complex: 1f5, *note rect: 1f7, *note polar: 1f6. and
-     *note cis: 1f8. conversion functions are overloaded so that they
+     148, *note complex: 1f6, *note rect: 1f8, *note polar: 1f7. and
+     *note cis: 1f9. conversion functions are overloaded so that they
      convert a rational to one of the other number types.
 
  -- Function: num x
@@ -3430,7 +3458,7 @@ numberp x'.
      Check for real values (`im x==0').
 
  -- Function: ratvalp x
-     Check for rational values (same as *note realvalp: 203, except
+     Check for rational values (same as *note realvalp: 204, except
      that IEEE 754 infinities and NaNs are excluded).
 
  -- Function: bigintvalp x
@@ -3614,7 +3642,7 @@ Updating a member of an array produces a new array:
     > members b;
     [0.0,2.0,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
 
-Two-dimensional arrays can be created with *note array2: 214. from a
+Two-dimensional arrays can be created with *note array2: 215. from a
 list of lists:
 
     > let a2::array = array2 [[i,x | x = [u,v,w]] | i = 1..2];
@@ -3652,7 +3680,7 @@ Heaps are a kind of priority queue data structure which allows quick
 smallest member and insert new elements in logarithmic time. Our
 implementation does not allow quick update of arbitrary heap members;
 if such functionality is required, bags can be used instead (see *note
-Sets and Bags: 22a.).
+Sets and Bags: 22b.).
 
   Heap members _must_ be ordered by the *note <=: 12f. predicate.
 Multiple instances of the same element may be stored in a heap;
@@ -3749,23 +3777,23 @@ whether multiple values for the same key should be allowed or not.
      stores members in an apparently random order.
 
  -- type: mdict
-     An ordered dictionary, like *note dict: 23a, which allows multiple
+     An ordered dictionary, like *note dict: 23b, which allows multiple
      values to be associated with the same key.
 
  -- type: hmdict
-     A multi-valued dictionary, like *note mdict: 23c, but uses hashed
-     keys like *note hdict: 23b.
+     A multi-valued dictionary, like *note mdict: 23d, but uses hashed
+     keys like *note hdict: 23c.
 
  -- type: xdict
      This is just an abstract supertype for matching any kind of
      dictionary provided by this module.
 
-  *note mdict: 23c. and *note hmdict: 23d. are also colloquially
+  *note mdict: 23d. and *note hmdict: 23e. are also colloquially
 referred to as (ordered or hashed) _multidicts_. This implementation
 guarantees that different members for the same key are always kept in
 the order in which they were inserted, and this is also the order in
-which they will be retrieved by the *note members: 23f, *note keys:
-240, *note vals: 241.  and indexing operations.
+which they will be retrieved by the *note members: 240, *note keys:
+241, *note vals: 242.  and indexing operations.
 
   The usual comparison predicates (*note ==: 46, *note ~=: 12e, *note
 <=: 12f, *note <: 132. etc.) are defined on all dictionary types, where
@@ -3789,8 +3817,8 @@ implementation of association lists. The original implementation was
 created by R. A. O'Keefe and updated for SWI-Prolog by Jan Wielemaker.
 For the original source see <http://www.swi-prolog.org>.
 
-  The port from SWI-Prolog and the deletion stuff (*note rmfirst: 242,
-*note rmlast: 243, *note delete: 244.) missing in the Prolog
+  The port from SWI-Prolog and the deletion stuff (*note rmfirst: 243,
+*note rmlast: 244, *note delete: 245.) missing in the Prolog
 implementation was provided by Jiri Spitz. The generalization of the
 code to arbitrary combinations of ordered/hashed and
 single-/multi-valued keys was done by Albert Graef.
@@ -3892,8 +3920,8 @@ File: purelib.info,  Node: Operations<3>,  Next: Examples<3>,  Prev: Imports<4>,
  -- Function: update d x y
      insert `x=>y' into `d' (this always adds a new member in a
      multidict, otherwise it replaces an existing value if there is
-     one); note that *note update: 262. is just a fully curried version
-     of *note insert: 261, so `update d x y' behaves exactly like
+     one); note that *note update: 263. is just a fully curried version
+     of *note insert: 262, so `update d x y' behaves exactly like
      `insert d (x=>y)'
 
  -- Function: delete d x
@@ -3907,12 +3935,12 @@ File: purelib.info,  Node: Operations<3>,  Next: Examples<3>,  Prev: Imports<4>,
 
  -- Function: delete_all d x
      remove all instances of `x' from `d' (in the non-multidict case,
-     this is just the same as *note delete: 244.)
+     this is just the same as *note delete: 245.)
 
      Note:
-        * The infix operators *note +: 257, *note -: 258. and *note *:
-          259.  work like the corresponding set and bag operations (see
-          *note Sets and Bags: 22a.), treating dictionaries as
+        * The infix operators *note +: 258, *note -: 259. and *note *:
+          25a.  work like the corresponding set and bag operations (see
+          *note Sets and Bags: 22b.), treating dictionaries as
           collections of `key=>val' pairs. You can mix arbitrary
           operand types with these operations, as well as with the
           comparison operations; the necessary conversions from less
@@ -3920,7 +3948,7 @@ File: purelib.info,  Node: Operations<3>,  Next: Examples<3>,  Prev: Imports<4>,
           general types (hashed, multi-valued) are handled
           automatically.
 
-        * The *note delete_val: 263. function always compares values
+        * The *note delete_val: 264. function always compares values
           using equality (*note ==: 46.), so this predicate must be
           defined on the values stored in the dictionary in order to
           make this operation work. If there is more than one instance
@@ -3928,7 +3956,7 @@ File: purelib.info,  Node: Operations<3>,  Next: Examples<3>,  Prev: Imports<4>,
           instance will be removed (which may be any instance that
           compares equal, not necessarily an exact match).
 
-        * In the multidict case, *note delete_val: 263. may require
+        * In the multidict case, *note delete_val: 264. may require
           linear time with respect to the number of different values
           stored under the given key.  Since this operation is also
           needed to implement some other multidict operations like
@@ -4178,10 +4206,10 @@ File: purelib.info,  Node: Operations<4>,  Next: Examples<4>,  Prev: Imports<5>,
 
  -- Function: delete_all m x
      remove all instances of `x' from `m' (in the set case, this is just
-     the same as *note delete: 287.)
+     the same as *note delete: 288.)
 
-  Note that the infix operators (*note +: 27a, *note -: 27b, *note *:
-27c, as well as the comparison operations) allow you to mix arbitrary
+  Note that the infix operators (*note +: 27b, *note -: 27c, *note *:
+27d, as well as the comparison operations) allow you to mix arbitrary
 operand types; the necessary conversions from less general set types
 (ordered, set) to more general types (hashed, multiset) are handled
 automatically.
@@ -4299,7 +4327,7 @@ declaration to your program:
     using system;
 
 Some functions of the system interface are provided in separate modules;
-see *note Regex Matching: aa, *note Additional POSIX Functions: 28c.
+see *note Regex Matching: aa, *note Additional POSIX Functions: 28d.
 and *note Option Parsing: b8.
 
 
@@ -4314,7 +4342,7 @@ File: purelib.info,  Node: Errno and Friends,  Next: POSIX Locale,  Prev: Import
  -- Function: strerror n
      This value and the related routines are indispensable to give
      proper diagnostics when system calls fail for some reason. Note
-     that, by its very nature, *note errno: 28e. is a fairly volatile
+     that, by its very nature, *note errno: 28f. is a fairly volatile
      value, don't expect it to survive a return to the command line in
      interactive sessions.
 
@@ -4347,9 +4375,9 @@ on the implementation, please check your local setlocale(3)
 documentation for details. If locale is not *note NULL: 52, the current
 locale is changed accordingly. The return value is the new locale, or
 the current locale when passing *note NULL: 52. for the locale
-parameter. In either case, the string returned by *note setlocale: 293.
-is such that it can be passed to *note setlocale: 293. to restore the
-same locale again. In case of an error, *note setlocale: 293. fails
+parameter. In either case, the string returned by *note setlocale: 294.
+is such that it can be passed to *note setlocale: 294. to restore the
+same locale again. In case of an error, *note setlocale: 294. fails
 (rather than returning a null pointer).
 
   Please note that calling this function alters the Pure interpreter's
@@ -4373,7 +4401,7 @@ File: purelib.info,  Node: Signal Handling,  Next: Time Functions,  Prev: POSIX 
  -- Function: trap action sig
      Establish or remove Pure signal handlers.
 
-  The action parameter of *note trap: 295. can be one of the predefined
+  The action parameter of *note trap: 296. can be one of the predefined
 integer values `SIG_TRAP', `SIG_IGN' and `SIG_DFL'.  `SIG_TRAP' causes
 the given signal to be handled by mapping it to a Pure exception of the
 form `signal sig'. `SIG_IGN' ignores the signal, `SIG_DFL' reverts to
@@ -4383,7 +4411,7 @@ signal values on your system.
   Note: When the interpreter runs interactively, most standard
 termination signals (`SIGINT', `SIGTERM', etc.) are already set up to
 report corresponding Pure exceptions; if this is not desired, you can
-use *note trap: 295. to either ignore these or revert to the default
+use *note trap: 296. to either ignore these or revert to the default
 handlers instead.
 
   See _Exception Handling_ in the Pure Manual for details and examples.
@@ -4396,17 +4424,17 @@ File: purelib.info,  Node: Time Functions,  Next: Process Functions,  Prev: Sign
 
 The usual date/time functions from the C library are all provided. This
 includes some functions to retrieve wallclock and cpu time which usually
-offer much better resolution than the venerable *note time: 297.
+offer much better resolution than the venerable *note time: 298.
 function.
 
  -- Function: time
      Reports the current time in seconds since the *epoch*, 00:00:00
      UTC, Jan 1 1970. The result is always a bigint (in fact, the *note
-     time: 297. value is already 64 bit on many OSes nowadays).
+     time: 298. value is already 64 bit on many OSes nowadays).
 
  -- Function: gettimeofday
      Returns wallclock time as seconds since the epoch, like *note
-     time: 297, but theoretically offers resolutions in the microsec
+     time: 298, but theoretically offers resolutions in the microsec
      range (actual resolutions vary, but are usually in the msec range
      for contemporary systems). The result is returned as a double
      value (which also limits precision). This function may actually be
@@ -4422,8 +4450,8 @@ function.
  -- Function: sleep t
  -- Function: nanosleep t
      Suspend execution for a given time interval in seconds. *note
-     sleep: 29a.  takes integer (int/bigint) arguments only and uses
-     the `sleep()' system function. *note nanosleep: 29b. also accepts
+     sleep: 29b.  takes integer (int/bigint) arguments only and uses
+     the `sleep()' system function. *note nanosleep: 29c. also accepts
      double arguments and theoretically supports resolutions down to 1
      nanosecond (again, actual resolutions vary). This function may
      actually be implemented through different system calls, depending
@@ -4458,9 +4486,9 @@ Example:
  -- variable: daylight
      The timezone information.
 
-  The *note tzset: 29c. function calls the corresponding routine from
-the C library and initializes the (Pure) variables *note tzname: 29d,
-*note timezone: 29e.  and *note daylight: 29f. accordingly. See the
+  The *note tzset: 29d. function calls the corresponding routine from
+the C library and initializes the (Pure) variables *note tzname: 29e,
+*note timezone: 29f.  and *note daylight: 2a0. accordingly. See the
 tzset(3) manual page for details. This routine is also called
 automatically when the system module is loaded, so you only have to
 invoke it to get up-to-date information after changes to the locale or
@@ -4479,32 +4507,32 @@ mktime(3), asctime(3), strftime(3) and strptime(3) manual pages for
 details.
 
  -- Function: ctime t
-     Convert a time value as returned by the *note time: 297. function
+     Convert a time value as returned by the *note time: 298. function
      to a string in local time.
 
  -- Function: gmtime t
  -- Function: localtime t
      Convert a time value to UTC or local time in "broken-down" form (a
      static pointer to a `tm' struct containing a bunch of `int' fields)
-     which can then be passed to the *note asctime: 2a3. and *note
-     strftime: 2a4.  functions, or to *note int_matrix: 106. if you
+     which can then be passed to the *note asctime: 2a4. and *note
+     strftime: 2a5.  functions, or to *note int_matrix: 106. if you
      want to convert the data to a matrix; see the example below.
 
  -- Function: mktime tm
      Converts broken-down time to a time value (seconds since the
-     epoch). As with *note time: 297, the result is always a bigint.
+     epoch). As with *note time: 298, the result is always a bigint.
 
  -- Function: asctime tm
  -- Function: strftime format tm
-     Format broken-down time as a string. *note strftime: 2a4. also
+     Format broken-down time as a string. *note strftime: 2a5. also
      uses a format string supplied by the user, see below for a list of
      the most important conversion specifiers.
 
  -- Function: strptime s format tm
      Parse a date/time string `s' according to the given format (using
      more or less the same format specifiers as the *note strftime:
-     2a4. function) and store the broken-down time result in the given
-     `tm' struct. This function may fail, e.g., if *note strptime: 2a6.
+     2a5. function) and store the broken-down time result in the given
+     `tm' struct. This function may fail, e.g., if *note strptime: 2a7.
      finds an error in the format string. Otherwise it returns the part
      of the string which wasn't processed, see the example below.
 
@@ -4525,32 +4553,32 @@ details.
     > strptime ans "%c" tm, int_matrix 9 tm;
     "CEST",{10,23,22,2,3,110,5,91,1}
 
-In the above example, *note strptime: 2a6. was given a static pointer
-to a `tm' struct returned by *note localtime: 2a2. This always works,
+In the above example, *note strptime: 2a7. was given a static pointer
+to a `tm' struct returned by *note localtime: 2a3. This always works,
 but in some situations it may be preferable to allocate dynamic storage
 instead. This storage should be properly initialized (zeroed out)
-before passing it to *note strptime: 2a6, since *note strptime: 2a6.
+before passing it to *note strptime: 2a7, since *note strptime: 2a7.
 only stores the values specified (at least in principle; please consult
 your local C library documentation for details). Also note that while
 POSIX only specifies nine `int' fields in a `tm' struct, depending on
 the host operating system the struct may contain additional public and
 private fields. The actual size of a `tm' struct is given by the
 `SIZEOF_TM' constant, so a safe way to allocate suitable dynamic
-storage for the *note strptime: 2a6. function is as follows:
+storage for the *note strptime: 2a7. function is as follows:
 
     > let tm = pointer_cast "int*" $ calloc 1 SIZEOF_TM;
     > strptime "4/2/10" "%D" tm, int_matrix 9 tm;
     "",{0,0,0,2,3,110,5,91,0}
 
 Instead of explicitly allocating dynamic storage and converting it to a
-Pure matrix later, you can also invoke *note strptime: 2a6. directly
+Pure matrix later, you can also invoke *note strptime: 2a7. directly
 with an int matrix of sufficient size:
 
     > let tm = imatrix (SIZEOF_TM div SIZEOF_INT + 1);
     > strptime "4/2/10" "%D" tm, take 9 tm;
     "",{0,0,0,2,3,110,5,91,0}
 
-Last but not least, to make calling *note strptime: 2a6. more
+Last but not least, to make calling *note strptime: 2a7. more
 convenient, you can supply your own little wrapper function which takes
 care of allocating the storage, e.g.:
 
@@ -4563,7 +4591,7 @@ care of allocating the storage, e.g.:
     "",{0,0,0,2,3,110,5,91,0}
 
 Here is a list of some common format specifiers which can be used with
-the *note strftime: 2a4. and *note strptime: 2a6. routines. These are
+the *note strftime: 2a5. and *note strptime: 2a7. routines. These are
 all specified by POSIX and should thus be available on most platforms.
 Note that many more formats are usually supported than what is listed
 here, so please consult your local manual pages for the complete list.
@@ -4595,7 +4623,7 @@ combinations of the above:
    * `%D': The American date format (`%m/%d/%y').
 
    * `%F': The ISO 8601 date format (`%Y-%m-%d'). (This is generally
-     supported by *note strftime: 2a4. only, but *note strptime: 2a6.
+     supported by *note strftime: 2a5. only, but *note strptime: 2a7.
      from GNU libc has it.)
 
    * `%r': The time in AM/PM notation (`%I:%M:%S %p').
@@ -4605,10 +4633,10 @@ combinations of the above:
    * `%T': The time in 24-hour notation, including seconds (`%H:%M:%S').
 
   In addition, `%%' denotes a literal `%' character, `%n' newlines and
-`%t' tabs. (For *note strptime: 2a6. the latter two are synonymous and
+`%t' tabs. (For *note strptime: 2a7. the latter two are synonymous and
 match arbitrary whitespace.)
 
-  Windows users should note that *note strptime: 2a6. isn't natively
+  Windows users should note that *note strptime: 2a7. isn't natively
 supported there. A basic emulation is provided by the Pure runtime, but
 at present this only supports the C locale.
 
@@ -4619,10 +4647,10 @@ File: purelib.info,  Node: Process Functions,  Next: Basic I/O Interface,  Prev:
 =====================
 
 The following process functions are available on all systems. (Some
-additional process-related functions such as *note fork: 2a8, *note
-kill: 2a9, *note wait: 2aa. and *note waitpid: 2ab. are available in
-the *note posix: 2ac. module, see *note Additional POSIX Functions:
-28c.)
+additional process-related functions such as *note fork: 2a9, *note
+kill: 2aa, *note wait: 2ab. and *note waitpid: 2ac. are available in
+the *note posix: 2ad. module, see *note Additional POSIX Functions:
+28d.)
 
  -- Function: system cmd
      Execute a shell command.
@@ -4633,10 +4661,10 @@ the *note posix: 2ac. module, see *note Additional POSIX Functions:
      Execute a new process. `prog' denotes the name of the executable
      to be run, `argv' the argument vector (which repeats the program
      name in the first component), and `envp' a vector of environment
-     strings of the form `"var=value"'. The *note execv: 2ae. function
+     strings of the form `"var=value"'. The *note execv: 2af. function
      executes the program `prog' exactly as given, while *note execvp:
-     2af. also performs a path search. The *note execve: 2b0. function
-     is like *note execv: 2ae, but also specifies an environment to be
+     2b0. also performs a path search. The *note execve: 2b1. function
+     is like *note execv: 2af, but also specifies an environment to be
      passed to the process. In either case, the new process replaces
      the current process. For convenience, both `argv' and `envp' can
      be specified as a Pure string vector or a list, which is
@@ -4649,21 +4677,21 @@ the *note posix: 2ac. module, see *note Additional POSIX Functions:
  -- Function: spawnve mode prog argv envp
      Spawn a new child process. These work like the corresponding MS
      Windows functions; on Un*x systems this functionality is
-     implemented using a combination of *note fork: 2a8. and *note
-     execv: 2ae. The arguments are the same as for the *note execv:
-     2ae. functions, except that there's an additional `mode' argument
+     implemented using a combination of *note fork: 2a9. and *note
+     execv: 2af. The arguments are the same as for the *note execv:
+     2af. functions, except that there's an additional `mode' argument
      which specifies how the process is to be executed: `P_WAIT' waits
-     for the process to finish, after which *note spawnv: 2b1. returns
+     for the process to finish, after which *note spawnv: 2b2. returns
      with the exit status of the terminated child process; `P_NOWAIT'
-     makes *note spawnv: 2b1. return immediately, returning the process
+     makes *note spawnv: 2b2. return immediately, returning the process
      id; and `P_OVERLAY' causes the child process to replace its
-     parent, just like with *note execv: 2ae. (On Windows, there's an
+     parent, just like with *note execv: 2af. (On Windows, there's an
      additional `P_DETACH' flag which works like `P_NOWAIT' but also
      turns the child process into a background task.)
 
-  Note that, in addition, the prelude provides the *note exit: 19d.
+  Note that, in addition, the prelude provides the *note exit: 19e.
 function which terminates the program with a given exit code, cf. *note
-Other Special Primitives: 19c.
+Other Special Primitives: 19d.
 
   Examples:
 
@@ -4685,7 +4713,7 @@ File: purelib.info,  Node: Basic I/O Interface,  Next: Stat and Friends,  Prev: 
 =======================
 
 Note that this module also defines the standard I/O streams *note
-stdin: 2b5, *note stdout: 2b6. and *note stderr: 2b7. as variables on
+stdin: 2b6, *note stdout: 2b7. and *note stderr: 2b8. as variables on
 startup. These are ready to be used with the operations described
 below. Also note that for convenience some of the following routines
 are actually Pure wrappers, rather than just providing the raw C
@@ -4706,12 +4734,12 @@ library routines.
 
  -- Function: fdopen fd mode
      Associates a file object with a given existing file descriptor.
-     Otherwise works like *note fopen: 2b8, so the resulting file is
+     Otherwise works like *note fopen: 2b9, so the resulting file is
      closed automatically when it's garbage-collected.
 
  -- Function: freopen path mode fp
      Reopens a file object. The existing file object is closed.
-     Otherwise works like *note fopen: 2b8, so the resulting file is
+     Otherwise works like *note fopen: 2b9, so the resulting file is
      closed automatically when it's garbage-collected.
 
  -- Function: fclose fp
@@ -4726,7 +4754,7 @@ library routines.
  -- Function: feof fp
  -- Function: ferror fp
  -- Function: clearerr fp
-     Check the end-of-file and error bits. *note clearerr: 2c1. clears
+     Check the end-of-file and error bits. *note clearerr: 2c2. clears
      the error bit.
 
  -- Function: fileno fp
@@ -4742,15 +4770,15 @@ library routines.
      the necessary buffering automatically.
 
  -- Function: fget fp
-     A variation of *note fgets: 2c4. which slurps in an entire text
+     A variation of *note fgets: 2c5. which slurps in an entire text
      file at once.
 
  -- Function: fputs s fp
  -- Function: puts s
-     Output a string to the given file or *note stdout: 2b6,
+     Output a string to the given file or *note stdout: 2b7,
      respectively. These are just the plain C functions. Note that
-     *note puts: 2c8. automatically adds a newline, while *note fputs:
-     2c7. doesn't. Hmm.
+     *note puts: 2c9. automatically adds a newline, while *note fputs:
+     2c8. doesn't. Hmm.
 
  -- Function: fread ptr size nmemb fp
  -- Function: fwrite ptr size nmemb fp
@@ -4762,7 +4790,7 @@ library routines.
  -- Function: rewind fp
      Reposition the file pointer and retrieve its current value. The
      constants `SEEK_SET', `SEEK_CUR' and `SEEK_END' can be used for
-     the `whence' argument of *note fseek: 2cb. The call `rewind fp' is
+     the `whence' argument of *note fseek: 2cc. The call `rewind fp' is
      equivalent to `fseek fp 0 SEEK_SET' (except that the latter also
      returns a result code). See the corresponding manual pages for
      details.
@@ -4772,16 +4800,16 @@ library routines.
      Set the buffering of a file object, given as the first argument.
      The second argument specifies the buffer, which must be a pointer
      to suitably allocated memory or *note NULL: 52. The `mode'
-     argument of *note setvbuf: 2cf. specifies the buffering mode,
+     argument of *note setvbuf: 2d0. specifies the buffering mode,
      which may be one of the predefined constants `_IONBF', `_IOLBF' and
      `_IOFBF' denoting no buffering, line buffering and full (a.k.a.
      block) buffering, respectively; the `size' argument denotes the
      buffer size.
 
-     For *note setbuf: 2ce, the given buffer must be able to hold
+     For *note setbuf: 2cf, the given buffer must be able to hold
      `BUFSIZ' characters, where `BUFSIZ' is a constant defined by this
      module.  `setbuf fp buf' is actually equivalent to the following
-     call (except that *note setvbuf: 2cf. also returns an integer
+     call (except that *note setvbuf: 2d0. also returns an integer
      return value):
 
          setvbuf fp buf (if null buf then _IONBF else _IOFBF) BUFSIZ
@@ -4828,7 +4856,7 @@ examples below.)
 
  -- Function: printf format args
  -- Function: fprintf fp format args
-     Print a formatted string to *note stdout: 2b6. or the given file,
+     Print a formatted string to *note stdout: 2b7. or the given file,
      respectively. Normally, these functions return the result of the
      underlying C routines (number of characters written, or negative on
      error). However, in case of an abnormal condition in the wrapper
@@ -4841,21 +4869,21 @@ examples below.)
      Print a formatted string to a buffer and return the result as a
      string.  Note that, unlike the C routine, the Pure version just
      returns the string result in the case of success; otherwise, the
-     error handling is the same as with *note printf: 2d2. and *note
-     fprintf: 2d3. The implementation actually uses the C routine
+     error handling is the same as with *note printf: 2d3. and *note
+     fprintf: 2d4. The implementation actually uses the C routine
      `snprintf' for safety, and a suitable output buffer is provided
      automatically.
 
  -- Function: scanf format
  -- Function: fscanf fp format
-     Read formatted input from *note stdin: 2b5. or the given file,
+     Read formatted input from *note stdin: 2b6. or the given file,
      respectively.  These normally return a tuple (or singleton) with
      the converted values. An exception of the form `scanf_error ret',
      where `ret' is the tuple of successfully converted values (which
      may be less than the number of requested input items), is thrown
      if end-of-file was met or another error occurred while still
      reading. The handling of other abnormal conditions is analogous to
-     *note printf: 2d2. et al. Also note that this implementation
+     *note printf: 2d3. et al. Also note that this implementation
      doesn't accept any of the standard length modifiers; in
      particular, floating point values will _always_ be read in double
      precision and you just specify `e', `g' etc. for these. The
@@ -4863,7 +4891,7 @@ examples below.)
      corresponding items will not be returned.
 
  -- Function: sscanf s format
-     This works exactly like *note fscanf: 2d6, but input comes from a
+     This works exactly like *note fscanf: 2d7, but input comes from a
      string (first argument) rather than a file.
 
   Examples:
@@ -4924,12 +4952,12 @@ File: purelib.info,  Node: Stat and Friends,  Next: Reading Directories,  Prev: 
  -- Function: lstat path
      Return information about the given symbolic link (rather than the
      file it points to). On systems where this function isn't supported
-     (e.g., Windows), *note lstat: 2da. is identical to *note stat: 2d9.
+     (e.g., Windows), *note lstat: 2db. is identical to *note stat: 2da.
 
  -- Function: fstat fp
      Return information about the given file object. Same as *note
-     stat: 2d9, but here the file is given as a file pointer created
-     with *note fopen: 2b8.  (see *note Basic I/O Interface: 2b4.
+     stat: 2da, but here the file is given as a file pointer created
+     with *note fopen: 2b9.  (see *note Basic I/O Interface: 2b5.
      above). Note that the corresponding system function actually takes
      a file descriptor, so the Pure implementation is equivalent to the
      C call `fstat(fileno(fp))'. This function might not be supported
@@ -4945,8 +4973,8 @@ full list of these. Other interesting fields are `st_atime', `st_mtime'
 and `st_ctime', which can be accessed using `stat filename!!(8..10)'.
 The values of these fields are the times of last access, last
 modification and creation, respectively, which can be decoded using the
-appropriate time functions like *note ctime: 2a0. or *note strftime:
-2a4, see *note Time Functions: 296.
+appropriate time functions like *note ctime: 2a1. or *note strftime:
+2a5, see *note Time Functions: 297.
 
   Examples:
 
@@ -5055,7 +5083,7 @@ can be done.)
 values, see the regcomp(3) manpage for an explanation of these. Two
 particularly important compilation flags (to be included in the `cflags'
 argument) are `REG_NOSUB', which prevents submatches to be computed,
-and `REG_EXTENDED', which switches *note regex: 2e2. from "basic" to
+and `REG_EXTENDED', which switches *note regex: 2e3. from "basic" to
 "extended" regular expressions so that it understands all the regular
 expression elements of egrep(1) in the pattern argument.
 
@@ -5100,10 +5128,10 @@ string. Other submatches may not participate in the match at all, in
 which case the pair `(-1,"")' is returned.
 
   The following helper functions are provided to analyze the result
-returned by *note regex: 2e2.
+returned by *note regex: 2e3.
 
  -- Function: reg_result res
-     Returns the result of a *note regex: 2e2. call, i.e., a `regerr'
+     Returns the result of a *note regex: 2e3. call, i.e., a `regerr'
      term if compilation failed, and a flag indicating whether the
      match was successful otherwise.
 
@@ -5112,7 +5140,7 @@ returned by *note regex: 2e2.
 
  -- Function: reg n info
      Returns the `n'th submatch of the given submatch info, where `info'
-     is the result of a *note reg_info: 2e4. call.
+     is the result of a *note reg_info: 2e5. call.
 
  -- Function: regs info
      Returns all valid submatches, i.e., the list of all triples
@@ -5130,16 +5158,16 @@ tokenize a string according to a given delimiter regex.
      `REG_NOSUB' flag with this function, it needs the submatch info.
 
  -- Function: regexgg f pat cflags s eflags
-     This works like *note regexg: 2e7, but allows overlapping matches.
+     This works like *note regexg: 2e8, but allows overlapping matches.
 
  -- Function: regsub f pat cflags s eflags
      Replaces all non-overlapping instances of a pattern with a computed
      substitution string. To these ends, the given function `f' is
-     applied to the *note reg_info: 2e4. for each match. The result
+     applied to the *note reg_info: 2e5. for each match. The result
      string is then obtained by concatenating `f info' for all matches,
      with the unmatched portions of the string in between. To make this
      work, `f' must always return a string value; otherwise, *note
-     regsub: 2e9. throws a *note bad_string_value: e. exception.
+     regsub: 2ea. throws a *note bad_string_value: e. exception.
 
  -- Function: regsplit pat cflags s eflags
      Splits a string into constituents delimited by substrings matching
@@ -5153,8 +5181,8 @@ the following lazy alternatives are available:
  -- Function: regexgs f pat cflags s eflags
  -- Function: regexggs f pat cflags s eflags
  -- Function: regsplits pat cflags s eflags
-     These work like *note regexg: 2e7, *note regexgg: 2e8. and *note
-     regsplit: 2ea.  above, but return a stream result which enables
+     These work like *note regexg: 2e8, *note regexgg: 2e9. and *note
+     regsplit: 2eb.  above, but return a stream result which enables
      you to process the matches one by one, using "call by need"
      evaluation.
 
@@ -5205,7 +5233,7 @@ match info:
     > regexg (!1) pat 0 s 0;
     ["var","foo","BAR"]
 
-Lazy versions of both *note regexg: 2e7. and *note regexgg: 2e8. are
+Lazy versions of both *note regexg: 2e8. and *note regexgg: 2e9. are
 provided which return the result as a stream instead. These can be
 processed in a "call by need" fashion:
 
@@ -5264,7 +5292,7 @@ pattern):
     > regsplit delim REG_EXTENDED "The   quick brown    fox" 0;
     ["The","quick","brown","fox"]
 
-The *note regsplit: 2ea. operation also has a lazy variation:
+The *note regsplit: 2eb. operation also has a lazy variation:
 
     > regsplits "[[:space:]]+" REG_EXTENDED "The   quick brown    fox" 0;
     "The":#<thunk 0x7fb1b79775b0>
@@ -5407,7 +5435,7 @@ The following operation is provided:
      `args', return the parsed options along with a list of the
      remaining (non-option) command line arguments.
 
-  The *note getopt: 2f7. function takes two arguments: `opts', a list
+  The *note getopt: 2f8. function takes two arguments: `opts', a list
 of option descriptions in the format described below, and `args', a
 list of strings containing the command line parameters to be parsed for
 options. The result is a pair `(opts_return,args_return)' where
@@ -5415,13 +5443,13 @@ options. The result is a pair `(opts_return,args_return)' where
 is the list of remaining (non-option) arguments. Options are parsed
 using the rules of GNU getopt(1). If an invalid option is encountered
 (unrecognized option, missing or extra argument, etc.), *note getopt:
-2f7. throws the offending option string as an exception.
+2f8. throws the offending option string as an exception.
 
   The `opts_return' value is a list of "hash pairs" `opt=>val' where
 `opt' is the (long) option name (as given by the `long_opt' field given
 in the `opts' argument, see below) and `val' is the corresponding value
 (`()' if none). Note that this format is ready to be passed to the
-*note dict: 24b. or *note hdict: 24c. function, cf. *note Dictionaries:
+*note dict: 24c. or *note hdict: 24d. function, cf. *note Dictionaries:
 10f, which makes it easy to retrieve option values or check for the
 presence of options. (As of Pure 0.41, you can also just convert the
 list to a record and employ the record functions to access the option
@@ -5532,7 +5560,7 @@ Index
 * __func__ function:                     Inspection.          (line  26)
 * __locals__ function:                   Inspection.          (line  69)
 * __namespace__ function:                Inspection.          (line  54)
-* __str__ function:                      Eval and Friends.    (line  88)
+* __str__ function:                      Eval and Friends.    (line 116)
 * abs function <1>:                      Complex Numbers.     (line  55)
 * abs function:                          Arithmetic.          (line 113)
 * acos function:                         Basic Math Functions.
@@ -5631,7 +5659,7 @@ Index
 * cis function:                          Complex Numbers.     (line  51)
 * clear_sentry function:                 Sentries.            (line  19)
 * clearerr function:                     Basic I/O Interface. (line  45)
-* clearsym function:                     Eval and Friends.    (line 108)
+* clearsym function:                     Eval and Friends.    (line 136)
 * clock function:                        Time Functions.      (line  25)
 * closure type:                          Prelude Types.       (line  92)
 * closurep function:                     Predicates.          (line  74)
@@ -5758,7 +5786,7 @@ Index
 * emptyset function:                     Operations<4>.       (line   6)
 * errno function:                        Errno and Friends.   (line   6)
 * eval function:                         Eval and Friends.    (line  29)
-* evalcmd function:                      Eval and Friends.    (line  38)
+* evalcmd function:                      Eval and Friends.    (line  49)
 * exactp function:                       Predicates.          (line  49)
 * execv function:                        Process Functions.   (line  15)
 * execve function:                       Process Functions.   (line  15)
@@ -5853,7 +5881,7 @@ Index
 * gets function:                         Basic I/O Interface. (line  58)
 * gettimeofday function:                 Time Functions.      (line  16)
 * glob function:                         Shell Globbing.      (line  10)
-* globsym function:                      Eval and Friends.    (line 100)
+* globsym function:                      Eval and Friends.    (line 128)
 * gmtime function:                       Time Functions.      (line  94)
 * hash function:                         Conversions.         (line   8)
 * hash pair:                             Hash Pairs.          (line   6)
@@ -5942,7 +5970,8 @@ Index
 * last function <3>:                     Operations.          (line  44)
 * last function:                         Common List Functions.
                                                               (line  67)
-* lasterr function:                      Eval and Friends.    (line  47)
+* lasterr function:                      Eval and Friends.    (line  58)
+* lasterrpos function:                   Eval and Friends.    (line  66)
 * lcd function:                          Arithmetic.          (line 126)
 * list arithmetic sequence:              Lists and Tuples.    (line 188)
 * list concatenation:                    Lists and Tuples.    (line  84)
@@ -6111,8 +6140,8 @@ Index
 * rect function:                         Complex Numbers.     (line  47)
 * redim function:                        Matrix Inspection and Manipulation.
                                                               (line 112)
-* reduce function:                       Eval and Friends.    (line 131)
-* reduce_with function:                  Eval and Friends.    (line 141)
+* reduce function:                       Eval and Friends.    (line 159)
+* reduce_with function:                  Eval and Friends.    (line 169)
 * ref function:                          Expression References.
                                                               (line  14)
 * refp function:                         Expression References.
@@ -7178,839 +7207,841 @@ Ref: 19188114
 Ref: val/string88114
 Ref: 17888508
 Ref: eval88508
-Ref: 17988975
-Ref: evalcmd88975
-Ref: 17f89465
-Ref: lasterr89465
-Ref: 19291140
-Ref: __str__91140
-Ref: 19391495
-Ref: globsym91495
-Ref: 19491951
-Ref: clearsym91951
-Ref: 17792540
-Ref: reduce92540
-Ref: 19593056
-Ref: reduce_with93056
-Node: Expression Serialization95161
-Ref: expression serialization95291
-Ref: 19095291
-Ref: expression-serialization95291
-Ref: 19696037
-Ref: blob96037
-Ref: 19796218
-Ref: val/blob96218
-Ref: 19896361
-Ref: blobp96361
-Ref: 19996740
-Ref: #/blob96740
-Ref: 19a96758
-Ref: blob_size96758
-Ref: 19b96784
-Ref: blob_crc96784
-Node: Other Special Primitives98436
-Ref: other special primitives98568
-Ref: 19c98568
-Ref: other-special-primitives98568
-Ref: 19d98633
-Ref: exit98633
-Ref: 19e98715
-Ref: throw98715
-Ref: 19f98789
-Ref: force98789
-Node: Pointer Operations98937
-Ref: pointer operations99053
-Ref: 1a099053
-Ref: pointer-operations99053
-Ref: 1a299388
-Ref: addr99388
-Ref: 1a399785
-Ref: calloc99785
-Ref: 1a499820
-Ref: malloc99820
-Ref: 1a599846
-Ref: realloc99846
-Ref: 1a699877
-Ref: free99877
-Ref: 1a7100482
-Ref: get_byte100482
-Ref: 1a8100509
-Ref: get_short100509
-Ref: 1a9100537
-Ref: get_int100537
-Ref: 1aa100563
-Ref: get_int64100563
-Ref: 1ab100591
-Ref: get_long100591
-Ref: 1ac100618
-Ref: get_float100618
-Ref: 1ad100646
-Ref: get_double100646
-Ref: 1ae100675
-Ref: get_string100675
-Ref: 1af100704
-Ref: get_pointer100704
-Ref: 1b0100856
-Ref: put_byte100856
-Ref: 1b1100885
-Ref: put_short100885
-Ref: 1b2100915
-Ref: put_int100915
-Ref: 1b3100943
-Ref: put_int64100943
-Ref: 1b4100973
-Ref: put_long100973
-Ref: 1b5101002
-Ref: put_float101002
-Ref: 1b6101032
-Ref: put_double101032
-Ref: 1b7101063
-Ref: put_string101063
-Ref: 1b8101094
-Ref: put_pointer101094
-Node: Sentries101276
-Ref: sentries101383
-Ref: 1b9101383
-Ref: 1ba101901
-Ref: sentry101901
-Ref: 1bb102015
-Ref: clear_sentry102015
-Ref: 1bc102093
-Ref: get_sentry102093
-Ref: 1bd103025
-Ref: cookedp103025
-Ref: 1be103108
-Ref: cooked103108
-Node: Tagged Pointers106172
-Ref: tagged pointers106282
-Ref: 1bf106282
-Ref: tagged-pointers106282
-Ref: 1c0106282
-Ref: id6106282
-Ref: 1c1106938
-Ref: ptrtag106938
-Ref: 1c2107087
-Ref: get_ptrtag107087
-Ref: 1c3107159
-Ref: check_ptrtag107159
-Ref: 1c4107389
-Ref: make_ptrtag107389
-Ref: 1c5108495
-Ref: pointer_tag108495
-Ref: 1c6108957
-Ref: pointer_type108957
-Ref: 1c7109341
-Ref: pointer_cast109341
-Node: Expression References111377
-Ref: expression references111497
-Ref: 110111497
-Ref: expression-references111497
-Ref: 1c8111497
-Ref: id7111497
-Ref: 1c9112037
-Ref: ref112037
-Ref: 1ca112109
-Ref: put112109
-Ref: 1cb112181
-Ref: get112181
-Ref: 1cc112249
-Ref: unref112249
-Ref: 1cd112454
-Ref: refp112454
-Ref: 1a1112735
-Ref: module-pointers112735
-Node: Pointer Arithmetic112735
-Ref: pointer arithmetic112831
-Ref: 125112831
-Ref: pointer-arithmetic112831
-Ref: 1ce113438
-Ref: int/pointer113438
-Ref: 1cf113458
-Ref: bigint/pointer113458
-Ref: 1d0113937
-Ref: +/pointer113937
-Ref: 1d1113957
-Ref: -/pointer113957
-Ref: 1d2113977
-Ref: -/pointerdiff113977
-Ref: 1d3114467
-Ref: ==/pointer114467
-Ref: 1d4114488
-Ref: ~=/pointer114488
-Ref: 1d5114613
-Ref: <=/pointer114613
-Ref: 1d6114634
-Ref: >=/pointer114634
-Ref: 1d7114655
-Ref: >/pointer114655
-Ref: 1d8114675
-Ref: </pointer114675
-Node: Mathematical Functions114890
-Ref: mathematical functions114993
-Ref: 1a114993
-Ref: module-math114993
-Ref: 126114993
-Ref: mathematical-functions114993
-Node: Imports115278
-Ref: imports115374
-Ref: 1d9115374
-Node: Basic Math Functions115510
-Ref: basic math functions115630
-Ref: 1da115630
-Ref: basic-math-functions115630
-Ref: 1db115738
-Ref: 1dc115789
-Ref: pi115789
-Ref: 1e0116516
-Ref: mersenne-twister116516
-Ref: 1e1116516
-Ref: random116516
-Ref: 1dd116621
-Ref: random31116621
-Ref: 1de116713
-Ref: random53116713
-Ref: 1df116822
-Ref: srandom116822
-Ref: 1e2117249
-Ref: sqrt117249
-Ref: 1e3117302
-Ref: exp117302
-Ref: 1e4117322
-Ref: ln117322
-Ref: 1e5117341
-Ref: log117341
-Ref: 1e6117421
-Ref: sin117421
-Ref: 1e7117441
-Ref: cos117441
-Ref: 1e8117461
-Ref: tan117461
-Ref: 1e9117512
-Ref: asin117512
-Ref: 1ea117533
-Ref: acos117533
-Ref: 1eb117554
-Ref: atan117554
-Ref: 1ec117614
-Ref: atan2117614
-Ref: 1ed117764
-Ref: sinh117764
-Ref: 1ee117785
-Ref: cosh117785
-Ref: 1ef117806
-Ref: tanh117806
-Ref: 1f0117869
-Ref: asinh117869
-Ref: 1f1117891
-Ref: acosh117891
-Ref: 1f2117913
-Ref: atanh117913
-Node: Complex Numbers117985
-Ref: complex numbers118114
-Ref: 1f3118114
-Ref: complex-numbers118114
-Ref: 1f4118232
-Ref: i118232
-Ref: 1f5119892
-Ref: complex119892
-Ref: 1f6119969
-Ref: polar119969
-Ref: 1f7119991
-Ref: rect119991
-Ref: 1f8120073
-Ref: cis120073
-Ref: 1f9120217
-Ref: abs/complex120217
-Ref: 1fa120237
-Ref: arg120237
-Ref: 1fb120415
-Ref: re120415
-Ref: 1fc120434
-Ref: im120434
-Ref: 1fd120484
-Ref: conj120484
-Node: Rational Numbers120970
-Ref: rational numbers121115
-Ref: 124121115
-Ref: rational-numbers121115
-Ref: 1fe121158
-Ref: %121158
-Ref: 1ff122563
-Ref: rational122563
-Ref: 200123127
-Ref: num123127
-Ref: 201123147
-Ref: den123147
-Node: Semantic Number Predicates and Types123812
-Ref: semantic number predicates and types123933
-Ref: 1b123933
-Ref: semantic-number-predicates-and-types123933
-Ref: 202124378
-Ref: compvalp124378
-Ref: 203124477
-Ref: realvalp124477
-Ref: 204124543
-Ref: ratvalp124543
-Ref: 205124690
-Ref: bigintvalp124690
-Ref: 206124797
-Ref: intvalp124797
-Ref: 207124908
-Ref: compval124908
-Ref: 208124926
-Ref: realval124926
-Ref: 209124944
-Ref: ratval124944
-Ref: 20a124961
-Ref: bigintval124961
-Ref: 20b124981
-Ref: intval124981
-Node: Container Types125210
-Ref: container types125322
-Ref: 20c125322
-Ref: container-types125322
-Ref: 20d126540
-Ref: module-array126540
-Node: Arrays126606
-Ref: arrays126679
-Ref: 20e126679
-Ref: 20f126975
-Ref: array/type126975
-Node: Imports<2>127079
-Ref: imports<2>127152
-Ref: 210127152
-Ref: id8127152
-Node: Operations127293
-Ref: operations127383
-Ref: 211127383
-Ref: 212127418
-Ref: emptyarray127418
-Ref: 213127472
-Ref: array127472
-Ref: 214127534
-Ref: array2127534
-Ref: 215127616
-Ref: mkarray127616
-Ref: 216127688
-Ref: mkarray2127688
-Ref: 217127771
-Ref: arrayp127771
-Ref: 218127830
-Ref: #/array127830
-Ref: 219127866
-Ref: !/array127866
-Ref: 21a127979
-Ref: null/array127979
-Ref: 21b128042
-Ref: members/array128042
-Ref: 21c128066
-Ref: list/array128066
-Ref: 21d128122
-Ref: members2/array128122
-Ref: 21e128147
-Ref: list2/array128147
-Ref: 21f128218
-Ref: first/array128218
-Ref: 220128240
-Ref: last/array128240
-Ref: 221128296
-Ref: rmfirst/array128296
-Ref: 222128320
-Ref: rmlast/array128320
-Ref: 223128387
-Ref: insert/array128387
-Ref: 224128453
-Ref: append/array128453
-Ref: 225128513
-Ref: update/array128513
-Ref: 226128585
-Ref: update2/array128585
-Node: Examples128652
-Ref: examples128723
-Ref: 227128723
-Ref: 228130049
-Ref: module-heap130049
-Node: Heaps130050
-Ref: heaps130144
-Ref: 229130144
-Ref: 22b130734
-Ref: heap/type130734
-Node: Imports<3>130862
-Ref: imports<3>130937
-Ref: 22c130937
-Ref: id9130937
-Node: Operations<2>131077
-Ref: operations<2>131172
-Ref: 22d131172
-Ref: id10131172
-Ref: 22e131207
-Ref: emptyheap131207
-Ref: 22f131259
-Ref: heap131259
-Ref: 230131318
-Ref: heapp131318
-Ref: 231131374
-Ref: #/heap131374
-Ref: 232131413
-Ref: null/heap131413
-Ref: 233131475
-Ref: members/heap131475
-Ref: 234131499
-Ref: list/heap131499
-Ref: 235131569
-Ref: first/heap131569
-Ref: 236131638
-Ref: rmfirst/heap131638
-Ref: 237131718
-Ref: insert/heap131718
-Node: Examples<2>131769
-Ref: examples<2>131845
-Ref: 238131845
-Ref: id11131845
-Ref: 239132013
-Ref: module-dict132013
-Node: Dictionaries132014
-Ref: dictionaries132115
-Ref: 10f132115
-Ref: 23a132418
-Ref: dict/type132418
-Ref: 23b132564
-Ref: hdict/type132564
-Ref: 23c132705
-Ref: mdict/type132705
-Ref: 23d132842
-Ref: hmdict/type132842
-Ref: 23e132964
-Ref: xdict/type132964
-Node: Imports<4>135069
-Ref: imports<4>135151
-Ref: 245135151
-Ref: id12135151
-Node: Operations<3>135291
-Ref: operations<3>135393
-Ref: 246135393
-Ref: id13135393
-Ref: 247135428
-Ref: emptydict135428
-Ref: 248135452
-Ref: emptyhdict135452
-Ref: 249135477
-Ref: emptymdict135477
-Ref: 24a135502
-Ref: emptyhmdict135502
-Ref: 24b135561
-Ref: dict135561
-Ref: 24c135583
-Ref: hdict135583
-Ref: 24d135606
-Ref: mdict135606
-Ref: 24e135629
-Ref: hmdict135629
-Ref: 24f135905
-Ref: dictp135905
-Ref: 250135927
-Ref: hdictp135927
-Ref: 251135950
-Ref: mdictp135950
-Ref: 252135973
-Ref: hmdictp135973
-Ref: 253136063
-Ref: mkdict136063
-Ref: 254136089
-Ref: mkhdict136089
-Ref: 255136116
-Ref: mkmdict136116
-Ref: 256136143
-Ref: mkhmdict136143
-Ref: 257136238
-Ref: +/dict136238
-Ref: 258136314
-Ref: -/dict136314
-Ref: 259136400
-Ref: */dict136400
-Ref: 25a136494
-Ref: #/dict136494
-Ref: 25b136575
-Ref: !/dict136575
-Ref: 25c136760
-Ref: null/dict136760
-Ref: 25d136827
-Ref: member/dict136827
-Ref: 23f136906
-Ref: members/dict136906
-Ref: 25e136930
-Ref: list/dict136930
-Ref: 240137032
-Ref: keys/dict137032
-Ref: 241137126
-Ref: vals/dict137126
-Ref: 25f137176
-Ref: first/dict137176
-Ref: 260137198
-Ref: last/dict137198
-Ref: 242137283
-Ref: rmfirst/dict137283
-Ref: 243137307
-Ref: rmlast/dict137307
-Ref: 261137396
-Ref: insert/dict137396
-Ref: 262137426
-Ref: update/dict137426
-Ref: 244137747
-Ref: delete/dict137747
-Ref: 263137895
-Ref: delete_val/dict137895
-Ref: 264138133
-Ref: delete_all/dict138133
-Node: Examples<3>139834
-Ref: examples<3>139917
-Ref: 265139917
-Ref: id14139917
-Ref: 266142692
-Ref: module-set142692
-Node: Sets and Bags142693
-Ref: sets and bags142780
-Ref: 22a142780
-Ref: sets-and-bags142780
-Ref: 267143398
-Ref: set/type143398
-Ref: 268143412
-Ref: bag/type143412
-Ref: 269143563
-Ref: hset/type143563
-Ref: 26a143578
-Ref: hbag/type143578
-Ref: 26b143750
-Ref: xset/type143750
-Node: Imports<5>144912
-Ref: imports<5>144995
-Ref: 26c144995
-Ref: id15144995
-Node: Operations<4>145134
-Ref: operations<4>145237
-Ref: 26d145237
-Ref: id16145237
-Ref: 26e145272
-Ref: emptyset145272
-Ref: 26f145295
-Ref: emptybag145295
-Ref: 270145318
-Ref: emptyhset145318
-Ref: 271145342
-Ref: emptyhbag145342
-Ref: 272145399
-Ref: set145399
-Ref: 273145420
-Ref: bag145420
-Ref: 274145441
-Ref: hset145441
-Ref: 275145463
-Ref: hbag145463
-Ref: 276145675
-Ref: setp145675
-Ref: 277145696
-Ref: bagp145696
-Ref: 278145717
-Ref: hsetp145717
-Ref: 279145739
-Ref: hbagp145739
-Ref: 27a145827
-Ref: +/set145827
-Ref: 27b145915
-Ref: -/set145915
-Ref: 27c146018
-Ref: */set146018
-Ref: 27d146129
-Ref: #/set146129
-Ref: 27e146178
-Ref: null/set146178
-Ref: 27f146245
-Ref: member/set146245
-Ref: 280146306
-Ref: members/set146306
-Ref: 281146330
-Ref: list/set146330
-Ref: 282146433
-Ref: first/set146433
-Ref: 283146455
-Ref: last/set146455
-Ref: 284146540
-Ref: rmfirst/set146540
-Ref: 285146564
-Ref: rmlast/set146564
-Ref: 286146653
-Ref: insert/set146653
-Ref: 287146761
-Ref: delete/set146761
-Ref: 288146878
-Ref: delete_all/set146878
-Node: Examples<4>147311
-Ref: examples<4>147395
-Ref: 289147395
-Ref: id17147395
-Ref: 28a149221
-Ref: module-system149221
-Node: System Interface149222
-Ref: system interface149317
-Ref: b9149317
-Ref: system-interface149317
-Node: Imports<6>150190
-Ref: imports<6>150280
-Ref: 28b150280
-Ref: id18150280
-Node: Errno and Friends150590
-Ref: errno and friends150701
-Ref: 28d150701
-Ref: errno-and-friends150701
-Ref: 28e150746
-Ref: errno150746
-Ref: 28f150766
-Ref: set_errno150766
-Ref: 290150792
-Ref: perror150792
-Ref: 291150817
-Ref: strerror150817
-Node: POSIX Locale151277
-Ref: posix locale151393
-Ref: 292151393
-Ref: posix-locale151393
-Ref: 293151428
-Ref: setlocale151428
-Node: Signal Handling152822
-Ref: signal handling152935
-Ref: 294152935
-Ref: signal-handling152935
-Ref: 295152976
-Ref: trap152976
-Node: Time Functions153804
-Ref: time functions153922
-Ref: 296153922
-Ref: time-functions153922
-Ref: 297154182
-Ref: time154182
-Ref: 298154407
-Ref: gettimeofday154407
-Ref: 299154881
-Ref: clock154881
-Ref: 29a155169
-Ref: sleep155169
-Ref: 29b155191
-Ref: nanosleep155191
-Ref: 29c156204
-Ref: tzset156204
-Ref: 29d156264
-Ref: tzname156264
-Ref: 29e156285
-Ref: timezone156285
-Ref: 29f156308
-Ref: daylight156308
-Ref: 2a0157125
-Ref: ctime157125
-Ref: 2a1157251
-Ref: gmtime157251
-Ref: 2a2157274
-Ref: localtime157274
-Ref: 2a5157647
-Ref: mktime157647
-Ref: 2a3157807
-Ref: asctime157807
-Ref: 2a4157832
-Ref: strftime157832
-Ref: 2a6158053
-Ref: strptime158053
-Node: Process Functions162394
-Ref: process functions162516
-Ref: 2a7162516
-Ref: process-functions162516
-Ref: 2ad162841
-Ref: system162841
-Ref: 2ae162897
-Ref: execv162897
-Ref: 2af162927
-Ref: execvp162927
-Ref: 2b0162958
-Ref: execve162958
-Ref: 2b1163843
-Ref: spawnv163843
-Ref: 2b2163879
-Ref: spawnvp163879
-Ref: 2b3163916
-Ref: spawnve163916
-Node: Basic I/O Interface165279
-Ref: basic i/o interface165403
-Ref: 2b4165403
-Ref: basic-i-o-interface165403
-Ref: 2b5165807
-Ref: stdin165807
-Ref: 2b6165827
-Ref: stdout165827
-Ref: 2b7165848
-Ref: stderr165848
-Ref: 2b8165901
-Ref: fopen165901
-Ref: 2b9165931
-Ref: popen165931
-Ref: 2ba166246
-Ref: fdopen166246
-Ref: 2bb166469
-Ref: freopen166469
-Ref: 2bc166693
-Ref: fclose166693
-Ref: 2bd166717
-Ref: pclose166717
-Ref: 2be166771
-Ref: tmpfile166771
-Ref: 2bf166960
-Ref: feof166960
-Ref: 2c0166982
-Ref: ferror166982
-Ref: 2c1167006
-Ref: clearerr167006
-Ref: 2c2167124
-Ref: fileno167124
-Ref: 2c3167214
-Ref: fflush167214
-Ref: 2c4167320
-Ref: fgets167320
-Ref: 2c5167343
-Ref: gets167343
-Ref: 2c6167478
-Ref: fget167478
-Ref: 2c7167589
-Ref: fputs167589
-Ref: 2c8167614
-Ref: puts167614
-Ref: 2c9167859
-Ref: fread167859
-Ref: 2ca167897
-Ref: fwrite167897
-Ref: 2cb168065
-Ref: fseek168065
-Ref: 2cc168102
-Ref: ftell168102
-Ref: 2cd168125
-Ref: rewind168125
-Ref: 2ce168512
-Ref: setbuf168512
-Ref: 2cf168540
-Ref: setvbuf168540
-Ref: 2d0170913
-Ref: gmp170913
-Ref: 2d1170913
-Ref: mpfr170913
-Ref: 2d2170913
-Ref: printf170913
-Ref: 2d3170946
-Ref: fprintf170946
-Ref: 2d4171488
-Ref: sprintf171488
-Ref: 2d5171955
-Ref: scanf171955
-Ref: 2d6171982
-Ref: fscanf171982
-Ref: 2d7172878
-Ref: sscanf172878
-Node: Stat and Friends174278
-Ref: stat and friends174404
-Ref: 2d8174404
-Ref: stat-and-friends174404
-Ref: 2d9174447
-Ref: stat174447
-Ref: 2da175031
-Ref: lstat175031
-Ref: 2db175273
-Ref: fstat175273
-Node: Reading Directories177096
-Ref: reading directories177217
-Ref: 2dc177217
-Ref: reading-directories177217
-Ref: 2dd177266
-Ref: readdir177266
-Node: Shell Globbing177453
-Ref: shell globbing177572
-Ref: 2de177572
-Ref: shell-globbing177572
-Ref: 2df177613
-Ref: fnmatch177613
-Ref: 2e0177776
-Ref: glob177776
-Node: Regex Matching178390
-Ref: regex matching178516
-Ref: 2e1178516
-Ref: module-regex178516
-Ref: aa178516
-Ref: regex-matching178516
-Ref: 2e2179448
-Ref: regex179448
-Ref: 2e3182832
-Ref: reg_result182832
-Ref: 2e4183036
-Ref: reg_info183036
-Ref: 2e5183130
-Ref: reg183130
-Ref: 2e6183280
-Ref: regs183280
-Ref: 2e7183613
-Ref: regexg183613
-Ref: 2e8184005
-Ref: regexgg184005
-Ref: 2e9184122
-Ref: regsub184122
-Ref: 2ea184650
-Ref: regsplit184650
-Ref: 2eb185045
-Ref: regexgs185045
-Ref: 2ec185089
-Ref: regexggs185089
-Ref: 2ed185134
-Ref: regsplits185134
-Node: Basic Examples185500
-Ref: basic examples185608
-Ref: 2ee185608
-Ref: basic-examples185608
-Node: Regex Substitutions and Splitting187520
-Ref: regex substitutions and splitting187650
-Ref: 2ef187650
-Ref: regex-substitutions-and-splitting187650
-Node: Empty Matches188346
-Ref: empty matches188472
-Ref: 2f0188472
-Ref: empty-matches188472
-Node: Submatches189380
-Ref: submatches189464
-Ref: 2f1189464
-Node: Additional POSIX Functions190840
-Ref: additional posix functions190966
-Ref: 2ac190966
-Ref: module-posix190966
-Ref: 28c190966
-Ref: additional-posix-functions190966
-Ref: 2a8191566
-Ref: fork191566
-Ref: 2f2191611
-Ref: getpid191611
-Ref: 2f3191632
-Ref: getppid191632
-Ref: 2aa191745
-Ref: wait191745
-Ref: 2ab191771
-Ref: waitpid191771
-Ref: 2a9191990
-Ref: kill191990
-Ref: 2f4192067
-Ref: raise192067
-Ref: 2f5192144
-Ref: pause192144
-Ref: 2f6192202
-Ref: module-getopt192202
-Node: Option Parsing192202
-Ref: option parsing192305
-Ref: b8192305
-Ref: option-parsing192305
-Ref: 2f7192591
-Ref: getopt192591
-Node: Index195729
-Ref: index195800
+Ref: 17989631
+Ref: evalcmd89631
+Ref: 17f90121
+Ref: lasterr90121
+Ref: 19290556
+Ref: lasterrpos90556
+Ref: 19392739
+Ref: __str__92739
+Ref: 19493094
+Ref: globsym93094
+Ref: 19593550
+Ref: clearsym93550
+Ref: 17794139
+Ref: reduce94139
+Ref: 19694655
+Ref: reduce_with94655
+Node: Expression Serialization96760
+Ref: expression serialization96890
+Ref: 19096890
+Ref: expression-serialization96890
+Ref: 19797636
+Ref: blob97636
+Ref: 19897817
+Ref: val/blob97817
+Ref: 19997960
+Ref: blobp97960
+Ref: 19a98339
+Ref: #/blob98339
+Ref: 19b98357
+Ref: blob_size98357
+Ref: 19c98383
+Ref: blob_crc98383
+Node: Other Special Primitives100035
+Ref: other special primitives100167
+Ref: 19d100167
+Ref: other-special-primitives100167
+Ref: 19e100232
+Ref: exit100232
+Ref: 19f100314
+Ref: throw100314
+Ref: 1a0100388
+Ref: force100388
+Node: Pointer Operations100536
+Ref: pointer operations100652
+Ref: 1a1100652
+Ref: pointer-operations100652
+Ref: 1a3100987
+Ref: addr100987
+Ref: 1a4101384
+Ref: calloc101384
+Ref: 1a5101419
+Ref: malloc101419
+Ref: 1a6101445
+Ref: realloc101445
+Ref: 1a7101476
+Ref: free101476
+Ref: 1a8102081
+Ref: get_byte102081
+Ref: 1a9102108
+Ref: get_short102108
+Ref: 1aa102136
+Ref: get_int102136
+Ref: 1ab102162
+Ref: get_int64102162
+Ref: 1ac102190
+Ref: get_long102190
+Ref: 1ad102217
+Ref: get_float102217
+Ref: 1ae102245
+Ref: get_double102245
+Ref: 1af102274
+Ref: get_string102274
+Ref: 1b0102303
+Ref: get_pointer102303
+Ref: 1b1102455
+Ref: put_byte102455
+Ref: 1b2102484
+Ref: put_short102484
+Ref: 1b3102514
+Ref: put_int102514
+Ref: 1b4102542
+Ref: put_int64102542
+Ref: 1b5102572
+Ref: put_long102572
+Ref: 1b6102601
+Ref: put_float102601
+Ref: 1b7102631
+Ref: put_double102631
+Ref: 1b8102662
+Ref: put_string102662
+Ref: 1b9102693
+Ref: put_pointer102693
+Node: Sentries102875
+Ref: sentries102982
+Ref: 1ba102982
+Ref: 1bb103500
+Ref: sentry103500
+Ref: 1bc103614
+Ref: clear_sentry103614
+Ref: 1bd103692
+Ref: get_sentry103692
+Ref: 1be104624
+Ref: cookedp104624
+Ref: 1bf104707
+Ref: cooked104707
+Node: Tagged Pointers107771
+Ref: tagged pointers107881
+Ref: 1c0107881
+Ref: tagged-pointers107881
+Ref: 1c1107881
+Ref: id6107881
+Ref: 1c2108537
+Ref: ptrtag108537
+Ref: 1c3108686
+Ref: get_ptrtag108686
+Ref: 1c4108758
+Ref: check_ptrtag108758
+Ref: 1c5108988
+Ref: make_ptrtag108988
+Ref: 1c6110094
+Ref: pointer_tag110094
+Ref: 1c7110556
+Ref: pointer_type110556
+Ref: 1c8110940
+Ref: pointer_cast110940
+Node: Expression References112976
+Ref: expression references113096
+Ref: 110113096
+Ref: expression-references113096
+Ref: 1c9113096
+Ref: id7113096
+Ref: 1ca113636
+Ref: ref113636
+Ref: 1cb113708
+Ref: put113708
+Ref: 1cc113780
+Ref: get113780
+Ref: 1cd113848
+Ref: unref113848
+Ref: 1ce114053
+Ref: refp114053
+Ref: 1a2114334
+Ref: module-pointers114334
+Node: Pointer Arithmetic114334
+Ref: pointer arithmetic114430
+Ref: 125114430
+Ref: pointer-arithmetic114430
+Ref: 1cf115037
+Ref: int/pointer115037
+Ref: 1d0115057
+Ref: bigint/pointer115057
+Ref: 1d1115536
+Ref: +/pointer115536
+Ref: 1d2115556
+Ref: -/pointer115556
+Ref: 1d3115576
+Ref: -/pointerdiff115576
+Ref: 1d4116066
+Ref: ==/pointer116066
+Ref: 1d5116087
+Ref: ~=/pointer116087
+Ref: 1d6116212
+Ref: <=/pointer116212
+Ref: 1d7116233
+Ref: >=/pointer116233
+Ref: 1d8116254
+Ref: >/pointer116254
+Ref: 1d9116274
+Ref: </pointer116274
+Node: Mathematical Functions116489
+Ref: mathematical functions116592
+Ref: 1a116592
+Ref: module-math116592
+Ref: 126116592
+Ref: mathematical-functions116592
+Node: Imports116877
+Ref: imports116973
+Ref: 1da116973
+Node: Basic Math Functions117109
+Ref: basic math functions117229
+Ref: 1db117229
+Ref: basic-math-functions117229
+Ref: 1dc117337
+Ref: 1dd117388
+Ref: pi117388
+Ref: 1e1118115
+Ref: mersenne-twister118115
+Ref: 1e2118115
+Ref: random118115
+Ref: 1de118220
+Ref: random31118220
+Ref: 1df118312
+Ref: random53118312
+Ref: 1e0118421
+Ref: srandom118421
+Ref: 1e3118848
+Ref: sqrt118848
+Ref: 1e4118901
+Ref: exp118901
+Ref: 1e5118921
+Ref: ln118921
+Ref: 1e6118940
+Ref: log118940
+Ref: 1e7119020
+Ref: sin119020
+Ref: 1e8119040
+Ref: cos119040
+Ref: 1e9119060
+Ref: tan119060
+Ref: 1ea119111
+Ref: asin119111
+Ref: 1eb119132
+Ref: acos119132
+Ref: 1ec119153
+Ref: atan119153
+Ref: 1ed119213
+Ref: atan2119213
+Ref: 1ee119363
+Ref: sinh119363
+Ref: 1ef119384
+Ref: cosh119384
+Ref: 1f0119405
+Ref: tanh119405
+Ref: 1f1119468
+Ref: asinh119468
+Ref: 1f2119490
+Ref: acosh119490
+Ref: 1f3119512
+Ref: atanh119512
+Node: Complex Numbers119584
+Ref: complex numbers119713
+Ref: 1f4119713
+Ref: complex-numbers119713
+Ref: 1f5119831
+Ref: i119831
+Ref: 1f6121491
+Ref: complex121491
+Ref: 1f7121568
+Ref: polar121568
+Ref: 1f8121590
+Ref: rect121590
+Ref: 1f9121672
+Ref: cis121672
+Ref: 1fa121816
+Ref: abs/complex121816
+Ref: 1fb121836
+Ref: arg121836
+Ref: 1fc122014
+Ref: re122014
+Ref: 1fd122033
+Ref: im122033
+Ref: 1fe122083
+Ref: conj122083
+Node: Rational Numbers122569
+Ref: rational numbers122714
+Ref: 124122714
+Ref: rational-numbers122714
+Ref: 1ff122757
+Ref: %122757
+Ref: 200124162
+Ref: rational124162
+Ref: 201124726
+Ref: num124726
+Ref: 202124746
+Ref: den124746
+Node: Semantic Number Predicates and Types125411
+Ref: semantic number predicates and types125532
+Ref: 1b125532
+Ref: semantic-number-predicates-and-types125532
+Ref: 203125977
+Ref: compvalp125977
+Ref: 204126076
+Ref: realvalp126076
+Ref: 205126142
+Ref: ratvalp126142
+Ref: 206126289
+Ref: bigintvalp126289
+Ref: 207126396
+Ref: intvalp126396
+Ref: 208126507
+Ref: compval126507
+Ref: 209126525
+Ref: realval126525
+Ref: 20a126543
+Ref: ratval126543
+Ref: 20b126560
+Ref: bigintval126560
+Ref: 20c126580
+Ref: intval126580
+Node: Container Types126809
+Ref: container types126921
+Ref: 20d126921
+Ref: container-types126921
+Ref: 20e128139
+Ref: module-array128139
+Node: Arrays128205
+Ref: arrays128278
+Ref: 20f128278
+Ref: 210128574
+Ref: array/type128574
+Node: Imports<2>128678
+Ref: imports<2>128751
+Ref: 211128751
+Ref: id8128751
+Node: Operations128892
+Ref: operations128982
+Ref: 212128982
+Ref: 213129017
+Ref: emptyarray129017
+Ref: 214129071
+Ref: array129071
+Ref: 215129133
+Ref: array2129133
+Ref: 216129215
+Ref: mkarray129215
+Ref: 217129287
+Ref: mkarray2129287
+Ref: 218129370
+Ref: arrayp129370
+Ref: 219129429
+Ref: #/array129429
+Ref: 21a129465
+Ref: !/array129465
+Ref: 21b129578
+Ref: null/array129578
+Ref: 21c129641
+Ref: members/array129641
+Ref: 21d129665
+Ref: list/array129665
+Ref: 21e129721
+Ref: members2/array129721
+Ref: 21f129746
+Ref: list2/array129746
+Ref: 220129817
+Ref: first/array129817
+Ref: 221129839
+Ref: last/array129839
+Ref: 222129895
+Ref: rmfirst/array129895
+Ref: 223129919
+Ref: rmlast/array129919
+Ref: 224129986
+Ref: insert/array129986
+Ref: 225130052
+Ref: append/array130052
+Ref: 226130112
+Ref: update/array130112
+Ref: 227130184
+Ref: update2/array130184
+Node: Examples130251
+Ref: examples130322
+Ref: 228130322
+Ref: 229131648
+Ref: module-heap131648
+Node: Heaps131649
+Ref: heaps131743
+Ref: 22a131743
+Ref: 22c132333
+Ref: heap/type132333
+Node: Imports<3>132461
+Ref: imports<3>132536
+Ref: 22d132536
+Ref: id9132536
+Node: Operations<2>132676
+Ref: operations<2>132771
+Ref: 22e132771
+Ref: id10132771
+Ref: 22f132806
+Ref: emptyheap132806
+Ref: 230132858
+Ref: heap132858
+Ref: 231132917
+Ref: heapp132917
+Ref: 232132973
+Ref: #/heap132973
+Ref: 233133012
+Ref: null/heap133012
+Ref: 234133074
+Ref: members/heap133074
+Ref: 235133098
+Ref: list/heap133098
+Ref: 236133168
+Ref: first/heap133168
+Ref: 237133237
+Ref: rmfirst/heap133237
+Ref: 238133317
+Ref: insert/heap133317
+Node: Examples<2>133368
+Ref: examples<2>133444
+Ref: 239133444
+Ref: id11133444
+Ref: 23a133612
+Ref: module-dict133612
+Node: Dictionaries133613
+Ref: dictionaries133714
+Ref: 10f133714
+Ref: 23b134017
+Ref: dict/type134017
+Ref: 23c134163
+Ref: hdict/type134163
+Ref: 23d134304
+Ref: mdict/type134304
+Ref: 23e134441
+Ref: hmdict/type134441
+Ref: 23f134563
+Ref: xdict/type134563
+Node: Imports<4>136668
+Ref: imports<4>136750
+Ref: 246136750
+Ref: id12136750
+Node: Operations<3>136890
+Ref: operations<3>136992
+Ref: 247136992
+Ref: id13136992
+Ref: 248137027
+Ref: emptydict137027
+Ref: 249137051
+Ref: emptyhdict137051
+Ref: 24a137076
+Ref: emptymdict137076
+Ref: 24b137101
+Ref: emptyhmdict137101
+Ref: 24c137160
+Ref: dict137160
+Ref: 24d137182
+Ref: hdict137182
+Ref: 24e137205
+Ref: mdict137205
+Ref: 24f137228
+Ref: hmdict137228
+Ref: 250137504
+Ref: dictp137504
+Ref: 251137526
+Ref: hdictp137526
+Ref: 252137549
+Ref: mdictp137549
+Ref: 253137572
+Ref: hmdictp137572
+Ref: 254137662
+Ref: mkdict137662
+Ref: 255137688
+Ref: mkhdict137688
+Ref: 256137715
+Ref: mkmdict137715
+Ref: 257137742
+Ref: mkhmdict137742
+Ref: 258137837
+Ref: +/dict137837
+Ref: 259137913
+Ref: -/dict137913
+Ref: 25a137999
+Ref: */dict137999
+Ref: 25b138093
+Ref: #/dict138093
+Ref: 25c138174
+Ref: !/dict138174
+Ref: 25d138359
+Ref: null/dict138359
+Ref: 25e138426
+Ref: member/dict138426
+Ref: 240138505
+Ref: members/dict138505
+Ref: 25f138529
+Ref: list/dict138529
+Ref: 241138631
+Ref: keys/dict138631
+Ref: 242138725
+Ref: vals/dict138725
+Ref: 260138775
+Ref: first/dict138775
+Ref: 261138797
+Ref: last/dict138797
+Ref: 243138882
+Ref: rmfirst/dict138882
+Ref: 244138906
+Ref: rmlast/dict138906
+Ref: 262138995
+Ref: insert/dict138995
+Ref: 263139025
+Ref: update/dict139025
+Ref: 245139346
+Ref: delete/dict139346
+Ref: 264139494
+Ref: delete_val/dict139494
+Ref: 265139732
+Ref: delete_all/dict139732
+Node: Examples<3>141433
+Ref: examples<3>141516
+Ref: 266141516
+Ref: id14141516
+Ref: 267144291
+Ref: module-set144291
+Node: Sets and Bags144292
+Ref: sets and bags144379
+Ref: 22b144379
+Ref: sets-and-bags144379
+Ref: 268144997
+Ref: set/type144997
+Ref: 269145011
+Ref: bag/type145011
+Ref: 26a145162
+Ref: hset/type145162
+Ref: 26b145177
+Ref: hbag/type145177
+Ref: 26c145349
+Ref: xset/type145349
+Node: Imports<5>146511
+Ref: imports<5>146594
+Ref: 26d146594
+Ref: id15146594
+Node: Operations<4>146733
+Ref: operations<4>146836
+Ref: 26e146836
+Ref: id16146836
+Ref: 26f146871
+Ref: emptyset146871
+Ref: 270146894
+Ref: emptybag146894
+Ref: 271146917
+Ref: emptyhset146917
+Ref: 272146941
+Ref: emptyhbag146941
+Ref: 273146998
+Ref: set146998
+Ref: 274147019
+Ref: bag147019
+Ref: 275147040
+Ref: hset147040
+Ref: 276147062
+Ref: hbag147062
+Ref: 277147274
+Ref: setp147274
+Ref: 278147295
+Ref: bagp147295
+Ref: 279147316
+Ref: hsetp147316
+Ref: 27a147338
+Ref: hbagp147338
+Ref: 27b147426
+Ref: +/set147426
+Ref: 27c147514
+Ref: -/set147514
+Ref: 27d147617
+Ref: */set147617
+Ref: 27e147728
+Ref: #/set147728
+Ref: 27f147777
+Ref: null/set147777
+Ref: 280147844
+Ref: member/set147844
+Ref: 281147905
+Ref: members/set147905
+Ref: 282147929
+Ref: list/set147929
+Ref: 283148032
+Ref: first/set148032
+Ref: 284148054
+Ref: last/set148054
+Ref: 285148139
+Ref: rmfirst/set148139
+Ref: 286148163
+Ref: rmlast/set148163
+Ref: 287148252
+Ref: insert/set148252
+Ref: 288148360
+Ref: delete/set148360
+Ref: 289148477
+Ref: delete_all/set148477
+Node: Examples<4>148910
+Ref: examples<4>148994
+Ref: 28a148994
+Ref: id17148994
+Ref: 28b150820
+Ref: module-system150820
+Node: System Interface150821
+Ref: system interface150916
+Ref: b9150916
+Ref: system-interface150916
+Node: Imports<6>151789
+Ref: imports<6>151879
+Ref: 28c151879
+Ref: id18151879
+Node: Errno and Friends152189
+Ref: errno and friends152300
+Ref: 28e152300
+Ref: errno-and-friends152300
+Ref: 28f152345
+Ref: errno152345
+Ref: 290152365
+Ref: set_errno152365
+Ref: 291152391
+Ref: perror152391
+Ref: 292152416
+Ref: strerror152416
+Node: POSIX Locale152876
+Ref: posix locale152992
+Ref: 293152992
+Ref: posix-locale152992
+Ref: 294153027
+Ref: setlocale153027
+Node: Signal Handling154421
+Ref: signal handling154534
+Ref: 295154534
+Ref: signal-handling154534
+Ref: 296154575
+Ref: trap154575
+Node: Time Functions155403
+Ref: time functions155521
+Ref: 297155521
+Ref: time-functions155521
+Ref: 298155781
+Ref: time155781
+Ref: 299156006
+Ref: gettimeofday156006
+Ref: 29a156480
+Ref: clock156480
+Ref: 29b156768
+Ref: sleep156768
+Ref: 29c156790
+Ref: nanosleep156790
+Ref: 29d157803
+Ref: tzset157803
+Ref: 29e157863
+Ref: tzname157863
+Ref: 29f157884
+Ref: timezone157884
+Ref: 2a0157907
+Ref: daylight157907
+Ref: 2a1158724
+Ref: ctime158724
+Ref: 2a2158850
+Ref: gmtime158850
+Ref: 2a3158873
+Ref: localtime158873
+Ref: 2a6159246
+Ref: mktime159246
+Ref: 2a4159406
+Ref: asctime159406
+Ref: 2a5159431
+Ref: strftime159431
+Ref: 2a7159652
+Ref: strptime159652
+Node: Process Functions163993
+Ref: process functions164115
+Ref: 2a8164115
+Ref: process-functions164115
+Ref: 2ae164440
+Ref: system164440
+Ref: 2af164496
+Ref: execv164496
+Ref: 2b0164526
+Ref: execvp164526
+Ref: 2b1164557
+Ref: execve164557
+Ref: 2b2165442
+Ref: spawnv165442
+Ref: 2b3165478
+Ref: spawnvp165478
+Ref: 2b4165515
+Ref: spawnve165515
+Node: Basic I/O Interface166878
+Ref: basic i/o interface167002
+Ref: 2b5167002
+Ref: basic-i-o-interface167002
+Ref: 2b6167406
+Ref: stdin167406
+Ref: 2b7167426
+Ref: stdout167426
+Ref: 2b8167447
+Ref: stderr167447
+Ref: 2b9167500
+Ref: fopen167500
+Ref: 2ba167530
+Ref: popen167530
+Ref: 2bb167845
+Ref: fdopen167845
+Ref: 2bc168068
+Ref: freopen168068
+Ref: 2bd168292
+Ref: fclose168292
+Ref: 2be168316
+Ref: pclose168316
+Ref: 2bf168370
+Ref: tmpfile168370
+Ref: 2c0168559
+Ref: feof168559
+Ref: 2c1168581
+Ref: ferror168581
+Ref: 2c2168605
+Ref: clearerr168605
+Ref: 2c3168723
+Ref: fileno168723
+Ref: 2c4168813
+Ref: fflush168813
+Ref: 2c5168919
+Ref: fgets168919
+Ref: 2c6168942
+Ref: gets168942
+Ref: 2c7169077
+Ref: fget169077
+Ref: 2c8169188
+Ref: fputs169188
+Ref: 2c9169213
+Ref: puts169213
+Ref: 2ca169458
+Ref: fread169458
+Ref: 2cb169496
+Ref: fwrite169496
+Ref: 2cc169664
+Ref: fseek169664
+Ref: 2cd169701
+Ref: ftell169701
+Ref: 2ce169724
+Ref: rewind169724
+Ref: 2cf170111
+Ref: setbuf170111
+Ref: 2d0170139
+Ref: setvbuf170139
+Ref: 2d1172512
+Ref: gmp172512
+Ref: 2d2172512
+Ref: mpfr172512
+Ref: 2d3172512
+Ref: printf172512
+Ref: 2d4172545
+Ref: fprintf172545
+Ref: 2d5173087
+Ref: sprintf173087
+Ref: 2d6173554
+Ref: scanf173554
+Ref: 2d7173581
+Ref: fscanf173581
+Ref: 2d8174477
+Ref: sscanf174477
+Node: Stat and Friends175877
+Ref: stat and friends176003
+Ref: 2d9176003
+Ref: stat-and-friends176003
+Ref: 2da176046
+Ref: stat176046
+Ref: 2db176630
+Ref: lstat176630
+Ref: 2dc176872
+Ref: fstat176872
+Node: Reading Directories178695
+Ref: reading directories178816
+Ref: 2dd178816
+Ref: reading-directories178816
+Ref: 2de178865
+Ref: readdir178865
+Node: Shell Globbing179052
+Ref: shell globbing179171
+Ref: 2df179171
+Ref: shell-globbing179171
+Ref: 2e0179212
+Ref: fnmatch179212
+Ref: 2e1179375
+Ref: glob179375
+Node: Regex Matching179989
+Ref: regex matching180115
+Ref: 2e2180115
+Ref: module-regex180115
+Ref: aa180115
+Ref: regex-matching180115
+Ref: 2e3181047
+Ref: regex181047
+Ref: 2e4184431
+Ref: reg_result184431
+Ref: 2e5184635
+Ref: reg_info184635
+Ref: 2e6184729
+Ref: reg184729
+Ref: 2e7184879
+Ref: regs184879
+Ref: 2e8185212
+Ref: regexg185212
+Ref: 2e9185604
+Ref: regexgg185604
+Ref: 2ea185721
+Ref: regsub185721
+Ref: 2eb186249
+Ref: regsplit186249
+Ref: 2ec186644
+Ref: regexgs186644
+Ref: 2ed186688
+Ref: regexggs186688
+Ref: 2ee186733
+Ref: regsplits186733
+Node: Basic Examples187099
+Ref: basic examples187207
+Ref: 2ef187207
+Ref: basic-examples187207
+Node: Regex Substitutions and Splitting189119
+Ref: regex substitutions and splitting189249
+Ref: 2f0189249
+Ref: regex-substitutions-and-splitting189249
+Node: Empty Matches189945
+Ref: empty matches190071
+Ref: 2f1190071
+Ref: empty-matches190071
+Node: Submatches190979
+Ref: submatches191063
+Ref: 2f2191063
+Node: Additional POSIX Functions192439
+Ref: additional posix functions192565
+Ref: 2ad192565
+Ref: module-posix192565
+Ref: 28d192565
+Ref: additional-posix-functions192565
+Ref: 2a9193165
+Ref: fork193165
+Ref: 2f3193210
+Ref: getpid193210
+Ref: 2f4193231
+Ref: getppid193231
+Ref: 2ab193344
+Ref: wait193344
+Ref: 2ac193370
+Ref: waitpid193370
+Ref: 2aa193589
+Ref: kill193589
+Ref: 2f5193666
+Ref: raise193666
+Ref: 2f6193743
+Ref: pause193743
+Ref: 2f7193801
+Ref: module-getopt193801
+Node: Option Parsing193801
+Ref: option parsing193904
+Ref: b8193904
+Ref: option-parsing193904
+Ref: 2f8194190
+Ref: getopt194190
+Node: Index197328
+Ref: index197399
 
 End Tag Table
 

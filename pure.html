@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.48, October 13, 2011</p>
+<p>Version 0.48, October 18, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -5656,7 +5656,7 @@ compute the greatest common divisor of two (machine) integers:</p>
 </pre></div>
 </div>
 <p>Let&#8217;s say that this code is in the file <tt class="docutils literal"><span class="pre">mygcd.c</span></tt>, then you&#8217;d compile it to
-a bitcode module using llvm-gcc as follows:</p>
+a bitcode module using <a class="reference internal" href="#llvm-gcc">llvm-gcc</a> as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre>llvm-gcc -emit-llvm -c mygcd.c -o mygcd.bc
 </pre></div>
 </div>
@@ -5710,6 +5710,31 @@ is actually to be called from Pure.</li>
 </div>
 <div class="section" id="inline-code">
 <h3><a class="toc-backref" href="#id82">Inline Code</a><a class="headerlink" href="#inline-code" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The facility described below requires that you have an LLVM-capable
+C/C++ compiler installed. The available options right now are <a class="reference internal" href="#clang">clang</a>,
+<a class="reference internal" href="#llvm-gcc">llvm-gcc</a> and <a class="reference internal" href="#dragonegg">dragonegg</a>. Please check the Pure installation instructions
+on how to get one of these (or all of them) up and running.  Note that
+clang and llvm-gcc are standalone compilers, while dragonegg is supplied as
+a gcc plugin which hooks into your existing system compiler (gcc 4.5 or
+later is required for that). Any of these enable you to compile C/C++
+source to LLVM assembler or bitcode. The clang compiler is recommended for
+C/C++ development, as it offers faster compilation times and has much
+better diagnostics than gcc. On the other hand, llvm-gcc and dragonegg have
+the advantage that they also support alternative frontends so that you can
+compile Fortran and Ada code as well.</p>
+<p class="last">At present, the default LLVM compiler used by the Pure interpreter is
+llvm-gcc, unless you compiled Pure itself using clang, in which case clang
+is used as the default for C/C++ compilation. You can easily change the
+default with the corresponding environment variables, see below. In the
+future dragonegg might be used as the new default instead, as soon as it is
+widely supported. Note that llvm-gcc is currently being phased out in
+favour of dragonegg, and will not be supported in the LLVM 3.x series any
+more. Thus with LLVM 3.0 or later we recommend using dragonegg or clang
+instead, although recent llvm-gcc versions should continue to work as well,
+at least with LLVM 3.0.</p>
+</div>
 <p>Instead of manually compiling source files to bitcode modules, you can also
 just place the source code into a Pure script, enclosing it in <tt class="docutils literal"><span class="pre">%&lt;</span> <span class="pre">...</span> <span class="pre">%&gt;</span></tt>.
 (Optionally, the opening brace may also be preceded with a <a class="reference internal" href="#public"><tt class="xref std std-keyword docutils literal"><span class="pre">public</span></tt></a>
@@ -5743,14 +5768,10 @@ instead (see <a class="reference internal" href="#importing-llvm-bitcode">Import
 to an executable (see <a class="reference internal" href="#batch-compilation">Batch Compilation</a>).</p>
 <p>Currently, C, C++, Fortran and Faust are supported as foreign source
 languages, with llvm-gcc, llvm-g++, llvm-gfortran and faust as the
-corresponding compilers. Alternatively, the LLVM clang and clang++ compilers
-can be used for C/C++ compilation (this will actually be default if the Pure
-interpreter itself was compiled with clang). Examples for all of these can be
-found in the Pure sources.</p>
-<p>C is the default language. The desired source language can be selected by
-placing an appropriate tag into the inline code section, immediately after the
-opening brace. (The tag is removed before the code is submitted to
-compilation.) For instance:</p>
+corresponding (default) compilers. C is the default language. The desired
+source language can be selected by placing an appropriate tag into the inline
+code section, immediately after the opening brace. (The tag is removed before
+the code is submitted to compilation.) For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre>%&lt; -*- Fortran90 -*-
 function fact(n) result(p)
   integer n, p
@@ -5786,12 +5807,20 @@ variable lets you specify the exact name of the executable along with any
 debugging and optimization options that you may want to add. Likewise,
 <span class="target" id="index-23"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_CXX</span></tt>, <span class="target" id="index-24"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_FC</span></tt> and <span class="target" id="index-25"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_FAUST</span></tt> are used for
 the C++, Fortran and Faust compilers, respectively.</p>
-<p>For instance, if you prefer to use clang as your C compiler, and you&#8217;d like to
-invoke it with the <tt class="docutils literal"><span class="pre">-O3</span></tt> optimization option, you would set
+<p>For instance, if you prefer to use <a class="reference internal" href="#clang">clang</a> as your C compiler, and you&#8217;d like
+to invoke it with the <tt class="docutils literal"><span class="pre">-O3</span></tt> optimization option, you would set
 <span class="target" id="index-26"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_CC</span></tt> to <tt class="docutils literal"><span class="pre">&quot;clang</span> <span class="pre">-O3&quot;</span></tt>. (To verify the settings you made, you
 can have the interpreter echo the compilation commands which are actually
 executed, by running Pure with the <tt class="docutils literal"><span class="pre">-v0100</span></tt> option, see <a class="reference internal" href="#verbosity-and-debugging-options">Verbosity and
-Debugging Options</a>.)</p>
+Debugging Options</a>. Also note that the options necessary to produce LLVM
+bitcode will be added automatically, so you don&#8217;t have to specify these.)</p>
+<p>Beginning with Pure 0.48, the <a class="reference internal" href="#dragonegg">dragonegg</a> gcc plugin is also fully supported.
+To make this work, you need to explicitly specify the name of the plugin in
+the compilation command, so that the Pure interpreter can add the proper set
+of options needed for bitcode compilation. For instance:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="go">PURE_CC=&quot;gcc -fplugin=dragonegg -O3&quot;</span>
+</pre></div>
+</div>
 <p>Some further details on the bitcode support for specific target languages can
 be found in the subsections below.</p>
 </div>
@@ -8633,8 +8662,14 @@ Addison-Wesley, 1988.</dd>
 <dt>Clang</dt>
 <dd>The new C/C++/Objective C compiler designed specifically to work on top of
 LLVM, <a class="reference external" href="http://clang.llvm.org">http://clang.llvm.org</a>. Clang provides a comparatively light-weight
-alternative to llvm-gcc which is faster and has better and more friendly
+alternative to <a class="reference internal" href="#llvm-gcc">llvm-gcc</a> which is faster and has better and more friendly
 diagnostics than gcc.</dd>
+</dl>
+<dl class="docutils" id="dragonegg">
+<dt>DragonEgg</dt>
+<dd>An LLVM backend for gcc 4.5 and later, <a class="reference external" href="http://dragonegg.llvm.org">http://dragonegg.llvm.org</a>. In
+contrast to <a class="reference internal" href="#llvm-gcc">llvm-gcc</a>, DragonEgg is implemented as a plugin which hooks
+into your system compiler.</dd>
 </dl>
 <dl class="docutils" id="faust">
 <dt>Faust</dt>
@@ -8661,6 +8696,12 @@ numeric matrices, <a class="reference external" href="http://www.gnu.org/softwar
 <dl class="docutils" id="llvm">
 <dt>LLVM</dt>
 <dd>The LLVM code generator framework, <a class="reference external" href="http://llvm.org">http://llvm.org</a>.</dd>
+</dl>
+<dl class="docutils" id="llvm-gcc">
+<dt>LLVM-GCC</dt>
+<dd>An LLVM-capable compiler based on gcc, see <a class="reference external" href="http://llvm.org">http://llvm.org</a>. This is based
+on a fairly old gcc version (4.2) and is currently being phased out in
+favour of the <a class="reference internal" href="#dragonegg">DragonEgg</a> plugin.</dd>
 </dl>
 <dl class="docutils" id="miranda">
 <dt>Miranda</dt>

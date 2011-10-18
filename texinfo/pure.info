@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.48, October 13, 2011
+  Version 0.48, October 18, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -6093,11 +6093,11 @@ compute the greatest common divisor of two (machine) integers:
     }
 
 Let's say that this code is in the file `mygcd.c', then you'd compile
-it to a bitcode module using llvm-gcc as follows:
+it to a bitcode module using *note llvm-gcc: f0. as follows:
 
     llvm-gcc -emit-llvm -c mygcd.c -o mygcd.bc
 
-Or, if you prefer to use *note clang: f0, the new LLVM-based C/C++
+Or, if you prefer to use *note clang: f1, the new LLVM-based C/C++
 compiler:
 
     clang -emit-llvm -c mygcd.c -o mygcd.bc
@@ -6123,7 +6123,7 @@ Some more examples showing how to use the bitcode interface can be
 found in the Pure sources. In particular, the interface also works with
 Fortran (using llvm-gfortran), and there is special support for
 interfacing to Grame's functional DSP programming language *note Faust:
-f1. (the latter uses a special variant of the bitcode loader, which is
+f2. (the latter uses a special variant of the bitcode loader, which is
 selected with the `dsp' tag in the *note using: 36. clause). Further
 details about these can be found below.
 
@@ -6156,6 +6156,33 @@ File: pure.info,  Node: Inline Code,  Next: Interfacing to C++,  Prev: Importing
 
 10.6 Inline Code
 ================
+
+     Note: The facility described below requires that you have an
+     LLVM-capable C/C++ compiler installed. The available options right
+     now are *note clang: f1, *note llvm-gcc: f0. and *note dragonegg:
+     f3. Please check the Pure installation instructions on how to get
+     one of these (or all of them) up and running.  Note that clang and
+     llvm-gcc are standalone compilers, while dragonegg is supplied as
+     a gcc plugin which hooks into your existing system compiler (gcc
+     4.5 or later is required for that). Any of these enable you to
+     compile C/C++ source to LLVM assembler or bitcode. The clang
+     compiler is recommended for C/C++ development, as it offers faster
+     compilation times and has much better diagnostics than gcc. On the
+     other hand, llvm-gcc and dragonegg have the advantage that they
+     also support alternative frontends so that you can compile Fortran
+     and Ada code as well.
+
+     At present, the default LLVM compiler used by the Pure interpreter
+     is llvm-gcc, unless you compiled Pure itself using clang, in which
+     case clang is used as the default for C/C++ compilation. You can
+     easily change the default with the corresponding environment
+     variables, see below. In the future dragonegg might be used as the
+     new default instead, as soon as it is widely supported. Note that
+     llvm-gcc is currently being phased out in favour of dragonegg, and
+     will not be supported in the LLVM 3.x series any more. Thus with
+     LLVM 3.0 or later we recommend using dragonegg or clang instead,
+     although recent llvm-gcc versions should continue to work as well,
+     at least with LLVM 3.0.
 
 Instead of manually compiling source files to bitcode modules, you can
 also just place the source code into a Pure script, enclosing it in `%<
@@ -6193,15 +6220,11 @@ an executable (see *note Batch Compilation: b.).
 
   Currently, C, C++, Fortran and Faust are supported as foreign source
 languages, with llvm-gcc, llvm-g++, llvm-gfortran and faust as the
-corresponding compilers. Alternatively, the LLVM clang and clang++
-compilers can be used for C/C++ compilation (this will actually be
-default if the Pure interpreter itself was compiled with clang).
-Examples for all of these can be found in the Pure sources.
-
-  C is the default language. The desired source language can be
-selected by placing an appropriate tag into the inline code section,
-immediately after the opening brace. (The tag is removed before the
-code is submitted to compilation.) For instance:
+corresponding (default) compilers. C is the default language. The
+desired source language can be selected by placing an appropriate tag
+into the inline code section, immediately after the opening brace. (The
+tag is removed before the code is submitted to compilation.) For
+instance:
 
     %< -*- Fortran90 -*-
     function fact(n) result(p)
@@ -6225,7 +6248,7 @@ such as `fortran90' which is used in the example above. The language
 tag can also be followed by a module name, using the format `-*-
 lang:name -*-'. This is optional for all languages except Faust (where
 the module name specifies the namespace for the interface routines of
-the Faust module; see *note Interfacing to Faust: f2. below). So, e.g.,
+the Faust module; see *note Interfacing to Faust: f4. below). So, e.g.,
 a Faust DSP named `test' would be specified with a `dsp:test' tag. Case
 is _significant_ in the module name.
 
@@ -6240,14 +6263,24 @@ executable along with any debugging and optimization options that you
 may want to add. Likewise, `PURE_CXX', `PURE_FC' and `PURE_FAUST' are
 used for the C++, Fortran and Faust compilers, respectively.
 
-  For instance, if you prefer to use clang as your C compiler, and
-you'd like to invoke it with the `-O3' optimization option, you would
-set `PURE_CC' to `"clang -O3"'. (To verify the settings you made, you
-can have the interpreter echo the compilation commands which are
-actually executed, by running Pure with the `-v0100' option, see *note
-Verbosity and Debugging Options: 3f.)
+  For instance, if you prefer to use *note clang: f1. as your C
+compiler, and you'd like to invoke it with the `-O3' optimization
+option, you would set `PURE_CC' to `"clang -O3"'. (To verify the
+settings you made, you can have the interpreter echo the compilation
+commands which are actually executed, by running Pure with the `-v0100'
+option, see *note Verbosity and Debugging Options: 3f. Also note that
+the options necessary to produce LLVM bitcode will be added
+automatically, so you don't have to specify these.)
 
-  Some further details on the bitcode support for specific target
+  Beginning with Pure 0.48, the *note dragonegg: f3. gcc plugin is also
+fully supported.  To make this work, you need to explicitly specify the
+name of the plugin in the compilation command, so that the Pure
+interpreter can add the proper set of options needed for bitcode
+compilation. For instance:
+
+    PURE_CC="gcc -fplugin=dragonegg -O3"
+
+Some further details on the bitcode support for specific target
 languages can be found in the subsections below.
 
 
@@ -6346,7 +6379,7 @@ File: pure.info,  Node: Interfacing to Faust,  Prev: Interfacing to C++,  Up: C 
 10.8 Interfacing to Faust
 =========================
 
-*note Faust: f1. is a functional dsp (a.k.a. digital signal processing)
+*note Faust: f2. is a functional dsp (a.k.a. digital signal processing)
 programming language developed at Grame, which is tailored to the task
 of generating and transforming streams of numeric data at the sample
 level. It is typically used to program sound synthesis and audio effect
@@ -6665,7 +6698,7 @@ command. The command language is intended solely for interactive
 purposes and thus doesn't offer any programming facilities of its own.
 However, it can be extended with user-defined commands implemented as
 ordinary Pure functions; this is described in the *note User-Defined
-Commands: fb.  section below.
+Commands: fd.  section below.
 
      Note: The interactive commands are only recognized at the very
      beginning of the command line. As most of the commands look just
@@ -6776,7 +6809,7 @@ File: pure.info,  Node: Interactive Commands,  Next: Specifying Symbol Selection
 
 The following built-in commands are always understood by the
 interpreter. (In addition, you can define your own commands for
-frequently-used operations; see *note User-Defined Commands: fb. below.)
+frequently-used operations; see *note User-Defined Commands: fd. below.)
 
  -- Description: ! command
      Shell escape.
@@ -6803,17 +6836,17 @@ frequently-used operations; see *note User-Defined Commands: fb. below.)
      Purge the definitions of the given symbols (functions, macros,
      constants or global variables). All symbols must be specified in
      fully qualified form, see the remarks below. If invoked as `clear
-     ans', clears the `ans' value (see *note Last Result: 104. below).
+     ans', clears the `ans' value (see *note Last Result: 106. below).
      When invoked without any arguments, `clear' purges all definitions
      at the current interactive "level" (after confirmation) and
      returns you to the previous level, if any. (It might be a good
      idea to first check your current definitions with `show' or back
      them up with `dump' before you do that.)  The desired level can be
      specified with the `-t' option. See the description of the `save'
-     command and *note Definition Levels: 105. below for further
+     command and *note Definition Levels: 107. below for further
      details. A description of the common options accepted by the
      `clear', `dump' and `show' commands can be found in *note
-     Specifying Symbol Selections: 106. below.
+     Specifying Symbol Selections: 108. below.
 
  -- Description: del [-b|-m|-t] [symbol ...]
      Deletes breakpoints and tracepoints on the given function or
@@ -6845,7 +6878,7 @@ frequently-used operations; see *note User-Defined Commands: fb. below.)
      some objects like closures, thunks and pointers don't have a
      textual representation from which they could be reconstructed. To
      handle these, you'll probably have to prepare a corresponding
-     .purerc file yourself, see *note Interactive Startup: 109. below.
+     .purerc file yourself, see *note Interactive Startup: 10b. below.
 
      A different filename can be specified with the `-n' option, which
      expects the name of the script to be written in the next argument,
@@ -6877,7 +6910,7 @@ frequently-used operations; see *note User-Defined Commands: fb. below.)
  -- Description: override
      Enter "override" mode. This allows you to add equations "above"
      existing definitions in the source script, possibly overriding
-     existing equations. See *note Definition Levels: 105. below for
+     existing equations. See *note Definition Levels: 107. below for
      details.
 
  -- Description: pwd
@@ -6911,21 +6944,21 @@ frequently-used operations; see *note User-Defined Commands: fb. below.)
      environment by just running a script containing the necessary
      namespace declarations and compiler directives. (Alternatively,
      you can also use the interpreter's startup files for that purpose,
-     see *note Interactive Startup: 109. below.)
+     see *note Interactive Startup: 10b. below.)
 
  -- Description: save
      Begin a new level of temporary definitions. A subsequent `clear'
      command (see above) will purge the definitions made since the most
-     recent `save' command. See *note Definition Levels: 105. below for
+     recent `save' command. See *note Definition Levels: 107. below for
      details.
 
  -- Description: show [option ...] [symbol ...]
      Show the definitions of symbols in various formats. See *note The
-     show Command: 113.  below for details. All symbols must be
+     show Command: 115.  below for details. All symbols must be
      specified in fully qualified form, see the remarks below. A
      description of the common options accepted by the `clear', `dump'
      and `show' commands can be found in *note Specifying Symbol
-     Selections: 106. below.
+     Selections: 108. below.
 
  -- Description: stats [-m] [on|off]
      Enables (default) or disables "stats" mode, in which some
@@ -6953,7 +6986,7 @@ frequently-used operations; see *note User-Defined Commands: fb. below.)
  -- Description: underride
      Exits "override" mode. This returns you to the normal mode of
      operation, where new equations are added "below" previous rules of
-     an existing function. See *note Definition Levels: 105. below for
+     an existing function. See *note Definition Levels: 107. below for
      details.
 
   Note that symbols (identifiers, operators etc.) must always be
@@ -6967,7 +7000,7 @@ special commands for the benefit of other programs such as *emacs*
 driving the interpreter; currently these are `completion_matches',
 `help_matches' and `help_index'. These aren't supposed to be invoked
 directly by the user, although they may sometimes be useful to
-implement custom functionality, see *note User-Defined Commands: fb.
+implement custom functionality, see *note User-Defined Commands: fd.
 
 
 File: pure.info,  Node: Specifying Symbol Selections,  Next: The show Command,  Prev: Interactive Commands,  Up: Interactive Usage
@@ -7049,7 +7082,7 @@ that a macro or function symbol may well have defining equations at
 different levels, in which case a command like `clear -tn foo' might
 only affect some part of `foo''s definition. The `dump' and `show'
 commands work analogously (albeit less destructively). See *note
-Definition Levels: 105. below for some examples.
+Definition Levels: 107. below for some examples.
 
 
 File: pure.info,  Node: The show Command,  Next: Definition Levels,  Prev: Specifying Symbol Selections,  Up: Interactive Usage
@@ -7704,7 +7737,7 @@ function you can easily go back to the standard print syntax:
 Note that if you have a set of definitions for the *note __show__: a9.
 function which should always be loaded at startup, you can put them
 into the interpreter's interactive startup files, see *note Interactive
-Startup: 109. below.
+Startup: 10b. below.
 
 
 File: pure.info,  Node: User-Defined Commands,  Next: Interactive Startup,  Prev: Pretty-Printing,  Up: Interactive Usage
@@ -7717,7 +7750,7 @@ commands. To these ends, all you have to do is provide some
 corresponding public function definitions in the special `__cmd__'
 namespace (cf. *note Namespaces: 81.). These definitions are typically
 placed in one of the interpreter's startup files (see *note Interactive
-Startup: 109. below) so that they are always available when running the
+Startup: 10b. below) so that they are always available when running the
 interpreter interactively.
 
   A command function is invoked with one string argument which contains
@@ -7945,7 +7978,7 @@ implies the following quirks and limitations:
      which are actually called somewhere in the static program text are
      available to `eval'.  (The *note -u: 25. option and the *note
      --required: 54. pragma can be used to avoid this, see *note
-     Options Affecting Code Size: 11b. below.)
+     Options Affecting Code Size: 11d. below.)
 
    * Code which gets executed to compute constant values at compile
      time will generally _not_ be executed in the compiled executable,
@@ -7956,7 +7989,7 @@ implies the following quirks and limitations:
      requires an initialization at run time, then the batch compiler
      will generate code for that. (The same happens if the *note
      --noconst: 4b. option is used to force computation of constant
-     values at run time, see *note Options Affecting Code Size: 11b.)
+     values at run time, see *note Options Affecting Code Size: 11d.)
 
   What all this boils down to is that anything which requires the
 compile time or interactive facilities of the interpreter, is
@@ -8387,11 +8420,11 @@ File: pure.info,  Node: Backward Compatibility,  Next: Error Recovery,  Prev: Et
 13.2 Backward Compatibility
 ===========================
 
-Pure is based on the author's earlier *note Q: 123. language, but it
+Pure is based on the author's earlier *note Q: 125. language, but it
 offers many new and powerful features and programs run much faster than
 their Q equivalents. The language also went through a thorough facelift
 in order to modernize the syntax and make it more similar to other
-modern-style functional languages, in particular *note Miranda: 124.
+modern-style functional languages, in particular *note Miranda: 126.
 and *note Haskell: 6c. Thus porting Q scripts to Pure often involves a
 substantial amount of manual work, but it can (and has) been done.
 
@@ -8456,7 +8489,7 @@ already normalized, or you'll have to normalize the result yourself.
   Also, as of Pure 0.41 the batch compiler produces stripped
 executables by default. To create unstripped executables you now have
 to use the *note -u: 25.  option, see *note Options Affecting Code
-Size: 11b. for details. The `-s' option to produce stripped executables
+Size: 11d. for details. The `-s' option to produce stripped executables
 is still provided for backward compatibility, but it won't have any
 effect unless you use it to override a previous *note -u: 25. option.
 
@@ -8485,7 +8518,7 @@ wishlist for the forthcoming 1.0 release:
 
    * You can now define your own interactive commands by placing
      suitable function definitions in the special `__cmd__' namespace;
-     see *note User-Defined Commands: fb. for details.
+     see *note User-Defined Commands: fd. for details.
 
    * The syntax used to denote *note inline code: 66. sections was
      changed from `%{...%}' to `%<...%>'. This resolves an ambiguity in
@@ -9089,7 +9122,7 @@ initialization code in this case. For all practical purposes, this
 turns the constant into a read-only variable. (There's also a code
 generation option to force this behaviour even for "normal" constants
 for which it's not strictly necessary, in order to create smaller
-executables; see *note Options Affecting Code Size: 11b. for details.)
+executables; see *note Options Affecting Code Size: 11d. for details.)
 
 
 File: pure.info,  Node: External C Functions,  Next: Calling Special Forms,  Prev: Constant Definitions,  Up: Caveats and Notes
@@ -9145,7 +9178,7 @@ File: pure.info,  Node: Laziness,  Next: Showing Macro Expansions,  Prev: Callin
 13.14 Laziness
 ==============
 
-Pure does lazy evaluation in the same way as *note Alice ML: 12d,
+Pure does lazy evaluation in the same way as *note Alice ML: 12f,
 providing an explicit operation (*note &: 71.) to defer evaluation and
 create a "future" which is called by need. However, note that like any
 language with a basically eager evaluation strategy, Pure cannot really
@@ -9468,8 +9501,15 @@ Bertrand
 Clang
      The new C/C++/Objective C compiler designed specifically to work
      on top of LLVM, <http://clang.llvm.org>. Clang provides a
-     comparatively light-weight alternative to llvm-gcc which is faster
-     and has better and more friendly diagnostics than gcc.
+     comparatively light-weight alternative to *note llvm-gcc: f0.
+     which is faster and has better and more friendly diagnostics than
+     gcc.
+
+DragonEgg
+     An LLVM backend for gcc 4.5 and later,
+     <http://dragonegg.llvm.org>. In contrast to *note llvm-gcc: f0,
+     DragonEgg is implemented as a plugin which hooks into your system
+     compiler.
 
 Faust
      Grame's functional DSP programming language,
@@ -9492,6 +9532,11 @@ Haskell
 
 LLVM
      The LLVM code generator framework, <http://llvm.org>.
+
+LLVM-GCC
+     An LLVM-capable compiler based on gcc, see <http://llvm.org>. This
+     is based on a fairly old gcc version (4.2) and is currently being
+     phased out in favour of the *note DragonEgg: f3. plugin.
 
 Miranda
      David Turner's non-strict FPL, <http://miranda.org.uk>. Miranda
@@ -9580,16 +9625,16 @@ Index
 * environment variable HOME:             Interactive Startup. (line  12)
 * environment variable LD_LIBRARY_PATH:  Importing Dynamic Libraries.
                                                               (line  32)
-* environment variable PATH <1>:         Inline Code.         (line  81)
+* environment variable PATH <1>:         Inline Code.         (line 104)
 * environment variable PATH <2>:         Hierarchical Namespaces.
                                                               (line  34)
 * environment variable PATH:             Modules and Imports. (line 134)
-* environment variable PURE_CC:          Inline Code.         (line  83)
-* environment variable PURE_CXX:         Inline Code.         (line  86)
+* environment variable PURE_CC:          Inline Code.         (line 106)
+* environment variable PURE_CXX:         Inline Code.         (line 109)
 * environment variable PURE_EAGER_JIT <1>: Environment.       (line  25)
 * environment variable PURE_EAGER_JIT:   Compiling Scripts.   (line  18)
-* environment variable PURE_FAUST:       Inline Code.         (line  86)
-* environment variable PURE_FC:          Inline Code.         (line  86)
+* environment variable PURE_FAUST:       Inline Code.         (line 109)
+* environment variable PURE_FC:          Inline Code.         (line 109)
 * environment variable PURE_HELP <1>:    Online Help.         (line  13)
 * environment variable PURE_HELP:        Environment.         (line  16)
 * environment variable PURE_INCLUDE <1>: Importing Dynamic Libraries.
@@ -9628,7 +9673,7 @@ Index
                                                               (line  96)
 * override command:                      Interactive Commands.
                                                               (line 106)
-* PATH <1>:                              Inline Code.         (line  81)
+* PATH <1>:                              Inline Code.         (line 104)
 * PATH <2>:                              Hierarchical Namespaces.
                                                               (line  34)
 * PATH:                                  Modules and Imports. (line 134)
@@ -9687,11 +9732,11 @@ Index
 * pure command line option -v[level]:    Options.             (line  65)
 * pure command line option -w:           Options.             (line  71)
 * pure command line option -x:           Options.             (line  74)
-* PURE_CC:                               Inline Code.         (line  83)
-* PURE_CXX:                              Inline Code.         (line  86)
+* PURE_CC:                               Inline Code.         (line 106)
+* PURE_CXX:                              Inline Code.         (line 109)
 * PURE_EAGER_JIT:                        Compiling Scripts.   (line  18)
-* PURE_FAUST:                            Inline Code.         (line  86)
-* PURE_FC:                               Inline Code.         (line  86)
+* PURE_FAUST:                            Inline Code.         (line 109)
+* PURE_FC:                               Inline Code.         (line 109)
 * PURE_HELP <1>:                         Online Help.         (line  13)
 * PURE_HELP:                             Environment.         (line  16)
 * PURE_INCLUDE <1>:                      Importing Dynamic Libraries.
@@ -10282,285 +10327,289 @@ Node: Importing LLVM Bitcode252024
 Ref: importing llvm bitcode252148
 Ref: ef252148
 Ref: importing-llvm-bitcode252148
-Node: Inline Code257866
-Ref: inline code257981
-Ref: 66257981
-Ref: inline-code257981
-Ref: f3261355
-Ref: index-21261355
-Ref: f4261469
-Ref: index-22261469
-Ref: f5261670
-Ref: index-23261670
-Ref: f6261682
-Ref: index-24261682
-Ref: f7261696
-Ref: index-25261696
-Ref: f8261916
-Ref: index-26261916
-Node: Interfacing to C++262273
-Ref: interfacing to c++262386
-Ref: f9262386
-Ref: interfacing-to-c262386
-Node: Interfacing to Faust264869
-Ref: interfacing to faust264962
-Ref: f2264962
-Ref: interfacing-to-faust264962
-Ref: fa266105
-Ref: llvm-backend-for-faust266105
-Node: Interactive Usage277720
-Ref: interactive usage277821
-Ref: a277821
-Ref: interactive-usage277821
-Node: Online Help281250
-Ref: online help281342
-Ref: 4281342
-Ref: online-help281342
-Ref: fc281811
-Ref: index-27281811
-Ref: fd281839
-Ref: index-28281839
-Ref: fe283342
-Ref: docutils283342
-Node: Interactive Commands284283
-Ref: interactive commands284412
-Ref: cc284412
-Ref: interactive-commands284412
-Ref: ff284664
-Ref: index-29284664
-Ref: 100284711
-Ref: index-30284711
-Ref: 101285138
-Ref: index-31285138
-Ref: 102285464
-Ref: index-32285464
-Ref: 103285526
-Ref: index-33285526
-Ref: 107286515
-Ref: index-34286515
-Ref: 108287292
-Ref: index-35287292
-Ref: 10a288812
-Ref: index-36288812
-Ref: 10b289140
-Ref: index-37289140
-Ref: 10c289206
-Ref: index-38289206
-Ref: 10d289757
-Ref: index-39289757
-Ref: 10e290004
-Ref: index-40290004
-Ref: 10f290084
-Ref: index-41290084
-Ref: 110290135
-Ref: index-42290135
-Ref: 111291820
-Ref: index-43291820
-Ref: 112292071
-Ref: index-44292071
-Ref: 114292485
-Ref: index-45292485
-Ref: 115293102
-Ref: index-46293102
-Ref: 116293722
-Ref: index-47293722
-Node: Specifying Symbol Selections294706
-Ref: specifying symbol selections294840
-Ref: 106294840
-Ref: specifying-symbol-selections294840
-Node: The show Command298247
-Ref: the show command298378
-Ref: 113298378
-Ref: the-show-command298378
-Ref: 117299480
-Ref: index-48299480
-Node: Definition Levels302246
-Ref: definition levels302358
-Ref: 105302358
-Ref: definition-levels302358
-Node: Debugging307608
-Ref: debugging307715
-Ref: 42307715
-Ref: 118309406
-Ref: index-49309406
-Node: Last Result318529
-Ref: last result318634
-Ref: 104318634
-Ref: last-result318634
-Node: Pretty-Printing319344
-Ref: pretty-printing319461
-Ref: aa319461
-Ref: a9319667
-Ref: __show__319667
-Node: User-Defined Commands323258
-Ref: user-defined commands323383
-Ref: fb323383
-Ref: user-defined-commands323383
-Node: Interactive Startup329321
-Ref: interactive startup329422
-Ref: 109329422
-Ref: interactive-startup329422
-Ref: 119329787
-Ref: index-50329787
-Node: Batch Compilation330745
-Ref: batch compilation330852
-Ref: b330852
-Ref: batch-compilation330852
-Ref: 11a330852
-Ref: id15330852
-Ref: 11c335957
-Ref: partial-evaluation335957
-Node: Example336075
-Ref: example336170
-Ref: 11d336170
-Node: Options Affecting Code Size339114
-Ref: options affecting code size339243
-Ref: 11b339243
-Ref: options-affecting-code-size339243
-Node: Other Output Code Formats342731
-Ref: other output code formats342882
-Ref: 11e342882
-Ref: other-output-code-formats342882
-Ref: 11f347391
-Ref: llvm-documentation347391
-Node: Calling Pure Functions From C347391
-Ref: calling pure functions from c347506
-Ref: 120347506
-Ref: calling-pure-functions-from-c347506
-Node: Caveats and Notes348999
-Ref: caveats and notes349095
-Ref: c349095
-Ref: caveats-and-notes349095
-Node: Etymology349742
-Ref: etymology349834
-Ref: 121349834
-Node: Backward Compatibility350684
-Ref: backward compatibility350799
-Ref: 122350799
-Ref: backward-compatibility350799
-Node: Error Recovery358537
-Ref: error recovery358662
-Ref: 125358662
-Ref: error-recovery358662
-Node: Non-Linear Patterns359318
-Ref: non-linear patterns359434
-Ref: 126359434
-Ref: non-linear-patterns359434
-Node: "As" Patterns360834
-Ref: "as" patterns360962
-Ref: ce360962
-Ref: as-patterns360962
-Node: "Head = Function" Pitfalls363097
-Ref: "head = function" pitfalls363223
-Ref: 127363223
-Ref: head-function-pitfalls363223
-Node: Defined Functions365414
-Ref: defined functions365542
-Ref: 58365542
-Ref: defined-functions365542
-Node: Recursive Types368870
-Ref: recursive types368985
-Ref: a3368985
-Ref: recursive-types368985
-Node: With and when372717
-Ref: with and when372835
-Ref: 128372835
-Ref: with-and-when372835
-Node: Numeric Calculations374961
-Ref: numeric calculations375084
-Ref: 129375084
-Ref: numeric-calculations375084
-Node: Constant Definitions376995
-Ref: constant definitions377125
-Ref: a4377125
-Ref: constant-definitions377125
-Node: External C Functions382870
-Ref: external c functions383001
-Ref: e2383001
-Ref: external-c-functions383001
-Ref: 12a384281
-Ref: libffi384281
-Node: Calling Special Forms384666
-Ref: calling special forms384785
-Ref: 12b384785
-Ref: calling-special-forms384785
-Node: Laziness385272
-Ref: laziness385395
-Ref: 12c385395
-Node: Showing Macro Expansions389893
-Ref: showing macro expansions390024
-Ref: 12e390024
-Ref: showing-macro-expansions390024
-Node: Stack Size and Tail Recursion391659
-Ref: stack size and tail recursion391814
-Ref: 48391814
-Ref: stack-size-and-tail-recursion391814
-Ref: 12f392202
-Ref: index-51392202
-Ref: 130392414
-Ref: index-52392414
-Ref: 131392702
-Ref: index-53392702
-Node: Handling of Asynchronous Signals393766
-Ref: handling of asynchronous signals393888
-Ref: 49393888
-Ref: handling-of-asynchronous-signals393888
-Node: Author395909
-Ref: author396004
-Ref: 132396004
-Node: Acknowledgements396139
-Ref: acknowledgements396224
-Ref: 133396224
-Node: Copying397423
-Ref: copying397522
-Ref: 3397522
-Node: References and Links399884
-Ref: references and links399972
-Ref: 134399972
-Ref: references-and-links399972
-Ref: 88400021
-Ref: aardappel400021
-Ref: 12d400162
-Ref: alice-ml400162
-Ref: 10400297
-Ref: baader-and-nipkow400297
-Ref: bb400415
-Ref: bertrand400415
-Ref: f0400675
-Ref: clang400675
-Ref: f1400947
-Ref: faust400947
-Ref: 135401034
-Ref: gnu-multiprecision-library401034
-Ref: 80401034
-Ref: gmp401034
-Ref: 136401142
-Ref: gnu-octave401142
-Ref: a8401142
-Ref: octave401142
-Ref: 84401286
-Ref: gnu-scientific-library401286
-Ref: 137401286
-Ref: gsl401286
-Ref: 6c401447
-Ref: haskell401447
-Ref: 7401513
-Ref: llvm401513
-Ref: 124401578
-Ref: miranda401578
-Ref: 6d401749
-Ref: ml401749
-Ref: f401908
-Ref: michael-o-donnell401908
-Ref: 123402058
-Ref: q402058
-Node: Index402143
-Ref: index402215
-Ref: b2417642
-Ref: 91417673
-Ref: 90417704
-Ref: 77417735
-Ref: 76417766
+Node: Inline Code257877
+Ref: inline code257992
+Ref: 66257992
+Ref: inline-code257992
+Ref: f5262816
+Ref: index-21262816
+Ref: f6262930
+Ref: index-22262930
+Ref: f7263131
+Ref: index-23263131
+Ref: f8263143
+Ref: index-24263143
+Ref: f9263157
+Ref: index-25263157
+Ref: fa263388
+Ref: index-26263388
+Node: Interfacing to C++264212
+Ref: interfacing to c++264325
+Ref: fb264325
+Ref: interfacing-to-c264325
+Node: Interfacing to Faust266808
+Ref: interfacing to faust266901
+Ref: f4266901
+Ref: interfacing-to-faust266901
+Ref: fc268044
+Ref: llvm-backend-for-faust268044
+Node: Interactive Usage279659
+Ref: interactive usage279760
+Ref: a279760
+Ref: interactive-usage279760
+Node: Online Help283189
+Ref: online help283281
+Ref: 4283281
+Ref: online-help283281
+Ref: fe283750
+Ref: index-27283750
+Ref: ff283778
+Ref: index-28283778
+Ref: 100285281
+Ref: docutils285281
+Node: Interactive Commands286222
+Ref: interactive commands286351
+Ref: cc286351
+Ref: interactive-commands286351
+Ref: 101286603
+Ref: index-29286603
+Ref: 102286650
+Ref: index-30286650
+Ref: 103287077
+Ref: index-31287077
+Ref: 104287403
+Ref: index-32287403
+Ref: 105287465
+Ref: index-33287465
+Ref: 109288454
+Ref: index-34288454
+Ref: 10a289231
+Ref: index-35289231
+Ref: 10c290751
+Ref: index-36290751
+Ref: 10d291079
+Ref: index-37291079
+Ref: 10e291145
+Ref: index-38291145
+Ref: 10f291696
+Ref: index-39291696
+Ref: 110291943
+Ref: index-40291943
+Ref: 111292023
+Ref: index-41292023
+Ref: 112292074
+Ref: index-42292074
+Ref: 113293759
+Ref: index-43293759
+Ref: 114294010
+Ref: index-44294010
+Ref: 116294424
+Ref: index-45294424
+Ref: 117295041
+Ref: index-46295041
+Ref: 118295661
+Ref: index-47295661
+Node: Specifying Symbol Selections296645
+Ref: specifying symbol selections296779
+Ref: 108296779
+Ref: specifying-symbol-selections296779
+Node: The show Command300186
+Ref: the show command300317
+Ref: 115300317
+Ref: the-show-command300317
+Ref: 119301419
+Ref: index-48301419
+Node: Definition Levels304185
+Ref: definition levels304297
+Ref: 107304297
+Ref: definition-levels304297
+Node: Debugging309547
+Ref: debugging309654
+Ref: 42309654
+Ref: 11a311345
+Ref: index-49311345
+Node: Last Result320468
+Ref: last result320573
+Ref: 106320573
+Ref: last-result320573
+Node: Pretty-Printing321283
+Ref: pretty-printing321400
+Ref: aa321400
+Ref: a9321606
+Ref: __show__321606
+Node: User-Defined Commands325197
+Ref: user-defined commands325322
+Ref: fd325322
+Ref: user-defined-commands325322
+Node: Interactive Startup331260
+Ref: interactive startup331361
+Ref: 10b331361
+Ref: interactive-startup331361
+Ref: 11b331726
+Ref: index-50331726
+Node: Batch Compilation332684
+Ref: batch compilation332791
+Ref: b332791
+Ref: batch-compilation332791
+Ref: 11c332791
+Ref: id15332791
+Ref: 11e337896
+Ref: partial-evaluation337896
+Node: Example338014
+Ref: example338109
+Ref: 11f338109
+Node: Options Affecting Code Size341053
+Ref: options affecting code size341182
+Ref: 11d341182
+Ref: options-affecting-code-size341182
+Node: Other Output Code Formats344670
+Ref: other output code formats344821
+Ref: 120344821
+Ref: other-output-code-formats344821
+Ref: 121349330
+Ref: llvm-documentation349330
+Node: Calling Pure Functions From C349330
+Ref: calling pure functions from c349445
+Ref: 122349445
+Ref: calling-pure-functions-from-c349445
+Node: Caveats and Notes350938
+Ref: caveats and notes351034
+Ref: c351034
+Ref: caveats-and-notes351034
+Node: Etymology351681
+Ref: etymology351773
+Ref: 123351773
+Node: Backward Compatibility352623
+Ref: backward compatibility352738
+Ref: 124352738
+Ref: backward-compatibility352738
+Node: Error Recovery360476
+Ref: error recovery360601
+Ref: 127360601
+Ref: error-recovery360601
+Node: Non-Linear Patterns361257
+Ref: non-linear patterns361373
+Ref: 128361373
+Ref: non-linear-patterns361373
+Node: "As" Patterns362773
+Ref: "as" patterns362901
+Ref: ce362901
+Ref: as-patterns362901
+Node: "Head = Function" Pitfalls365036
+Ref: "head = function" pitfalls365162
+Ref: 129365162
+Ref: head-function-pitfalls365162
+Node: Defined Functions367353
+Ref: defined functions367481
+Ref: 58367481
+Ref: defined-functions367481
+Node: Recursive Types370809
+Ref: recursive types370924
+Ref: a3370924
+Ref: recursive-types370924
+Node: With and when374656
+Ref: with and when374774
+Ref: 12a374774
+Ref: with-and-when374774
+Node: Numeric Calculations376900
+Ref: numeric calculations377023
+Ref: 12b377023
+Ref: numeric-calculations377023
+Node: Constant Definitions378934
+Ref: constant definitions379064
+Ref: a4379064
+Ref: constant-definitions379064
+Node: External C Functions384809
+Ref: external c functions384940
+Ref: e2384940
+Ref: external-c-functions384940
+Ref: 12c386220
+Ref: libffi386220
+Node: Calling Special Forms386605
+Ref: calling special forms386724
+Ref: 12d386724
+Ref: calling-special-forms386724
+Node: Laziness387211
+Ref: laziness387334
+Ref: 12e387334
+Node: Showing Macro Expansions391832
+Ref: showing macro expansions391963
+Ref: 130391963
+Ref: showing-macro-expansions391963
+Node: Stack Size and Tail Recursion393598
+Ref: stack size and tail recursion393753
+Ref: 48393753
+Ref: stack-size-and-tail-recursion393753
+Ref: 131394141
+Ref: index-51394141
+Ref: 132394353
+Ref: index-52394353
+Ref: 133394641
+Ref: index-53394641
+Node: Handling of Asynchronous Signals395705
+Ref: handling of asynchronous signals395827
+Ref: 49395827
+Ref: handling-of-asynchronous-signals395827
+Node: Author397848
+Ref: author397943
+Ref: 134397943
+Node: Acknowledgements398078
+Ref: acknowledgements398163
+Ref: 135398163
+Node: Copying399362
+Ref: copying399461
+Ref: 3399461
+Node: References and Links401823
+Ref: references and links401911
+Ref: 136401911
+Ref: references-and-links401911
+Ref: 88401960
+Ref: aardappel401960
+Ref: 12f402101
+Ref: alice-ml402101
+Ref: 10402236
+Ref: baader-and-nipkow402236
+Ref: bb402354
+Ref: bertrand402354
+Ref: f1402614
+Ref: clang402614
+Ref: f3402902
+Ref: dragonegg402902
+Ref: f2403112
+Ref: faust403112
+Ref: 137403199
+Ref: gnu-multiprecision-library403199
+Ref: 80403199
+Ref: gmp403199
+Ref: 138403307
+Ref: gnu-octave403307
+Ref: a8403307
+Ref: octave403307
+Ref: 84403451
+Ref: gnu-scientific-library403451
+Ref: 139403451
+Ref: gsl403451
+Ref: 6c403612
+Ref: haskell403612
+Ref: 7403678
+Ref: llvm403678
+Ref: f0403743
+Ref: llvm-gcc403743
+Ref: 126403958
+Ref: miranda403958
+Ref: 6d404129
+Ref: ml404129
+Ref: f404288
+Ref: michael-o-donnell404288
+Ref: 125404438
+Ref: q404438
+Node: Index404523
+Ref: index404595
+Ref: b2420022
+Ref: 91420053
+Ref: 90420084
+Ref: 77420115
+Ref: 76420146
 
 End Tag Table
 

@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.48, October 20, 2011</p>
+<p>Version 0.49, October 23, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2010 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -2761,12 +2761,12 @@ evaluating &#39;__func__&#39;
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="macro">
 <dt id="__namespace__">
-<tt class="descname">__namespace__</tt><a class="headerlink" href="#__namespace__" title="Permalink to this definition">¶</a></dt>
+<em class="property">macro </em><tt class="descname">__namespace__</tt><a class="headerlink" href="#__namespace__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the current namespace at the point of the call. This is
-implemented as a macro which expands to a string. The empty string is
-returned in the default namespace. Example:</p>
+implemented as a built-in macro which expands to a string. The empty
+string is returned in the default namespace. Example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">namespace</span> foo<span class="p">;</span>
 <span class="gp">&gt; </span>foo = __namespace__<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">namespace</span><span class="p">;</span>
@@ -2778,31 +2778,51 @@ foo<span class="p">::</span>foo = <span class="s">&quot;foo&quot;</span><span cl
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="macro">
+<dt id="__list__">
+<em class="property">macro </em><tt class="descname">__list__</tt><a class="headerlink" href="#__list__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This expands a (literal) tuple to a list, preserving embedded tuples in
+the same way that list values are parsed in the Pure language,
+cf. <a class="reference internal" href="pure.html#primary-expressions"><em>Primary Expressions</em></a>. This is provided for the benefit of
+custom aggregate notations (usually implemented as outfix operators)
+which are supposed to be parsed like the built-in list and matrix
+brackets. Example:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">outfix</span> (: :)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">def</span> (:x:) = __list__ x<span class="p">;</span>
+<span class="gp">&gt; </span>(:(<span class="mi">1</span>,<span class="mi">2</span>),(<span class="mi">3</span>,<span class="mi">4</span>):)<span class="p">;</span>
+[(<span class="mi">1</span>,<span class="mi">2</span>),(<span class="mi">3</span>,<span class="mi">4</span>)]
+</pre></div>
+</div>
+<p>Note that this macro uses internal information from the parser not
+available to Pure programs. Thus there&#8217;s no way to actually define this
+macro in Pure, which is why it is provided as a builtin instead.</p>
+</dd></dl>
+
+<dl class="macro">
 <dt id="__locals__">
-<tt class="descname">__locals__</tt><a class="headerlink" href="#__locals__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a list with the local function bindings (<a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clauses)
-visible at this point in the program. This is actually implemented as a
-built-in. The return value is a list of hash pairs <tt class="docutils literal"><span class="pre">x=&gt;f</span></tt> where <tt class="docutils literal"><span class="pre">x</span></tt>
-is the global symbol denoting the function (the symbol is always quoted)
-and <tt class="docutils literal"><span class="pre">f</span></tt> is the function value itself. Example:</p>
+<em class="property">macro </em><tt class="descname">__locals__</tt><a class="headerlink" href="#__locals__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Built-in macro which expands to a list with the local function bindings
+(<a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clauses) visible at this point in the program. The
+return value is a list of hash pairs <tt class="docutils literal"><span class="pre">x=&gt;f</span></tt> where <tt class="docutils literal"><span class="pre">x</span></tt> is the global
+symbol denoting the function (the symbol is always quoted) and <tt class="docutils literal"><span class="pre">f</span></tt> is
+the function value itself. Example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>__locals__ <span class="kr">with</span> foo x = x+<span class="mi">1</span><span class="p">;</span> x = a+b <span class="kr">end</span><span class="p">;</span>
 [x=&gt;a+b,foo=&gt;foo]
 <span class="gp">&gt; </span>f <span class="mi">99</span> <span class="kr">when</span> _=&gt;f = ans!<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
 <span class="mi">100</span>
 </pre></div>
 </div>
-<p>The <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> function is useful for debugging purposes, as
+<p>The <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__locals__</span></tt></a> function is useful for debugging purposes, as
 well as to implement dynamic environments. It is also used internally to
-implement the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro, see <a class="reference internal" href="#eval-and-friends">Eval and Friends</a>.</p>
-<p>Note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> always evaluates parameterless functions
+implement the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> macro, see <a class="reference internal" href="#eval-and-friends">Eval and Friends</a>.</p>
+<p>Note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__locals__</span></tt></a> always evaluates parameterless functions
 and returns the resulting value instead of a closure (as can be seen in
 the binding <tt class="docutils literal"><span class="pre">x=&gt;a+b</span></tt> in the example above). Normally this is what you
 want, but it can be a problem with parameterless functions involving
 side effects. In such a case, if you want to evaluate the function at a
 later time, you&#8217;ll either have to use a thunk or massage the local
 function so that it takes a dummy argument such as <tt class="docutils literal"><span class="pre">()</span></tt>.</p>
-<p>Also note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> will use as keys in the resulting list
+<p>Also note that <a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__locals__</span></tt></a> will use as keys in the resulting list
 whatever global symbols are in scope at the point of the call. By
 default, i.e., if no global symbol with the same print name as the local
 is visible at the point of the call, a symbol in the default namespace
@@ -3161,27 +3181,27 @@ x,y
 </div>
 <p>The following functions are useful for doing symbolic expression
 simplification.</p>
-<dl class="function">
+<dl class="macro">
 <dt id="reduce">
-<tt class="descname">reduce</tt> x<a class="headerlink" href="#reduce" title="Permalink to this definition">¶</a></dt>
+<em class="property">macro </em><tt class="descname">reduce</tt> x<a class="headerlink" href="#reduce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reevaluates an expression in a local environment. This dynamically
 rebinds function symbols in the given expression to whatever local
-function definitions are in effect at the point of the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a>
-call. Note that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> is actually implemented as a macro which
+function definitions are in effect at the point of the <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a>
+call. Note that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> is actually implemented as a macro which
 expands to the <a class="reference internal" href="#reduce_with" title="reduce_with"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce_with</span></tt></a> primitive (see below), using the
-<a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-func docutils literal"><span class="pre">__locals__</span></tt></a> builtin to enumerate the bindings which are in effect
+<a class="reference internal" href="#__locals__" title="__locals__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__locals__</span></tt></a> builtin to enumerate the bindings which are in effect
 at the call site.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="reduce_with">
 <tt class="descname">reduce_with</tt> env x<a class="headerlink" href="#reduce_with" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> above, but takes a list of replacements (given as
-hash pairs <tt class="docutils literal"><span class="pre">u=&gt;v</span></tt>) as the first argument. The <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro
+<dd><p>Like <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> above, but takes a list of replacements (given as
+hash pairs <tt class="docutils literal"><span class="pre">u=&gt;v</span></tt>) as the first argument. The <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> macro
 expands to <tt class="docutils literal"><span class="pre">reduce_with</span> <span class="pre">__locals__</span></tt>.</p>
 </dd></dl>
 
-<p>The <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> macro provides a restricted form of dynamic binding
+<p>The <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> macro provides a restricted form of dynamic binding
 which is useful to implement local rewriting rules. It is invoked without
 parameters and expands to the curried call <tt class="docutils literal"><span class="pre">reduce_with</span> <span class="pre">__locals__</span></tt> of
 the <a class="reference internal" href="#reduce_with" title="reduce_with"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce_with</span></tt></a> primitive, which takes one additional argument, the
@@ -3206,7 +3226,7 @@ computed result, thus the instances of <tt class="docutils literal"><span class=
 <tt class="docutils literal"><span class="pre">a*2+b*2</span></tt> and <tt class="docutils literal"><span class="pre">(a+b)*2</span></tt> shown above denote the corresponding globals,
 not the local incarnations of <tt class="docutils literal"><span class="pre">*</span></tt> and <tt class="docutils literal"><span class="pre">+</span></tt> defined in <tt class="docutils literal"><span class="pre">expand</span></tt> and
 <tt class="docutils literal"><span class="pre">factor</span></tt>, respectively.</p>
-<p><a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> also adjusts to quoted arguments. In this case, the local
+<p><a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> also adjusts to quoted arguments. In this case, the local
 rules are applied as usual, but back-substituted globals are <em>not</em>
 evaluated in the result:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>expand ((a+<span class="mi">1</span>)*<span class="mi">2</span>)<span class="p">;</span>
@@ -3215,7 +3235,7 @@ a*<span class="mi">2</span>+<span class="mi">2</span>
 a*<span class="mi">2</span>+<span class="mi">1</span>*<span class="mi">2</span>
 </pre></div>
 </div>
-<p>Note that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce</span></tt></a> only takes into account local <em>function</em> bindings
+<p>Note that <a class="reference internal" href="#reduce" title="reduce"><tt class="xref pure pure-macro docutils literal"><span class="pre">reduce</span></tt></a> only takes into account local <em>function</em> bindings
 from <a class="reference internal" href="pure.html#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clauses, local <em>variable</em> bindings do not affect its
 operation in any way:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> y = [x,x^<span class="mi">2</span>,x^<span class="mi">3</span>]<span class="p">;</span>

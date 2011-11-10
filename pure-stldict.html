@@ -57,7 +57,7 @@
             
   <div class="section" id="module-hashdict">
 <span id="pure-stldict"></span><h1>pure-stldict<a class="headerlink" href="#module-hashdict" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-orddict"></span><p>Version 0.0, October 31, 2011</p>
+<span class="target" id="module-orddict"></span><p>Version 0.0, November 01, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This package provides a light-weight, no frills interface to the C++
 dictionary-like containers, <tt class="docutils literal"><span class="pre">map</span></tt> and <tt class="docutils literal"><span class="pre">unordered_map</span></tt>, see the <a class="reference external" href="http://en.cppreference.com/w/cpp">C++
@@ -116,11 +116,15 @@ structures:</p>
 <li><tt class="docutils literal"><span class="pre">hashdict</span></tt>, <tt class="docutils literal"><span class="pre">hashmdict</span></tt>: Hashed (unordered) dictionary data structures.
 These work with arbitrary key (and value) types, like the hashed dictionary
 and set data structures in the standard library, and can be found in the
-<tt class="docutils literal"><span class="pre">hashdict.pure</span></tt> module.</li>
+<tt class="docutils literal"><span class="pre">hashdict.pure</span></tt> module. In addition, the <tt class="docutils literal"><span class="pre">hashxdict</span></tt> type is defined as
+the union of the <tt class="docutils literal"><span class="pre">hashdict</span></tt> and <tt class="docutils literal"><span class="pre">hashmdict</span></tt> types so that it can be used
+to match any kind of hashed dictionary.</li>
 <li><tt class="docutils literal"><span class="pre">orddict</span></tt>, <tt class="docutils literal"><span class="pre">ordmdict</span></tt>: Ordered dictionary data structures. These require
 the keys to be ordered by the standard <tt class="docutils literal"><span class="pre">&lt;</span></tt> predicate, like the ordered
 dictionary and set data structures in the standard library, and can be found
-in the <tt class="docutils literal"><span class="pre">orddict.pure</span></tt> module.</li>
+in the <tt class="docutils literal"><span class="pre">orddict.pure</span></tt> module. In addition, the <tt class="docutils literal"><span class="pre">ordxdict</span></tt> type is
+defined as the union of the <tt class="docutils literal"><span class="pre">orddict</span></tt> and <tt class="docutils literal"><span class="pre">ordmdict</span></tt> types so that it
+can be used to match any kind of ordered dictionary.</li>
 </ul>
 <p>Note that <tt class="docutils literal"><span class="pre">hashdict</span></tt> and <tt class="docutils literal"><span class="pre">hashmdict</span></tt> differ in that the former has exactly
 one key-value association for each key in the dictionary, while the latter is
@@ -183,12 +187,13 @@ comprehensions:</p>
 </pre></div>
 </div>
 <p>This example illustrates how to employ ordered dictionaries as a set data
-structure:</p>
+structure (note that we use the <tt class="docutils literal"><span class="pre">ordxdict</span></tt> type here so that these
+definitions work with both <tt class="docutils literal"><span class="pre">orddict</span></tt> and <tt class="docutils literal"><span class="pre">ordmdict</span></tt>):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> orddict<span class="p">;</span>
-<span class="gp">&gt; </span><span class="kr">type</span> ordxdict x<span class="p">::</span>orddict | ordxdict x<span class="p">::</span>ordmdict<span class="p">;</span>
 <span class="gp">&gt; </span>x<span class="p">::</span>ordxdict + y<span class="p">::</span>ordxdict = foldl insert (copy x) (list y)<span class="p">;</span>
 <span class="gp">&gt; </span>x<span class="p">::</span>ordxdict - y<span class="p">::</span>ordxdict = foldl delete (copy x) (list y)<span class="p">;</span>
 <span class="gp">&gt; </span>x<span class="p">::</span>ordxdict * y<span class="p">::</span>ordxdict = x-(x-y)<span class="p">;</span>
+
 <span class="gp">&gt; </span><span class="kr">let</span> m1 = orddict [<span class="mi">5</span>,<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">11</span>,<span class="mi">3</span>]<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> m2 = orddict (<span class="mi">3</span>..<span class="mi">6</span>)<span class="p">;</span>
 <span class="gp">&gt; </span>m1<span class="p">;</span>m2<span class="p">;</span>
@@ -200,11 +205,8 @@ orddict [<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">4<
 orddict [<span class="mi">1</span>,<span class="mi">11</span>]
 <span class="gp">&gt; </span>m1*m2<span class="p">;</span>
 orddict [<span class="mi">3</span>,<span class="mi">5</span>]
-</pre></div>
-</div>
-<p>Using <tt class="docutils literal"><span class="pre">ordmdict</span></tt> instead of <tt class="docutils literal"><span class="pre">orddict</span></tt>, we also get ordered multisets
-(&#8220;bags&#8221;):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> m1 = ordmdict [<span class="mi">5</span>,<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">11</span>,<span class="mi">3</span>]<span class="p">;</span>
+
+<span class="gp">&gt; </span><span class="kr">let</span> m1 = ordmdict [<span class="mi">5</span>,<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">11</span>,<span class="mi">3</span>]<span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> m2 = ordmdict (<span class="mi">3</span>..<span class="mi">6</span>)<span class="p">;</span>
 <span class="gp">&gt; </span>m1<span class="p">;</span>m2<span class="p">;</span>
 ordmdict [<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">3</span>,<span class="mi">5</span>,<span class="mi">11</span>]

@@ -19,16 +19,15 @@ pure-stldict
   Albert Graef <<Dr.Graef@t-online.de>>
 
   This package provides a light-weight, no frills interface to the C++
-dictionary-like containers, `map' and `unordered_map', see the C++
-standard library documentation (http://en.cppreference.com/w/cpp) for
-details. (The C++ containers were originally based on the Standard
-Template Library (http://www.sgi.com/tech/stl/), so they are also
-sometimes referred to as "STL containers"; hence the name of this
-package.)
+dictionary containers `map' and `unordered_map'. The *note stldict: 2.
+module makes these data structures available in Pure land and equips
+them with a (more or less) idiomatic Pure container interface.
 
-  The package includes the `hashdict' and `orddict' modules which make
-these data structures available in Pure land and equip them with a
-(more or less) idiomatic Pure container interface.
+  The C++ containers are part of the standard C++ library, see the C++
+standard library documentation (http://en.cppreference.com/w/cpp) for
+details. They were originally based on the Standard Template Library
+(http://www.sgi.com/tech/stl/), so they are also sometimes referred to
+as "STL containers"; hence the name of this package.
 
 * Menu:
 
@@ -45,12 +44,12 @@ these data structures available in Pure land and equip them with a
 Operations
 
 * Basic Operations::
-* Pretty-Printing::
 * Comparisons::
 * Set-Like Operations::
 * List-Like Operations::
 * Iterators::
-* Other Low-Level Operations::
+* Low-Level Operations::
+* Pretty-Printing::
 
 
 File: pure-stldict.info,  Node: Copying,  Next: Installation,  Prev: Top,  Up: Top
@@ -145,18 +144,13 @@ structures:
      and set data structures in the standard library, and can be found
      in the `orddict.pure' module.
 
-  These data structures are very thin wrappers around the C++ container
-types; in fact, they are just pointers to the C++ containers. Memory
-management of these objects is automatic, and customizable *note
-pretty-printing: d. is provided as well.
-
-  Note that *note hashdict: 9. and *note hashmdict: a. differ in that
+  Note that *note hashdict: a. and *note hashmdict: b. differ in that
 the former has exactly one key-value association for each key in the
 dictionary, while the latter is a "multidict" which allows multiple
 values to be associated with a key. The same applies to the *note
-orddict: b. and *note ordmdict: c. types.
+orddict: c. and *note ordmdict: d. types.
 
-  There are also various supertype symbols which correspond to
+  In addition, there are various supertypes which correspond to
 different unions of the hashed and ordered dictionary types. These are:
 
  -- type: hashxdict
@@ -172,17 +166,16 @@ different unions of the hashed and ordered dictionary types. These are:
      Denotes any kind of dictionary.
 
   For instance, you can use *note hashxdict: e. to match both *note
-hashdict: 9. and *note hashmdict: a. values. Likewise, *note stlmdict:
-11. matches both *note hashmdict: a. and *note ordmdict: c. values. To
+hashdict: a. and *note hashmdict: b. values. Likewise, *note stlmdict:
+11. matches both *note hashmdict: b. and *note ordmdict: d. values. To
 match any kind of dictionary, use the *note stlxdict: 12. type.
 
-
-File: pure-stldict.info,  Node: Operations,  Next: Examples,  Prev: Types,  Up: Top
+  These data structures are very thin wrappers around the C++ container
+types; in fact, they are just pointers to the C++ containers. Memory
+management of these objects is automatic, and customizable *note
+pretty-printing: 13. is provided as well.
 
-5 Operations
-************
-
-All data structures offer most of the usual Pure container interface
+  All data structures offer most of the usual Pure container interface
 (as well as some extensions). In contrast to the standard library
 dictionaries, they can be used both as dictionaries (holding key =>
 value pairs) and sets (holding only keys, without associated values),
@@ -194,18 +187,87 @@ and deleting members really modifies the underlying C++ containers.
 (However, it is possible to take copies of the containers in situations
 where it's necessary to preserve value semantics.)
 
+
+File: pure-stldict.info,  Node: Operations,  Next: Examples,  Prev: Types,  Up: Top
+
+5 Operations
+************
+
+All types of dictionaries are simply pointers to the corresponding C++
+containers which hold key-value associations where both keys and values
+may be arbitrary Pure expressions. The *note basic operations: 15.
+described below can be used to create, query and modify these objects.
+*note Comparisons: 16. of dictionaries are implemented as well, and the
+*note set-like operations: 17. let you combine dictionaries in
+different ways. These operations provide an interface similar to the
+usual Pure container API.
+
+  In addition, the *note stldict: 2. module provides some *note
+list-like operations: 18.  on dictionaries, so that the member data can
+be processed and aggregated in a convenient fashion (including the
+ability to use dictionaries as generators in list and matrix
+comprehensions), and there's also an interface to C++ *note iterators:
+19. which enables you to traverse, inspect and modify the containers in
+a more C++-like way. Some *note low-level operations: 1a. are available
+to access information about the underlying hash table of a hashed
+dictionary. Last but not least, the module also offers some operations
+to customize the *note pretty-printing: 13. of dictionary values.
+
+  When working with these data structures, please note the following
+special properties of this implementation:
+
+   * All dictionary types are _mutable_. Inserting and deleting members
+     really modifies the underlying C++ data structure as a side effect
+     of the operation. If you need value semantics, you should probably
+     use one of the dictionary or set data structures from the standard
+     Pure library instead. Another possibility is to take a copy of a
+     hashdict using the *note copy: 1b. function if you need to
+     preserve the original value.
+
+   * Keys in a hashed dictionary may be stored in an apparently random
+     order (not necessarily in the order in which they were inserted),
+     while they are guaranteed to be in ascending order (by key) for
+     ordered dictionaries.  However, note that even in the latter case,
+     the order of different members for the same key in a multi-valued
+     dictionary is not specified. This must be taken into account when
+     comparing dictionaries, see below. The order of members in a
+     dictionary also matters when listing data from a container using,
+     e.g., the *note members: 1c, *note keys: 1d. and *note vals: 1e.
+     operations.
+
+   * Two dictionaries are considered syntactically equal iff they
+     contain the same elements in exactly the same order, using
+     syntactic equality on both the keys and the associated values.
+     This test can always be done in linear time, but is of limited
+     usefulness for most kinds of dictionaries, since the exact order
+     of members in the dictionary may vary depending on how the
+     dictionary was constructed. Semantic equality operations are
+     provided which check (albeit at the cost of increased running
+     time) whether two containers contain the same members irrespective
+     of element order, using semantic equality on the members. Various
+     subset comparisons are provided as well, please check the *note
+     Comparisons: 16. section for details.
+
+   * Values in a dictionary can be omitted, so that a dictionary can be
+     also used as a set data structure. This obviates the need for a
+     separate set data structure at the cost of some (small) increase
+     in memory usage. Also note that you can't really have a hash pair
+     `x=>y' as a member of a set, since it always denotes a key-value
+     association. As a remedy, you may use ordinary pairs `(x,y)'
+     instead.
+
 * Menu:
 
 * Basic Operations::
-* Pretty-Printing::
 * Comparisons::
 * Set-Like Operations::
 * List-Like Operations::
 * Iterators::
-* Other Low-Level Operations::
+* Low-Level Operations::
+* Pretty-Printing::
 
 
-File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: Operations
+File: pure-stldict.info,  Node: Basic Operations,  Next: Comparisons,  Up: Operations
 
 5.1 Basic Operations
 ====================
@@ -224,7 +286,7 @@ File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: O
      The same operations can also be used to construct a dictionary
      from another dictionary of any type. If the given dictionary is
      already of the corresponding type, this is a no-op (if you want to
-     copy the dictionary instead, use the *note copy: 19. function
+     copy the dictionary instead, use the *note copy: 1b. function
      below). Otherwise the given dictionary is converted to a new
      dictionary of the desired target type.
 
@@ -239,8 +301,8 @@ File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: O
  -- Function: copy m
      Create a new dictionary with the same type and content as `m'.
      This is useful if you want to preserve value semantics when using
-     destructive update operations such as *note insert: 1e. and *note
-     delete: 1f.  In such a case, *note copy: 19. can be used to take a
+     destructive update operations such as *note insert: 27. and *note
+     delete: 28.  In such a case, *note copy: 1b. can be used to take a
      copy of the dictionary beforehand, so that the original dictionary
      remains unmodified.
 
@@ -286,18 +348,13 @@ File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: O
      Return the list of members of `m'. The member list will be in an
      apparently random order in the hashed dictionary case, while it is
      guaranteed to be in ascending order (by key) for ordered
-     dictionaries.  However, note that even in the latter case, the
-     order of different members for the same key in a multidict is not
-     specified. This must be taken into account when comparing
-     dictionaries (cf. *note Comparisons: 2f.). The same order is also
-     used for the other inspection operations below (*note stream: 30,
-     *note tuple: 31, *note vector: 32, *note keys: 33, *note vals:
-     34.).
+     dictionaries. The same order is also used for the other inspection
+     operations below.
 
  -- Function: stream m
-     Like *note list: 2e, but the member list is returned as a lazy list
+     Like *note list: 36, but the member list is returned as a lazy list
      (cf. _Lazy Evaluation and Streams_) whose members will be computed
-     on the fly as the list is being traversed; cf. *note Iterators: 35.
+     on the fly as the list is being traversed; cf. *note Iterators: 19.
 
  -- Function: tuple m
  -- Function: vector m
@@ -311,11 +368,10 @@ File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: O
      singleton key `x' without associated value, `x' itself is returned
      instead.
 
-  Note that, in contrast to the dictionary implementations in the
-standard library, the following modification operations are
+  As already mentioned, the following modification operations are
 destructive, i.e., they actually modify the underlying dictionary data
 structure. If this is not desired, you'll first have to take a copy of
-the target dictionary, see *note copy: 19.
+the target dictionary, see *note copy: 1b.
 
  -- Function: insert m x
  -- Function: insert m (x=>y)
@@ -323,8 +379,8 @@ the target dictionary, see *note copy: 19.
      Insert a singleton key `x' or a key-value pair `x=>y' into `m' and
      return the modified dictionary. This always adds a new member in a
      multidict, otherwise it replaces an existing value if there is
-     one. *note update: 37. is provided as a fully curried version of
-     *note insert: 36, so `update m x y' behaves exactly like `insert m
+     one. *note update: 3b. is provided as a fully curried version of
+     *note insert: 3a, so `update m x y' behaves exactly like `insert m
      (x=>y)'.
 
  -- Function: delete m x
@@ -339,9 +395,200 @@ the target dictionary, see *note copy: 19.
      Returns `()'.
 
 
-File: pure-stldict.info,  Node: Pretty-Printing,  Next: Comparisons,  Prev: Basic Operations,  Up: Operations
+File: pure-stldict.info,  Node: Comparisons,  Next: Set-Like Operations,  Prev: Basic Operations,  Up: Operations
 
-5.2 Pretty-Printing
+5.2 Comparisons
+===============
+
+The usual comparison predicates (`==', `~=', `<=', `<' etc.) are
+defined on all dictionary types, where two dictionaries are considered
+"equal" (`m1==m2') if they both contain the same `key=>value' pairs,
+and `m1<=m2' means that `m1' is a sub-dictionary of `m2', i.e., all
+`key=>value' pairs of `m1' are also contained in `m2' (taking into
+account multiplicities in the multidict case). Ordered dictionaries
+compare keys using equality (assuming two keys `a' and `b' to be equal
+if neither `a<b' nor `b<a' holds), while hashed dictionaries check for
+syntactical equality (using `==='). The associated values are compared
+using the `==' predicate if it is defined, falling back to syntactic
+equality otherwise.
+
+  The module also defines syntactic equality on all dictionary types,
+so that two dictionaries of the same type are considered syntactically
+equal iff they contain the same (syntactically equal) members in the
+same order. This is always guaranteed if two dictionaries are
+"identical" (the same C++ pointer), but generally the member order will
+depend on how the dictionary was constructed. Thus if you need to check
+that two dictionaries contain the same members irrespective of the
+order in which the members are listed, the semantic equality operation
+`==' should be used instead; this will also handle the case of mixed
+operand types.
+
+  Note that if you really need to check whether two dictionaries are
+the same object rather than just syntactically equal, you'll have to
+cast them to generic C pointers before comparing them with `==='. This
+can be done with the following little helper function:
+
+    same_dict x y = pointer_cast "void*" x === pointer_cast "void*" y;
+
+
+
+File: pure-stldict.info,  Node: Set-Like Operations,  Next: List-Like Operations,  Prev: Comparisons,  Up: Operations
+
+5.3 Set-Like Operations
+=======================
+
+These operations work with mixed operand types, promoting less general
+types to more general ones (i.e., ordered to hashed, and single-valued
+to multi-valued dictionaries). The result is always a new dictionary,
+leaving the operands unmodified.
+
+ -- Function: m1 + m2
+     Sum: `m1+m2' adds the members of `m2' to `m1'.
+
+ -- Function: m1 - m2
+     Difference: `m1-m2' removes the members of `m2' from `m1'.
+
+ -- Function: m1 * m2
+     Intersection: `m1*m2' removes the members _not_ in `m2' from `m1'.
+
+
+File: pure-stldict.info,  Node: List-Like Operations,  Next: Iterators,  Prev: Set-Like Operations,  Up: Operations
+
+5.4 List-Like Operations
+========================
+
+The following operations are all overloaded so that they work like
+their list counterparts, treating their dictionary argument as if it
+was the member list of the dictionary:
+
+   * `do', `map', `catmap', `listmap', `rowmap', `rowcatmap', `colmap',
+     `colcatmap'
+
+   * `all', `any', `filter', `foldl', `foldl1', `foldr', `foldr1',
+     `scanl', `scanl1', `scanr', `scanr1', `sort'
+
+  Note that this includes the generic comprehension helpers `listmap',
+`catmap' et al, so that dictionaries can be used as generators in list
+and matrix comprehensions as usual (see below for some *note examples:
+41.).
+
+
+File: pure-stldict.info,  Node: Iterators,  Next: Low-Level Operations,  Prev: List-Like Operations,  Up: Operations
+
+5.5 Iterators
+=============
+
+These operations give direct access to C++ iterators on dictionaries
+which let you query the elements and do basic manipulations of the
+container. The operations are available in the `stldict' namespace.
+
+  The iterator concept is somewhat alien to Pure and there are some
+pitfalls (most notably, destructive updates may render iterators
+invalid), but the operations described here are still useful in some
+situations, especially if you need to speed up sequential accesses to
+large containers or modify values stored in a container in a direct
+way. They are also used internally to compute lazy member lists of
+containers (*note stream: 37. function).
+
+  You should only use these directly if you know what you are doing. In
+particular, make sure to consult the C++ standard library documentation
+(http://en.cppreference.com/w/cpp) for further details on C++ iterator
+usage.
+
+  The following operations are provided to create an iterator for a
+given dictionary.
+
+ -- Function: stldict::begin m
+ -- Function: stldict::end m
+     Return iterators pointing to the beginning and the end of the
+     container.  (Note that *note stldict end: 43. _must_ always be
+     specified in qualified form since `end' is a keyword in the Pure
+     language.)
+
+ -- Function: stldict::find m x
+     Locates a key or specific key=>value pair `x' in the container and
+     returns an iterator pointing to the corresponding member (or
+     `stldict::end m' if `m' doesn't contain `x').
+
+  Note that these operations return a new iterator object for each
+invocation.  Also, the created iterator object keeps track of the
+container it belongs to, so that the container isn't garbage-collected
+while the iterator is still being used. However, removing a member from
+the container (using either *note delete: 28. or *note stldict erase:
+45.) invalidates all iterators pointing to that member; the result of
+trying to access such an invalidated iterator is undefined (most likely
+your program will crash).
+
+  Similar caveats also apply to the *note stream: 37. function which, as
+already mentioned, uses iterators internally to implement lazy list
+traversal of the members of a dictionary. Thus, if you delete a member
+of a dictionary while traversing it using *note stream: 37, you better
+make sure that this member is not the next stream element remaining to
+be visited; otherwise bad things will happen.
+
+  The following operations on iterators let you query and modify the
+contents of the underlying container:
+
+ -- Function: stldict::dict i
+     Return the dictionary to which `i' belongs.
+
+ -- Function: stldict::endp i
+     Check whether the iterator `i' points to the end of the container
+     (i.e., past the last element).
+
+ -- Function: stldict::next i
+     Advance the iterator to the next element. Note that for
+     convenience, in contrast to the corresponding C++ operation this
+     operation is non-destructive. Thus it actually creates a _new_
+     iterator object, leaving the original iterator `i' unmodified. The
+     operation fails if `i' is already at the end of the container.
+
+ -- Function: stldict::get i
+     Retrieve the key=>val pair stored in the member pointed to by `i'
+     (or just the key if there is no associated value). The operation
+     fails if `i' is at the end of the container.
+
+ -- Function: stldict::put i y
+     Change the value associated with the member pointed to by `i' to
+     `y', and return the new value `y'. The operation fails if `i' is
+     at the end of the container. Note that *note stldict put: 4a. only
+     allows you to set the associated value, _not_ the key of the
+     member.
+
+ -- Function: stldict::erase i
+     Remove the member pointed to by `i' (this invalidates `i' and all
+     other iterators pointing to this member). The operation fails if
+     `i' is at the end of the container.
+
+ -- Function: i == j
+ -- Function: i ~= j
+     Semantic equality of iterators. Two iterators are considered equal
+     (`i == j') if `i' and `j' point to the same element in the same
+     container, and unequal (`i ~= j') if they don't. (In contrast,
+     note that iterators are in fact just pointers to a corresponding
+     C++ data structure, and thus _syntactical_ equality (`i === j')
+     holds only if two iterators are the same object.)
+
+
+File: pure-stldict.info,  Node: Low-Level Operations,  Next: Pretty-Printing,  Prev: Iterators,  Up: Operations
+
+5.6 Low-Level Operations
+========================
+
+The *note hashdict: 0. module also provides a few specialized low-level
+operations dealing with the layouts of buckets and the hash policy of
+the *note hashdict: a. and *note hashmdict: b. containers, such as
+`bucket_count', `load_factor', `rehash' etc. These operations, which are
+all kept in their own separate `hashdict' namespace, are useful to
+obtain performance-related information and modify the setup of the
+underlying hash table. Please check the `hashdict.pure' module and the
+C++ standard library documentation (http://en.cppreference.com/w/cpp)
+for further details.
+
+
+File: pure-stldict.info,  Node: Pretty-Printing,  Prev: Low-Level Operations,  Up: Operations
+
+5.7 Pretty-Printing
 ===================
 
 By default, dictionaries are pretty-printed in the format `somedict xs',
@@ -375,202 +622,12 @@ example which also discusses how to make such a custom print
 representation reparsable.
 
 
-File: pure-stldict.info,  Node: Comparisons,  Next: Set-Like Operations,  Prev: Pretty-Printing,  Up: Operations
-
-5.3 Comparisons
-===============
-
-The usual comparison predicates (`==', `~=', `<=', `<' etc.) are
-defined on all dictionary types, where two dictionaries are considered
-"equal" (`m1==m2') if they both contain the same `key=>value' pairs,
-and `m1<=m2' means that `m1' is a sub-dictionary of `m2', i.e., all
-`key=>value' pairs of `m1' are also contained in `m2' (taking into
-account multiplicities in the multidict case). Ordered dictionaries
-compare keys using equality (assuming two keys `a' and `b' to be equal
-if neither `a<b' nor `b<a' holds), while hashed dictionaries check for
-syntactical equality (using `==='). The associated values are compared
-using the `==' predicate if it is defined, falling back to syntactic
-equality otherwise.
-
-  The modules also define syntactic equality on all dictionary types,
-so that two dictionaries of the same type are considered syntactically
-equal iff they contain the same (syntactically equal) members in the
-same order. This is always guaranteed if two dictionaries are
-"identical" (the same C++ pointer), but generally the member order will
-depend on how the dictionary was constructed. Thus if you need to check
-that two dictionaries contain the same members irrespective of the
-order in which the members are listed, the semantic equality operation
-`==' should be used instead; this will also handle the case of mixed
-operand types.
-
-  Note that if you really need to check whether two dictionaries are
-the same object rather than just syntactically equal, you'll have to
-cast them to generic C pointers before comparing them with `==='. This
-can be done with the following little helper function:
-
-    same_dict x y = pointer_cast "void*" x === pointer_cast "void*" y;
-
-
-
-File: pure-stldict.info,  Node: Set-Like Operations,  Next: List-Like Operations,  Prev: Comparisons,  Up: Operations
-
-5.4 Set-Like Operations
-=======================
-
-These operations work with mixed operand types, promoting less general
-types to more general ones (i.e., ordered to hashed, and single-valued
-to multi-valued dictionaries). The result is always a new dictionary,
-leaving the operands unmodified.
-
- -- Function: m1 + m2
-     Sum: `m1+m2' adds the members of `m2' to `m1'.
-
- -- Function: m1 - m2
-     Difference: `m1-m2' removes the members of `m2' from `m1'.
-
- -- Function: m1 * m2
-     Intersection: `m1*m2' removes the members _not_ in `m2' from `m1'.
-
-
-File: pure-stldict.info,  Node: List-Like Operations,  Next: Iterators,  Prev: Set-Like Operations,  Up: Operations
-
-5.5 List-Like Operations
-========================
-
-The following operations are all overloaded so that they work like
-their list counterparts, treating their dictionary argument as if it
-was the member list of the dictionary:
-
-   * `do', `map', `catmap', `listmap', `rowmap', `rowcatmap', `colmap',
-     `colcatmap'
-
-   * `all', `any', `filter', `foldl', `foldl1', `foldr', `foldr1',
-     `scanl', `scanl1', `scanr', `scanr1', `sort'
-
-  Note that this includes the generic comprehension helpers `listmap',
-`catmap' et al, so that dictionaries can be used as generators in list
-and matrix comprehensions as usual (see below for some *note examples:
-43.).
-
-
-File: pure-stldict.info,  Node: Iterators,  Next: Other Low-Level Operations,  Prev: List-Like Operations,  Up: Operations
-
-5.6 Iterators
-=============
-
-These operations give direct access to C++ iterators on dictionaries
-which let you query the elements and do basic manipulations of the
-container. Most of the operations are in their own `stldict' namespace.
-
-  The iterator concept is somewhat alien to Pure and there are some
-pitfalls (most notably, destructive updates may render iterators
-invalid), but the operations described here are still useful in some
-situations, especially if you need to speed up sequential accesses to
-large containers or modify values stored in a container in a direct
-way. They are also used internally to compute lazy member lists of
-containers (*note stream: 30. function).
-
-  You should only use these directly if you know what you are doing. In
-particular, make sure to consult the C++ standard library documentation
-(http://en.cppreference.com/w/cpp) for further details on C++ iterator
-usage.
-
-  The following operations are provided to create an iterator for a
-given dictionary.
-
- -- Function: stldict::begin m
- -- Function: stldict::end m
-     Return iterators pointing to the beginning and the end of the
-     container.  (Note that *note stldict end: 45. _must_ always be
-     specified in qualified form since `end' is a keyword in the Pure
-     language.)
-
- -- Function: stldict::find m x
-     Locates a key or specific key=>value pair `x' in the container and
-     returns an iterator pointing to the corresponding member (or
-     `stldict::end m' if `m' doesn't contain `x').
-
-  Note that these operations return a new iterator object for each
-invocation.  Also, the created iterator object keeps track of the
-container it belongs to, so that the container isn't garbage-collected
-while the iterator is still being used. However, removing a member from
-the container (using either *note delete: 1f. or *note stldict erase:
-47.) invalidates all iterators pointing to that member; the result of
-trying to access such an invalidated iterator is undefined (most likely
-your program will crash).
-
-  Similar caveats also apply to the *note stream: 30. function which, as
-already mentioned, uses iterators internally to implement lazy list
-traversal of the members of a dictionary. Thus, if you delete a member
-of a dictionary while traversing it using *note stream: 30, you better
-make sure that this member is not the next stream element remaining to
-be visited; otherwise bad things will happen.
-
-  The following operations on iterators let you query and modify the
-contents of the underlying container:
-
- -- Function: stldict::dict i
-     Return the dictionary to which `i' belongs.
-
- -- Function: stldict::endp i
-     Check whether the iterator `i' points to the end of the container
-     (i.e., past the last element).
-
- -- Function: stldict::next i
-     Advance the iterator to the next element. Note that for
-     convenience, in contrast to the corresponding C++ operation this
-     operation is non-destructive. Thus it actually creates a _new_
-     iterator object, leaving the original iterator `i' unmodified. The
-     operation fails if `i' is already at the end of the container.
-
- -- Function: stldict::get i
-     Retrieve the key=>val pair stored in the member pointed to by `i'
-     (or just the key if there is no associated value). The operation
-     fails if `i' is at the end of the container.
-
- -- Function: stldict::put i y
-     Change the value associated with the member pointed to by `i' to
-     `y', and return the new value `y'. The operation fails if `i' is
-     at the end of the container. Note that *note stldict put: 4c. only
-     allows you to set the associated value, _not_ the key of the
-     member.
-
- -- Function: stldict::erase i
-     Remove the member pointed to by `i' (this invalidates `i' and all
-     other iterators pointing to this member). The operation fails if
-     `i' is at the end of the container.
-
- -- Function: i == j
- -- Function: i ~= j
-     Semantic equality of iterators. Two iterators are considered equal
-     (`i == j') if `i' and `j' point to the same element in the same
-     container, and unequal (`i ~= j') if they don't. (In contrast,
-     note that iterators are in fact just pointers to a corresponding
-     C++ data structure, and thus _syntactical_ equality (`i === j')
-     holds only if two iterators are the same object.)
-
-
-File: pure-stldict.info,  Node: Other Low-Level Operations,  Prev: Iterators,  Up: Operations
-
-5.7 Other Low-Level Operations
-==============================
-
-The *note hashdict: 3. module also provides a few specialized low-level
-operations dealing with the layouts of buckets and the hash policy,
-such as `bucket_count', `load_factor', `rehash' etc. These operations,
-which are all kept in their separate `hashdict' namespace, are useful
-to obtain performance-related information and modify the setup of the
-underlying hash table. Please check the `hashdict.pure' module and the
-C++ standard library documentation (http://en.cppreference.com/w/cpp)
-for further details.
-
-
 File: pure-stldict.info,  Node: Examples,  Next: Index,  Prev: Operations,  Up: Top
 
 6 Examples
 **********
 
-Some basic examples showing *note hashdict: 9. in action:
+Some basic examples showing *note hashdict: a. in action:
 
     > using stldict;
     > let m = hashdict [foo=>99, bar=>bar 4711L, baz=>1..5]; m;
@@ -586,7 +643,7 @@ Some basic examples showing *note hashdict: 9. in action:
     > member m foo, member m bar;
     1,1
 
-Hashed multidicts (*note hashmdict: a.):
+Hashed multidicts (*note hashmdict: b.):
 
     > let m = hashmdict [foo=>99,baz=>1..5,baz=>bar 4711L]; m;
     hashmdict [foo=>99,baz=>[1,2,3,4,5],baz=>bar 4711L]
@@ -596,7 +653,7 @@ Hashed multidicts (*note hashmdict: a.):
     [99]
 
 The following example illustrates how to employ ordered dictionaries
-(*note orddict: b.) as a set data structure:
+(*note orddict: c.) as a set data structure:
 
     > let m1 = orddict [5,1,3,11,3];
     > let m2 = orddict (3..6);
@@ -614,7 +671,7 @@ The following example illustrates how to employ ordered dictionaries
     > m1 < m1+m2, m2 < m1+m2;
     1,1
 
-Of course, the same works with ordered multidicts (*note ordmdict: c.):
+Of course, the same works with ordered multidicts (*note ordmdict: d.):
 
     > let m1 = ordmdict [5,1,3,11,3];
     > let m2 = ordmdict (3..6);
@@ -669,7 +726,7 @@ comprehensions:
 Note that in the current implementation this always computes the full
 member list of the dictionary as an intermediate value, which will need
 considerable extra memory in the case of large dictionaries. As a
-remedy, you can also use the *note stream: 30. function to convert the
+remedy, you can also use the *note stream: 37. function to convert the
 dictionary to a lazy list instead. This will often be slower, but in
 the case of big dictionaries the tradeoff between memory usage and
 execution speed might be worth considering. For instance:
@@ -706,9 +763,9 @@ Index
 * + infix function:                      Set-Like Operations. (line  11)
 * - infix function:                      Set-Like Operations. (line  14)
 * == infix function:                     Iterators.           (line  88)
-* clear function:                        Basic Operations.    (line 130)
+* clear function:                        Basic Operations.    (line 124)
 * copy function:                         Basic Operations.    (line  32)
-* delete function:                       Basic Operations.    (line 123)
+* delete function:                       Basic Operations.    (line 117)
 * hashdict function:                     Basic Operations.    (line   6)
 * hashdict module:                       Top.                 (line   6)
 * hashdict type:                         Types.               (line  10)
@@ -718,11 +775,11 @@ Index
 * hashmdict type:                        Types.               (line  10)
 * hashmdict_symbol function:             Pretty-Printing.     (line  13)
 * hashmdictp function:                   Basic Operations.    (line  46)
-* hashxdict type:                        Types.               (line  38)
+* hashxdict type:                        Types.               (line  33)
 * hashxdictp function:                   Basic Operations.    (line  53)
 * infix function:                        Basic Operations.    (line  64)
-* insert function:                       Basic Operations.    (line 113)
-* keys function:                         Basic Operations.    (line  99)
+* insert function:                       Basic Operations.    (line 107)
+* keys function:                         Basic Operations.    (line  94)
 * list function:                         Basic Operations.    (line  77)
 * member function:                       Basic Operations.    (line  74)
 * members function:                      Basic Operations.    (line  77)
@@ -740,7 +797,7 @@ Index
 * ordmdict type:                         Types.               (line  17)
 * ordmdict_symbol function:              Pretty-Printing.     (line  13)
 * ordmdictp function:                    Basic Operations.    (line  46)
-* ordxdict type:                         Types.               (line  38)
+* ordxdict type:                         Types.               (line  33)
 * ordxdictp function:                    Basic Operations.    (line  53)
 * stldict begin function:                Iterators.           (line  26)
 * stldict dict function:                 Iterators.           (line  57)
@@ -749,19 +806,20 @@ Index
 * stldict erase function:                Iterators.           (line  83)
 * stldict find function:                 Iterators.           (line  33)
 * stldict get function:                  Iterators.           (line  71)
+* stldict module:                        Top.                 (line   6)
 * stldict next function:                 Iterators.           (line  64)
 * stldict put function:                  Iterators.           (line  76)
-* stldict type:                          Types.               (line  42)
+* stldict type:                          Types.               (line  37)
 * stldictp function:                     Basic Operations.    (line  53)
-* stlmdict type:                         Types.               (line  42)
+* stlmdict type:                         Types.               (line  37)
 * stlmdictp function:                    Basic Operations.    (line  53)
-* stlxdict type:                         Types.               (line  47)
+* stlxdict type:                         Types.               (line  42)
 * stlxdictp function:                    Basic Operations.    (line  53)
-* stream function:                       Basic Operations.    (line  90)
-* tuple function:                        Basic Operations.    (line  95)
-* update function:                       Basic Operations.    (line 113)
-* vals function:                         Basic Operations.    (line 102)
-* vector function:                       Basic Operations.    (line  95)
+* stream function:                       Basic Operations.    (line  85)
+* tuple function:                        Basic Operations.    (line  90)
+* update function:                       Basic Operations.    (line 107)
+* vals function:                         Basic Operations.    (line  97)
+* vector function:                       Basic Operations.    (line  90)
 * ~= infix function:                     Iterators.           (line  88)
 
 
@@ -769,183 +827,185 @@ Index
 Tag Table:
 Node: Top258
 Ref: 0352
+Ref: module-hashdict352
+Ref: 1352
 Ref: module-orddict352
-Ref: 11035
-Ref: c-standard-library-documentation1035
-Ref: 21035
-Ref: standard-template-library1035
-Node: Copying1332
-Ref: copying1418
-Ref: 31418
-Ref: module-hashdict1418
-Ref: 41418
-Ref: 51418
-Node: Installation2118
-Ref: installation2206
-Ref: 62206
-Node: Usage3164
-Ref: usage3250
-Ref: 73250
-Node: Types3626
-Ref: types3710
-Ref: 83710
-Ref: 93877
-Ref: hashdict/type3877
-Ref: a3896
-Ref: hashmdict/type3896
-Ref: b4157
-Ref: orddict/type4157
-Ref: c4175
-Ref: ordmdict/type4175
-Ref: e5143
-Ref: hashxdict/type5143
-Ref: f5163
-Ref: ordxdict/type5163
-Ref: 105252
-Ref: stldict/type5252
-Ref: 115270
-Ref: stlmdict/type5270
-Ref: 125377
-Ref: stlxdict/type5377
-Node: Operations5709
-Ref: operations5796
-Ref: 135796
-Node: Basic Operations6613
-Ref: basic operations6706
-Ref: 146706
-Ref: basic-operations6706
-Ref: 156749
-Ref: hashdict6749
-Ref: 166775
-Ref: hashmdict6775
-Ref: 176802
-Ref: orddict6802
-Ref: 186827
-Ref: ordmdict6827
-Ref: 1a7635
-Ref: mkhashdict7635
-Ref: 1b7665
-Ref: mkhashmdict7665
-Ref: 1c7696
-Ref: mkorddict7696
-Ref: 1d7725
-Ref: mkordmdict7725
-Ref: 197912
-Ref: copy/stldict7912
-Ref: 208645
-Ref: hashdictp8645
-Ref: 218671
-Ref: hashmdictp8671
-Ref: 228698
-Ref: orddictp8698
-Ref: 238723
-Ref: ordmdictp8723
-Ref: 248830
-Ref: hashxdictp8830
-Ref: 258857
-Ref: ordxdictp8857
-Ref: 268883
-Ref: stldictp8883
-Ref: 278908
-Ref: stlmdictp8908
-Ref: 288934
-Ref: stlxdictp8934
-Ref: 299046
-Ref: #/stldict9046
-Ref: 2a9132
-Ref: !/stldict9132
-Ref: 2b9506
-Ref: null/stldict9506
-Ref: 2c9584
-Ref: member/stldict9584
-Ref: 2d9664
-Ref: members/stldict9664
-Ref: 2e9688
-Ref: list/stldict9688
-Ref: 3010337
-Ref: stream/stldict10337
-Ref: 3110579
-Ref: tuple/stldict10579
-Ref: 3210601
-Ref: vector/stldict10601
-Ref: 3310671
-Ref: keys/stldict10671
-Ref: 3410741
-Ref: vals/stldict10741
-Ref: 1e11224
-Ref: insert/stldict11224
-Ref: 3611249
-Ref: insert/stldict211249
-Ref: 3711279
-Ref: update/stldict11279
-Ref: 1f11675
-Ref: delete/stldict11675
-Ref: 3811700
-Ref: delete/stldict211700
-Ref: 3911971
-Ref: clear/stldict11971
-Node: Pretty-Printing12079
-Ref: pretty-printing12192
-Ref: d12192
-Ref: 3a12663
-Ref: hashdict_symbol12663
-Ref: 3b12695
-Ref: hashmdict_symbol12695
-Ref: 3c12728
-Ref: orddict_symbol12728
-Ref: 3d12759
-Ref: ordmdict_symbol12759
-Node: Comparisons13481
-Ref: comparisons13597
-Ref: 2f13597
-Node: Set-Like Operations15318
-Ref: set-like operations15439
-Ref: 3e15439
-Ref: set-like-operations15439
-Ref: 3f15734
-Ref: +/stldict15734
-Ref: 4015809
-Ref: -/stldict15809
-Ref: 4115896
-Ref: */stldict15896
-Node: List-Like Operations15991
-Ref: list-like operations16110
-Ref: 4216110
-Ref: list-like-operations16110
-Node: Iterators16765
-Ref: iterators16891
-Ref: 3516891
-Ref: 4417888
-Ref: stldict begin17888
-Ref: 4517919
-Ref: stldict end17919
-Ref: 4618170
-Ref: stldict find18170
-Ref: 4819416
-Ref: stldict dict19416
-Ref: 4919496
-Ref: stldict endp19496
-Ref: 4a19634
-Ref: stldict next19634
-Ref: 4b20004
-Ref: stldict get20004
-Ref: 4c20225
-Ref: stldict put20225
-Ref: 4720548
-Ref: stldict erase20548
-Ref: 4d20762
-Ref: ==/stldict_iterator20762
-Ref: 4e20783
-Ref: ~=/stldict_iterator20783
-Node: Other Low-Level Operations21208
-Ref: other low-level operations21305
-Ref: 4f21305
-Ref: other-low-level-operations21305
-Node: Examples21882
-Ref: examples21969
-Ref: 4321969
-Node: Index25383
-Ref: index25451
+Ref: 31037
+Ref: c-standard-library-documentation1037
+Ref: 41037
+Ref: standard-template-library1037
+Node: Copying1328
+Ref: copying1414
+Ref: 21414
+Ref: module-stldict1414
+Ref: 51414
+Ref: 61414
+Node: Installation2114
+Ref: installation2202
+Ref: 72202
+Node: Usage3160
+Ref: usage3246
+Ref: 83246
+Node: Types3622
+Ref: types3706
+Ref: 93706
+Ref: a3873
+Ref: hashdict/type3873
+Ref: b3892
+Ref: hashmdict/type3892
+Ref: c4153
+Ref: orddict/type4153
+Ref: d4171
+Ref: ordmdict/type4171
+Ref: e4892
+Ref: hashxdict/type4892
+Ref: f4912
+Ref: ordxdict/type4912
+Ref: 105001
+Ref: stldict/type5001
+Ref: 115019
+Ref: stlmdict/type5019
+Ref: 125126
+Ref: stlxdict/type5126
+Node: Operations6338
+Ref: operations6425
+Ref: 146425
+Node: Basic Operations10244
+Ref: basic operations10333
+Ref: 1510333
+Ref: basic-operations10333
+Ref: 1f10376
+Ref: hashdict10376
+Ref: 2010402
+Ref: hashmdict10402
+Ref: 2110429
+Ref: orddict10429
+Ref: 2210454
+Ref: ordmdict10454
+Ref: 2311262
+Ref: mkhashdict11262
+Ref: 2411292
+Ref: mkhashmdict11292
+Ref: 2511323
+Ref: mkorddict11323
+Ref: 2611352
+Ref: mkordmdict11352
+Ref: 1b11539
+Ref: copy/stldict11539
+Ref: 2912272
+Ref: hashdictp12272
+Ref: 2a12298
+Ref: hashmdictp12298
+Ref: 2b12325
+Ref: orddictp12325
+Ref: 2c12350
+Ref: ordmdictp12350
+Ref: 2d12457
+Ref: hashxdictp12457
+Ref: 2e12484
+Ref: ordxdictp12484
+Ref: 2f12510
+Ref: stldictp12510
+Ref: 3012535
+Ref: stlmdictp12535
+Ref: 3112561
+Ref: stlxdictp12561
+Ref: 3212673
+Ref: #/stldict12673
+Ref: 3312759
+Ref: !/stldict12759
+Ref: 3413133
+Ref: null/stldict13133
+Ref: 3513211
+Ref: member/stldict13211
+Ref: 1c13291
+Ref: members/stldict13291
+Ref: 3613315
+Ref: list/stldict13315
+Ref: 3713636
+Ref: stream/stldict13636
+Ref: 3813878
+Ref: tuple/stldict13878
+Ref: 3913900
+Ref: vector/stldict13900
+Ref: 1d13970
+Ref: keys/stldict13970
+Ref: 1e14040
+Ref: vals/stldict14040
+Ref: 2714463
+Ref: insert/stldict14463
+Ref: 3a14488
+Ref: insert/stldict214488
+Ref: 3b14518
+Ref: update/stldict14518
+Ref: 2814914
+Ref: delete/stldict14914
+Ref: 3c14939
+Ref: delete/stldict214939
+Ref: 3d15210
+Ref: clear/stldict15210
+Node: Comparisons15318
+Ref: comparisons15435
+Ref: 1615435
+Node: Set-Like Operations17156
+Ref: set-like operations17277
+Ref: 1717277
+Ref: set-like-operations17277
+Ref: 3e17572
+Ref: +/stldict17572
+Ref: 3f17647
+Ref: -/stldict17647
+Ref: 4017734
+Ref: */stldict17734
+Node: List-Like Operations17829
+Ref: list-like operations17948
+Ref: 1817948
+Ref: list-like-operations17948
+Node: Iterators18603
+Ref: iterators18723
+Ref: 1918723
+Ref: 4219716
+Ref: stldict begin19716
+Ref: 4319747
+Ref: stldict end19747
+Ref: 4419998
+Ref: stldict find19998
+Ref: 4621244
+Ref: stldict dict21244
+Ref: 4721324
+Ref: stldict endp21324
+Ref: 4821462
+Ref: stldict next21462
+Ref: 4921832
+Ref: stldict get21832
+Ref: 4a22053
+Ref: stldict put22053
+Ref: 4522376
+Ref: stldict erase22376
+Ref: 4b22590
+Ref: ==/stldict_iterator22590
+Ref: 4c22611
+Ref: ~=/stldict_iterator22611
+Node: Low-Level Operations23036
+Ref: low-level operations23151
+Ref: 1a23151
+Ref: low-level-operations23151
+Node: Pretty-Printing23781
+Ref: pretty-printing23878
+Ref: 1323878
+Ref: 4d24349
+Ref: hashdict_symbol24349
+Ref: 4e24381
+Ref: hashmdict_symbol24381
+Ref: 4f24414
+Ref: orddict_symbol24414
+Ref: 5024445
+Ref: ordmdict_symbol24445
+Node: Examples25167
+Ref: examples25254
+Ref: 4125254
+Node: Index28668
+Ref: index28736
 
 End Tag Table
 

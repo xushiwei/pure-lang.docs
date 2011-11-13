@@ -57,7 +57,7 @@
             
   <div class="section" id="module-hashdict">
 <span id="pure-stldict"></span><h1>pure-stldict<a class="headerlink" href="#module-hashdict" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-orddict"></span><p>Version 0.0, November 12, 2011</p>
+<span class="target" id="module-orddict"></span><p>Version 0.0, November 13, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This package provides a light-weight, no frills interface to the C++
 dictionary-like containers, <tt class="docutils literal"><span class="pre">map</span></tt> and <tt class="docutils literal"><span class="pre">unordered_map</span></tt>, see the <a class="reference external" href="http://en.cppreference.com/w/cpp">C++
@@ -272,7 +272,7 @@ dictionary and set data structures from the standard library instead.</p>
 <tt class="descname">stlmdictp</tt> m<a class="headerlink" href="#stlmdictp" title="Permalink to this definition">¶</a></dt>
 <dt id="stlxdictp">
 <tt class="descname">stlxdictp</tt> m<a class="headerlink" href="#stlxdictp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check whether the argument is a dictionary of the corresponding union type.</p>
+<dd><p>Check whether the argument is a dictionary of the corresponding supertype.</p>
 </dd></dl>
 
 <dl class="function">
@@ -445,6 +445,13 @@ constructed. Thus if you need to check that two dictionaries contain the same
 members irrespective of the order in which the members are listed, the
 semantic equality operation <a class="reference internal" href="purelib.html#==" title="=="><tt class="xref pure pure-func docutils literal"><span class="pre">==</span></tt></a> should be used instead; this will also
 handle the case of mixed operand types.</p>
+<p>Note that if you really need to check whether two dictionaries are the same
+object rather than just syntactically equal, you&#8217;ll have to cast them to
+generic C pointers before comparing them with <a class="reference internal" href="purelib.html#===" title="==="><tt class="xref pure pure-func docutils literal"><span class="pre">===</span></tt></a>. This can be done
+with the following little helper function:</p>
+<div class="highlight-pure"><div class="highlight"><pre>same_dict x y = pointer_cast <span class="s">&quot;void*&quot;</span> x === pointer_cast <span class="s">&quot;void*&quot;</span> y<span class="p">;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="set-like-operations">
 <h3>Set-Like Operations<a class="headerlink" href="#set-like-operations" title="Permalink to this headline">¶</a></h3>
@@ -524,20 +531,21 @@ returns an iterator pointing to the corresponding member (or <tt class="docutils
 <p>Note that these operations return a new iterator object for each invocation.
 Also, the created iterator object keeps track of the container it belongs to,
 so that the container isn&#8217;t garbage-collected while the iterator is still
-being used. However, note that removing a member from the container (using
-either <a class="reference internal" href="#delete/stldict" title="delete"><tt class="xref pure pure-func docutils literal"><span class="pre">delete</span></tt></a> or <a class="reference internal" href="#stldict::erase" title="stldict::erase"><tt class="xref pure pure-func docutils literal"><span class="pre">stldict::erase</span></tt></a>) invalidates all
-iterators pointing to that member; the result of trying to access such an
-invalidated iterator is undefined (most likely you&#8217;ll get a segfault).</p>
+being used. However, removing a member from the container (using either
+<a class="reference internal" href="#delete/stldict" title="delete"><tt class="xref pure pure-func docutils literal"><span class="pre">delete</span></tt></a> or <a class="reference internal" href="#stldict::erase" title="stldict::erase"><tt class="xref pure pure-func docutils literal"><span class="pre">stldict::erase</span></tt></a>) invalidates all iterators
+pointing to that member; the result of trying to access such an invalidated
+iterator is undefined (most likely your program will crash).</p>
 <p>Similar caveats also apply to the <a class="reference internal" href="#stream/stldict" title="stream"><tt class="xref pure pure-func docutils literal"><span class="pre">stream</span></tt></a> function which, as
 already mentioned, uses iterators internally to implement lazy list traversal
 of the members of a dictionary. Thus, if you delete a member of a dictionary
-while traversing it using <a class="reference internal" href="#stream/stldict" title="stream"><tt class="xref pure pure-func docutils literal"><span class="pre">stream</span></tt></a>, always make sure that this
-member is not the next stream element; otherwise bad things will happen.</p>
+while traversing it using <a class="reference internal" href="#stream/stldict" title="stream"><tt class="xref pure pure-func docutils literal"><span class="pre">stream</span></tt></a>, you better make sure that
+this member is not the next stream element remaining to be visited; otherwise
+bad things will happen.</p>
 <p>The following operations on iterators let you query and modify the contents
 of the underlying container:</p>
 <dl class="function">
-<dt id="hashdict/stldict">
-<tt class="descname">hashdict</tt> i<a class="headerlink" href="#hashdict/stldict" title="Permalink to this definition">¶</a></dt>
+<dt id="stldict::dict">
+<tt class="descclassname">stldict::</tt><tt class="descname">dict</tt> i<a class="headerlink" href="#stldict::dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the dictionary to which <tt class="docutils literal"><span class="pre">i</span></tt> belongs.</p>
 </dd></dl>
 
@@ -583,11 +591,19 @@ iterators pointing to this member). The operation fails if <tt class="docutils l
 end of the container.</p>
 </dd></dl>
 
-<p>Note that iterators are in fact just pointers to a corresponding C++ data
-structure. Thus syntactical equality holds only if two iterators are exactly
-the same pointer. Equality of iterators can be tested with the <a class="reference internal" href="purelib.html#==" title="=="><tt class="xref pure pure-func docutils literal"><span class="pre">==</span></tt></a>
-operation: <tt class="docutils literal"><span class="pre">i</span> <span class="pre">==</span> <span class="pre">j</span></tt> iff <tt class="docutils literal"><span class="pre">i</span></tt> and <tt class="docutils literal"><span class="pre">j</span></tt> point to the same element in the
-same container, <tt class="docutils literal"><span class="pre">i</span> <span class="pre">~=</span> <span class="pre">j</span></tt> iff they don&#8217;t.</p>
+<dl class="function">
+<dt id="==/stldict_iterator">
+i <tt class="descname">==</tt> j<a class="headerlink" href="#==/stldict_iterator" title="Permalink to this definition">¶</a></dt>
+<dt id="~=/stldict_iterator">
+i <tt class="descname">~=</tt> j<a class="headerlink" href="#~=/stldict_iterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Semantic equality of iterators. Two iterators are considered equal (<tt class="docutils literal"><span class="pre">i</span> <span class="pre">==</span>
+<span class="pre">j</span></tt>) if <tt class="docutils literal"><span class="pre">i</span></tt> and <tt class="docutils literal"><span class="pre">j</span></tt> point to the same element in the same container,
+and unequal (<tt class="docutils literal"><span class="pre">i</span> <span class="pre">~=</span> <span class="pre">j</span></tt>) if they don&#8217;t. (In contrast, note that iterators
+are in fact just pointers to a corresponding C++ data structure, and thus
+<em>syntactical</em> equality (<tt class="docutils literal"><span class="pre">i</span> <span class="pre">===</span> <span class="pre">j</span></tt>) holds only if two iterators are the
+same object.)</p>
+</dd></dl>
+
 </div>
 <div class="section" id="other-low-level-operations">
 <h3>Other Low-Level Operations<a class="headerlink" href="#other-low-level-operations" title="Permalink to this headline">¶</a></h3>

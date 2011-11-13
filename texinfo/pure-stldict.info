@@ -14,7 +14,7 @@ File: pure-stldict.info,  Node: Top,  Next: Copying,  Up: (dir)
 pure-stldict
 ************
 
-  Version 0.0, November 12, 2011
+  Version 0.0, November 13, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -263,7 +263,7 @@ File: pure-stldict.info,  Node: Basic Operations,  Next: Pretty-Printing,  Up: O
  -- Function: stlmdictp m
  -- Function: stlxdictp m
      Check whether the argument is a dictionary of the corresponding
-     union type.
+     supertype.
 
  -- Function: # m
      The size of a dictionary (the number of members it contains).
@@ -403,6 +403,14 @@ order in which the members are listed, the semantic equality operation
 `==' should be used instead; this will also handle the case of mixed
 operand types.
 
+  Note that if you really need to check whether two dictionaries are
+the same object rather than just syntactically equal, you'll have to
+cast them to generic C pointers before comparing them with `==='. This
+can be done with the following little helper function:
+
+    same_dict x y = pointer_cast "void*" x === pointer_cast "void*" y;
+
+
 
 File: pure-stldict.info,  Node: Set-Like Operations,  Next: List-Like Operations,  Prev: Comparisons,  Up: Operations
 
@@ -485,23 +493,23 @@ given dictionary.
   Note that these operations return a new iterator object for each
 invocation.  Also, the created iterator object keeps track of the
 container it belongs to, so that the container isn't garbage-collected
-while the iterator is still being used. However, note that removing a
-member from the container (using either *note delete: 1f. or *note
-stldict erase: 47.) invalidates all iterators pointing to that member;
-the result of trying to access such an invalidated iterator is
-undefined (most likely you'll get a segfault).
+while the iterator is still being used. However, removing a member from
+the container (using either *note delete: 1f. or *note stldict erase:
+47.) invalidates all iterators pointing to that member; the result of
+trying to access such an invalidated iterator is undefined (most likely
+your program will crash).
 
   Similar caveats also apply to the *note stream: 30. function which, as
 already mentioned, uses iterators internally to implement lazy list
 traversal of the members of a dictionary. Thus, if you delete a member
-of a dictionary while traversing it using *note stream: 30, always make
-sure that this member is not the next stream element; otherwise bad
-things will happen.
+of a dictionary while traversing it using *note stream: 30, you better
+make sure that this member is not the next stream element remaining to
+be visited; otherwise bad things will happen.
 
   The following operations on iterators let you query and modify the
 contents of the underlying container:
 
- -- Function: hashdict i
+ -- Function: stldict::dict i
      Return the dictionary to which `i' belongs.
 
  -- Function: stldict::endp i
@@ -532,11 +540,14 @@ contents of the underlying container:
      other iterators pointing to this member). The operation fails if
      `i' is at the end of the container.
 
-  Note that iterators are in fact just pointers to a corresponding C++
-data structure. Thus syntactical equality holds only if two iterators
-are exactly the same pointer. Equality of iterators can be tested with
-the `==' operation: `i == j' iff `i' and `j' point to the same element
-in the same container, `i ~= j' iff they don't.
+ -- Function: i == j
+ -- Function: i ~= j
+     Semantic equality of iterators. Two iterators are considered equal
+     (`i == j') if `i' and `j' point to the same element in the same
+     container, and unequal (`i ~= j') if they don't. (In contrast,
+     note that iterators are in fact just pointers to a corresponding
+     C++ data structure, and thus _syntactical_ equality (`i === j')
+     holds only if two iterators are the same object.)
 
 
 File: pure-stldict.info,  Node: Other Low-Level Operations,  Prev: Iterators,  Up: Operations
@@ -694,10 +705,10 @@ Index
 * * infix function:                      Set-Like Operations. (line  17)
 * + infix function:                      Set-Like Operations. (line  11)
 * - infix function:                      Set-Like Operations. (line  14)
+* == infix function:                     Iterators.           (line  88)
 * clear function:                        Basic Operations.    (line 130)
 * copy function:                         Basic Operations.    (line  32)
 * delete function:                       Basic Operations.    (line 123)
-* hashdict function <1>:                 Iterators.           (line  57)
 * hashdict function:                     Basic Operations.    (line   6)
 * hashdict module:                       Top.                 (line   6)
 * hashdict type:                         Types.               (line  10)
@@ -732,6 +743,7 @@ Index
 * ordxdict type:                         Types.               (line  38)
 * ordxdictp function:                    Basic Operations.    (line  53)
 * stldict begin function:                Iterators.           (line  26)
+* stldict dict function:                 Iterators.           (line  57)
 * stldict end function:                  Iterators.           (line  26)
 * stldict endp function:                 Iterators.           (line  60)
 * stldict erase function:                Iterators.           (line  83)
@@ -750,6 +762,7 @@ Index
 * update function:                       Basic Operations.    (line 113)
 * vals function:                         Basic Operations.    (line 102)
 * vector function:                       Basic Operations.    (line  95)
+* ~= infix function:                     Iterators.           (line  88)
 
 
 
@@ -837,98 +850,102 @@ Ref: 278908
 Ref: stlmdictp8908
 Ref: 288934
 Ref: stlxdictp8934
-Ref: 299047
-Ref: #/stldict9047
-Ref: 2a9133
-Ref: !/stldict9133
-Ref: 2b9507
-Ref: null/stldict9507
-Ref: 2c9585
-Ref: member/stldict9585
-Ref: 2d9665
-Ref: members/stldict9665
-Ref: 2e9689
-Ref: list/stldict9689
-Ref: 3010338
-Ref: stream/stldict10338
-Ref: 3110580
-Ref: tuple/stldict10580
-Ref: 3210602
-Ref: vector/stldict10602
-Ref: 3310672
-Ref: keys/stldict10672
-Ref: 3410742
-Ref: vals/stldict10742
-Ref: 1e11225
-Ref: insert/stldict11225
-Ref: 3611250
-Ref: insert/stldict211250
-Ref: 3711280
-Ref: update/stldict11280
-Ref: 1f11676
-Ref: delete/stldict11676
-Ref: 3811701
-Ref: delete/stldict211701
-Ref: 3911972
-Ref: clear/stldict11972
-Node: Pretty-Printing12080
-Ref: pretty-printing12193
-Ref: d12193
-Ref: 3a12664
-Ref: hashdict_symbol12664
-Ref: 3b12696
-Ref: hashmdict_symbol12696
-Ref: 3c12729
-Ref: orddict_symbol12729
-Ref: 3d12760
-Ref: ordmdict_symbol12760
-Node: Comparisons13482
-Ref: comparisons13598
-Ref: 2f13598
-Node: Set-Like Operations14981
-Ref: set-like operations15102
-Ref: 3e15102
-Ref: set-like-operations15102
-Ref: 3f15397
-Ref: +/stldict15397
-Ref: 4015472
-Ref: -/stldict15472
-Ref: 4115559
-Ref: */stldict15559
-Node: List-Like Operations15654
-Ref: list-like operations15773
-Ref: 4215773
-Ref: list-like-operations15773
-Node: Iterators16428
-Ref: iterators16554
-Ref: 3516554
-Ref: 4417551
-Ref: stldict begin17551
-Ref: 4517582
-Ref: stldict end17582
-Ref: 4617833
-Ref: stldict find17833
-Ref: 4819059
-Ref: hashdict/stldict19059
-Ref: 4919134
-Ref: stldict endp19134
-Ref: 4a19272
-Ref: stldict next19272
-Ref: 4b19642
-Ref: stldict get19642
-Ref: 4c19863
-Ref: stldict put19863
-Ref: 4720186
-Ref: stldict erase20186
-Node: Other Low-Level Operations20732
-Ref: other low-level operations20829
-Ref: 4d20829
-Ref: other-low-level-operations20829
-Node: Examples21406
-Ref: examples21493
-Ref: 4321493
-Node: Index24907
-Ref: index24975
+Ref: 299046
+Ref: #/stldict9046
+Ref: 2a9132
+Ref: !/stldict9132
+Ref: 2b9506
+Ref: null/stldict9506
+Ref: 2c9584
+Ref: member/stldict9584
+Ref: 2d9664
+Ref: members/stldict9664
+Ref: 2e9688
+Ref: list/stldict9688
+Ref: 3010337
+Ref: stream/stldict10337
+Ref: 3110579
+Ref: tuple/stldict10579
+Ref: 3210601
+Ref: vector/stldict10601
+Ref: 3310671
+Ref: keys/stldict10671
+Ref: 3410741
+Ref: vals/stldict10741
+Ref: 1e11224
+Ref: insert/stldict11224
+Ref: 3611249
+Ref: insert/stldict211249
+Ref: 3711279
+Ref: update/stldict11279
+Ref: 1f11675
+Ref: delete/stldict11675
+Ref: 3811700
+Ref: delete/stldict211700
+Ref: 3911971
+Ref: clear/stldict11971
+Node: Pretty-Printing12079
+Ref: pretty-printing12192
+Ref: d12192
+Ref: 3a12663
+Ref: hashdict_symbol12663
+Ref: 3b12695
+Ref: hashmdict_symbol12695
+Ref: 3c12728
+Ref: orddict_symbol12728
+Ref: 3d12759
+Ref: ordmdict_symbol12759
+Node: Comparisons13481
+Ref: comparisons13597
+Ref: 2f13597
+Node: Set-Like Operations15318
+Ref: set-like operations15439
+Ref: 3e15439
+Ref: set-like-operations15439
+Ref: 3f15734
+Ref: +/stldict15734
+Ref: 4015809
+Ref: -/stldict15809
+Ref: 4115896
+Ref: */stldict15896
+Node: List-Like Operations15991
+Ref: list-like operations16110
+Ref: 4216110
+Ref: list-like-operations16110
+Node: Iterators16765
+Ref: iterators16891
+Ref: 3516891
+Ref: 4417888
+Ref: stldict begin17888
+Ref: 4517919
+Ref: stldict end17919
+Ref: 4618170
+Ref: stldict find18170
+Ref: 4819416
+Ref: stldict dict19416
+Ref: 4919496
+Ref: stldict endp19496
+Ref: 4a19634
+Ref: stldict next19634
+Ref: 4b20004
+Ref: stldict get20004
+Ref: 4c20225
+Ref: stldict put20225
+Ref: 4720548
+Ref: stldict erase20548
+Ref: 4d20762
+Ref: ==/stldict_iterator20762
+Ref: 4e20783
+Ref: ~=/stldict_iterator20783
+Node: Other Low-Level Operations21208
+Ref: other low-level operations21305
+Ref: 4f21305
+Ref: other-low-level-operations21305
+Node: Examples21882
+Ref: examples21969
+Ref: 4321969
+Node: Index25383
+Ref: index25451
 
 End Tag Table
 

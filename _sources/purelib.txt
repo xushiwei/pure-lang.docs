@@ -560,23 +560,18 @@ Some important basic operations on lists and tuples are listed below.
      > (1,2,3,4,5)!!(3..10);
      4,5
 
-   Indices can actually be specified in any order, so that you can retrieve
+   The case of contiguous index ranges, as shown above, is optimized so
+   that it always works in linear time, see Slicing_ below for details. But
+   indices can actually be specified in any order, so that you can retrieve
    any permutation of the members, also with duplicates. E.g.::
 
      > (1..5)!![2,4,4,1];
      [3,5,5,2]
 
-   This is less efficient than the case of contiguous index ranges (which
-   is optimized so that it always works in linear time), because it
-   requires repeated traversals of the list for each index. For larger
+   This is less efficient than the case of contiguous index ranges, because
+   it requires repeated traversals of the list for each index. For larger
    lists you should hence use vectors or matrices instead, to avoid the
    quadratic complexity.
-
-   Note: The prelude actually implements the slicing operation in a fairly
-   generic way, so that it works with any kind of container data structure
-   which defines '\ :func:`\!`\ ' in such a manner that it throws an
-   exception when the index is out of bounds. It also works with any kind
-   of index container that implements the :func:`catmap` operation.
 
 .. index:: list; arithmetic sequence
 
@@ -667,16 +662,77 @@ stream are in fact already known. However, this operation then allows you
 to apply other functions to the list and have them evaluated in a lazy
 fashion.
 
+Slicing
+-------
+
+Indexing and slicing are actually fairly general operations in Pure which
+are used not only in the context of lists and tuples, but for any type of
+container data structure which can be "indexed" in some way. Other examples
+in the standard library are the :mod:`array` and :mod:`dict` containers.
+
+The prelude therefore implements slicing in a generic way, so that it works
+with any kind of container data structure which defines '\ :func:`\!`\ ' in
+such a manner that it throws an exception when the index is out of bounds.
+It also works with any kind of index container that implements the
+:func:`catmap` operation.
+
+The prelude also optimizes the case of contiguous integer ranges so that
+slices like ``xs!!(i..j)`` are computed in linear time if possible.  This
+works, in particular, with lists, strings and matrices.
+
+Moreover, the prelude includes some optimization rules and corresponding
+helper functions to optimize the most common cases at compile time, so that
+the index range is never actually constructed. To these ends, the slicing
+expression ``xs!!(i..j)`` is translated to a call ``subseq xs i j`` of the
+special :func:`subseq` function:
+
+.. function:: subseq x i j
+
+   If ``x`` is a list, matrix or string, and ``i`` and ``j`` are int
+   values, compute the slice ``xs!!(i..j)`` in the most efficient manner
+   possible. This generally avoids constructing the index list ``i..j``.
+   Otherwise ``i..j`` is computed and :func:`subseq` falls back to the
+   :func:`slice` function below to compute the slice in the usual way.
+
+.. function:: slice x ys
+
+   Compute the slice ``x!!ys`` using the standard slicing operation,
+   without any special compile time tricks. (Runtime optimizations are
+   still applied if possible.)
+
+You can readily see the effects of this optimization by running the slicing
+operator against :func:`slice`::
+
+  > let xs = 1..1000000;
+  > stats -m
+  > #slice xs (100000..299990);
+  199991
+  0.34s, 999957 cells
+  > #xs!!(100000..299990);
+  199991
+  0.14s, 399984 cells
+
+Even more drastic improvements in both running time and memory usage can be
+seen in the case of matrix slices::
+
+  > let x = rowvector xs;
+  > #slice x (100000..299990);
+  199991
+  0.19s, 599990 cells
+  > #x!!(100000..299990);
+  199991
+  0s, 10 cells
+
 Hash Pairs
 ----------
 
 .. index:: hash pair, hash rocket
 
-The prelude also provides another special kind of pairs called "hash
-pairs", which take the form ``key=>value``. These are used in various
-contexts to denote key-value associations. The only operations on hash
-pairs provided by the prelude are equality testing (which recursively
-compares the components) and the functions :func:`key` and :func:`val`:
+The prelude provides another special kind of pairs called "hash pairs",
+which take the form ``key=>value``. These are used in various contexts to
+denote key-value associations. The only operations on hash pairs provided
+by the prelude are equality testing (which recursively compares the
+components) and the functions :func:`key` and :func:`val`:
 
 .. constructor:: infix => x y
 
@@ -1317,6 +1373,12 @@ Matrix Functions
      > x!!(0..1,1);
      {2;5}
 
+   As in the case of lists, matrix slices are optimized to handle cases
+   with contiguous index ranges in an efficient manner, see Slicing_ for
+   details. To these ends, the helper functions :func:`subseq/matrix` and
+   :func:`subseq2/matrix` are defined to handle the necessary compile time
+   optimizations.
+
 .. function:: infix == /matrix x y
               infix ~= /matrix x y
 
@@ -1396,12 +1458,15 @@ Matrix Construction and Conversions
      > vectorseq 0.0 0.9 0.1;
      {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}
 
-   These operations are also handy to define macros which optimize the
-   construction of vectors from list ranges, so that the intermediate list
-   values are actually never constructed. For instance::
+   The prelude also contains some optimization rules which translate calls
+   to :func:`vector` et al on arithmetic sequences to the corresponding
+   calls to :func:`vectorseq` et al, such as::
 
-     > def vector (n1:n2..m) = vectorseq n1 m (n2-n1);
-     > def vector (n..m) = vectorseq n m 1;
+     def vector (n1:n2..m) = vectorseq n1 m (n2-n1);
+     def vector (n..m) = vectorseq n m 1;
+
+   Example::
+
      > foo = vector (1..10);
      > bar = vector (0.0:0.1..0.9);
      > show foo bar
@@ -1411,9 +1476,11 @@ Matrix Construction and Conversions
      {1,2,3,4,5,6,7,8,9,10}
      {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}
 
-   (Note that the library doesn't contain any such macro rules, so you'll
-   have to add them yourself if you want to take advantage of these
-   optimizations.)
+   Please note that these optimization rules assume that basic arithmetic
+   works with the involved elements, which may give you trouble if you need
+   to use :func:`vector` et al with exotic kinds of arithmetic sequences.
+   To disable them, simply comment out the corresponding lines in
+   matrices.pure.
 
 .. function:: dmatrix xs
               cmatrix xs
@@ -1493,6 +1560,14 @@ Matrix Inspection and Manipulation
    array, see the description of the :func:`pack` function below for
    further details. There's little use for this value in Pure, but it may
    be needed when interfacing to C.
+
+.. function:: subseq /matrix x i j
+              subseq2 /matrix x i j k l
+
+   Helper functions to optimize matrix slices, see Slicing_ for details.
+   :func:`subseq2/matrix` is a special version of :func:`subseq/matrix`
+   which is used to optimize the case of 2-dimensional matrix slices
+   ``xs!!(i..j,k..l)``.
 
 .. function:: row x i
               col x i

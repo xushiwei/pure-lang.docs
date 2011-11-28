@@ -207,18 +207,19 @@ and the latest sources can be found under the following URLs:</p>
 <li><a class="reference internal" href="#stack-size-and-tail-recursion" id="id117">Stack Size and Tail Recursion</a></li>
 <li><a class="reference internal" href="#handling-of-asynchronous-signals" id="id118">Handling of Asynchronous Signals</a></li>
 <li><a class="reference internal" href="#recursive-types" id="id119">Recursive Types</a></li>
-<li><a class="reference internal" href="#numeric-calculations" id="id120">Numeric Calculations</a></li>
-<li><a class="reference internal" href="#constant-definitions" id="id121">Constant Definitions</a></li>
-<li><a class="reference internal" href="#external-c-functions" id="id122">External C Functions</a></li>
-<li><a class="reference internal" href="#calling-special-forms" id="id123">Calling Special Forms</a></li>
-<li><a class="reference internal" href="#laziness" id="id124">Laziness</a></li>
-<li><a class="reference internal" href="#showing-macro-expansions" id="id125">Showing Macro Expansions</a></li>
+<li><a class="reference internal" href="#interfaces" id="id120">Interfaces</a></li>
+<li><a class="reference internal" href="#numeric-calculations" id="id121">Numeric Calculations</a></li>
+<li><a class="reference internal" href="#constant-definitions" id="id122">Constant Definitions</a></li>
+<li><a class="reference internal" href="#external-c-functions" id="id123">External C Functions</a></li>
+<li><a class="reference internal" href="#calling-special-forms" id="id124">Calling Special Forms</a></li>
+<li><a class="reference internal" href="#laziness" id="id125">Laziness</a></li>
+<li><a class="reference internal" href="#showing-macro-expansions" id="id126">Showing Macro Expansions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#author" id="id126">Author</a></li>
-<li><a class="reference internal" href="#acknowledgements" id="id127">Acknowledgements</a></li>
-<li><a class="reference internal" href="#copying" id="id128">Copying</a></li>
-<li><a class="reference internal" href="#references-and-links" id="id129">References and Links</a></li>
+<li><a class="reference internal" href="#author" id="id127">Author</a></li>
+<li><a class="reference internal" href="#acknowledgements" id="id128">Acknowledgements</a></li>
+<li><a class="reference internal" href="#copying" id="id129">Copying</a></li>
+<li><a class="reference internal" href="#references-and-links" id="id130">References and Links</a></li>
 </ul>
 </div>
 <div class="section" id="introduction">
@@ -2597,10 +2598,9 @@ such dirty tricks to wreak havoc on the internal representation of an ADT,
 he gets what he deserves.</p>
 </div>
 <p>Pure provides some additional facilities to ease the handling of abstract data
-types through its <a class="reference internal" href="#interface-types">interface types</a>. For instance, instead of defining
-<tt class="docutils literal"><span class="pre">point</span></tt> as a concrete data type using a <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> rule, we might also
-specify it as an interface type which merely lists the supported operations as
-follows:</p>
+types. Specifically, instead of defining <tt class="docutils literal"><span class="pre">point</span></tt> as a concrete data type
+using a <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> rule, we might also specify it as an <strong class="dfn">interface type</strong>
+which merely lists the supported operations as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> point <span class="kr">with</span>
   xcoord p<span class="p">::</span>point<span class="p">;</span>
   ycoord p<span class="p">::</span>point<span class="p">;</span>
@@ -2629,35 +2629,33 @@ command:</p>
 </pre></div>
 </div>
 <p>As you can see, the compiler derived our previous definition of the type. But
-in fact <tt class="docutils literal"><span class="pre">translate</span></tt> will now work with <em>any</em> data type as long as it
-implements the <tt class="docutils literal"><span class="pre">point</span></tt> interface (i.e., provides the <tt class="docutils literal"><span class="pre">xcoord</span></tt>, <tt class="docutils literal"><span class="pre">ycoord</span></tt>
-and <tt class="docutils literal"><span class="pre">move</span></tt> operations), so we may swap out the underlying data structure on
-a whim. For instance, if we&#8217;d like to use vectors instead of constructor
-terms, all we have to do is to provide the necessary implementations of the
-interface operations:</p>
-<div class="highlight-pure"><div class="highlight"><pre>xcoord {x,y} = x<span class="p">;</span>
+in fact <tt class="docutils literal"><span class="pre">translate</span></tt> will now work with <em>any</em> data type which implements the
+<tt class="docutils literal"><span class="pre">point</span></tt> interface (i.e., provides the <tt class="docutils literal"><span class="pre">xcoord</span></tt>, <tt class="docutils literal"><span class="pre">ycoord</span></tt> and <tt class="docutils literal"><span class="pre">move</span></tt>
+operations), so we may swap out the underlying data structure on a whim. For
+instance, if we&#8217;d like to use vectors instead of constructor terms, all we
+have to do is to provide a corresponding construction function and implement
+the interface operations:</p>
+<div class="highlight-pure"><div class="highlight"><pre>vpoint x y = {x,y}<span class="p">;</span>
+xcoord {x,y} = x<span class="p">;</span>
 ycoord {x,y} = y<span class="p">;</span>
 move {_,_} x y = {x,y}<span class="p">;</span>
 </pre></div>
 </div>
-<p>And everything just works:</p>
+<p>After these definitions the new data representation works just fine with
+existing <tt class="docutils literal"><span class="pre">point</span></tt> operations such as <tt class="docutils literal"><span class="pre">translate</span></tt>:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show interface point
 <span class="kr">type</span> point (Point x y)<span class="p">;</span>
 <span class="kr">type</span> point {x,y}<span class="p">;</span>
-<span class="gp">&gt; </span><span class="kr">let</span> p<span class="p">::</span>point = {<span class="mi">3</span>,<span class="mi">3</span>}<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> p<span class="p">::</span>point = vpoint <span class="mi">3</span> <span class="mi">3</span><span class="p">;</span>
 <span class="gp">&gt; </span>p<span class="p">;</span> translate (<span class="mi">1</span>,<span class="mi">2</span>) p<span class="p">;</span>
 {<span class="mi">3</span>,<span class="mi">3</span>}
 {<span class="mi">4</span>,<span class="mi">5</span>}
 </pre></div>
 </div>
-<p>This separation of interface and implementation of a data structure is very
-important in the design of larger software systems. In particular, it makes it
-possible to revise the internal representation or even provide alternative
-implementations of a data type, and have auxiliary functions (like our
-<tt class="docutils literal"><span class="pre">translate</span></tt> function) still work on the modified data structure.</p>
-<p>More examples and detailed explanations of Pure&#8217;s notions of type predicates
-and interface types can be found in the <a class="reference internal" href="#type-rules">Type Rules</a> and <a class="reference internal" href="#interface-types">Interface Types</a>
-sections below.</p>
+<p>This separation of interface and implementation of a data structure is an
+important ingredient of software engineering techniques. More examples and
+detailed explanations of Pure&#8217;s notions of type predicates and interface types
+can be found in the <a class="reference internal" href="#type-rules">Type Rules</a> and <a class="reference internal" href="#interface-types">Interface Types</a> sections below.</p>
 </div>
 <div class="section" id="general-rules">
 <h3><a class="toc-backref" href="#id49">General Rules</a><a class="headerlink" href="#general-rules" title="Permalink to this headline">¶</a></h3>
@@ -3077,11 +3075,35 @@ which gives the type name along with a collection of patterns, the so-called
 which arguments they expect. This may be anything that can occur as the
 left-hand side of an ordinary function definition, cf. <a class="reference internal" href="#general-rules">General Rules</a>.</li>
 <li>The name of another interface type. This causes the signature of the named
-interface type to be included in the interface type being defined.</li>
+interface type to be included in the interface type being defined, which
+effectively turns the new interface type into a subtype of the existing one.</li>
 </ul>
-<p>Note that an interface may also be empty, in which case it matches <em>any</em>
-value. Thus, <tt class="docutils literal"><span class="pre">interface</span> <span class="pre">any</span> <span class="pre">with</span> <span class="pre">end</span></tt> is just a fancy way to define the type
-<tt class="docutils literal"><span class="pre">type</span> <span class="pre">any</span> <span class="pre">_</span></tt>.</p>
+<p>An interface may also be empty, in which case it matches <em>any</em> value. Thus,</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> any <span class="kr">with</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>is just a fancy way to define the type:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> any _<span class="p">;</span>
+</pre></div>
+</div>
+<p>Also, interface types may be refined at any time, by adding more interface
+patterns. Thus,</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span> foo x<span class="p">::</span>foo<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+<span class="kr">interface</span> foo <span class="kr">with</span> bar x<span class="p">::</span>foo<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>is equivalent to:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span>
+  foo x<span class="p">::</span>foo<span class="p">;</span>
+  bar x<span class="p">::</span>foo<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>However, note that when including one interface in another, the included
+interface must already exist and only the interface patterns known at the
+point of inclusion become part of the including interface; refining the
+included interface later has no effect on the including interface. In
+particular, this also prevents circular interface definitions.</p>
 <p>The gist of an interface is in its patterns, more precisely: in the pattern
 variables which have the name of the interface as a type tag. The precise
 meaning of the patterns is as follows:</p>
@@ -3098,10 +3120,55 @@ eliminated.</li>
 variable without any type tag, which thus matches <em>any</em> value) are
 eliminated as well.</li>
 </ul>
-<p>Note that an interface pattern may contain type tags other than the interface
+<p>An interface pattern may contain type tags other than the interface
 type. These must always be matched <em>literally</em> on the left-hand sides of
-equations.</p>
-<p>For instance, let&#8217;s consider the customary stack data structure:</p>
+equations. Thus,</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span>
+  foo x<span class="p">::</span>foo y<span class="p">::</span><span class="kt">int</span><span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>matches any rule of the form</p>
+<div class="highlight-pure"><div class="highlight"><pre>foo x y<span class="p">::</span><span class="kt">int</span> = ...<span class="p">;</span>
+</pre></div>
+</div>
+<p>but <em>not</em>:</p>
+<div class="highlight-pure"><div class="highlight"><pre>foo x <span class="mi">0</span> = ...<span class="p">;</span>
+foo x y<span class="p">::</span>bar = ...<span class="p">;</span>
+</pre></div>
+</div>
+<p>(unless <tt class="docutils literal"><span class="pre">bar</span></tt> happens to be an alias of the <tt class="docutils literal"><span class="pre">int</span></tt> type, of course).
+In such cases it is necessary to explicitly add these patterns to the
+interface if you want them to be included.</p>
+<p>Interface patterns may contain the interface type tag any number of times,
+yielding candidate patterns for each occurrence of the interface type tag in
+the pattern. For instance, here is a quick way to determine the type of all
+&#8220;addable&#8221; data structures in the prelude (this uses the interactive <tt class="docutils literal"><span class="pre">show</span>
+<span class="pre">interface</span></tt> command to list the patterns actually matched by an interface
+type, cf. <a class="reference internal" href="#the-show-command">The show Command</a>):</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">interface</span> addable <span class="kr">with</span> x<span class="p">::</span>addable + y<span class="p">::</span>addable<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>show interface addable
+<span class="kr">type</span> addable x<span class="p">::</span><span class="kt">int</span><span class="p">;</span>
+<span class="kr">type</span> addable x<span class="p">::</span><span class="kt">double</span><span class="p">;</span>
+<span class="kr">type</span> addable x<span class="p">::</span><span class="kt">bigint</span><span class="p">;</span>
+<span class="kr">type</span> addable s<span class="p">::</span><span class="kt">string</span><span class="p">;</span>
+<span class="kr">type</span> addable []<span class="p">;</span>
+<span class="kr">type</span> addable xs<span class="p">@</span>(_:_)<span class="p">;</span>
+</pre></div>
+</div>
+<p>On the other hand, interfaces may also contain &#8220;static&#8221; patterns which do not
+include the interface type as a tag at all, such as:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span> bar x<span class="p">::</span>bar y<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>These do not contribute anything to the candidate patterns of the type, but do
+restrict the type just like the other patterns, in that the type will be empty
+unless the static patterns are all &#8220;implemented&#8221;. In the example above, this
+means that the <tt class="docutils literal"><span class="pre">foo</span></tt> type will be empty unless the <tt class="docutils literal"><span class="pre">bar</span></tt> function is
+defined and takes an element of the <tt class="docutils literal"><span class="pre">bar</span></tt> type as its first argument.</p>
+<p>Let&#8217;s now take a look at some examples to see how this all works in practice.
+We&#8217;ll be using the following stack data structure as a running example
+throughout the remainder of this section:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> stack <span class="kr">with</span>
   push s<span class="p">::</span>stack x<span class="p">;</span>
   pop s<span class="p">::</span>stack<span class="p">;</span>
@@ -3142,16 +3209,15 @@ purposes:</p>
 </pre></div>
 </div>
 <p>Looks good so far. We can also check the actual definition of the type in
-terms of its <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> rules using the <tt class="docutils literal"><span class="pre">show</span> <span class="pre">interface</span></tt> command
-(cf. <a class="reference internal" href="#the-show-command">The show Command</a>):</p>
+terms of its <a class="reference internal" href="#type"><tt class="xref std std-keyword docutils literal"><span class="pre">type</span></tt></a> rules using the <tt class="docutils literal"><span class="pre">show</span> <span class="pre">interface</span></tt> command:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show interface stack
 <span class="kr">type</span> stack xs<span class="p">@</span>(_:_)<span class="p">;</span>
 </pre></div>
 </div>
-<p>Wait, there seems to be something wrong there. The empty list pattern of the
+<p>Wait, something seems to be wrong there. The empty list pattern of the
 <tt class="docutils literal"><span class="pre">push</span></tt> function is missing, where did it go? Let&#8217;s restart the interpreter
 with warnings enabled (<a class="reference internal" href="#cmdoption-pure-w"><em class="xref std std-option">-w</em></a>) and retype the above definitions. The
-compiler tells us:</p>
+compiler then tells us:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show interface stack
 warning: <span class="kr">interface</span> &#39;stack&#39; may be incomplete
 warning: function &#39;pop&#39; might lack a rule for &#39;xs<span class="p">@</span>[]&#39;
@@ -3161,7 +3227,7 @@ warning: function &#39;top&#39; might lack a rule for &#39;xs<span class="p">@</
 </div>
 <p>See? A pattern is only considered part of the type if it is supported by <em>all</em>
 the interface operations. Since the <tt class="docutils literal"><span class="pre">pop</span></tt> and <tt class="docutils literal"><span class="pre">top</span></tt> operations don&#8217;t have
-any rules for empty list arguments, this value isn&#8217;t a member of the type. We
+any rules for empty list arguments, empty lists are excluded from the type. We
 can fix this quite easily by adding the following &#8220;error rules&#8221; which handle
 this case:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>pop [] = <span class="nb">throw</span> <span class="s">&quot;empty stack&quot;</span><span class="p">;</span>
@@ -3175,7 +3241,7 @@ this case:</p>
 to good use. Operations on the type are defined as usual, employing <tt class="docutils literal"><span class="pre">stack</span></tt>
 as a type tag for stack arguments so that we can be sure that the <tt class="docutils literal"><span class="pre">push</span></tt>,
 <tt class="docutils literal"><span class="pre">pop</span></tt> and <tt class="docutils literal"><span class="pre">top</span></tt> operations are all supported. For instance, let&#8217;s
-implement a little RPN (&#8220;reverse polish notation&#8221;) calculator:</p>
+implement a little RPN (&#8220;Reverse Polish Notation&#8221;) calculator:</p>
 <div class="highlight-pure"><div class="highlight"><pre>rpn xs<span class="p">::</span>stack ops<span class="p">::</span>list = foldl (call []) xs ops <span class="kr">with</span>
   call ys xs op = push xs (foldl ($) op ys) <span class="kr">if</span> nargs op&lt;=#ys<span class="p">;</span>
                 = call (top xs:ys) (pop xs) op <span class="kr">otherwise</span><span class="p">;</span>
@@ -3231,33 +3297,6 @@ still allow to be pushed). We also add a function to construct such values:</p>
 <span class="gp">&gt; </span>rpn (bstack <span class="mi">2</span> []) [<span class="mi">10</span>,<span class="mi">4</span>,<span class="mi">3</span>,(+),<span class="mi">2</span>,(*),(-)]<span class="p">;</span>
 <span class="gr">&lt;stdin&gt;, line 7: </span>unhandled exception &#39;&quot;full stack&quot;&#39; while evaluating
 &#39;rpn (bstack <span class="mi">2</span> []) [<span class="mi">10</span>,<span class="mi">4</span>,<span class="mi">3</span>,(+),<span class="mi">2</span>,(*),(-)]&#39;
-</pre></div>
-</div>
-<p>Compared to statically typed languages like Go, Pure&#8217;s implementation of
-interface types has some limitations. First, nothing is known about the return
-type of an interface operation, but this is no real impediment in Pure since
-an interface type is all about the kind of <em>arguments</em> which can be matched by
-the left-hand side of an equation.</p>
-<p>Second, as we have seen, interface types work best if all interface operations
-are completely defined on the intended data type. This may sometimes force you
-to add default or error rules raising exceptions which may interfere with
-symbolic evaluation (cf. <a class="reference internal" href="#exception-handling">Exception Handling</a> and <a class="reference internal" href="#defined-functions">Defined Functions</a>). This
-can be a real issue, but it is almost always possible to work around this,
-e.g., by just adding in the missing type members manually. To these ends, Pure
-allows an interface type to be augmented with ordinary type rules as described
-in <a class="reference internal" href="#type-rules">Type Rules</a>. For instance, we might also have implemented the stack type
-as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> stack <span class="kr">with</span>
-  push s<span class="p">::</span>stack x<span class="p">;</span>
-  pop s<span class="p">::</span>stack<span class="p">;</span>
-  top s<span class="p">::</span>stack<span class="p">;</span>
-<span class="kr">end</span><span class="p">;</span>
-
-<span class="kr">type</span> stack []<span class="p">;</span>
-
-push xs<span class="p">@</span>[] x | push xs<span class="p">@</span>(_:_) x = x:xs<span class="p">;</span>
-pop (x:xs) = xs<span class="p">;</span>
-top (x:xs) = x<span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -8942,8 +8981,51 @@ sum (<span class="mi">1</span>:<span class="mi">2</span>:<span class="mi">3</spa
 or the other depends on the situation. Similar techniques and tradeoffs also
 apply to other recursive types such as trees.</p>
 </div>
+<div class="section" id="interfaces">
+<h3><a class="toc-backref" href="#id120">Interfaces</a><a class="headerlink" href="#interfaces" title="Permalink to this headline">¶</a></h3>
+<p>Compared to statically typed languages like <a class="reference internal" href="#go">Go</a>, Pure&#8217;s implementation of
+<a class="reference internal" href="#interface-types">interface types</a> has some limitations. First, nothing is known about the
+<em>return type</em> of an interface operation, but this is no real impediment in
+Pure since Pure types are all about restricting the kind of <em>arguments</em> which
+can be passed to a function, not their result types, so return types are
+irrelevant to interface types anyway.</p>
+<p>Second, as we have seen, interface types work best if all interface operations
+are completely defined on the target data domain. This may sometimes force you
+to add default or error rules raising exceptions which may interfere with
+symbolic evaluation (cf. <a class="reference internal" href="#exception-handling">Exception Handling</a> and <a class="reference internal" href="#defined-functions">Defined Functions</a>). This
+can be a real issue, but it is almost always possible to work around this,
+e.g., by just adding in the missing type members manually. To these ends, Pure
+allows an interface type to be augmented with ordinary type rules as described
+in <a class="reference internal" href="#type-rules">Type Rules</a>. For instance, we might also have implemented the stack type
+discussed in the <a class="reference internal" href="#interface-types">Interface Types</a> section as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> stack <span class="kr">with</span>
+  push s<span class="p">::</span>stack x<span class="p">;</span>
+  pop s<span class="p">::</span>stack<span class="p">;</span>
+  top s<span class="p">::</span>stack<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+
+<span class="kr">type</span> stack []<span class="p">;</span>
+
+push xs<span class="p">@</span>[] x | push xs<span class="p">@</span>(_:_) x = x:xs<span class="p">;</span>
+pop (x:xs) = xs<span class="p">;</span>
+top (x:xs) = x<span class="p">;</span>
+</pre></div>
+</div>
+<p>Finally, Pure&#8217;s interface types are really a compromise between theoretical
+soundness and practicality. From the theoretical point of view, we&#8217;d actually
+like an interface type to be the <em>intersection</em> of the instances of the
+candidate patterns for each interface function. Unfortunately, the set of
+patterns for such an intersection might well be exponential in size. Hence the
+approach taken in Pure is to eliminate those candidate patterns which aren&#8217;t
+supported by all interface functions. In general, this will produce a subtype
+of the theoretically optimal intersection type, but it can be computed much
+faster. In fact, this method also has the nice advantage that the compiler can
+warn about potentially missing rules for eliminated patterns in some of the
+interface operations. We&#8217;ve seen in the <a class="reference internal" href="#interface-types">Interface Types</a> section that this
+can be fairly useful at times.</p>
+</div>
 <div class="section" id="numeric-calculations">
-<h3><a class="toc-backref" href="#id120">Numeric Calculations</a><a class="headerlink" href="#numeric-calculations" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id121">Numeric Calculations</a><a class="headerlink" href="#numeric-calculations" title="Permalink to this headline">¶</a></h3>
 <p>If possible, you should decorate numeric variables on the left-hand sides of
 function definitions with the appropriate type tags, like <tt class="docutils literal"><span class="pre">int</span></tt> or
 <tt class="docutils literal"><span class="pre">double</span></tt>. This often helps the compiler to generate better code and makes
@@ -8976,7 +9058,7 @@ integers, not bigints; for the latter you&#8217;ll have to use the &#8220;big L&
 bigints.</p>
 </div>
 <div class="section" id="constant-definitions">
-<h3><a class="toc-backref" href="#id121">Constant Definitions</a><a class="headerlink" href="#constant-definitions" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id122">Constant Definitions</a><a class="headerlink" href="#constant-definitions" title="Permalink to this headline">¶</a></h3>
 <p>Constants differ from variables in that they cannot be redefined (that&#8217;s their
 main purpose after all) so that their values, once defined, can be substituted
 into other definitions which use them. For instance:</p>
@@ -9108,7 +9190,7 @@ necessary, in order to create smaller executables; see <a class="reference inter
 Size</a> for details.)</p>
 </div>
 <div class="section" id="external-c-functions">
-<h3><a class="toc-backref" href="#id122">External C Functions</a><a class="headerlink" href="#external-c-functions" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id123">External C Functions</a><a class="headerlink" href="#external-c-functions" title="Permalink to this headline">¶</a></h3>
 <p>The interpreter always takes your <a class="reference internal" href="#extern"><tt class="xref std std-keyword docutils literal"><span class="pre">extern</span></tt></a> declarations of C routines
 at face value. It will not go and read any C header files to determine whether
 you actually declared the function correctly! So you have to be careful to
@@ -9133,7 +9215,7 @@ and functions declared in the header. Please refer to <a class="reference intern
 details.</p>
 </div>
 <div class="section" id="calling-special-forms">
-<h3><a class="toc-backref" href="#id123">Calling Special Forms</a><a class="headerlink" href="#calling-special-forms" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id124">Calling Special Forms</a><a class="headerlink" href="#calling-special-forms" title="Permalink to this headline">¶</a></h3>
 <p>Special forms are recognized at compile time only. Thus the <a class="reference internal" href="#catch" title="catch"><tt class="xref pure pure-func docutils literal"><span class="pre">catch</span></tt></a>
 function, as well as <a class="reference internal" href="#quote" title="quote"><tt class="xref pure pure-func docutils literal"><span class="pre">quote</span></tt></a> and the operators <a class="reference internal" href="#&amp;&amp;/special" title="&amp;&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;&amp;</span></tt></a>,
 <a class="reference internal" href="#||/special" title="||"><tt class="xref pure pure-func docutils literal"><span class="pre">||</span></tt></a>, <a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a> and <a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>, are only treated as special
@@ -9142,7 +9224,7 @@ around as function values or in partial applications, but in this case they
 lose all their special call-by-name argument processing.</p>
 </div>
 <div class="section" id="laziness">
-<h3><a class="toc-backref" href="#id124">Laziness</a><a class="headerlink" href="#laziness" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id125">Laziness</a><a class="headerlink" href="#laziness" title="Permalink to this headline">¶</a></h3>
 <p>Pure does lazy evaluation in the same way as <a class="reference internal" href="#alice-ml">Alice ML</a>, providing an
 explicit operation (<a class="reference internal" href="#&amp;" title="&amp;"><tt class="xref pure pure-func docutils literal"><span class="pre">&amp;</span></tt></a>) to defer evaluation and create a &#8220;future&#8221; which
 is called by need. However, note that like any language with a basically eager
@@ -9214,7 +9296,7 @@ is being traversed, leading to rather nasty memory leaks. Please see the
 </ul>
 </div>
 <div class="section" id="showing-macro-expansions">
-<h3><a class="toc-backref" href="#id125">Showing Macro Expansions</a><a class="headerlink" href="#showing-macro-expansions" title="Permalink to this headline">¶</a></h3>
+<h3><a class="toc-backref" href="#id126">Showing Macro Expansions</a><a class="headerlink" href="#showing-macro-expansions" title="Permalink to this headline">¶</a></h3>
 <p>As mentioned in the <a class="reference internal" href="#macro-hygiene">Macro Hygiene</a> section, Pure macros are lexically scoped
 and thus &#8220;hygienic&#8221;. So Pure macros are not suceptible to name capture, but
 there is also one Pure-related caveat here. The expression printer currently
@@ -9248,12 +9330,12 @@ such glitches manually.</p>
 </div>
 </div>
 <div class="section" id="author">
-<h2><a class="toc-backref" href="#id126">Author</a><a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id127">Author</a><a class="headerlink" href="#author" title="Permalink to this headline">¶</a></h2>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;, Dept. of Computer Music, Johannes
 Gutenberg University of Mainz, Germany.</p>
 </div>
 <div class="section" id="acknowledgements">
-<h2><a class="toc-backref" href="#id127">Acknowledgements</a><a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id128">Acknowledgements</a><a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
 <p>Pure wouldn&#8217;t be what it is without its users and other people interested in
 the language. In particular, I&#8217;d like to thank Scott E. Dillard, Rooslan
 S. Khayrov, Eddie Rucker, Libor Spacek, Jiri Spitz, Peter Summerland and
@@ -9273,7 +9355,7 @@ concentrate on the design and implementation of the programming language at
 hand.</p>
 </div>
 <div class="section" id="copying">
-<h2><a class="toc-backref" href="#id128">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id129">Copying</a><a class="headerlink" href="#copying" title="Permalink to this headline">¶</a></h2>
 <p>Pure comes with a fairly liberal license which lets you distribute your own
 Pure programs and extensions under a license of your choice and permits
 linking of commercial applications against the Pure runtime and the Pure
@@ -9310,7 +9392,7 @@ distribution for the exact licensing terms. You can also find the LLVM license
 at the <a class="reference internal" href="#llvm">LLVM</a> website.</p>
 </div>
 <div class="section" id="references-and-links">
-<h2><a class="toc-backref" href="#id129">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id130">References and Links</a><a class="headerlink" href="#references-and-links" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils" id="aardappel">
 <dt>Aardappel</dt>
 <dd>Wouter van Oortmerssen&#8217;s functional programming language based on term
@@ -9543,6 +9625,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 <li><a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail Recursion</a></li>
 <li><a class="reference internal" href="#handling-of-asynchronous-signals">Handling of Asynchronous Signals</a></li>
 <li><a class="reference internal" href="#recursive-types">Recursive Types</a></li>
+<li><a class="reference internal" href="#interfaces">Interfaces</a></li>
 <li><a class="reference internal" href="#numeric-calculations">Numeric Calculations</a></li>
 <li><a class="reference internal" href="#constant-definitions">Constant Definitions</a></li>
 <li><a class="reference internal" href="#external-c-functions">External C Functions</a></li>

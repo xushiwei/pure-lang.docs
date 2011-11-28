@@ -3194,34 +3194,6 @@ Interfaces consist of two kinds of items:
      being defined, which effectively turns the new interface type into
      a subtype of the existing one.
 
-  An interface may also be empty, in which case it matches _any_ value.
-Thus,
-
-    interface any with end;
-
-is just a fancy way to define the type:
-
-    type any _;
-
-Also, interface types may be refined at any time, by adding more
-interface patterns. Thus,
-
-    interface foo with foo x::foo; end;
-    interface foo with bar x::foo; end;
-
-is equivalent to:
-
-    interface foo with
-      foo x::foo;
-      bar x::foo;
-    end;
-
-However, note that when including one interface in another, the included
-interface must already exist and only the interface patterns known at
-the point of inclusion become part of the including interface; refining
-the included interface later has no effect on the including interface.
-In particular, this also prevents circular interface definitions.
-
   The gist of an interface is in its patterns, more precisely: in the
 pattern variables which have the name of the interface as a type tag.
 The precise meaning of the patterns is as follows:
@@ -3240,13 +3212,18 @@ The precise meaning of the patterns is as follows:
      variable without any type tag, which thus matches _any_ value) are
      eliminated as well.
 
-  An interface pattern may contain type tags other than the interface
-type. These must always be matched _literally_ on the left-hand sides of
-equations. Thus,
+  Interface patterns often take a simple form like the following,
 
-    interface foo with
-      foo x::foo y::int;
-    end;
+    interface foo with foo x::foo y z; end;
+
+specifying the number of arguments of the interface function along with
+the position of the interface type argument. However, general patterns
+are permitted, in order to further restrict the left-hand sides of the
+function definitions to be taken into consideration. Specifically, note
+that type tags other than the interface type must always be matched
+_literally_ on the left-hand sides of equations. Thus,
+
+    interface foo with foo x::foo y::int; end;
 
 matches any rule of the form
 
@@ -3257,7 +3234,7 @@ but _not_:
     foo x 0 = ...;
     foo x y::bar = ...;
 
-(unless `bar' happens to be an alias of the `int' type, of course).  In
+(unless `bar' happens to be an alias of the `int' type, of course). In
 such cases it is necessary to explicitly add these patterns to the
 interface if you want them to be included.
 
@@ -3289,9 +3266,33 @@ example above, this means that the `foo' type will be empty unless the
 `bar' function is defined and takes an element of the `bar' type as its
 first argument.
 
-  Let's now take a look at some examples to see how this all works in
-practice.  We'll be using the following stack data structure as a
-running example throughout the remainder of this section:
+  An interface may also be empty, in which case it matches _any_ value.
+Thus,
+
+    interface any with end;
+
+is just a fancy way to define the type:
+
+    type any _;
+
+Also, interface types may be refined at any time, by adding more
+interface patterns. Thus,
+
+    interface foo with foo x::foo; end;
+    interface foo with bar x::foo; end;
+
+is equivalent to:
+
+    interface foo with foo x::foo; bar x::foo; end;
+
+However, note that when including one interface in another, the included
+interface must already exist and only the interface patterns known at
+the point of inclusion become part of the including interface; refining
+the included interface later has no effect on the including interface.
+In particular, this also prevents circular interface definitions.
+
+  Let's now take a look at the example of a stack data structure to see
+how this all works in practice:
 
     interface stack with
       push s::stack x;
@@ -10960,520 +10961,520 @@ Ref: a0135977
 Ref: interface-types135977
 Ref: b2135977
 Ref: id7135977
-Node: Examples146466
-Ref: examples146553
-Ref: 94146553
-Node: List Comprehensions148282
-Ref: list comprehensions148380
-Ref: b6148380
-Ref: list-comprehensions148380
-Node: Lazy Evaluation and Streams150018
-Ref: lazy evaluation and streams150144
-Ref: 92150144
-Ref: lazy-evaluation-and-streams150144
-Ref: b7150144
-Ref: id9150144
-Node: Matrix Computations154689
-Ref: matrix computations154813
-Ref: a5154813
-Ref: matrix-computations154813
-Ref: b8154813
-Ref: id10154813
-Node: Symbolic Matrices163041
-Ref: symbolic matrices163149
-Ref: bc163149
-Ref: symbolic-matrices163149
-Node: Record Data165596
-Ref: record data165694
-Ref: be165694
-Ref: record-data165694
-Ref: bf165694
-Ref: id11165694
-Node: The Quote171218
-Ref: the quote171290
-Ref: 9a171290
-Ref: the-quote171290
-Node: Declarations174824
-Ref: declarations174906
-Ref: 3b174906
-Node: Symbol Declarations175967
-Ref: symbol declarations176061
-Ref: c3176061
-Ref: public176061
-Ref: c4176061
-Ref: private176061
-Ref: c5176061
-Ref: infix176061
-Ref: c6176061
-Ref: infixl176061
-Ref: c7176061
-Ref: infixr176061
-Ref: c8176061
-Ref: prefix176061
-Ref: c9176061
-Ref: postfix176061
-Ref: bd176061
-Ref: outfix176061
-Ref: 82176061
-Ref: nonfix176061
-Ref: 57176061
-Ref: symbol-declarations176061
-Node: Modules and Imports183202
-Ref: modules and imports183315
-Ref: 3a183315
-Ref: using183315
-Ref: cc183315
-Ref: modules-and-imports183315
-Ref: cd186673
-Ref: index-9186673
-Ref: ce186787
-Ref: index-10186787
-Ref: cf187085
-Ref: index-11187085
-Ref: d0187372
-Ref: index-12187372
-Ref: d1187400
-Ref: index-13187400
-Ref: d2188987
-Ref: index-14188987
-Node: Namespaces189291
-Ref: namespaces189376
-Ref: c2189376
-Ref: namespace189376
-Ref: 90189376
-Node: Using Namespaces192964
-Ref: using namespaces193060
-Ref: d4193060
-Ref: using-namespace193060
-Ref: d5193060
-Ref: using-namespaces193060
-Node: Symbol Lookup and Creation195499
-Ref: symbol lookup and creation195619
-Ref: 65195619
-Ref: symbol-lookup-and-creation195619
-Ref: d6195619
-Ref: id13195619
-Node: Private Symbols203142
-Ref: private symbols203269
-Ref: ca203269
-Ref: private-symbols203269
-Node: Hierarchical Namespaces204443
-Ref: hierarchical namespaces204561
-Ref: d7204561
-Ref: hierarchical-namespaces204561
-Ref: d8205703
-Ref: index-15205703
-Node: Scoped Namespaces206731
-Ref: scoped namespaces206825
-Ref: d3206825
-Ref: scoped-namespaces206825
-Node: Macros210074
-Ref: macros210166
-Ref: a1210166
-Ref: d9210166
-Ref: id14210166
-Node: Optimization Rules212083
-Ref: optimization rules212167
-Ref: da212167
-Ref: optimization-rules212167
-Ref: db212167
-Ref: id15212167
-Node: Recursive Macros215413
-Ref: recursive macros215532
-Ref: c0215532
-Ref: recursive-macros215532
-Ref: df218066
-Ref: index-16218066
-Node: User-Defined Special Forms218112
-Ref: user-defined special forms218226
-Ref: e0218226
-Ref: user-defined-special-forms218226
-Node: Macro Hygiene219622
-Ref: macro hygiene219759
-Ref: e1219759
-Ref: macro-hygiene219759
-Node: Built-in Macros and Special Expressions222158
-Ref: built-in macros and special expressions222290
-Ref: e2222290
-Ref: built-in-macros-and-special-expressions222290
-Ref: e3222768
-Ref: __ifelse__222768
-Ref: e4222902
-Ref: __lambda__222902
-Ref: e5222996
-Ref: __case__222996
-Ref: e7223273
-Ref: __when__223273
-Ref: e8223579
-Ref: __with__223579
-Ref: e6223883
-Ref: -->223883
-Ref: e9223942
-Ref: __if__223942
-Ref: ea224439
-Ref: __as__224439
-Ref: eb224506
-Ref: __type__224506
-Ref: ec229841
-Ref: __eval__229841
-Node: Advanced Optimization231262
-Ref: advanced optimization231391
-Ref: dd231391
-Ref: advanced-optimization231391
-Node: Reflection236287
-Ref: reflection236368
-Ref: ed236368
-Node: Exception Handling240987
-Ref: exception handling241083
-Ref: ee241083
-Ref: exception-handling241083
-Ref: ef241083
-Ref: id16241083
-Ref: f0241395
-Ref: catch241395
-Ref: f1242563
-Ref: index-17242563
-Node: Standard Library245733
-Ref: standard library245834
-Ref: 75245834
-Ref: standard-library245834
-Node: C Interface250095
-Ref: c interface250195
-Ref: 3c250195
-Ref: c-interface250195
-Node: Extern Declarations251723
-Ref: extern declarations251817
-Ref: c1251817
-Ref: extern251817
-Ref: f3251817
-Ref: extern-declarations251817
-Node: Variadic C Functions256874
-Ref: variadic c functions256984
-Ref: f5256984
-Ref: variadic-c-functions256984
-Node: C Types258235
-Ref: c types258353
-Ref: f4258353
-Ref: c-types258353
-Ref: f6258353
-Ref: id17258353
-Node: Basic C Types259595
-Ref: basic c types259672
-Ref: f7259672
-Ref: basic-c-types259672
-Node: Pointer Types261842
-Ref: pointer types261949
-Ref: f8261949
-Ref: pointer-types261949
-Node: Pointers and Matrices265143
-Ref: pointers and matrices265253
-Ref: f9265253
-Ref: pointers-and-matrices265253
-Node: Pointer Examples268431
-Ref: pointer examples268519
-Ref: fa268519
-Ref: pointer-examples268519
-Node: Importing Dynamic Libraries272745
-Ref: importing dynamic libraries272865
-Ref: fb272865
-Ref: importing-dynamic-libraries272865
-Ref: fc273988
-Ref: index-18273988
-Ref: fd274063
-Ref: index-19274063
-Ref: fe274274
-Ref: index-20274274
-Node: Importing LLVM Bitcode274666
-Ref: importing llvm bitcode274790
-Ref: ff274790
-Ref: importing-llvm-bitcode274790
-Node: Inline Code280522
-Ref: inline code280637
-Ref: 74280637
-Ref: inline-code280637
-Ref: 105285466
-Ref: index-21285466
-Ref: 106285580
-Ref: index-22285580
-Ref: 107285781
-Ref: index-23285781
-Ref: 108285793
-Ref: index-24285793
-Ref: 109285807
-Ref: index-25285807
-Ref: 10a286039
-Ref: index-26286039
-Node: Interfacing to C++286864
-Ref: interfacing to c++286977
-Ref: 10b286977
-Ref: interfacing-to-c286977
-Node: Interfacing to Faust289460
-Ref: interfacing to faust289553
-Ref: 104289553
-Ref: interfacing-to-faust289553
-Ref: 10c290697
-Ref: llvm-backend-for-faust290697
-Node: Interactive Usage302312
-Ref: interactive usage302413
-Ref: b302413
-Ref: interactive-usage302413
-Node: Online Help305843
-Ref: online help305935
-Ref: 4305935
-Ref: online-help305935
-Ref: 10e306404
-Ref: index-27306404
-Ref: 10f306432
-Ref: index-28306432
-Ref: 110307935
-Ref: docutils307935
-Node: Interactive Commands308876
-Ref: interactive commands309005
-Ref: dc309005
-Ref: interactive-commands309005
-Ref: 111309258
-Ref: index-29309258
-Ref: 112309305
-Ref: index-30309305
-Ref: 113309732
-Ref: index-31309732
-Ref: 114310058
-Ref: index-32310058
-Ref: 115310120
-Ref: index-33310120
-Ref: 119311109
-Ref: index-34311109
-Ref: 11a311886
-Ref: index-35311886
-Ref: 11c313406
-Ref: index-36313406
-Ref: 11d313734
-Ref: index-37313734
-Ref: 11e313800
-Ref: index-38313800
-Ref: 11f314351
-Ref: index-39314351
-Ref: 120314598
-Ref: index-40314598
-Ref: 121314678
-Ref: index-41314678
-Ref: 122314729
-Ref: index-42314729
-Ref: 123316414
-Ref: index-43316414
-Ref: 124316665
-Ref: index-44316665
-Ref: 125317078
-Ref: index-45317078
-Ref: 126317695
-Ref: index-46317695
-Ref: 127318315
-Ref: index-47318315
-Node: Specifying Symbol Selections319300
-Ref: specifying symbol selections319434
-Ref: 118319434
-Ref: specifying-symbol-selections319434
-Node: The show Command322841
-Ref: the show command322972
-Ref: b4322972
-Ref: the-show-command322972
-Ref: 128324074
-Ref: index-48324074
-Node: Definition Levels327669
-Ref: definition levels327781
-Ref: 117327781
-Ref: definition-levels327781
-Node: Debugging333031
-Ref: debugging333138
-Ref: 46333138
-Ref: 129334829
-Ref: index-49334829
-Node: Last Result343952
-Ref: last result344057
-Ref: 116344057
-Ref: last-result344057
-Node: Pretty-Printing344767
-Ref: pretty-printing344884
-Ref: bb344884
-Ref: ba345090
-Ref: __show__345090
-Node: User-Defined Commands348681
-Ref: user-defined commands348806
-Ref: 10d348806
-Ref: user-defined-commands348806
-Node: Interactive Startup354744
-Ref: interactive startup354845
-Ref: 11b354845
-Ref: interactive-startup354845
-Ref: 12a355210
-Ref: index-50355210
-Node: Batch Compilation356168
-Ref: batch compilation356275
-Ref: c356275
-Ref: batch-compilation356275
-Ref: 12b356275
-Ref: id18356275
-Ref: 12d361381
-Ref: partial-evaluation361381
-Node: Example361499
-Ref: example361594
-Ref: 12e361594
-Node: Options Affecting Code Size366086
-Ref: options affecting code size366215
-Ref: 12c366215
-Ref: options-affecting-code-size366215
-Node: Other Output Code Formats369703
-Ref: other output code formats369854
-Ref: 12f369854
-Ref: other-output-code-formats369854
-Ref: 130374363
-Ref: llvm-documentation374363
-Node: Calling Pure Functions From C374363
-Ref: calling pure functions from c374478
-Ref: 131374478
-Ref: calling-pure-functions-from-c374478
-Node: Caveats and Notes375971
-Ref: caveats and notes376067
-Ref: d376067
-Ref: caveats-and-notes376067
-Node: Etymology376729
-Ref: etymology376821
-Ref: 132376821
-Node: Backward Compatibility377712
-Ref: backward compatibility377827
-Ref: 133377827
-Ref: backward-compatibility377827
-Node: Error Recovery386360
-Ref: error recovery386479
-Ref: 136386479
-Ref: error-recovery386479
-Node: With and when387135
-Ref: with and when387251
-Ref: 137387251
-Ref: with-and-when387251
-Node: Non-Linear Patterns390942
-Ref: non-linear patterns391057
-Ref: 138391057
-Ref: non-linear-patterns391057
-Node: "As" Patterns392457
-Ref: "as" patterns392585
-Ref: de392585
-Ref: as-patterns392585
-Node: "Head = Function" Pitfalls393341
-Ref: "head = function" pitfalls393467
-Ref: 139393467
-Ref: head-function-pitfalls393467
-Node: Defined Functions397060
-Ref: defined functions397202
-Ref: 5d397202
-Ref: defined-functions397202
-Node: Stack Size and Tail Recursion400530
-Ref: stack size and tail recursion400678
-Ref: 4c400678
-Ref: stack-size-and-tail-recursion400678
-Ref: 13a401064
-Ref: index-51401064
-Ref: 13b401276
-Ref: index-52401276
-Ref: 13c401564
-Ref: index-53401564
-Node: Handling of Asynchronous Signals402928
-Ref: handling of asynchronous signals403074
-Ref: 4d403074
-Ref: handling-of-asynchronous-signals403074
-Node: Recursive Types405095
-Ref: recursive types405222
-Ref: b0405222
-Ref: recursive-types405222
-Ref: 13d408179
-Ref: continuation-passing408179
-Node: Interfaces410402
-Ref: interfaces410517
-Ref: 13e410517
-Node: Numeric Calculations412780
-Ref: numeric calculations412900
-Ref: 13f412900
-Ref: numeric-calculations412900
-Node: Constant Definitions414811
-Ref: constant definitions414941
-Ref: b5414941
-Ref: constant-definitions414941
-Node: External C Functions420686
-Ref: external c functions420817
-Ref: f2420817
-Ref: external-c-functions420817
-Ref: 140422097
-Ref: libffi422097
-Node: Calling Special Forms422482
-Ref: calling special forms422601
-Ref: 141422601
-Ref: calling-special-forms422601
-Node: Laziness423088
-Ref: laziness423211
-Ref: 142423211
-Node: Showing Macro Expansions427709
-Ref: showing macro expansions427802
-Ref: 144427802
-Ref: showing-macro-expansions427802
-Node: Author429437
-Ref: author429532
-Ref: 145429532
-Node: Acknowledgements429667
-Ref: acknowledgements429752
-Ref: 146429752
-Node: Copying430951
-Ref: copying431050
-Ref: 3431050
-Node: References and Links433412
-Ref: references and links433500
-Ref: 147433500
-Ref: references-and-links433500
-Ref: 97433549
-Ref: aardappel433549
-Ref: 143433690
-Ref: alice-ml433690
-Ref: 11433825
-Ref: baader-and-nipkow433825
-Ref: cb433943
-Ref: bertrand433943
-Ref: 101434203
-Ref: clang434203
-Ref: 103434492
-Ref: dragonegg434492
-Ref: 102434703
-Ref: faust434703
-Ref: 148434790
-Ref: gnu-multiprecision-library434790
-Ref: 8f434790
-Ref: gmp434790
-Ref: 149434898
-Ref: gnu-octave434898
-Ref: b9434898
-Ref: octave434898
-Ref: 93435042
-Ref: gnu-scientific-library435042
-Ref: 14a435042
-Ref: gsl435042
-Ref: b3435203
-Ref: go435203
-Ref: 7a435267
-Ref: haskell435267
-Ref: 8435333
-Ref: llvm435333
-Ref: 100435398
-Ref: llvm-gcc435398
-Ref: 135435614
-Ref: miranda435614
-Ref: 7b435785
-Ref: ml435785
-Ref: 10435944
-Ref: michael-o-donnell435944
-Ref: 134436094
-Ref: q436094
-Node: Index436179
-Ref: index436251
-Ref: 84452665
-Ref: 85452696
+Node: Examples146710
+Ref: examples146797
+Ref: 94146797
+Node: List Comprehensions148526
+Ref: list comprehensions148624
+Ref: b6148624
+Ref: list-comprehensions148624
+Node: Lazy Evaluation and Streams150262
+Ref: lazy evaluation and streams150388
+Ref: 92150388
+Ref: lazy-evaluation-and-streams150388
+Ref: b7150388
+Ref: id9150388
+Node: Matrix Computations154933
+Ref: matrix computations155057
+Ref: a5155057
+Ref: matrix-computations155057
+Ref: b8155057
+Ref: id10155057
+Node: Symbolic Matrices163285
+Ref: symbolic matrices163393
+Ref: bc163393
+Ref: symbolic-matrices163393
+Node: Record Data165840
+Ref: record data165938
+Ref: be165938
+Ref: record-data165938
+Ref: bf165938
+Ref: id11165938
+Node: The Quote171462
+Ref: the quote171534
+Ref: 9a171534
+Ref: the-quote171534
+Node: Declarations175068
+Ref: declarations175150
+Ref: 3b175150
+Node: Symbol Declarations176211
+Ref: symbol declarations176305
+Ref: c3176305
+Ref: public176305
+Ref: c4176305
+Ref: private176305
+Ref: c5176305
+Ref: infix176305
+Ref: c6176305
+Ref: infixl176305
+Ref: c7176305
+Ref: infixr176305
+Ref: c8176305
+Ref: prefix176305
+Ref: c9176305
+Ref: postfix176305
+Ref: bd176305
+Ref: outfix176305
+Ref: 82176305
+Ref: nonfix176305
+Ref: 57176305
+Ref: symbol-declarations176305
+Node: Modules and Imports183446
+Ref: modules and imports183559
+Ref: 3a183559
+Ref: using183559
+Ref: cc183559
+Ref: modules-and-imports183559
+Ref: cd186917
+Ref: index-9186917
+Ref: ce187031
+Ref: index-10187031
+Ref: cf187329
+Ref: index-11187329
+Ref: d0187616
+Ref: index-12187616
+Ref: d1187644
+Ref: index-13187644
+Ref: d2189231
+Ref: index-14189231
+Node: Namespaces189535
+Ref: namespaces189620
+Ref: c2189620
+Ref: namespace189620
+Ref: 90189620
+Node: Using Namespaces193208
+Ref: using namespaces193304
+Ref: d4193304
+Ref: using-namespace193304
+Ref: d5193304
+Ref: using-namespaces193304
+Node: Symbol Lookup and Creation195743
+Ref: symbol lookup and creation195863
+Ref: 65195863
+Ref: symbol-lookup-and-creation195863
+Ref: d6195863
+Ref: id13195863
+Node: Private Symbols203386
+Ref: private symbols203513
+Ref: ca203513
+Ref: private-symbols203513
+Node: Hierarchical Namespaces204687
+Ref: hierarchical namespaces204805
+Ref: d7204805
+Ref: hierarchical-namespaces204805
+Ref: d8205947
+Ref: index-15205947
+Node: Scoped Namespaces206975
+Ref: scoped namespaces207069
+Ref: d3207069
+Ref: scoped-namespaces207069
+Node: Macros210318
+Ref: macros210410
+Ref: a1210410
+Ref: d9210410
+Ref: id14210410
+Node: Optimization Rules212327
+Ref: optimization rules212411
+Ref: da212411
+Ref: optimization-rules212411
+Ref: db212411
+Ref: id15212411
+Node: Recursive Macros215657
+Ref: recursive macros215776
+Ref: c0215776
+Ref: recursive-macros215776
+Ref: df218310
+Ref: index-16218310
+Node: User-Defined Special Forms218356
+Ref: user-defined special forms218470
+Ref: e0218470
+Ref: user-defined-special-forms218470
+Node: Macro Hygiene219866
+Ref: macro hygiene220003
+Ref: e1220003
+Ref: macro-hygiene220003
+Node: Built-in Macros and Special Expressions222402
+Ref: built-in macros and special expressions222534
+Ref: e2222534
+Ref: built-in-macros-and-special-expressions222534
+Ref: e3223012
+Ref: __ifelse__223012
+Ref: e4223146
+Ref: __lambda__223146
+Ref: e5223240
+Ref: __case__223240
+Ref: e7223517
+Ref: __when__223517
+Ref: e8223823
+Ref: __with__223823
+Ref: e6224127
+Ref: -->224127
+Ref: e9224186
+Ref: __if__224186
+Ref: ea224683
+Ref: __as__224683
+Ref: eb224750
+Ref: __type__224750
+Ref: ec230085
+Ref: __eval__230085
+Node: Advanced Optimization231506
+Ref: advanced optimization231635
+Ref: dd231635
+Ref: advanced-optimization231635
+Node: Reflection236531
+Ref: reflection236612
+Ref: ed236612
+Node: Exception Handling241231
+Ref: exception handling241327
+Ref: ee241327
+Ref: exception-handling241327
+Ref: ef241327
+Ref: id16241327
+Ref: f0241639
+Ref: catch241639
+Ref: f1242807
+Ref: index-17242807
+Node: Standard Library245977
+Ref: standard library246078
+Ref: 75246078
+Ref: standard-library246078
+Node: C Interface250339
+Ref: c interface250439
+Ref: 3c250439
+Ref: c-interface250439
+Node: Extern Declarations251967
+Ref: extern declarations252061
+Ref: c1252061
+Ref: extern252061
+Ref: f3252061
+Ref: extern-declarations252061
+Node: Variadic C Functions257118
+Ref: variadic c functions257228
+Ref: f5257228
+Ref: variadic-c-functions257228
+Node: C Types258479
+Ref: c types258597
+Ref: f4258597
+Ref: c-types258597
+Ref: f6258597
+Ref: id17258597
+Node: Basic C Types259839
+Ref: basic c types259916
+Ref: f7259916
+Ref: basic-c-types259916
+Node: Pointer Types262086
+Ref: pointer types262193
+Ref: f8262193
+Ref: pointer-types262193
+Node: Pointers and Matrices265387
+Ref: pointers and matrices265497
+Ref: f9265497
+Ref: pointers-and-matrices265497
+Node: Pointer Examples268675
+Ref: pointer examples268763
+Ref: fa268763
+Ref: pointer-examples268763
+Node: Importing Dynamic Libraries272989
+Ref: importing dynamic libraries273109
+Ref: fb273109
+Ref: importing-dynamic-libraries273109
+Ref: fc274232
+Ref: index-18274232
+Ref: fd274307
+Ref: index-19274307
+Ref: fe274518
+Ref: index-20274518
+Node: Importing LLVM Bitcode274910
+Ref: importing llvm bitcode275034
+Ref: ff275034
+Ref: importing-llvm-bitcode275034
+Node: Inline Code280766
+Ref: inline code280881
+Ref: 74280881
+Ref: inline-code280881
+Ref: 105285710
+Ref: index-21285710
+Ref: 106285824
+Ref: index-22285824
+Ref: 107286025
+Ref: index-23286025
+Ref: 108286037
+Ref: index-24286037
+Ref: 109286051
+Ref: index-25286051
+Ref: 10a286283
+Ref: index-26286283
+Node: Interfacing to C++287108
+Ref: interfacing to c++287221
+Ref: 10b287221
+Ref: interfacing-to-c287221
+Node: Interfacing to Faust289704
+Ref: interfacing to faust289797
+Ref: 104289797
+Ref: interfacing-to-faust289797
+Ref: 10c290941
+Ref: llvm-backend-for-faust290941
+Node: Interactive Usage302556
+Ref: interactive usage302657
+Ref: b302657
+Ref: interactive-usage302657
+Node: Online Help306087
+Ref: online help306179
+Ref: 4306179
+Ref: online-help306179
+Ref: 10e306648
+Ref: index-27306648
+Ref: 10f306676
+Ref: index-28306676
+Ref: 110308179
+Ref: docutils308179
+Node: Interactive Commands309120
+Ref: interactive commands309249
+Ref: dc309249
+Ref: interactive-commands309249
+Ref: 111309502
+Ref: index-29309502
+Ref: 112309549
+Ref: index-30309549
+Ref: 113309976
+Ref: index-31309976
+Ref: 114310302
+Ref: index-32310302
+Ref: 115310364
+Ref: index-33310364
+Ref: 119311353
+Ref: index-34311353
+Ref: 11a312130
+Ref: index-35312130
+Ref: 11c313650
+Ref: index-36313650
+Ref: 11d313978
+Ref: index-37313978
+Ref: 11e314044
+Ref: index-38314044
+Ref: 11f314595
+Ref: index-39314595
+Ref: 120314842
+Ref: index-40314842
+Ref: 121314922
+Ref: index-41314922
+Ref: 122314973
+Ref: index-42314973
+Ref: 123316658
+Ref: index-43316658
+Ref: 124316909
+Ref: index-44316909
+Ref: 125317322
+Ref: index-45317322
+Ref: 126317939
+Ref: index-46317939
+Ref: 127318559
+Ref: index-47318559
+Node: Specifying Symbol Selections319544
+Ref: specifying symbol selections319678
+Ref: 118319678
+Ref: specifying-symbol-selections319678
+Node: The show Command323085
+Ref: the show command323216
+Ref: b4323216
+Ref: the-show-command323216
+Ref: 128324318
+Ref: index-48324318
+Node: Definition Levels327913
+Ref: definition levels328025
+Ref: 117328025
+Ref: definition-levels328025
+Node: Debugging333275
+Ref: debugging333382
+Ref: 46333382
+Ref: 129335073
+Ref: index-49335073
+Node: Last Result344196
+Ref: last result344301
+Ref: 116344301
+Ref: last-result344301
+Node: Pretty-Printing345011
+Ref: pretty-printing345128
+Ref: bb345128
+Ref: ba345334
+Ref: __show__345334
+Node: User-Defined Commands348925
+Ref: user-defined commands349050
+Ref: 10d349050
+Ref: user-defined-commands349050
+Node: Interactive Startup354988
+Ref: interactive startup355089
+Ref: 11b355089
+Ref: interactive-startup355089
+Ref: 12a355454
+Ref: index-50355454
+Node: Batch Compilation356412
+Ref: batch compilation356519
+Ref: c356519
+Ref: batch-compilation356519
+Ref: 12b356519
+Ref: id18356519
+Ref: 12d361625
+Ref: partial-evaluation361625
+Node: Example361743
+Ref: example361838
+Ref: 12e361838
+Node: Options Affecting Code Size366330
+Ref: options affecting code size366459
+Ref: 12c366459
+Ref: options-affecting-code-size366459
+Node: Other Output Code Formats369947
+Ref: other output code formats370098
+Ref: 12f370098
+Ref: other-output-code-formats370098
+Ref: 130374607
+Ref: llvm-documentation374607
+Node: Calling Pure Functions From C374607
+Ref: calling pure functions from c374722
+Ref: 131374722
+Ref: calling-pure-functions-from-c374722
+Node: Caveats and Notes376215
+Ref: caveats and notes376311
+Ref: d376311
+Ref: caveats-and-notes376311
+Node: Etymology376973
+Ref: etymology377065
+Ref: 132377065
+Node: Backward Compatibility377956
+Ref: backward compatibility378071
+Ref: 133378071
+Ref: backward-compatibility378071
+Node: Error Recovery386604
+Ref: error recovery386723
+Ref: 136386723
+Ref: error-recovery386723
+Node: With and when387379
+Ref: with and when387495
+Ref: 137387495
+Ref: with-and-when387495
+Node: Non-Linear Patterns391186
+Ref: non-linear patterns391301
+Ref: 138391301
+Ref: non-linear-patterns391301
+Node: "As" Patterns392701
+Ref: "as" patterns392829
+Ref: de392829
+Ref: as-patterns392829
+Node: "Head = Function" Pitfalls393585
+Ref: "head = function" pitfalls393711
+Ref: 139393711
+Ref: head-function-pitfalls393711
+Node: Defined Functions397304
+Ref: defined functions397446
+Ref: 5d397446
+Ref: defined-functions397446
+Node: Stack Size and Tail Recursion400774
+Ref: stack size and tail recursion400922
+Ref: 4c400922
+Ref: stack-size-and-tail-recursion400922
+Ref: 13a401308
+Ref: index-51401308
+Ref: 13b401520
+Ref: index-52401520
+Ref: 13c401808
+Ref: index-53401808
+Node: Handling of Asynchronous Signals403172
+Ref: handling of asynchronous signals403318
+Ref: 4d403318
+Ref: handling-of-asynchronous-signals403318
+Node: Recursive Types405339
+Ref: recursive types405466
+Ref: b0405466
+Ref: recursive-types405466
+Ref: 13d408423
+Ref: continuation-passing408423
+Node: Interfaces410646
+Ref: interfaces410761
+Ref: 13e410761
+Node: Numeric Calculations413024
+Ref: numeric calculations413144
+Ref: 13f413144
+Ref: numeric-calculations413144
+Node: Constant Definitions415055
+Ref: constant definitions415185
+Ref: b5415185
+Ref: constant-definitions415185
+Node: External C Functions420930
+Ref: external c functions421061
+Ref: f2421061
+Ref: external-c-functions421061
+Ref: 140422341
+Ref: libffi422341
+Node: Calling Special Forms422726
+Ref: calling special forms422845
+Ref: 141422845
+Ref: calling-special-forms422845
+Node: Laziness423332
+Ref: laziness423455
+Ref: 142423455
+Node: Showing Macro Expansions427953
+Ref: showing macro expansions428046
+Ref: 144428046
+Ref: showing-macro-expansions428046
+Node: Author429681
+Ref: author429776
+Ref: 145429776
+Node: Acknowledgements429911
+Ref: acknowledgements429996
+Ref: 146429996
+Node: Copying431195
+Ref: copying431294
+Ref: 3431294
+Node: References and Links433656
+Ref: references and links433744
+Ref: 147433744
+Ref: references-and-links433744
+Ref: 97433793
+Ref: aardappel433793
+Ref: 143433934
+Ref: alice-ml433934
+Ref: 11434069
+Ref: baader-and-nipkow434069
+Ref: cb434187
+Ref: bertrand434187
+Ref: 101434447
+Ref: clang434447
+Ref: 103434736
+Ref: dragonegg434736
+Ref: 102434947
+Ref: faust434947
+Ref: 148435034
+Ref: gnu-multiprecision-library435034
+Ref: 8f435034
+Ref: gmp435034
+Ref: 149435142
+Ref: gnu-octave435142
+Ref: b9435142
+Ref: octave435142
+Ref: 93435286
+Ref: gnu-scientific-library435286
+Ref: 14a435286
+Ref: gsl435286
+Ref: b3435447
+Ref: go435447
+Ref: 7a435511
+Ref: haskell435511
+Ref: 8435577
+Ref: llvm435577
+Ref: 100435642
+Ref: llvm-gcc435642
+Ref: 135435858
+Ref: miranda435858
+Ref: 7b436029
+Ref: ml436029
+Ref: 10436188
+Ref: michael-o-donnell436188
+Ref: 134436338
+Ref: q436338
+Node: Index436423
+Ref: index436495
+Ref: 84452909
+Ref: 85452940
 
 End Tag Table
 

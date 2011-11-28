@@ -22,7 +22,7 @@ The Pure Manual
    \hyphenation{name-spaces}
    \hyphenation{white-space}
 
-Version 0.49, |today|
+Version 0.50, |today|
 
 Albert Gräf <Dr.Graef@t-online.de>
 
@@ -84,7 +84,7 @@ program. Simply run the program from the shell as follows:
 .. code-block:: console
 
    $ pure
-   Pure 0.47 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef
+   Pure 0.50 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef
    (Type 'help' for help, 'help copying' for license information.)
    Loaded prelude from /usr/local/lib/pure/prelude.pure.
 
@@ -700,6 +700,9 @@ Currently, the following code generation options are recognized:
      > show bar
      bar x = 2*3*x;
 
+   The same option also determines the handling of type aliases at compile
+   time, see `Type Rules`_.
+
 .. option:: --tc
    	    --notc
 
@@ -894,6 +897,17 @@ version dependencies.
   native executable or not. Please see the example at the end of the `Batch
   Compilation`_ section for details.
 
+* The ``interactive`` and ``debugging`` options are set if a program runs in
+  interactive (:option:`-i <pure -i>`) and/or debugging (:option:`-g <pure -g>`)
+  mode, respectively. These options are read-only; they cannot be changed with
+  :option:`--enable`, :option:`--disable`. Example::
+
+    #! --if interactive
+    puts "Usage: run 'main filename'";
+    #! --else
+    main (argv!1);
+    #! --endif
+
 * The ``version-x.y`` option indicates a check against the version of the host
   Pure interpreter. ``x.y`` indicates the required (major/minor) version. You
   can also use ``x.y+`` to indicate version ``x.y`` or later, or ``x.y-`` for
@@ -947,6 +961,22 @@ pragmas to your script:
 
    Enable or disable compiler warnings. The :option:`-w <pure -w>` flag sets
    the default for these pragmas.
+
+.. option:: --rewarn
+
+   Reset compiler warnings to the default, as set with the
+   :option:`-w <pure -w>` flag (or not).
+
+The latter pragma is useful to enable or disable warnings in a section of code
+and reset it to the default afterwards::
+
+  #! --warn
+  // Code with warnings goes here.
+  #! --rewarn
+
+(The same could also be achieved with conditional compilation, but only much
+more clumsily. However, note that :option:`--rewarn` only provides a single
+level of "backup", so nesting such sections is not supported.)
 
 .. program:: pure
 
@@ -1086,10 +1116,10 @@ symbol ``|``, parentheses ``()``, brackets ``[]`` and curly braces ``{}``.
 lexeme by itself; the other symbols can be used inside operator symbols.)
 Moreover, there are some keywords which cannot be used as identifiers::
 
-  case       const   def      else    end        extern  if
-  infix      infixl  infixr   let     namespace  nonfix  of
-  otherwise  outfix  postfix  prefix  private    public  then
-  type       using   when     with
+  case   const      def     else       end     extern     if
+  infix  infixl     infixr  interface  let     namespace  nonfix
+  of     otherwise  outfix  postfix    prefix  private    public
+  then   type       using   when       with
 
 Pure fully supports the `Unicode` character set or, more precisely, UTF-8.
 This is an ASCII extension capable of representing all Unicode characters,
@@ -1863,10 +1893,9 @@ definitions, and expressions to be evaluated:
      	: | `rule` ";"
      	: | `expr` ";"
 
-(The syntax of the :token:`rule`, :token:`type_rule`, :token:`macro_rule` and
-:token:`simple_rule` elements is discussed in the `Rule Syntax`_ section
-below. Also, a few additional toplevel elements are provided in the
-declaration syntax, see Declarations_.)
+These elements are discussed in more detail in the `Rule Syntax`_ section.
+Also, a few additional toplevel elements are part of the declaration syntax,
+see Declarations_.
 
 .. describe:: lhs = rhs;
 
@@ -1883,6 +1912,17 @@ declaration syntax, see Declarations_.)
    interpreter just treats this as a comment). Pure also provides some
    abbreviations for factoring out common left-hand or right-hand sides in
    collections of rules; see the `Rule Syntax`_ section for details.
+
+.. describe:: type lhs = rhs;
+
+   A rule starting with the keyword :keyword:`type` defines a type predicate.
+   This works pretty much like an ordinary rewriting rule, except that only a
+   single right-hand side is permitted (which may also be omitted in some
+   cases) and the left-hand side may involve at most one argument expression;
+   see the `Type Rules`_ section for details. There's also an alternative
+   syntax which lets you define types in a more abstract way and have the
+   compiler generate the type rules for you; this is described in the
+   `Interface Types`_ section.
 
 .. describe:: def lhs = rhs;
 
@@ -2286,40 +2326,38 @@ efficiently):
 
    The type of C pointer values.
 
-To define your own data types, you employ a special kind of rule syntax, which
+Pure's standard library provides additional data types along with the
+corresponding operations, such as rational and complex numbers, lists, tuples
+and the container data types (sets, dictionaries, etc.). These are all
+described in the :doc:`purelib`.
+
+You can define your own data types using a special kind of rule syntax which
 is explained in `Type Rules`_ below. For instance, we might represent points
 in the plane using a constructor symbol ``Point`` which gets applied to pairs
 of coordinates. We can then define the ``point`` data type as follows::
 
-  type point (Point x::number y::number);
+  type point (Point x y);
 
 This introduces the type symbol ``point`` and specifies that this type
-consists of terms of the form ``Point x y`` where ``x`` and ``y`` may be any
-kinds of numbers (the :type:`number/type` type is defined in the prelude). We
-can now equip this data type with an operation ``point`` to construct a point
-from its coordinates, and two operations ``xcoord`` and ``ycoord`` to retrieve
-the coordinates::
+consists of terms of the form ``Point x y``. We can now equip this data type
+with an operation ``point`` to construct a point from its coordinates, two
+operations ``xcoord`` and ``ycoord`` to retrieve the coordinates, and an
+operation ``move`` to change the coordinates to the given values::
 
-  point x::number y::number = Point x y;
+  point x y = Point x y;
   xcoord (Point x y) = x;
   ycoord (Point x y) = y;
+  move (Point _ _) x y = Point x y;
 
 Next we might define a function ``translate`` which shifts the coordinates of
 a point by a given amount in the x and y directions as follows::
 
-  translate (x,y) p::point = point (xcoord p+x) (ycoord p+y);
+  translate x y p::point = move p (xcoord p+x) (ycoord p+y);
 
 Note the use of ``point`` as a type tag on the ``p`` variable. By these means,
 we can ensure that the argument is actually an instance of the point data type
 we just defined. The type tag acts just like an extra guard of the equation
-defining ``translate``, as if you had written::
-
-  translate (x,y) p = point (xcoord p+x) (ycoord p+y) if pointp p with
-    pointp (Point x::number y::number) = true;
-    pointp _ = false otherwise;
-  end;
-
-However, using the type tag, all the necessary type checking is done
+defining ``translate``, but all the necessary type checking is done
 automatically during pattern matching. This is often more convenient (and,
 depending on the implementation, the compiler may generate more efficient code
 for a type tag than for an ordinary guard).
@@ -2327,21 +2365,19 @@ for a type tag than for an ordinary guard).
 The ``translate`` function can be invoked as follows::
 
   > let p::point = point 3 3;
-  > p; translate (1,2) p;
+  > p; translate 1 2 p;
   Point 3 3
   Point 4 5
 
-One important point here is that ``translate`` can be defined without knowing
-or assuming *anything* about the internal representation of the ``point`` data
-type. In fact, the ``Point`` constructor might well be hidden by making it a
-private member of some namespace (cf. Namespaces_), so that all accesses to
-the data structure would have to be done through the provided operations. Such
-a data type is also known as an `abstract data type` (ADT). The kind of
-"information hiding" provided by abstract data types is very important in the
-design of larger software systems. In particular, it makes it possible to
-revise the internal representation or even provide alternative implementations
-of a data type, and have auxiliary functions (like our ``translate`` function)
-still work on the modified data structure.
+One important point to note here is that ``translate`` can be defined without
+knowing or assuming *anything* about the internal representation of the
+``point`` data type. We have defined ``point`` as a `concrete data type` in
+this example, making its constructor and internal structure visible in the
+rest of the program. This is often convenient, but the ``Point`` constructor
+might just as well be hidden by making it a private member of some namespace
+(cf. Namespaces_), so that all accesses to the data structure would have to be
+done through the provided operations. Such a data type is also known as an
+`abstract data type` (ADT).
 
 .. note:: As we've already seen, Pure has some powerful capabilities which
    enable you to write functions to inspect and manipulate terms in a
@@ -2351,14 +2387,69 @@ still work on the modified data structure.
    such dirty tricks to wreak havoc on the internal representation of an ADT,
    he gets what he deserves.
 
-Pure's standard library provides a few predefined data types, some of them
-concrete (like the derived number types), some of them abstract (like the
-container data types), and some which are just aliases for frequently used
-type predicates (such as the matrix subtypes). These are all described in the
-:doc:`purelib`.
+Pure provides some additional facilities to ease the handling of abstract data
+types through its `interface types`_. For instance, instead of defining
+``point`` as a concrete data type using a :keyword:`type` rule, we might also
+specify it as an interface type which merely lists the supported operations as
+follows::
 
-More examples and a detailed explanation of Pure's type tag concept can be
-found in the `Type Rules`_ section below.
+  interface point with
+    xcoord p::point;
+    ycoord p::point;
+    move p::point x y;
+  end;
+
+We can implement this type the same way as before::
+
+  point x y = Point x y;
+  xcoord (Point x y) = x;
+  ycoord (Point x y) = y;
+  move (Point _ _) x y = Point x y;
+
+The definition of the ``translate`` function is also unchanged::
+
+  translate x y p::point = move p (xcoord p+x) (ycoord p+y);
+
+The difference is that now the structure of members of the type is not made
+explicit *anywhere* in the definition of the type. Instead, the compiler
+figures out which data matches the ``point`` tag on its own. We can check the
+actual term patterns making up the ``point`` type with the ``show interface``
+command::
+
+  > show interface point
+  type point (Point x y);
+
+As you can see, the compiler derived our previous definition of the type. But
+in fact ``translate`` will now work with *any* data type as long as it
+implements the ``point`` interface (i.e., provides the ``xcoord``, ``ycoord``
+and ``move`` operations), so we may swap out the underlying data structure on
+a whim. For instance, if we'd like to use vectors instead of constructor
+terms, all we have to do is to provide the necessary implementations of the
+interface operations::
+
+  xcoord {x,y} = x;
+  ycoord {x,y} = y;
+  move {_,_} x y = {x,y};
+
+And everything just works::
+
+  > show interface point
+  type point (Point x y);
+  type point {x,y};
+  > let p::point = {3,3};
+  > p; translate (1,2) p;
+  {3,3}
+  {4,5}
+
+This separation of interface and implementation of a data structure is very
+important in the design of larger software systems. In particular, it makes it
+possible to revise the internal representation or even provide alternative
+implementations of a data type, and have auxiliary functions (like our
+``translate`` function) still work on the modified data structure.
+
+More examples and detailed explanations of Pure's notions of type predicates
+and interface types can be found in the `Type Rules`_ and `Interface Types`_
+sections below.
 
 General Rules
 -------------
@@ -2616,9 +2707,9 @@ This implements just the bare bones, but that should be enough to make
   > fact (s (s (s 0)));
   s (s (s (s (s (s 0)))))
 
-So, counting the ``s``\ 's, the factorial of 3 is 6. Works! It goes without
-saying, though, that this implementation of ``nat`` is rather impractical;
-you'll get mountains of ``s``\ 's for larger values of ``n``.
+So, counting the ``s``\ 's, the factorial of 3 is 6. Works! (It goes without
+saying, though, that this implementation of ``nat`` is not very practical;
+you'll get mountains of ``s``\ 's for larger values of ``n``.)
 
 As you can see, a type definition may in general consist of many type rules
 which may be scattered out over different parts of a program. This works
@@ -2655,19 +2746,30 @@ following example can be found in the standard library::
 
   type integer x::int | integer x::bigint;
 
-Last but not least, a type rule can also take the form of a function definition
-without arguments.  In this case, the corresponding right-hand side may either
-be another type symbol, or any kind of closure denoting a (curried) type
-predicate. In this case the defined type is simply an `alias` for the type
-denoted on the right-hand side. This is often done, e.g., for numeric types,
-to document that they actually stand for special kinds of quantities::
+A type rule can also take the form of a function definition without arguments.
+The corresponding right-hand side may either be another type symbol, or any
+kind of closure denoting a (curried) type predicate. In this case the defined
+type is simply an `alias` for the type denoted on the right-hand side. This is
+often done, e.g., for numeric types, to document that they actually stand for
+special kinds of quantities::
 
   type speed = double;
   type size = int;
 
 Note that the definition of a type alias is always complete; there's no way to
-extend the corresponding type later. However, it's also possible to just
-specify the type name, without giving the right-hand side::
+extend the corresponding type later. Therefore type aliases are normally
+resolved at compile time, so that they incur no additional runtime cost. For
+instance::
+
+  > half x::speed = x/2;
+  > show half
+  half x::double = x/2;
+
+(If necessary, this "type folding" can also be disabled with the
+:option:`--nofold` pragma.)
+
+Finally, it's also possible to just specify the type name, without giving the
+right-hand side::
 
   type thing;
 
@@ -2726,13 +2828,11 @@ that's why this macro isn't defined in the prelude.)
 
 Pure places no a priori restrictions on the rules defining a data type (other
 than that they must either define a unary predicate or an alias for an
-existing data type). Thus any type of relation between two data types is
+existing data type). As far as Pure is concerned, types are just subsets of
+the universe of terms. Thus any type of relation between two data types is
 possible; they might be unrelated (disjoint) term sets, one may be a subset of
 another, or they might be related in some other way (some terms may be members
-of both types, while others aren't). Thus the relationships between types and
-their adherence to certain "interfaces" are the responsibility of the
-programmer. As far as Pure is concerned, types are just subsets of the
-universe of terms.
+of both types, while others aren't).
 
 For instance, consider the types ``nat`` and ``odd`` from above. Both are
 subtypes of the ``int`` type (assuming our original definition of ``nat`` as
@@ -2767,6 +2867,228 @@ exactly when the code of a type definition will be executed at runtime. Thus,
 as a general rule, a type definition should not rely on side effects such as
 doing I/O (except maybe for debugging purposes), modifying references or
 external data structures via C pointers, etc.
+
+.. _interface:
+.. _Interface Types:
+
+Interface Types
+---------------
+
+Besides the "concrete" types described in the previous section, Pure provides
+another, more abstract way to characterize a type through the collection of
+operations it supports. These `interface types` work pretty much like in
+Google's Go_ programming language. They provide a safe form of "Duck typing"
+in which the operations available on a type are stated explicitly, and hence
+members of the type are always known to provide all of the listed operations.
+
+Syntactically, an interface in Pure is a toplevel element (cf. Toplevel_)
+which gives the type name along with a collection of patterns, the so-called
+`signature` which specifies the manifest operations of the type:
+
+.. productionlist::
+   item : "interface" `qualified_identifier`
+   	: "with" `interface_item`* "end" ";"
+   interface_item : `pattern` ";"
+   		  : | "interface" `qualified_identifier` ";"
+
+Interfaces consist of two kinds of items:
+
+* The patterns, which indicate which operations are supported by the type, and
+  which arguments they expect. This may be anything that can occur as the
+  left-hand side of an ordinary function definition, cf. `General Rules`_.
+
+* The name of another interface type. This causes the signature of the named
+  interface type to be included in the interface type being defined.
+
+Note that an interface may also be empty, in which case it matches *any*
+value. Thus, ``interface any with end`` is just a fancy way to define the type
+``type any _``.
+
+The gist of an interface is in its patterns, more precisely: in the pattern
+variables which have the name of the interface as a type tag. The precise
+meaning of the patterns is as follows:
+
+* The patterns are matched against the left-hand sides of ordinary function
+  definitions. If a left-hand side matches, any argument pattern substituted
+  for a variable tagged with the interface type becomes a "candidate pattern"
+  of the type.
+
+* The type consists of all candidate patterns which can be matched by some
+  candidate pattern of *each* interface function. That is, candidate patterns
+  which are only supported by some but not all of the interface functions, are
+  eliminated.
+
+* Finally, all trivial candidate patterns (``x`` where ``x`` is just a
+  variable without any type tag, which thus matches *any* value) are
+  eliminated as well.
+
+Note that an interface pattern may contain type tags other than the interface
+type. These must always be matched *literally* on the left-hand sides of
+equations.
+
+For instance, let's consider the customary stack data structure::
+
+  interface stack with
+    push s::stack x;
+    pop s::stack;
+    top s::stack;
+  end;
+
+Note the use of the type tag ``stack`` in the operation patterns, which marks
+the positions of ``stack`` arguments of the interface operations. The
+interface tells us that a stack provides three operations ``push``, ``pop``
+and ``top`` which each take a stack as their first argument; also, ``push``
+takes two arguments, while ``pop`` and ``top`` just take a single (stack)
+argument.
+
+This information is all that the compiler needs to figure out which terms are
+members of the ``stack`` data type. To these ends, the compiler looks at
+existing definitions of ``push``, ``pop`` and ``top`` and extracts the
+patterns for arguments marked with the ``stack`` tag in the interface. The
+``stack`` patterns implemented by *all* of the interface operations make up
+the ``stack`` type; i.e., the members of the type are all the instances of
+these patterns.
+
+Right now our ``stack`` type doesn't have any members, because we didn't
+implement the interface operations yet, so let's do this now. For instance, to
+implement stacks as lists, we might define::
+
+  push xs@[] x | push xs@(_:_) x = x:xs;
+  pop (x:xs) = xs;
+  top (x:xs) = x;
+
+This is also known as "instantiating" the type. In addition, we will need an
+operation to create an initial stack value. The following will do for our
+purposes::
+
+  stack xs::list = xs;
+
+This yields a stack with the given initial contents. Let's give it a go::
+
+  > top (push (stack []) 99);
+  99
+
+Looks good so far. We can also check the actual definition of the type in
+terms of its :keyword:`type` rules using the ``show interface`` command
+(cf. `The show Command`_)::
+
+  > show interface stack
+  type stack xs@(_:_);
+
+Wait, there seems to be something wrong there. The empty list pattern of the
+``push`` function is missing, where did it go? Let's restart the interpreter
+with warnings enabled (:option:`-w`) and retype the above definitions. The
+compiler tells us::
+
+  > show interface stack
+  warning: interface 'stack' may be incomplete
+  warning: function 'pop' might lack a rule for 'xs@[]'
+  warning: function 'top' might lack a rule for 'xs@[]'
+  type stack xs@(_:_);
+
+See? A pattern is only considered part of the type if it is supported by *all*
+the interface operations. Since the ``pop`` and ``top`` operations don't have
+any rules for empty list arguments, this value isn't a member of the type. We
+can fix this quite easily by adding the following "error rules" which handle
+this case::
+
+  > pop [] = throw "empty stack";
+  > top [] = throw "empty stack";
+  > show interface stack
+  type stack xs@[];
+  type stack xs@(_:_);
+
+This looks fine now, so let's see how we can put our new stack data structure
+to good use. Operations on the type are defined as usual, employing ``stack``
+as a type tag for stack arguments so that we can be sure that the ``push``,
+``pop`` and ``top`` operations are all supported. For instance, let's
+implement a little RPN ("reverse polish notation") calculator::
+
+  rpn xs::stack ops::list = foldl (call []) xs ops with
+    call ys xs op = push xs (foldl ($) op ys) if nargs op<=#ys;
+                  = call (top xs:ys) (pop xs) op otherwise;
+  end;
+
+This takes an initial stack ``xs`` and a list ``ops`` of operands and
+operations as inputs and returns the resulting stack after processing ``ops``.
+Examples::
+
+  > rpn (stack []) [10,4,3,(+),2,(*),(-)];
+  [-4]
+  > using math;
+  > rpn (stack []) [1,2,ln,(/)];
+  [1.44269504088896]
+  > rpn (stack []) [4,1,atan,(*)];
+  [3.14159265358979]
+  > rpn (stack []) [2,(*)];
+  <stdin>, line 5: unhandled exception '"empty stack"' while evaluating
+  'rpn (stack []) [2,(*)]'
+
+Ok, this is all nice and dandy, but it seems that so far we haven't done much
+more than we could have achieved just as easily with plain lists instead. So
+what are the benefits of having an interface type?
+
+First, an interface provides a fair amount of `safety`. As long as we stick to
+the interface functions, we can be sure that the data is capable of carrying
+out the requested operations. At the same time, the interface also serves as a
+valuable piece of documentation, since it tells us at a glance exactly which
+operations are supported by the type.
+
+Second, an interface provides `data abstraction`. We don't need to know how
+the interface operations are implemented, our functions will work with *any*
+implementation of the interface. In fact, now that the interface is defined,
+we can easily supply alternative implementations. For instance, suppose that
+we'd like to use our little RPN calculator with "bounded stacks", i.e., stacks
+which don't grow beyond a certain limit. These can be implemented as follows::
+
+  push (n,xs@[]) x | push (n,xs@(_:_)) x =
+    if n>0 then (n-1,x:xs) else throw "full stack";
+  pop (n,x:xs) = n+1,xs;
+  top (n,x:xs) = x;
+  pop (n,[]) = throw "empty stack";
+  top (n,[]) = throw "empty stack";
+
+Note that we represent a bounded stack by a pair ``(n,xs)`` here, where ``xs``
+is the list of elements and ``n`` is the "free space" (number of elements we
+still allow to be pushed). We also add a function to construct such values::
+
+  bstack n::int xs::list = (n-#xs,xs);
+
+Example::
+
+  > rpn (bstack 3 []) [10,4,3,(+),2,(*),(-)];
+  2,[-4]
+  > rpn (bstack 2 []) [10,4,3,(+),2,(*),(-)];
+  <stdin>, line 7: unhandled exception '"full stack"' while evaluating
+  'rpn (bstack 2 []) [10,4,3,(+),2,(*),(-)]'
+
+Compared to statically typed languages like Go, Pure's implementation of
+interface types has some limitations. First, nothing is known about the return
+type of an interface operation, but this is no real impediment in Pure since
+an interface type is all about the kind of *arguments* which can be matched by
+the left-hand side of an equation.
+
+Second, as we have seen, interface types work best if all interface operations
+are completely defined on the intended data type. This may sometimes force you
+to add default or error rules raising exceptions which may interfere with
+symbolic evaluation (cf. `Exception Handling`_ and `Defined Functions`_). This
+can be a real issue, but it is almost always possible to work around this,
+e.g., by just adding in the missing type members manually. To these ends, Pure
+allows an interface type to be augmented with ordinary type rules as described
+in `Type Rules`_. For instance, we might also have implemented the stack type
+as follows::
+
+  interface stack with
+    push s::stack x;
+    pop s::stack;
+    top s::stack;
+  end;
+
+  type stack [];
+
+  push xs@[] x | push xs@(_:_) x = x:xs;
+  pop (x:xs) = xs;
+  top (x:xs) = x;
 
 Examples
 ========
@@ -3492,8 +3814,7 @@ consisting of several source modules:
 
 * symbol declarations determine "scope" and "fixity" of a symbol;
 
-* :keyword:`extern` declarations specify external C functions (described in
-  the `C Interface`_ section);
+* :keyword:`extern` declarations specify external C functions;
 
 * :keyword:`using` clauses let you include other scripts in a Pure script;
 
@@ -3505,8 +3826,9 @@ These are toplevel elements (cf. Toplevel_):
 .. productionlist::
    item : `symbol_decl` | `extern_decl` | `using_decl` | `namespace_decl`
 
-The syntax of each of these is described in the following subsections, except
-:token:`extern_decl` which can be found in the `C Interface`_ section.
+We defer the discussion of :keyword:`extern` declarations to the `C
+Interface`_ section. The other kinds of declarations are described in the
+following subsections.
 
 .. _public:
 .. _private:
@@ -5026,7 +5348,7 @@ Or let's lists all global variables along with their values::
 
   > catmap get_vardef (globsym "*" 0);
   [(argc-->0),(argv-->[]),(compiling-->0),
-  (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.47")]
+  (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.50")]
 
 The counterparts of :func:`add_fundef` and :func:`del_fundef` are provided as
 well. Not very surprisingly, they are named :func:`add_typedef`,
@@ -6845,7 +7167,7 @@ values (using the "long" format)::
   argv       var  argv = [];
   compiling  var  compiling = 0;
   sysinfo    var  sysinfo = "x86_64-unknown-linux-gnu";
-  version    var  version = "0.47";
+  version    var  version = "0.50";
   5 variables
 
 Or you can list just private symbols of the namespace ``foo``, as follows::
@@ -6863,21 +7185,44 @@ case you might consider to use the ``dump`` command instead, which writes the
 definitions to a file which can then be loaded into a text editor for easier
 viewing. This may occasionally be useful for debugging purposes.)
 
-Finally, there are two alternate forms of the ``show`` command: ``show
-namespace`` which lists the current and search namespaces, and ``show
-namespaces`` which lists all declared namespaces. These come in handy if you
-have forgotten what namespaces are currently active and which other namespaces
-are available in your program. For instance::
+The ``show`` command also has the following alternate forms which are used for
+special purposes:
 
-  > show namespace
-  > show namespaces
-  namespace C;
-  namespace matrix;
-  > using namespace C;
-  > namespace my;
-  > show namespace
-  namespace my;
-  using namespace C;
+* ``show interface`` lists the actual :keyword:`type` rules for an interface
+  type. This is useful if you want to verify which patterns will be matched by
+  an interface type, see `Interface Types`_ for details. For instance::
+
+    > interface stack with
+    >   push xs::stack x;
+    >   pop xs::stack;
+    >   top xs::stack;
+    > end;
+    > push xs@[] x |
+    > push xs@(_:_) x = x:xs;
+    > pop (x:xs) = xs;
+    > top (x:xs) = x;
+    > show interface stack
+    type stack xs@(_:_);
+    > pop [] = throw "empty stack";
+    > top [] = throw "empty stack";
+    > show interface stack
+    type stack xs@[];
+    type stack xs@(_:_);
+
+* ``show namespace`` lists the current and search namespaces, while ``show
+  namespaces`` lists all declared namespaces. These come in handy if you have
+  forgotten what namespaces are currently active and which other namespaces
+  are available in your program. For instance::
+
+    > show namespace
+    > show namespaces
+    namespace C;
+    namespace matrix;
+    > using namespace C;
+    > namespace my;
+    > show namespace
+    namespace my;
+    using namespace C;
 
 Definition Levels
 -----------------
@@ -8038,12 +8383,12 @@ Etymology
 
 People keep asking me what's so "pure" about Pure. The long and apologetic
 answer is that Pure tries to stay as close as possible to the spirit of term
-rewriting without sacrificing practicality. It's possible and in fact quite
-easy to write purely functional programs in Pure, and you're encouraged to do
-so whenever this is possible or at least reasonable. On the other hand, Pure
-doesn't get in your way if you want to call external operations with side
-effects; after all, it does allow you to call any C function at any point in a
-Pure program.
+rewriting without sacrificing practicality. Pure's term rewriting core is in
+fact purely functional. It's thus possible and in fact quite easy to write
+purely functional programs in Pure, and you're encouraged to do so whenever
+this is reasonable. On the other hand, Pure doesn't get in your way if you
+want to call external operations with side effects; after all, it does allow
+you to call any C function at any point in a Pure program.
 
 The short answer is that I simply liked the name, and there wasn't any
 programming language named "Pure" yet (quite a feat nowadays), so there's one
@@ -8178,6 +8523,21 @@ the forthcoming 1.0 release:
   to the corresponding "as" pattern (i.e., ``x::foo`` to ``x@(foo _)``), or
   just add a proper type definition for the tag (like ``type foo (foo _);``).
 
+Pure 0.48 moved pointer arithmetic and the regex functions into separate
+:mod:`pointers` and :mod:`regex` modules, so you now have to import these
+modules if you need this functionality. It also introduced the
+:option:`--defined <pure-pragma --defined>` pragma which lets you have
+"defined" functions in Pure which throw an exception if they can't be applied,
+e.g., because they are invoked with the wrong arguments.
+
+Pure 0.49 introduced the `conditional compilation`_ pragmas, so that simple
+version and system dependencies can now be handled in a more convenient way.
+
+Pure 0.50 introduced the declaration of `interface types`_, which make it
+possible to create the definition of a type from a description of its
+operations. To these ends, a new keyword :keyword:`interface` was added to the
+language.
+
 Error Recovery
 --------------
 
@@ -8189,6 +8549,76 @@ accepts an empty definition (just ``;`` by itself) at the toplevel only. Thus,
 in interactive usage, if the parser seems to eat away your input without doing
 anything, entering an extra semicolon or two should break the spell, putting
 you back at the toplevel where you can start typing the definition again.
+
+With and when
+-------------
+
+A common source of confusion is that Pure provides two different constructs to
+bind local function and variable symbols, respectively. This distinction is
+necessary because Pure does not segregate defined functions and constructors,
+and thus there is no magic to figure out whether an equation like ``foo x =
+y`` by itself is meant as a definition of a function ``foo`` with formal
+parameter ``x`` and return value ``y``, or a pattern binding defining the
+local variable ``x`` by matching the pattern ``foo x`` against the value of
+``y``. The :keyword:`with` construct does the former, :keyword:`when` the
+latter.
+
+Also note that the function definitions in a :keyword:`with` clause are all
+done simultaneously (and can thus be mutually recursive), while the individual
+variable definitions and expressions in a :keyword:`when` clause are executed
+in order. This works in exactly the same fashion as ``letrec`` and ``let`` in
+Scheme. (As a mnemonic, consider that :keyword:`when` conveys a sense of time,
+so its parts are "executed in sequence".)
+
+The sequential execution aspect of :keyword:`when` is rather important in
+Pure, because it enables you to do a series of "actions" (variable bindings
+and expression evaluations) in sequence by simply enclosing it in a
+:keyword:`when` clause. This provides the Pure programmer with a useful and
+familiar bit of imperative "look and feel" (even though the :keyword:`when`
+clause itself works in a purely functional way). For instance, suppose that
+we'd like to define a function which opens a file, checks that the file was
+opened successfully and throws an exception otherwise, outputs a message to
+indicate which file was opened, and finally returns the contents of the file
+as a string. The easiest way to do this in Pure is as follows::
+
+  using system;
+
+  read_file name::string = s when
+    fp = fopen name "r";
+    pointerp fp || throw (sprintf "%s: %s" (name,strerror errno));
+    printf "opened file %s\n" name;
+    s = fget fp;
+  end;
+
+One of Pure's major idiosyncrasies is that :keyword:`with` and :keyword:`when`
+clauses are tacked on to the end of the expression they belong to. This mimics
+mathematical language and makes it easy to read and understand a definition,
+because you're told right up front *what* is to be computed, before going into
+the details of *how* the computation is performed. However, this style differs
+considerably from other block-structured programming languages, which often
+place local definitions in front of the code they apply to. Pure doesn't offer
+any special syntax for this, but note that you can always write a
+:keyword:`when` or :keyword:`with` clause in the following style which places
+the "body" at the bottom::
+
+  result when
+    y = foo (x+1);
+    z = bar y;
+    result = baz z;
+  end;
+
+This can be read and written more or less like a ``let`` expression in Scheme
+or ML, except that the name of the result is given explicitly at the beginning.
+However, this style doesn't really save you either if you need several
+sections with both local functions and variables. In this case you'll just
+have to bite the bullet and arrange the :keyword:`with` and :keyword:`when`
+clauses the way that Pure wants them. That is, first come the local variables
+used in the right-hand side, then the local functions needed to compute those
+variables, then maybe another section with local variables needed by those
+functions, etc. When looking at a complicated definition like this, it
+sometimes helps to read the :keyword:`with` and :keyword:`when` blocks "in
+reverse", i.e., from bottom to top, which is the order in which they will
+actually be executed.
 
 Non-Linear Patterns
 -------------------
@@ -8241,6 +8671,9 @@ at runtime. For instance::
   > case bar 99 of y@(bar x) = y,x+1; end;
   bar 99,100
 
+"Head = Function" Pitfalls
+--------------------------
+
 "As" patterns are also a useful device if you need to manipulate function
 applications in a generic way. Note that the "head = function" rule means that
 the head symbol ``f`` of an application ``f x1 ... xn`` occurring on (or
@@ -8259,14 +8692,11 @@ the function and all arguments::
   [a,b,c,d]
 
 This may seem a little awkward, but as a matter of fact the "head = function"
-rule is quite useful since it covers the common cases without forcing the
-programmer to declare "constructor" symbols (except nonfix symbols). On the
-other hand, generic rules operating on arbitrary function applications are not
-all that common, so having to "escape" a variable using the anonymous "as"
-pattern trick is a small price to pay for that convenience.
-
-"Head = Function" Pitfalls
---------------------------
+rule is quite useful the way that it is, since it covers the common cases
+without forcing the programmer to declare "constructor" symbols (except nonfix
+symbols). On the other hand, generic rules operating on arbitrary function
+applications are not all that common, so having to "escape" a variable using
+the anonymous "as" pattern trick is a small price to pay for that convenience.
 
 Sometimes you may also run into the complementary problem, i.e., to match a
 function argument against a given function. Consider this code fragment::
@@ -8391,50 +8821,165 @@ save you some time and trouble, especially when testing programs which are to
 be executed mostly in batch mode. Future versions of the interpreter might
 also make good use of this pragma for static checks and optimization purposes.
 
+Stack Size and Tail Recursion
+-----------------------------
+
+Pure programs may need a considerable amount of stack space to handle
+recursive function and macro calls, and the interpreter itself also takes its
+toll. So you should configure your system accordingly (8 MB of stack space is
+recommended for 32 bit systems, systems with 64 bit pointers probably need
+more). If the :envvar:`PURE_STACK` environment variable is defined, the
+interpreter performs advisory stack checks on function entry and raises a Pure
+exception if the current stack size exceeds the given limit. The value of
+:envvar:`PURE_STACK` should be the maximum stack size in kilobytes. Please
+note that this is only an advisory limit which does not change the program's
+physical stack size.  Your operating system should supply you with a command
+such as ulimit(1) to set the real process stack size. (The
+:envvar:`PURE_STACK` limit should be a little less than that, to account for
+temporary stack usage by the interpreter itself.)
+
+Like Scheme, Pure does proper tail calls (if LLVM provides that feature on the
+platform at hand), so tail-recursive definitions should work fine in limited
+stack space. For instance, the following little program will loop forever if
+your platform supports the required optimizations::
+
+  loop = loop;
+  loop;
+
+This also works if your definition involves function parameters, guards and
+multiple equations, of course. Moreover, conditional expressions
+(:keyword:`if`-:keyword:`then`-:keyword:`else`) are tail-recursive in both
+branches, and the logical operators :func:`&&/special` and :func:`||/special`,
+as well as the sequence operator :func:`$$`, are tail-recursive in their
+second operand.
+
+In addition, the Pure compiler also does a specialized form of tail recursion
+optimization for type definition rules. Due to the special way in which type
+tags are processed, however, the amount of optimization performed in this case
+is somewhat limited; see `Recursive Types`_ below.
+
+Finally, note that tail call optimization is *always* disabled if the debugger
+is enabled (-g). This makes it much easier to debug programs, but means that
+you may run into stack overflows when debugging a program that does deep tail
+recursion.
+
+Handling of Asynchronous Signals
+--------------------------------
+
+As described in section `Exception Handling`_, signals delivered to the
+process can be caught and handled with Pure's exception handling facilities.
+This has its limitations, however. Since Pure code cannot be executed directly
+from a C signal handler, checks for pending signals are only done on function
+entry. This means that in certain situations (such as the execution of an
+external C routine), delivery of a signal may be delayed by an arbitrary
+amount of time. Moreover, if more than one signal arrives between two
+successive signal checks, only the last one will be reported in the current
+implementation.
+
+When delivering a signal which has been remapped to a Pure exception, the
+corresponding exception handler (if any) will be invoked as usual. Further
+signals are blocked while the exception handler is being executed.
+
+A fairly typical case is that you have to handle signals in a tail-recursive
+function. This can be done with code like the following::
+
+  using system;
+
+  // Remap some common POSIX signals.
+  do (trap SIG_TRAP) [SIGHUP, SIGINT, SIGTERM];
+
+  loop = catch handler process $$ loop
+  with handler (signal k) = printf "Hey, I got signal %d.\n" k end;
+  process = sleep 1; // do something
+
+Running the above ``loop`` function enters an endless loop reporting all
+signals delivered to the process. Note that to make this work, the
+tail-recursive invocation of ``loop`` must immediately follow the
+signal-handling code, so that signals don't escape the exception handler.
+
+Of course, in a real application you'd probably want the ``loop`` function to
+carry around some data to be processed by the ``process`` routine, which then
+returns an updated value for the next iteration. This can be implemented as
+follows::
+
+  loop x = loop (catch handler (process x))
+  with handler (signal k) = printf "Hey, I got signal %d.\n" k $$ 0 end;
+  process x = printf "counting: %d\n" x $$ sleep 1 $$ x+1;
+
 Recursive Types
 ---------------
 
 Using the facilities described in `Type Rules`_, type tags can easily be
-defined in a recursive fashion. For instance, the following list type is
-defined recursively, so that it only matches proper lists which have list
+defined in a recursive fashion. In simple cases, the compiler can optimize
+such definitions so that they are executed in constant stack space, just like
+ordinary tail-recursive functions. The main difference here is that the
+recursion already takes place during *matching*, i.e., on the *left-hand* side
+of a rule, since this is where type predicates are normally invoked. This also
+limits the amount of tail recursion optimization available on type rules, as
+detailed below.
+
+For instance, the following :type:`rlist/type` type from the prelude is
+defined in such a way that it only matches "proper" lists which have list
 values in all their tails (and are thus terminated by the empty list). ::
 
-  type prlist [] | prlist (x:xs::prlist);
+  type rlist [] | rlist (x : xs::rlist);
 
-This is a perfectly legal type definition, but note that the current
-implementation doesn't do any tail call optimization for such type predicates.
-(Technically, type tags are just additional guards on an equation which are
-executed recursively before evaluating the right-hand side of an equation.)
-Therefore you'll run into stack overflows when trying to apply this definition
-to big list values::
+Note that this type definition recurses in the *last* :type:`rlist/type` tag
+of the *last* rule of the type. If tail calls are supported by the host
+implementation (cf. `Stack Size and Tail Recursion`_), the compiler makes sure
+that such definitions are safe to use even if the recursion may go arbitrarily
+deep. For instance::
 
-  > typep prlist (1..300000);
-  <stdin>, line 2: unhandled exception 'stack_fault' while evaluating
-  'typep prlist (1..300000)'
-
-It is possible to work around this by implementing the actual type check as an
-ordinary predicate, since those *will* be optimized to run in constant stack
-space if they are tail-recursive (cf. `Stack Size and Tail Recursion`_). For
-instance, here is how the proper list type :type:`rlist/type` is actually
-implemented in the prelude::
-
-  type rlist [];
-  type rlist (_:xs) = true if check xs with
-    check [] = true;
-    check (_:xs) = check xs;
-    check _ = false;
-  end;
-
-This definition works just fine with big list values::
-
-  > typep rlist (1..300000);
+  > typep rlist (1..10000000);
   1
 
-However, there's yet another important issue with recursive type definitions,
-namely the *time* it takes to check the definition. In the above example,
-checking :type:`rlist/type` takes O(n) time, where n is the size of the
-list. This will have dire consequences if you do this check repeatedly while
-traversing a list, as in the following ``sum`` function::
+The precise rules for tail-recursive type definitions are as follows:
+
+* The *last* rule of the type must have a trivial right-hand side (either just
+  :cons:`true` or missing) and must be *directly* recursive in the *last* type
+  tag on the left-hand side of the rule.
+
+* The rule may not contain any non-linearities. (That's because these are
+  always checked *after* the type guards for efficiency.)
+
+While these are rather strict requirements, they work reasonably well for
+simple recursive types such as the recursive list type above. More general
+recursion in types will not be optimized by the compiler, however, and may
+thus be subject to stack overflows. For instance, consider the following
+binary tree type::
+
+  nonfix nil;
+  type tree nil | tree (bin x l::tree r::tree);
+
+This is a perfectly legal type definition, and the recursion in the last
+``tree`` tag of the second rule will indeed be optimized away. However, the
+second rule also recurses on the *first* ``tree`` tag which will cause trouble
+if there are long chains of left branches in a tree. For instance::
+
+  > mktree xs = foldr (\x t->bin x t nil) nil xs;
+  > mktree [];
+  nil
+  > mktree [1,2,3];
+  bin 1 (bin 2 (bin 3 nil nil) nil) nil
+  > typep tree (mktree []);
+  1
+  > typep tree (mktree [1,2,3]);
+  1
+  > typep tree (mktree (1..10000));
+  <stdin>, line 6: unhandled exception 'stack_fault' while evaluating
+  'typep tree (mktree (1..10000))'
+
+To avoid deep recursion in such cases it is necessary to implement the type
+using a general predicate, which handles the recursion by transforming it into
+a tail-recursive form using a technique like `continuation passing`_.
+
+.. _continuation passing: http://en.wikipedia.org/wiki/Continuation-passing_style
+
+There's yet another important issue with recursive type definitions, namely
+the *time* it takes to check the definition. In the above example, checking
+:type:`rlist/type` takes O(n) time, where n is the size of the list. This will
+have dire consequences if you do this check repeatedly while traversing a
+list, as in the following ``sum`` function::
 
   sum xs::rlist = if null xs then 0 else head xs+sum (tail xs);
 
@@ -8473,7 +9018,7 @@ somewhat prettier normal form instead::
 
   > clear sum
   > sum xs::rlist = sum xs with
-  >  sum xs = if null xs then 0 else head xs+sum (tail xs);
+  >   sum xs = if null xs then 0 else head xs+sum (tail xs);
   > end;
   > sum (1:2:3);
   sum (1:2:3)
@@ -8481,51 +9026,6 @@ somewhat prettier normal form instead::
 Thus the wrapper-worker approach also has its merits, and whether to use one
 or the other depends on the situation. Similar techniques and tradeoffs also
 apply to other recursive types such as trees.
-
-With and when
--------------
-
-A common source of confusion is that Pure provides two different constructs to
-bind local function and variable symbols, respectively. This distinction is
-necessary because Pure does not segregate defined functions and constructors,
-and thus there is no magic to figure out whether an equation like ``foo x =
-y`` by itself is meant as a definition of a function ``foo`` with formal
-parameter ``x`` and return value ``y``, or a pattern binding defining the
-local variable ``x`` by matching the pattern ``foo x`` against the value of
-``y``. The :keyword:`with` construct does the former, :keyword:`when` the
-latter. (As a mnemonic, you may consider that :keyword:`when` conveys a sense
-of time, as the individual variable definitions in a :keyword:`when` clause
-are executed in order, while the function definitions in a :keyword:`with`
-clause are all done simultaneously.)
-
-Another speciality is that :keyword:`with` and :keyword:`when` clauses are
-tacked on to the end of the expression they belong to. This mimics
-mathematical language and makes it easy to read and understand a definition in
-a "top-down" fashion.  This style differs considerably from other
-block-structured programming languages, however, which often place local
-definitions in front of the code they apply to. To grasp the operational
-meaning of such nested definitions, it can be helpful to read the nested
-scopes "in reverse" (from bottom to top). Some people also prefer to write
-their programs that way. In contrast to Haskell and ML which have
-:keyword:`let` expressions to support that kind of notation, Pure doesn't
-provide any special syntax for this. But note that you can always write
-:keyword:`when` clauses in the following style which places the "body" at the
-bottom of the clause::
-
-  result when
-    y = foo (x+1);
-    z = bar y;
-    result = baz z;
-  end;
-
-This doesn't incur any overhead, since the compiler will always eliminate the
-trivial "tail binding" for the result value. E.g., the above will compile to
-exactly the same code as::
-
-  baz z when
-    y = foo (x+1);
-    z = bar y;
-  end;
 
 Numeric Calculations
 --------------------
@@ -8847,86 +9347,6 @@ definition. This is an outright bug in the expression printer which will
 hopefully be fixed some time. But for the time being you will have to correct
 such glitches manually.
 
-Stack Size and Tail Recursion
------------------------------
-
-Pure programs may need a considerable amount of stack space to handle
-recursive function and macro calls, and the interpreter itself also takes its
-toll. So you should configure your system accordingly (8 MB of stack space is
-recommended for 32 bit systems, systems with 64 bit pointers probably need
-more). If the :envvar:`PURE_STACK` environment variable is defined, the
-interpreter performs advisory stack checks on function entry and raises a Pure
-exception if the current stack size exceeds the given limit. The value of
-:envvar:`PURE_STACK` should be the maximum stack size in kilobytes. Please
-note that this is only an advisory limit which does not change the program's
-physical stack size.  Your operating system should supply you with a command
-such as ulimit(1) to set the real process stack size. (The
-:envvar:`PURE_STACK` limit should be a little less than that, to account for
-temporary stack usage by the interpreter itself.)
-
-Like Scheme, Pure does proper tail calls (if LLVM provides that feature on the
-platform at hand), so tail-recursive definitions should work fine in limited
-stack space. For instance, the following little program will loop forever if
-your platform supports the required optimizations::
-
-  loop = loop;
-  loop;
-
-This also works if your definition involves function parameters, guards and
-multiple equations, of course. Moreover, conditional expressions
-(:keyword:`if`-:keyword:`then`-:keyword:`else`) are tail-recursive in both
-branches, and the logical operators :func:`&&/special` and :func:`||/special`,
-as well as the sequence operator :func:`$$`, are tail-recursive in their
-second operand.
-
-Also note that tail call optimization is *always* disabled if the debugger is
-enabled (-g). This makes it much easier to debug programs, but means that you
-may run into stack overflows when debugging a program that does deep tail
-recursion.
-
-Handling of Asynchronous Signals
---------------------------------
-
-As described in section `Exception Handling`_, signals delivered to the
-process can be caught and handled with Pure's exception handling facilities.
-This has its limitations, however. Since Pure code cannot be executed directly
-from a C signal handler, checks for pending signals are only done on function
-entry. This means that in certain situations (such as the execution of an
-external C routine), delivery of a signal may be delayed by an arbitrary
-amount of time. Moreover, if more than one signal arrives between two
-successive signal checks, only the last one will be reported in the current
-implementation.
-
-When delivering a signal which has been remapped to a Pure exception, the
-corresponding exception handler (if any) will be invoked as usual. Further
-signals are blocked while the exception handler is being executed.
-
-A fairly typical case is that you have to handle signals in a tail-recursive
-function. This can be done with code like the following::
-
-  using system;
-
-  // Remap some common POSIX signals.
-  do (trap SIG_TRAP) [SIGHUP, SIGINT, SIGTERM];
-
-  loop = catch handler process $$ loop
-  with handler (signal k) = printf "Hey, I got signal %d.\n" k end;
-  process = sleep 1; // do something
-
-Running the above ``loop`` function enters an endless loop reporting all
-signals delivered to the process. Note that to make this work, the
-tail-recursive invocation of ``loop`` must immediately follow the
-signal-handling code, so that signals don't escape the exception handler.
-
-Of course, in a real application you'd probably want the ``loop`` function to
-carry around some data to be processed by the ``process`` routine, which then
-returns an updated value for the next iteration. This can be implemented as
-follows::
-
-  loop x = loop (catch handler (process x))
-  with handler (signal k) = printf "Hey, I got signal %d.\n" k $$ 0 end;
-  process x = printf "counting: %d\n" x $$ sleep 1 $$ x+1;
-
 Author
 ======
 
@@ -9066,6 +9486,11 @@ GNU Octave
 GNU Scientific Library
     A free software library for numeric applications, can be used with Pure's
     numeric matrices, http://www.gnu.org/software/gsl.
+
+.. _Go:
+
+Go
+    Google's Go programming language, http://golang.org.
 
 .. _Haskell:
 

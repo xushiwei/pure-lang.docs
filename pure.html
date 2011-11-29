@@ -3069,7 +3069,7 @@ which gives the type name along with a collection of patterns, the so-called
 <strong id="grammar-token-interface_item">interface_item</strong> ::=  <a class="reference internal" href="#grammar-token-pattern"><tt class="xref docutils literal"><span class="pre">pattern</span></tt></a> &quot;;&quot;
                     | &quot;interface&quot; <a class="reference internal" href="#grammar-token-qualified_identifier"><tt class="xref docutils literal"><span class="pre">qualified_identifier</span></tt></a> &quot;;&quot;
 </pre>
-<p>Interfaces consist of two kinds of items:</p>
+<p>Interfaces thus consist of two kinds of items:</p>
 <ul class="simple">
 <li>The patterns, which indicate which operations are supported by the type, and
 which arguments they expect. This may be anything that can occur as the
@@ -3154,7 +3154,7 @@ argument.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> any _<span class="p">;</span>
 </pre></div>
 </div>
-<p>Also, interface types may be refined at any time, by adding more interface
+<p>Interfaces can be composed in a piecemeal fashion, by adding more interface
 patterns. Thus,</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span> foo x<span class="p">::</span>foo<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
 <span class="kr">interface</span> foo <span class="kr">with</span> bar x<span class="p">::</span>foo<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
@@ -3164,11 +3164,65 @@ patterns. Thus,</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> foo <span class="kr">with</span> foo x<span class="p">::</span>foo<span class="p">;</span> bar x<span class="p">::</span>foo<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>However, note that when including one interface in another, the included
-interface must already exist and only the interface patterns known at the
-point of inclusion become part of the including interface; refining the
-included interface later has no effect on the including interface. In
-particular, this also prevents circular interface definitions.</p>
+<p>It is also possible to include one interface in another, which effectively
+establishes a subtype relationship. For instance, here&#8217;s yet another way to
+define the <tt class="docutils literal"><span class="pre">foo</span></tt> interface above:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> bar <span class="kr">with</span>
+  bar x<span class="p">::</span>bar<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+
+<span class="kr">interface</span> foo <span class="kr">with</span>
+  foo x<span class="p">::</span>foo<span class="p">;</span>
+  <span class="kr">interface</span> bar<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This has the effect of including the signature of <tt class="docutils literal"><span class="pre">bar</span></tt> in <tt class="docutils literal"><span class="pre">foo</span></tt> (while
+renaming the interface type tags in the <tt class="docutils literal"><span class="pre">bar</span></tt> signature accordingly):</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show foo
+<span class="kr">interface</span> foo <span class="kr">with</span>
+  foo x<span class="p">::</span>foo<span class="p">;</span>
+  bar x<span class="p">::</span>foo<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Including interfaces is a static operation. Only the interface
+patterns known at the point of inclusion become part of the including
+interface; refining the included interface later has no effect on the set
+of included patterns. In particular, this also prevents circular interface
+definitions.</p>
+<p>When composing interfaces in this fashion, it is easy to end up with
+duplicate interface patterns from various sources. The compiler removes
+such duplicates, even if they only match up to the renaming of variables.
+For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show bar foo
+<span class="kr">interface</span> bar <span class="kr">with</span>
+  bar x<span class="p">::</span>bar<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+<span class="kr">interface</span> foo <span class="kr">with</span>
+  foo x<span class="p">::</span>foo<span class="p">;</span>
+  bar x<span class="p">::</span>foo<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">interface</span> baz <span class="kr">with</span>
+<span class="gp">&gt; </span>  <span class="kr">interface</span> foo<span class="p">;</span> <span class="kr">interface</span> bar<span class="p">;</span>
+<span class="gp">&gt; </span>  foo y<span class="p">::</span>baz<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>show baz
+<span class="kr">interface</span> baz <span class="kr">with</span>
+  foo x<span class="p">::</span>baz<span class="p">;</span>
+  bar x<span class="p">::</span>baz<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p class="last">Also note that, despite the obvious similarities between interfaces and
+classes in object-oriented programming, they are really different things.
+The former are essentially just signatures of functions living elsewhere,
+whereas the latter also include data layouts and method implementations.
+More on the similarities and differences of interfaces and classes can be
+found in the <a class="reference external" href="http://golang.org/doc/go_faq.html#types">Go FAQ</a>.</p>
+</div>
 <p>Let&#8217;s now take a look at the example of a stack data structure to see how this
 all works in practice:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> stack <span class="kr">with</span>
@@ -3306,13 +3360,9 @@ new variation of the data structure:</p>
 limitations. In particular, the guarantees provided by an interface are of a
 purely syntactic nature; the signature doesn&#8217;t tell us anything about the
 actual meaning of the provided operations, so unit testing is still needed to
-ensure certain semantic properties of the implementation. Also, interface
-types are always defined in a purely syntactic way, by considering the
-left-hand sides of the definitions of the interface functions only. Guards are
-not taken into account, and thus the compiler cannot really guarantee that a
-member of an interface type will always be valid input to an interface
-function. Some further issues due to Pure&#8217;s dynamically typed nature are
-discussed under <a class="reference internal" href="#interfaces">Interfaces</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section.</p>
+ensure certain semantic properties of the implementation. Some further issues
+due to Pure&#8217;s dynamically typed nature are discussed under <a class="reference internal" href="#interfaces">Interfaces</a> in the
+<a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section.</p>
 </div>
 </div>
 <div class="section" id="examples">
@@ -8997,21 +9047,34 @@ apply to other recursive types such as trees.</p>
 </div>
 <div class="section" id="interfaces">
 <h3><a class="toc-backref" href="#id120">Interfaces</a><a class="headerlink" href="#interfaces" title="Permalink to this headline">¶</a></h3>
-<p>Compared to statically typed languages like <a class="reference internal" href="#go">Go</a>, Pure&#8217;s implementation of
-<a class="reference internal" href="#interface-types">interface types</a> has some limitations. First, nothing is known about the
-<em>return type</em> of an interface operation, but this is no real impediment in
-Pure since Pure types are all about restricting the kind of <em>arguments</em> which
-can be passed to a function, not their result types, so return types are
-irrelevant to interface types anyway.</p>
-<p>Second, as we have seen, interface types work best if all interface operations
-are completely defined on the target data domain. This may sometimes force you
-to add default or error rules raising exceptions which may interfere with
-symbolic evaluation (cf. <a class="reference internal" href="#exception-handling">Exception Handling</a> and <a class="reference internal" href="#defined-functions">Defined Functions</a>). This
-can be a real issue, but it is almost always possible to work around this,
-e.g., by just adding in the missing type members manually. To these ends, Pure
-allows an interface type to be augmented with ordinary type rules as described
-in <a class="reference internal" href="#type-rules">Type Rules</a>. For instance, we might also have implemented the stack type
-discussed in the <a class="reference internal" href="#interface-types">Interface Types</a> section as follows:</p>
+<p>Pure&#8217;s implementation of <a class="reference internal" href="#interface-types">interface types</a> has some notable differences to
+interfaces in a statically typed language like <a class="reference internal" href="#go">Go</a>. These are mostly due to
+Pure&#8217;s dynamically typed nature.</p>
+<ul>
+<li><p class="first">Nothing is known about the <em>return type</em> of an interface operation, but this
+is no real impediment since Pure types are all about restricting the kind of
+<em>arguments</em> which can be passed to a function, not their result types, so
+return types are irrelevant to Pure&#8217;s interface types anyway.</p>
+</li>
+<li><p class="first">Pure interfaces aren&#8217;t based on the notion of &#8220;methods&#8221; and therefore don&#8217;t
+provide any kind of &#8220;method dispatch&#8221;. Interface operations are just
+ordinary Pure functions which rely on Pure&#8217;s usual pattern-matching
+mechanism to do the dynamic dispatch.</p>
+</li>
+<li><p class="first">Membership in interface types is decided by considering the left-hand sides
+of the definitions of the interface functions only. Guards are not taken
+into account, and thus there&#8217;s no real guarantee that a member of an
+interface type will always be valid input to an interface function.</p>
+</li>
+<li><p class="first">Interface types work best if all interface operations are completely defined
+on the target data domain. This may sometimes force you to add default or
+error rules raising exceptions, as shown in the <a class="reference internal" href="#interface-types">Interface Types</a> section,
+which may interfere with symbolic evaluation (cf. <a class="reference internal" href="#exception-handling">Exception Handling</a> and
+<a class="reference internal" href="#defined-functions">Defined Functions</a>). If this is not desirable, you can also just include
+the missing members manually. To these ends, Pure allows an interface type
+to be augmented with ordinary type rules as described in <a class="reference internal" href="#type-rules">Type Rules</a>. For
+instance, we might also have implemented the stack type discussed in the
+<a class="reference internal" href="#interface-types">Interface Types</a> section as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> stack <span class="kr">with</span>
   push s<span class="p">::</span>stack x<span class="p">;</span>
   pop s<span class="p">::</span>stack<span class="p">;</span>
@@ -9025,17 +9088,19 @@ pop (x:xs) = xs<span class="p">;</span>
 top (x:xs) = x<span class="p">;</span>
 </pre></div>
 </div>
-<p>Finally, Pure&#8217;s interface types are really a compromise between theoretical
-soundness and practicality. From the theoretical point of view, we&#8217;d actually
-like an interface type to be the <em>intersection</em> of the interface types for the
-individual interface functions. Unfortunately, the pattern set for such an
-intersection type might well be exponential in size. Hence the approach taken
-in Pure is to eliminate those candidate patterns which aren&#8217;t supported by all
-interface functions. This can be done much more efficiently, but will in
-general only produce a subtype of the intersection type. (On the other hand,
-this method also has the advantage that the compiler can warn about
-potentially missing rules in some of the interface operations. We&#8217;ve seen in
-the <a class="reference internal" href="#interface-types">Interface Types</a> section that this can be fairly useful at times.)</p>
+</li>
+</ul>
+<p>Pure&#8217;s interface types are really a compromise between theoretical soundness
+and practicality. From the theoretical point of view, we&#8217;d like an interface
+type to be the <em>intersection</em> of the interface types for the individual
+interface functions. Unfortunately, the pattern set for such an intersection
+type might well be exponential in size. Hence the approach taken in Pure is to
+eliminate those candidate patterns which aren&#8217;t supported by all interface
+functions. This can be done much more efficiently, but will in general only
+produce a subtype of the intersection type. (On the other hand, this method
+also has the advantage that the compiler can warn about potentially missing
+rules in some of the interface operations. We&#8217;ve seen in the <a class="reference internal" href="#interface-types">Interface
+Types</a> section that this can be fairly useful at times.)</p>
 <p>Another issue arises with interface operations which allow the interface type
 in multiple arguments. A typical example are operators:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> addable <span class="kr">with</span> x<span class="p">::</span>addable + y<span class="p">::</span>addable<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
@@ -9047,7 +9112,7 @@ to:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> addable <span class="kr">with</span> x<span class="p">::</span>addable + y<span class="p">;</span> x + y<span class="p">::</span>addable<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This makes sense in most situations, but of course this depends on the
+<p>This makes sense in many situations, but of course this depends on the
 particular operation. In some cases, you might have to decide on which
 argument you want to place the interface type tag, or even have different
 types for each possible argument position.</p>

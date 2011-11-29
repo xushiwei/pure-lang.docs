@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.50, November 28, 2011
+  Version 0.50, November 29, 2011
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -3391,9 +3391,9 @@ operations as inputs and returns the resulting stack after processing
     <stdin>, line 5: unhandled exception '"empty stack"' while evaluating
     'rpn (stack []) [2,(*)]'
 
-Ok, this is all nice and dandy, but it seems that so far we haven't
-done much more than we could have achieved just as easily with plain
-lists instead. So what are the benefits of having an interface type?
+Ok, this is all very nice, but it seems that so far we haven't done
+much more than we could have achieved just as easily with plain lists
+instead. So what are the benefits of having an interface type?
 
   First, an interface provides a fair amount of *safety*. As long as we
 stick to the interface functions, we can be sure that the data is
@@ -3402,12 +3402,11 @@ interface also serves as a valuable piece of documentation, since it
 tells us at a glance exactly which operations are supported by the type.
 
   Second, an interface provides *data abstraction*. We don't need to
-know how the interface operations are implemented, our functions will
-work with _any_ implementation of the interface. In fact, now that the
-interface is defined, we can easily supply alternative implementations.
-For instance, suppose that we'd like to use our little RPN calculator
-with "bounded stacks", i.e., stacks which don't grow beyond a certain
-limit. These can be implemented as follows:
+know how the interface operations are implemented, and in fact
+functions coded against the interface will work with _any_
+implementation of the interface. For instance, suppose that we'd like
+to provide a "bounded stacks" data structure, i.e., stacks which don't
+grow beyond a certain limit. These can be implemented as follows:
 
     push (n,xs@[]) x | push (n,xs@(_:_)) x =
       if n>0 then (n-1,x:xs) else throw "full stack";
@@ -3423,7 +3422,8 @@ construct such values:
 
     bstack n::int xs::list = (n-#xs,xs);
 
-Example:
+Without any further ado, our little RPN calculator works just fine with
+the new variation of the data structure:
 
     > rpn (bstack 3 []) [10,4,3,(+),2,(*),(-)];
     2,[-4]
@@ -3431,6 +3431,19 @@ Example:
     <stdin>, line 7: unhandled exception '"full stack"' while evaluating
     'rpn (bstack 2 []) [10,4,3,(+),2,(*),(-)]'
 
+While they're quite useful in general, Pure's interface types also have
+their limitations. In particular, the guarantees provided by an
+interface are of a purely syntactic nature; the signature doesn't tell
+us anything about the actual meaning of the provided operations, so
+unit testing is still needed to ensure certain semantic properties of
+the implementation. Also, interface types are always defined in a
+purely syntactic way, by considering the left-hand sides of the
+definitions of the interface functions only. Guards are not taken into
+account, and thus the compiler cannot really guarantee that a member of
+an interface type will always be valid input to an interface function.
+Some further issues due to Pure's dynamically typed nature are
+discussed under *note Interfaces: b5. in the *note Caveats and Notes:
+d. section.
 
 
 File: pure.info,  Node: Examples,  Next: Declarations,  Prev: Rule Syntax,  Up: Top
@@ -3482,7 +3495,7 @@ parameterless function whose value is precomputed at compile time:
 Note that the compiler normally computes constant subexpressions at
 compile time, such as `2*pi' in the `foo' function. This works with all
 simple scalars (machine ints and doubles), see *note Constant
-Definitions: b5. for details.
+Definitions: b6. for details.
 
 * Menu:
 
@@ -3831,8 +3844,8 @@ the pivoting step) and to apply a transposition to a permutation
     with tr k = if k==i then j else if k==j then i else k end;
 
 Finally, let us define a convenient print representation of double
-matrices a la *note Octave: b9. (the meaning of the *note __show__: ba.
-function is explained in *note Pretty-Printing: bb.):
+matrices a la *note Octave: ba. (the meaning of the *note __show__: bb.
+function is explained in *note Pretty-Printing: bc.):
 
     using system;
     __show__ x::matrix
@@ -3914,7 +3927,7 @@ pair of "non-splicing" vector brackets:
     > {:{:{1,2}:},{:{3,4}:}:};
     {{{1,2}},{{3,4}}}
 
-(Both macros and *note outfix: bd. symbol declarations are described
+(Both macros and *note outfix: be. symbol declarations are described
 later in the appropriate sections, see *note Macros: a1. and *note
 Symbol Declarations: 57. Please also check the `purelib' for a
 description of the built-in `__list__' macro.)
@@ -4126,7 +4139,7 @@ above, local variable substitution makes it easy to fill in the
 variable parts in a quoted "template" expression, without any need for
 an arguably complex tool like Lisp's "quasiquote". (But note that it is
 quite easy to define the quasiquote in Pure if you want it. See the
-*note Recursive Macros: c0. section for a simplified version; a full
+*note Recursive Macros: c1. section for a simplified version; a full
 implementation can be found in the Pure library.)
 
   If you do need to quote a symbol which is already being used as a
@@ -4200,12 +4213,12 @@ manage programs consisting of several source modules:
 
    * symbol declarations determine "scope" and "fixity" of a symbol;
 
-   * *note extern: c1. declarations specify external C functions;
+   * *note extern: c2. declarations specify external C functions;
 
    * *note using: 3a. clauses let you include other scripts in a Pure
      script;
 
-   * *note namespace: c2. declarations let you avoid name clashes and
+   * *note namespace: c3. declarations let you avoid name clashes and
      thereby make it easier to manage large programs consisting of many
      separate modules.
 
@@ -4213,7 +4226,7 @@ manage programs consisting of several source modules:
 
     item ::= symbol_decl | extern_decl | using_decl | namespace_decl
 
-We defer the discussion of *note extern: c1. declarations to the *note
+We defer the discussion of *note extern: c2. declarations to the *note
 C Interface: 3c. section. The other kinds of declarations are described
 in the following subsections.
 
@@ -4252,17 +4265,17 @@ needed (unless you want to declare symbols as members of a specific
 namespace, see *note Namespaces: 90. below). Symbols can also be
 declared private, meaning that the symbol is visible only in the
 namespace it belongs to. This is explained in more detail under *note
-Private Symbols: ca. in the *note Namespaces: 90. section below.
+Private Symbols: cb. in the *note Namespaces: 90. section below.
 
   Note that to declare several symbols in a single declaration, you can
 list them all with whitespace in between. The same syntax applies to
 the other types of symbol declarations discussed below. (Commas are
 _not_ allowed as delimiters here, as they may occur as legal symbol
-constituents in the list of symbols.) The *note public: c3. and *note
-private: c4. keywords can also be used as a prefix in any of the
+constituents in the list of symbols.) The *note public: c4. and *note
+private: c5. keywords can also be used as a prefix in any of the
 special symbol declarations discussed below, to specify the scope of
 the declared symbols (if the scope prefix is omitted, it defaults to
-*note public: c3.).
+*note public: c4.).
 
   The following "fixity" declarations are available for introducing
 special operator and constant symbols. This changes the way that these
@@ -4288,10 +4301,10 @@ easily sneak in new operator symbols at low, high or intermediate
 precedences.)
 
   On each precedence level, you can declare (in order of increasing
-precedence) *note infix: c5. (binary non-associative), *note infixl:
-c6. (binary left-associative), *note infixr: c7. (binary
-right-associative), *note prefix: c8. (unary prefix) and *note postfix:
-c9. (unary postfix) operators. For instance, here is a typical excerpt
+precedence) *note infix: c6. (binary non-associative), *note infixl:
+c7. (binary left-associative), *note infixr: c8. (binary
+right-associative), *note prefix: c9. (unary prefix) and *note postfix:
+ca. (unary postfix) operators. For instance, here is a typical excerpt
 from the prelude (the full table can be found in the _Prelude_ section
 of the `purelib'):
 
@@ -4317,7 +4330,7 @@ postfix operator:
     postfix (^) ^^ ;
 
 Pure also provides unary outfix operators, which work like in Wm Leler's
-constraint programming language *note Bertrand: cb. These can be
+constraint programming language *note Bertrand: cc. These can be
 declared as follows:
 
  -- Description: outfix left right ...;
@@ -4549,17 +4562,17 @@ constructs should be enough to start using it.)
   The global namespace is always available. By default, new symbols are
 created in this namespace, which is also called the *default
 namespace*. Additional namespaces can be created with the *note
-namespace: c2. declaration, which also switches to the given namespace
+namespace: c3. declaration, which also switches to the given namespace
 (makes it the _current_ namespace), so that new symbols are then
 created in that namespace rather than the default one. The current
 namespace also applies to all kinds of symbol declarations, including
-operator and constant symbol declarations, as well as *note extern: c1.
+operator and constant symbol declarations, as well as *note extern: c2.
 declarations (the latter are described in the *note C Interface: 3c.
 section).
 
-  The basic form of the *note namespace: c2. declaration has the
+  The basic form of the *note namespace: c3. declaration has the
 following syntax (there's also a "scoped" form of the *note namespace:
-c2. declaration which will be discussed in *note Scoped Namespaces: d3.
+c3. declaration which will be discussed in *note Scoped Namespaces: d4.
 at the end of this section):
 
     namespace name;
@@ -4593,7 +4606,7 @@ definitions to it. This allows namespaces to be created that span
 several source modules. You can also create several different
 namespaces in the same module.
 
-  Similar to the *note using: 3a. declaration, a *note namespace: c2.
+  Similar to the *note using: 3a. declaration, a *note namespace: c3.
 declaration accepts either identifiers or double-quoted strings as
 namespace names. E.g., the following two declarations are equivalent:
 
@@ -4608,9 +4621,9 @@ identifiers, e.g.:
 Note that the namespace prefix in a qualified identifier must be a legal
 identifier, so it isn't possible to access symbols in namespaces with
 such descriptive labels in a direct fashion. The only way to get at the
-symbols in this case is to use a *note namespace: c2. or *note using
-namespace: d4.  declaration (for the latter see *note Using Namespaces:
-d5. below).
+symbols in this case is to use a *note namespace: c3. or *note using
+namespace: d5.  declaration (for the latter see *note Using Namespaces:
+d6. below).
 
 * Menu:
 
@@ -4630,14 +4643,14 @@ Since it is rather inconvenient if you always have to write identifiers
 in their qualified form outside of their "home" namespace, Pure allows
 you to specify a list of _search_ namespaces which are used to look up
 symbols not in the default or the current namespace. This is done with
-the *note using namespace: d4. declaration, which takes the following
+the *note using namespace: d5. declaration, which takes the following
 form:
 
     using namespace name1, name2, ...;
     // ...
     using namespace;
 
-(As with *note namespace: c2. declarations, the second form without any
+(As with *note namespace: c3. declarations, the second form without any
 namespace arguments gets you back to the default empty list of search
 namespaces.)
 
@@ -4662,10 +4675,10 @@ The symbols in these namespaces can be accessed unqualified as follows:
     100
 
 This method is often to be preferred over opening a namespace with the
-*note namespace: c2. declaration, since *note using namespace: d4. only
+*note namespace: c3. declaration, since *note using namespace: d5. only
 gives you "read access" to the imported symbols, so you can't
 accidentally mess up the definitions of the namespace you're using.
-Another advantage is that the *note using namespace: d4. declaration
+Another advantage is that the *note using namespace: d5. declaration
 also lets you search multiple namespaces at once:
 
     using namespace foo, bar;
@@ -4726,7 +4739,7 @@ qualifier of the form `::foo::bar'. In particular, `::bar' always
 denotes the symbol `bar' in the default namespace, while `::foo::bar'
 denotes the symbol `bar' in the `foo' namespace. (Normally, the latter
 kind of notation is only needed if you have to deal with nested
-namespaces, see *note Hierarchical Namespaces: d7.  below.)
+namespaces, see *note Hierarchical Namespaces: d8.  below.)
 
   If no existing symbol is found, a new symbol is created
 automatically, by implicitly declaring a public symbol with default
@@ -4876,7 +4889,7 @@ well enter this rule while in the global namespace), but it can be
 useful in some circumstances.  Specifically, you might want to
 "overload" a global function or operator with a definition that makes
 use of private symbols of a namespace (which are only visible inside
-that namespace; see *note Private Symbols: ca.  below). For instance:
+that namespace; see *note Private Symbols: cb.  below). For instance:
 
     > namespace my;
     > private bar;
@@ -4900,7 +4913,7 @@ internal operations which shouldn't be accessed directly outside the
 namespace in which they are declared. The scope of a private symbol is
 confined to its namespace, i.e., the symbol is only visible when its
 "home" namespace is current. Symbols are declared private by using the
-*note private: c4. keyword in the symbol declaration:
+*note private: c5. keyword in the symbol declaration:
 
     > namespace secret;
     > private baz;
@@ -4965,7 +4978,7 @@ This works pretty much like a hierarchy of directories and files, where
 the namespaces play the role of the directories (with the default
 namespace as the root directory), the symbols in each namespace
 correspond to the files in a directory, and the *note using namespace:
-d4. declaration functions similar to the shell's `PATH' variable.
+d5. declaration functions similar to the shell's `PATH' variable.
 
   Sometimes it is necessary to tell the compiler to use a symbol in a
 specific namespace, bypassing the usual symbol lookup mechanism. For
@@ -4999,7 +5012,7 @@ File: pure.info,  Node: Scoped Namespaces,  Prev: Hierarchical Namespaces,  Up: 
 6.3.5 Scoped Namespaces
 -----------------------
 
-Pure also provides an alternative scoped *note namespace: c2. construct
+Pure also provides an alternative scoped *note namespace: c3. construct
 which makes nested namespace definitions more convenient. This
 construct takes the following form:
 
@@ -5027,7 +5040,7 @@ nested:
     end;
 
 Note that this kind of nesting does not necessarily imply a namespace
-hierarchy as discussed in *note Hierarchical Namespaces: d7. However,
+hierarchy as discussed in *note Hierarchical Namespaces: d8. However,
 you can achieve this by using the appropriate qualified namespace names:
 
     namespace foo with
@@ -5039,7 +5052,7 @@ you can achieve this by using the appropriate qualified namespace names:
     end;
 
 Another special feature of the scoped namespace construct is that *note
-using namespace: d4. declarations are always local to the current
+using namespace: d5. declarations are always local to the current
 namespace scope (and other nested namespace scopes inside it). Thus the
 previous setting is restored at the end of each scope:
 
@@ -5088,7 +5101,7 @@ Pure's namespaces can thus be used pretty much like "modules" or
 "packages" in languages like Ada or Modula-2. They provide a structured
 way to describe program components offering collections of related data
 and operations, which can be brought into scope in a controlled way by
-making judicious use of *note using namespace: d4. declarations. They
+making judicious use of *note using namespace: d5. declarations. They
 also provide an abstraction barrier, since internal operations and data
 structures can be hidden away employing private symbols.
 
@@ -5177,7 +5190,7 @@ number of arguments than the corresponding function.)
   When running interactively, you can follow the reduction steps the
 compiler performs during macro evaluation. To these ends, you have to
 set "tracepoints" on the relevant macros, using the `trace' command
-with the `-m' option; see *note Interactive Commands: dc. (This works
+with the `-m' option; see *note Interactive Commands: dd. (This works
 even if the interpreter is run in non-debugging mode.) Note that since
 macro expansion is performed at compile time, you'll have to do this
 _before_ entering the definitions in which the macro is used. However,
@@ -5214,7 +5227,7 @@ Again, let's see exactly what's going on there:
 Note that the contraction of the subterm `1+1+1' to the integer constant
 `3' is actually done by the compiler after macro expansion has been
 performed. This is also called "constant folding", see *note Constant
-Definitions: b5.  in the *note Caveats and Notes: d. section for
+Definitions: b6.  in the *note Caveats and Notes: d. section for
 details. It is also the reason that we added the first rule for `succ'.
 This rule may seem superflous at first sight, but actually it is needed
 to massage the sum into a form which enables constant folding.
@@ -5224,7 +5237,7 @@ course, the above examples are still rather elementary. Pure macros can
 do much more elaborate optimizations, but for this we first need to
 discuss how to write recursive macros, as well as macros which take
 apart special terms like lambdas. After that we'll return to the
-subject of optimization rules in *note Advanced Optimization: dd. below.
+subject of optimization rules in *note Advanced Optimization: de. below.
 
 
 File: pure.info,  Node: Recursive Macros,  Next: User-Defined Special Forms,  Prev: Optimization Rules,  Up: Macros
@@ -5248,7 +5261,7 @@ of this example.)
 
 (Note the `f@_', which is an anonymous "as" pattern forcing the
 compiler to recognize `f' as a function variable, rather than a literal
-function symbol. See *note "As" Patterns: de. in the *note Caveats and
+function symbol. See *note "As" Patterns: df. in the *note Caveats and
 Notes: d. section for an explanation of this trick.)
 
   The first rule above takes care of "unquoting" embedded subterms. The
@@ -5404,7 +5417,7 @@ construct the corresponding specials.
 
  -- macro: __case__ x [(x1 -> y1),...,(xn -> yn)]
      Expands to the *note case: 87. expression `case x of x1 = y1; ...;
-     xn = yn end'. Note that the *note -->: e6. symbol is used to
+     xn = yn end'. Note that the *note -->: e7. symbol is used to
      separate the left-hand side and the right-hand side of each rule
      (see below).
 
@@ -5419,8 +5432,8 @@ construct the corresponding specials.
      = yn end'.
 
   Note that the following low-priority infix operators are used to
-denote equations in the *note __case__: e5, *note __when__: e7. and
-*note __with__: e8.  macros:
+denote equations in the *note __case__: e6, *note __when__: e8. and
+*note __with__: e9.  macros:
 
  -- constructor: x -> y
      Denotes an equation `x = y'.
@@ -5428,8 +5441,8 @@ denote equations in the *note __case__: e5, *note __when__: e7. and
  -- constructor: x __if__ y
      Attaches a guard to the right-hand side of an equation. That is,
      `x --> y __if__ z' denotes the conditional equation `x = y if z'.
-     This symbol is only recognized in *note __case__: e5. and *note
-     __with__: e8. calls.
+     This symbol is only recognized in *note __case__: e6. and *note
+     __with__: e9. calls.
 
   In addition, patterns on the left-hand side of equations or in lambda
 arguments may be decorated with the following constructor terms to
@@ -5491,8 +5504,8 @@ The `__str__' function can be used to pretty-print quoted specials:
 
 This is useful to see which expression a quoted special will expand to.
 Note that `__str__' can also be used to define print representations for
-quoted specials with *note __show__: ba. (described in *note
-Pretty-Printing: bb.) if you always want to have them printed that way
+quoted specials with *note __show__: bb. (described in *note
+Pretty-Printing: bc.) if you always want to have them printed that way
 by the interpreter.
 
   As quoted specials are just ordinary Pure expressions, they can be
@@ -5511,7 +5524,7 @@ left-hand side of an equation, in which case it actually denotes the
 corresponding placeholder term. So the `swap' function can also be
 defined like this (note that we first scratch the previous definition
 of `swap' with the `clear' command, see *note Interactive Commands:
-dc.):
+dd.):
 
     > clear swap
     > swap (\x y -> z) = '(\y x -> z);
@@ -5585,7 +5598,7 @@ this purpose:
      level of (outermost) quotes from `x' and performing macro
      expansion on the resulting unquoted subexpressions.
 
-  Using *note __eval__: ec, we can implement the `swap' macro as
+  Using *note __eval__: ed, we can implement the `swap' macro as
 follows:
 
     > clear swap
@@ -5607,7 +5620,7 @@ remove them during macro evaluation.
 
   Finally, note that placeholder terms for specials are just simple
 expressions; they don't do any variable binding by themselves. Thus the
-rules of *note macro hygiene: e1. don't apply to them, which makes it
+rules of *note macro hygiene: e2. don't apply to them, which makes it
 possible to manipulate lambdas and local definitions in any desired
 way. On the other hand, this means that it is the programmer's
 responsibility to avoid accidental name capture when using these
@@ -5734,7 +5747,7 @@ File: pure.info,  Node: Reflection,  Prev: Advanced Optimization,  Up: Macros
 ==============
 
 The meta representation of specials discussed in *note Built-in Macros
-and Special Expressions: e2. is also useful to obtain information about
+and Special Expressions: e3. is also useful to obtain information about
 the running program and even modify it. Pure's runtime provides some
 built-in operations to implement these reflection capabilities, which
 are comparable in scope to what the Lisp programming language offers.
@@ -5743,7 +5756,7 @@ are comparable in scope to what the Lisp programming language offers.
 definition of a global Pure function. Given the symbol denoting the
 function, `get_fundef' returns the list of rewriting rules implementing
 the functions, using the same `lhs --> rhs' format used by the *note
-__case__: e5, *note __when__: e7. and *note __with__: e8. macros
+__case__: e6, *note __when__: e8. and *note __with__: e9. macros
 discussed above. For instance:
 
     > fact n = 1 if n<=1;
@@ -5815,7 +5828,7 @@ list takes the form `[var-->val]' if the symbol is defined, `[]' if it
 isn't.
 
   For instance, let's check the definition of the `$' macro (cf. *note
-Optimization Rules: da.) and the `list' type (cf. *note Recursive
+Optimization Rules: db.) and the `list' type (cf. *note Recursive
 Types: b0.):
 
     > get_macdef ($);
@@ -5865,7 +5878,7 @@ File: pure.info,  Node: Exception Handling,  Next: Standard Library,  Prev: Macr
 Pure also offers a useful exception handling facility. To raise an
 exception, you just invoke the built-in function `throw' with the value
 to be thrown as the argument. Exceptions are caught with the built-in
-special form *note catch: f0. which is invoked as follows:
+special form *note catch: f1. which is invoked as follows:
 
  -- Function: catch handler x
      Catch an exception. The first argument denotes the exception
@@ -5884,7 +5897,7 @@ pattern-matching lambda abstraction, or a *note let: 9c, *note case:
 87. or *note when: 88.  construct. These types of exceptions are
 reported using the symbols `stack_fault', `failed_cond' and
 `failed_match', respectively, which are declared as constant symbols in
-the standard prelude. You can use *note catch: f0. to handle these
+the standard prelude. You can use *note catch: f1. to handle these
 kinds of exceptions just like any other. For instance:
 
     > fact n = if n>0 then n*fact(n-1) else 1;
@@ -5955,7 +5968,7 @@ Finally, note that since the right-hand side of a type definition (cf.
 susceptible to exceptions, too.  Such exceptions are reported or caught
 just like any other. In particular, if you want to make a type
 definition just fail silently in case of an exception, you'll have to
-wrap it up in a suitable *note catch: f0. clause:
+wrap it up in a suitable *note catch: f1. clause:
 
     > foo x = throw foo; // dummy predicate which always throws an exception
     > type bar x = foo x;
@@ -6062,12 +6075,12 @@ File: pure.info,  Node: C Interface,  Next: Interactive Usage,  Prev: Standard L
 
 Pure makes it very easy to call C functions (as well as functions in a
 number of other languages supported by the GNU compiler collection). To
-call an existing C function, you just need an *note extern: c1.
+call an existing C function, you just need an *note extern: c2.
 declaration of the function, as described below. By these means, all
 functions in the standard C library and the Pure runtime are readily
 available to Pure scripts. Functions can also be loaded from dynamic
 libraries and LLVM bitcode files at runtime. In the latter case, you
-don't even need to write any *note extern: c1. declarations, the
+don't even need to write any *note extern: c2. declarations, the
 interpreter will do that for you. As of Pure 0.45, you can also add
 inline C/C++ and Fortran code to your Pure scripts and have the Pure
 interpreter compile them on the fly, provided that you have the
@@ -6076,10 +6089,10 @@ corresponding compilers from the LLVM project installed.
   In some cases you will still have to rely on big and complicated
 third-party and system libraries which aren't readily available in
 bitcode form. It goes without saying that writing all the *note extern:
-c1. declarations for such libraries can be a daunting task.
+c2. declarations for such libraries can be a daunting task.
 Fortunately, there is a utility to help with this, by extracting the
-*note extern: c1. declarations automatically from C headers. Please see
-*note External C Functions: f2. in the *note Caveats and Notes: d.
+*note extern: c2. declarations automatically from C headers. Please see
+*note External C Functions: f3. in the *note Caveats and Notes: d.
 section for details.
 
 * Menu:
@@ -6099,7 +6112,7 @@ File: pure.info,  Node: Extern Declarations,  Next: Variadic C Functions,  Up: C
 10.1 Extern Declarations
 ========================
 
-To access an existing C function in Pure, you need an *note extern: c1.
+To access an existing C function in Pure, you need an *note extern: c2.
 declaration of the function, which is a simplified kind of C prototype.
 The syntax of these declarations is described by the following grammar
 rules:
@@ -6113,19 +6126,19 @@ rules:
 Extern functions can be called in Pure just like any other. For
 instance, the following commands, entered interactively in the
 interpreter, let you use the `sin' function from the C library (of
-course you could just as well put the *note extern: c1. declaration
+course you could just as well put the *note extern: c2. declaration
 into a script):
 
     > extern double sin(double);
     > sin 0.3;
     0.29552020666134
 
-An *note extern: c1. declaration can also be prefixed with a *note
-public: c3./*note private: c4. scope specifier:
+An *note extern: c2. declaration can also be prefixed with a *note
+public: c4./*note private: c5. scope specifier:
 
     private extern double sin(double);
 
-Multiple prototypes can be given in one *note extern: c1. declaration,
+Multiple prototypes can be given in one *note extern: c2. declaration,
 separating them with commas:
 
     extern double sin(double), double cos(double), double tan(double);
@@ -6146,7 +6159,7 @@ with one or more asterisks, as in C. For instance:
 As you can see in the previous example, some pointer types get special
 treatment, allowing you to pass certain kinds of Pure data (such as Pure
 strings as `char*' in this example). This is discussed in more detail
-in *note C Types: f4. below.
+in *note C Types: f5. below.
 
   The interpreter makes sure that the parameters in a call match; if
 not, then by default the call is treated as a normal form expression:
@@ -6159,7 +6172,7 @@ not, then by default the call is treated as a normal form expression:
 
 This gives you the opportunity to augment the external function with
 your own Pure equations. To make this work, you have to make sure that
-the *note extern: c1. declaration of the function comes first. For
+the *note extern: c2. declaration of the function comes first. For
 instance, we might want to extend the `sin' function with a rule to
 handle integers:
 
@@ -6195,8 +6208,8 @@ Note that the namespace qualification only affects the Pure side; the
 underlying C function is still called under the unqualified name as
 usual. The way in which such qualified externs are accessed is the same
 as for ordinary qualified symbols. In particular, the *note using
-namespace: d4. declaration applies as usual, and you can declare such
-symbols as *note private: c4. if needed. It is also possible to combine
+namespace: d5. declaration applies as usual, and you can declare such
+symbols as *note private: c5. if needed. It is also possible to combine
 a namespace qualifier with an alias:
 
     > namespace c;
@@ -6282,7 +6295,7 @@ File: pure.info,  Node: C Types,  Next: Importing Dynamic Libraries,  Prev: Vari
 ============
 
 As indicated in the previous section, the data types in *note extern:
-c1.  declarations are either C type names or pointer types derived from
+c2.  declarations are either C type names or pointer types derived from
 these. The special `expr*' pointer type is simply passed through; this
 provides a means to deal with Pure data in C functions in a direct
 fashion. For all other C types, Pure values are "marshalled"
@@ -6298,7 +6311,7 @@ appropriate pointer types. In practice, this simplified system should
 cover most kinds of calls that need to be done when interfacing to C
 libraries, but there are ways to work around these limitations if you
 need to access C structs or call back from C to Pure, see *note
-External C Functions: f2. in the *note Caveats and Notes: d. section
+External C Functions: f3. in the *note Caveats and Notes: d. section
 for details.
 
 * Menu:
@@ -6392,7 +6405,7 @@ values of C functions.
      GSL matrices between Pure and GSL routines in a direct fashion
      without any overhead. (For convenience, there are also some other
      pointer conversions for marshalling matrix arguments to numeric C
-     vectors, which are described in *note Pointers and Matrices: f9.
+     vectors, which are described in *note Pointers and Matrices: fa.
      below.)
 
    * `expr*' is for any kind of Pure value. A pointer to the expression
@@ -6603,10 +6616,10 @@ directly from Pure:
 
 After this declaration the functions from the given library will be
 ready to be imported into your Pure program by means of corresponding
-*note extern: c1.  declarations.
+*note extern: c2.  declarations.
 
   Shared libraries opened with using clauses are searched for in the
-same way as source scripts (see section *note Modules and Imports: cc.
+same way as source scripts (see section *note Modules and Imports: cd.
 above), using the *note -L: 21. option and the *note PURE_LIBRARY: 70.
 environment variable in place of *note -I: 20. and *note PURE_INCLUDE:
 6f. If the library isn't found by these means, the interpreter will
@@ -6615,7 +6628,7 @@ linker, such as the system library directories and `LD_LIBRARY_PATH' on
 Linux. The necessary filename suffix (e.g., .so on Linux or .dll on
 Windows) will be supplied automatically when needed. Of course you can
 also specify a full pathname for the library if you prefer that. If a
-library file cannot be found, or if an *note extern: c1.  declaration
+library file cannot be found, or if an *note extern: c2.  declaration
 names a function symbol which cannot be resolved, an appropriate error
 message is printed.
 
@@ -6629,9 +6642,9 @@ As of Pure 0.44, the interpreter also provides a direct way to import
 LLVM bitcode modules in Pure scripts. The main advantage of this method
 over the "plain" C interface explained above is that the bitcode loader
 knows all the call interfaces and generates the necessary *note extern:
-c1. declarations automatically. This is more than just a convenience,
+c2. declarations automatically. This is more than just a convenience,
 as it also eliminates at least some of the mistakes in *note extern:
-c1. declarations that may arise when importing functions manually from
+c2. declarations that may arise when importing functions manually from
 dynamic libraries.
 
   LLVM bitcode is loaded in a Pure script using the following special
@@ -6643,9 +6656,9 @@ format of the *note using: 3a. clause:
 bitcode filename extension is supplied automatically. Also, the bitcode
 file is searched for on the usual library search path.)
 
-  That's it, no explicit *note extern: c1. declarations are required on
+  That's it, no explicit *note extern: c2. declarations are required on
 the Pure side. The Pure interpreter automatically creates *note extern:
-c1.  declarations (in the current namespace) for all the external
+c2.  declarations (in the current namespace) for all the external
 functions defined in the LLVM bitcode module, and generates the
 corresponding wrappers to make the functions callable from Pure. (This
 also works when batch-compiling a Pure script. In this case, the
@@ -6654,7 +6667,7 @@ bitcode module only needs to be present at compile time.)
 
   By default the imported symbols will be public. You can also specify
 the desired scope of the symbols explicitly, by placing the *note
-public: c3. or *note private: c4. keyword before the module name. For
+public: c4. or *note private: c5. keyword before the module name. For
 instance:
 
     using private "bc:modname";
@@ -6692,11 +6705,11 @@ compute the greatest common divisor of two (machine) integers:
     }
 
 Let's say that this code is in the file `mygcd.c', then you'd compile
-it to a bitcode module using *note llvm-gcc: 100. as follows:
+it to a bitcode module using *note llvm-gcc: 101. as follows:
 
     llvm-gcc -emit-llvm -c mygcd.c -o mygcd.bc
 
-Or, if you prefer to use *note clang: 101, the new LLVM-based C/C++
+Or, if you prefer to use *note clang: 102, the new LLVM-based C/C++
 compiler:
 
     clang -emit-llvm -c mygcd.c -o mygcd.bc
@@ -6712,7 +6725,7 @@ function in the Pure interpreter simply as follows:
     > mygcd 75 105;
     15
 
-To actually see the generated *note extern: c1. declaration of the
+To actually see the generated *note extern: c2. declaration of the
 imported function, you can use the interactive `show' command:
 
     > show mygcd
@@ -6722,7 +6735,7 @@ Some more examples showing how to use the bitcode interface can be
 found in the Pure sources. In particular, the interface also works with
 Fortran (using llvm-gfortran), and there is special support for
 interfacing to Grame's functional DSP programming language *note Faust:
-102. (the latter uses a special variant of the bitcode loader, which is
+103. (the latter uses a special variant of the bitcode loader, which is
 selected with the `dsp' tag in the *note using: 3a. clause). Further
 details about these can be found below.
 
@@ -6737,7 +6750,7 @@ somewhat experimental, and there are some known limitations:
      (`void*', `void**', etc.) in Pure. If this is a problem then you
      can just redeclare the corresponding functions under a synonym
      _after_ loading the bitcode module, giving the proper argument and
-     result types (see *note Extern Declarations: f3. above).
+     result types (see *note Extern Declarations: f4. above).
 
    * The bitcode interface is limited to the same range of C types as
      Pure's plain C interface. In practice, this should cover most C
@@ -6746,7 +6759,7 @@ somewhat experimental, and there are some known limitations:
      print a warning; the affected functions will still be linked in,
      but they will not be callable from Pure.  Also note that calling
      conventions for passing C structs _by value_ depend on the host
-     ABI, so you should have a look at the resulting *note extern: c1.
+     ABI, so you should have a look at the resulting *note extern: c2.
      declaration (using `show') to determine how the function is
      actually to be called from Pure.
 
@@ -6758,8 +6771,8 @@ File: pure.info,  Node: Inline Code,  Next: Interfacing to C++,  Prev: Importing
 
      Note: The facility described below requires that you have an
      LLVM-capable C/C++ compiler installed. The available options right
-     now are *note clang: 101, *note llvm-gcc: 100. and *note
-     dragonegg: 103. Please check the Pure `installation instructions'
+     now are *note clang: 102, *note llvm-gcc: 101. and *note
+     dragonegg: 104. Please check the Pure `installation instructions'
      on how to get one of these (or all of them) up and running. Note
      that clang and llvm-gcc are standalone compilers, while dragonegg
      is supplied as a gcc plugin which hooks into your existing system
@@ -6786,7 +6799,7 @@ File: pure.info,  Node: Inline Code,  Next: Interfacing to C++,  Prev: Importing
 Instead of manually compiling source files to bitcode modules, you can
 also just place the source code into a Pure script, enclosing it in `%<
 ... %>'.  (Optionally, the opening brace may also be preceded with a
-*note public: c3.  or *note private: c4. scope specifier, which is used
+*note public: c4.  or *note private: c5. scope specifier, which is used
 in the same way as the scope specifier following the *note using: 3a.
 keyword when importing bitcode files.)
 
@@ -6814,7 +6827,7 @@ functions. The downside is that the inline code sections will have to
 be recompiled every time you run the script with the interpreter which
 may considerably increase startup times. If this is a problem then it's
 usually better to import a separate bitcode module instead (see *note
-Importing LLVM Bitcode: ff.), or at least batch-compile your script to
+Importing LLVM Bitcode: 100.), or at least batch-compile your script to
 an executable (see *note Batch Compilation: c.).
 
   Currently, C, C++, Fortran and Faust are supported as foreign source
@@ -6847,7 +6860,7 @@ such as `fortran90' which is used in the example above. The language
 tag can also be followed by a module name, using the format `-*-
 lang:name -*-'. This is optional for all languages except Faust (where
 the module name specifies the namespace for the interface routines of
-the Faust module; see *note Interfacing to Faust: 104. below). So,
+the Faust module; see *note Interfacing to Faust: 105. below). So,
 e.g., a Faust DSP named `test' would be specified with a `dsp:test'
 tag. Case is _significant_ in the module name.
 
@@ -6862,7 +6875,7 @@ executable along with any debugging and optimization options that you
 may want to add. Likewise, `PURE_CXX', `PURE_FC' and `PURE_FAUST' are
 used for the C++, Fortran and Faust compilers, respectively.
 
-  For instance, if you prefer to use *note clang: 101. as your C
+  For instance, if you prefer to use *note clang: 102. as your C
 compiler, and you'd like to invoke it with the `-O3' optimization
 option, you would set `PURE_CC' to `"clang -O3"'. (To verify the
 settings you made, you can have the interpreter echo the compilation
@@ -6871,7 +6884,7 @@ option, see *note Verbosity and Debugging Options: 43. Also note that
 the options necessary to produce LLVM bitcode will be added
 automatically, so you don't have to specify these.)
 
-  Beginning with Pure 0.48, the *note dragonegg: 103. gcc plugin is
+  Beginning with Pure 0.48, the *note dragonegg: 104. gcc plugin is
 also fully supported.  To make this work, you need to explicitly
 specify the name of the plugin in the compilation command, so that the
 Pure interpreter can add the proper set of options needed for bitcode
@@ -6978,7 +6991,7 @@ File: pure.info,  Node: Interfacing to Faust,  Prev: Interfacing to C++,  Up: C 
 10.8 Interfacing to Faust
 =========================
 
-*note Faust: 102. is a functional dsp (a.k.a. digital signal
+*note Faust: 103. is a functional dsp (a.k.a. digital signal
 processing) programming language developed at Grame, which is tailored
 to the task of generating and transforming streams of numeric data at
 the sample level. It is typically used to program sound synthesis and
@@ -7282,8 +7295,8 @@ thunks ("lazy" values to be evaluated when needed) and pointers which
 don't have a textual representation in the Pure syntax and will be
 printed in the format `#<'_object description_`>' by default. It is
 also possible to override the print representation of any kind of
-expression by means of the *note __show__: ba. function, see *note
-Pretty-Printing: bb. below for details.
+expression by means of the *note __show__: bb. function, see *note
+Pretty-Printing: bc. below for details.
 
   Besides Pure definitions and expressions, the interpreter also
 understands a number of special interactive commands for performing
@@ -7297,7 +7310,7 @@ command. The command language is intended solely for interactive
 purposes and thus doesn't offer any programming facilities of its own.
 However, it can be extended with user-defined commands implemented as
 ordinary Pure functions; this is described in the *note User-Defined
-Commands: 10d.  section below.
+Commands: 10e.  section below.
 
      Note: The interactive commands are only recognized at the very
      beginning of the command line. As most of the commands look just
@@ -7408,7 +7421,7 @@ File: pure.info,  Node: Interactive Commands,  Next: Specifying Symbol Selection
 
 The following built-in commands are always understood by the
 interpreter. (In addition, you can define your own commands for
-frequently-used operations; see *note User-Defined Commands: 10d.
+frequently-used operations; see *note User-Defined Commands: 10e.
 below.)
 
  -- Description: ! command
@@ -7436,17 +7449,17 @@ below.)
      Purge the definitions of the given symbols (functions, macros,
      constants or global variables). All symbols must be specified in
      fully qualified form, see the remarks below. If invoked as `clear
-     ans', clears the `ans' value (see *note Last Result: 116. below).
+     ans', clears the `ans' value (see *note Last Result: 117. below).
      When invoked without any arguments, `clear' purges all definitions
      at the current interactive "level" (after confirmation) and
      returns you to the previous level, if any. (It might be a good
      idea to first check your current definitions with `show' or back
      them up with `dump' before you do that.)  The desired level can be
      specified with the `-t' option. See the description of the `save'
-     command and *note Definition Levels: 117. below for further
+     command and *note Definition Levels: 118. below for further
      details. A description of the common options accepted by the
      `clear', `dump' and `show' commands can be found in *note
-     Specifying Symbol Selections: 118. below.
+     Specifying Symbol Selections: 119. below.
 
  -- Description: del [-b|-m|-t] [symbol ...]
      Deletes breakpoints and tracepoints on the given function or
@@ -7473,12 +7486,12 @@ below.)
      time the interpreter starts up in interactive mode in the same
      directory. This provides a quick-and-dirty way to save an
      interactive session and have it restored later, but note that this
-     isn't perfect. In particular, declarations of *note extern: c1.
+     isn't perfect. In particular, declarations of *note extern: c2.
      symbols won't be saved unless they're specified explicitly, and
      some objects like closures, thunks and pointers don't have a
      textual representation from which they could be reconstructed. To
      handle these, you'll probably have to prepare a corresponding
-     .purerc file yourself, see *note Interactive Startup: 11b. below.
+     .purerc file yourself, see *note Interactive Startup: 11c. below.
 
      A different filename can be specified with the `-n' option, which
      expects the name of the script to be written in the next argument,
@@ -7510,7 +7523,7 @@ below.)
  -- Description: override
      Enter "override" mode. This allows you to add equations "above"
      existing definitions in the source script, possibly overriding
-     existing equations. See *note Definition Levels: 117. below for
+     existing equations. See *note Definition Levels: 118. below for
      details.
 
  -- Description: pwd
@@ -7544,12 +7557,12 @@ below.)
      environment by just running a script containing the necessary
      namespace declarations and compiler directives. (Alternatively,
      you can also use the interpreter's startup files for that purpose,
-     see *note Interactive Startup: 11b. below.)
+     see *note Interactive Startup: 11c. below.)
 
  -- Description: save
      Begin a new level of temporary definitions. A subsequent `clear'
      command (see above) will purge the definitions made since the most
-     recent `save' command. See *note Definition Levels: 117. below for
+     recent `save' command. See *note Definition Levels: 118. below for
      details.
 
  -- Description: show [option ...] [symbol ...]
@@ -7558,7 +7571,7 @@ below.)
      specified in fully qualified form, see the remarks below. A
      description of the common options accepted by the `clear', `dump'
      and `show' commands can be found in *note Specifying Symbol
-     Selections: 118. below.
+     Selections: 119. below.
 
  -- Description: stats [-m] [on|off]
      Enables (default) or disables "stats" mode, in which some
@@ -7586,7 +7599,7 @@ below.)
  -- Description: underride
      Exits "override" mode. This returns you to the normal mode of
      operation, where new equations are added "below" previous rules of
-     an existing function. See *note Definition Levels: 117. below for
+     an existing function. See *note Definition Levels: 118. below for
      details.
 
   Note that symbols (identifiers, operators etc.) must always be
@@ -7600,7 +7613,7 @@ special commands for the benefit of other programs such as *emacs*
 driving the interpreter; currently these are `completion_matches',
 `help_matches' and `help_index'. These aren't supposed to be invoked
 directly by the user, although they may sometimes be useful to
-implement custom functionality, see *note User-Defined Commands: 10d.
+implement custom functionality, see *note User-Defined Commands: 10e.
 
 
 File: pure.info,  Node: Specifying Symbol Selections,  Next: The show Command,  Prev: Interactive Commands,  Up: Interactive Usage
@@ -7682,7 +7695,7 @@ that a macro or function symbol may well have defining equations at
 different levels, in which case a command like `clear -tn foo' might
 only affect some part of `foo''s definition. The `dump' and `show'
 commands work analogously (albeit less destructively). See *note
-Definition Levels: 117. below for some examples.
+Definition Levels: 118. below for some examples.
 
 
 File: pure.info,  Node: The show Command,  Next: Definition Levels,  Prev: Specifying Symbol Selections,  Up: Interactive Usage
@@ -7855,7 +7868,7 @@ corresponding definitions can be removed again when the level is
 popped. On the other hand, intermediate changes in variable values are
 not recorded anywhere and cannot be undone. Moreover, global
 declarations (which encompasses *note using: 3a. clauses, *note extern:
-c1. declarations and special symbol declarations) always apply to all
+c2. declarations and special symbol declarations) always apply to all
 levels, so they can't be undone either.
 
   That said, the temporary levels can still be pretty useful when
@@ -8232,7 +8245,7 @@ to debug some functions while only tracing others.
 the `break', `trace' and `del' commands, as shown above, and just
 `break' or `trace' without any arguments lists the currently defined
 breakpoints or tracepoints, respectively. Please see *note Interactive
-Commands: dc. above for details. Also note that these are really
+Commands: dd. above for details. Also note that these are really
 interpreter commands, so to invoke them in the debugger you have to
 escape them with the `!' command.
 
@@ -8277,10 +8290,10 @@ Haskell's `show' function.
      The programmer may define this function to supply custom print
      representations for certain expressions.
 
-  *note __show__: ba. is just an ordinary Pure function expected to
+  *note __show__: bb. is just an ordinary Pure function expected to
 return a string with the desired custom representation of a normal form
 value given as the function's single argument. The interpreter prints
-the strings returned by *note __show__: ba. just as they are. It will
+the strings returned by *note __show__: bb. just as they are. It will
 not check whether they conform to Pure syntax and/or semantics, or
 modify them in any way. Also, the library doesn't define this function
 anywhere, so you are free to add any rules that you want.
@@ -8288,7 +8301,7 @@ anywhere, so you are free to add any rules that you want.
   Custom print representations are most useful for interactive
 purposes, if you're not happy with the default print syntax of some
 kinds of objects. One particularly useful application of *note
-__show__: ba. is to change the format of numeric values. Here are some
+__show__: bb. is to change the format of numeric values. Here are some
 examples:
 
     > using system;
@@ -8304,12 +8317,12 @@ examples:
     0.000000+-1.000000i
 
 The prelude function `str', which returns the print representation of
-any Pure expression, calls *note __show__: ba. as well:
+any Pure expression, calls *note __show__: bb. as well:
 
     > str (1/7);
     "0.142857"
 
-Conversely, you can call the `str' function from *note __show__: ba, but
+Conversely, you can call the `str' function from *note __show__: bb, but
 in this case it always returns the default representation of an
 expression. This prevents the expression printer from going recursive,
 and allows you to define your custom representation in terms of the
@@ -8321,14 +8334,14 @@ bigint values:
     > fact 30;
     265252859812191058636308480000000
 
-Of course, your definition of *note __show__: ba. can also call *note
-__show__: ba.  itself recursively to determine the custom
+Of course, your definition of *note __show__: bb. can also call *note
+__show__: bb.  itself recursively to determine the custom
 representation of an object.
 
   One case which needs special consideration are thunks (futures). The
-printer will _never_ use *note __show__: ba. for those, to prevent them
+printer will _never_ use *note __show__: bb. for those, to prevent them
 from being forced inadvertently. In fact, you _can_ use *note __show__:
-ba. to define custom representations for thunks, but only in the
+bb. to define custom representations for thunks, but only in the
 context of a rule for other kinds of objects, such as lists. For
 instance:
 
@@ -8352,7 +8365,7 @@ perfect, but you get the idea):
        1.00000   0.50000
        0.33333   4.00000
 
-Finally, by just purging the definition of the *note __show__: ba.
+Finally, by just purging the definition of the *note __show__: bb.
 function you can easily go back to the standard print syntax:
 
     > clear __show__
@@ -8361,10 +8374,10 @@ function you can easily go back to the standard print syntax:
     1786
     6.12303176911189e-17+:-1.0
 
-Note that if you have a set of definitions for the *note __show__: ba.
+Note that if you have a set of definitions for the *note __show__: bb.
 function which should always be loaded at startup, you can put them
 into the interpreter's interactive startup files, see *note Interactive
-Startup: 11b. below.
+Startup: 11c. below.
 
 
 File: pure.info,  Node: User-Defined Commands,  Next: Interactive Startup,  Prev: Pretty-Printing,  Up: Interactive Usage
@@ -8377,7 +8390,7 @@ commands. To these ends, all you have to do is provide some
 corresponding public function definitions in the special `__cmd__'
 namespace (cf. *note Namespaces: 90.). These definitions are typically
 placed in one of the interpreter's startup files (see *note Interactive
-Startup: 11b. below) so that they are always available when running the
+Startup: 11c. below) so that they are always available when running the
 interpreter interactively.
 
   A command function is invoked with one string argument which contains
@@ -8552,7 +8565,7 @@ directory, which is usually created with the `dump' command (see
 above). This file is loaded after the .purerc files if it is present.
 
   The interpreter processes all these files in the same way as with the
-`run' command (see *note Interactive Commands: dc. above). When
+`run' command (see *note Interactive Commands: dd. above). When
 invoking the interpreter, you can specify the *note --norc: 25. option
 on the command line if you wish to skip these initializations.
 
@@ -8593,7 +8606,7 @@ implies the following quirks and limitations:
      functions. In other words, anything which changes the executing
      program is "verboten".  Moreover, the introspective capabilities
      provided by `evalcmd' and similar operations (discussed under
-     *note Reflection: ed. in the *note Macros: a1. section) are all
+     *note Reflection: ee. in the *note Macros: a1. section) are all
      disabled. If you need any of these capabilities, you have to run
      your program with the interpreter.
 
@@ -8605,7 +8618,7 @@ implies the following quirks and limitations:
      which are actually called somewhere in the static program text are
      available to `eval'.  (The *note -u: 28. option and the *note
      --required: 59.  pragma can be used to avoid this, see *note
-     Options Affecting Code Size: 12c. below.)
+     Options Affecting Code Size: 12d. below.)
 
    * Code which gets executed to compute constant values at compile
      time will generally _not_ be executed in the compiled executable,
@@ -8616,7 +8629,7 @@ implies the following quirks and limitations:
      requires an initialization at run time, then the batch compiler
      will generate code for that. (The same happens if the *note
      --noconst: 4f. option is used to force computation of constant
-     values at run time, see *note Options Affecting Code Size: 12c.)
+     values at run time, see *note Options Affecting Code Size: 12d.)
 
   What all this boils down to is that anything which requires the
 compile time or interactive facilities of the interpreter, is
@@ -8643,7 +8656,7 @@ opens the door for some powerful programming techniques like partial
 evaluation (http://en.wikipedia.org/wiki/Partial_evaluation). It is
 also a necessity because of Pure's highly dynamic nature. For instance,
 Pure allows you to define constants by evaluating an arbitrary
-expression (see *note Constant Definitions: b5. below), and using
+expression (see *note Constant Definitions: b6. below), and using
 `eval' a program can easily modify itself in even more unforeseeable
 ways. Therefore pretty much anything in your program can actually
 depend on previous computations performed while the program is being
@@ -9092,11 +9105,11 @@ File: pure.info,  Node: Backward Compatibility,  Next: Error Recovery,  Prev: Et
 13.2 Backward Compatibility
 ===========================
 
-Pure is based on the author's earlier *note Q: 134. language, but it
+Pure is based on the author's earlier *note Q: 135. language, but it
 offers many new and powerful features and programs run much faster than
 their Q equivalents. The language also went through a thorough facelift
 in order to modernize the syntax and make it more similar to other
-modern-style functional languages, in particular *note Miranda: 135.
+modern-style functional languages, in particular *note Miranda: 136.
 and *note Haskell: 7a. Thus porting Q scripts to Pure often involves a
 substantial amount of manual work, but it can (and has) been done.
 
@@ -9135,7 +9148,7 @@ int' is always interpreted as a tagged variable, no matter whether
 
   Pure 0.26 extended the namespaces feature to add support for
 hierarchical namespaces. This means that name lookup works in a
-slightly different fashion now (see *note Hierarchical Namespaces: d7.
+slightly different fashion now (see *note Hierarchical Namespaces: d8.
 for details), but old code which doesn't use the new feature should
 continue to work unchanged.
 
@@ -9161,7 +9174,7 @@ already normalized, or you'll have to normalize the result yourself.
   Also, as of Pure 0.41 the batch compiler produces stripped
 executables by default. To create unstripped executables you now have
 to use the *note -u: 28.  option, see *note Options Affecting Code
-Size: 12c. for details. The `-s' option to produce stripped executables
+Size: 12d. for details. The `-s' option to produce stripped executables
 is still provided for backward compatibility, but it won't have any
 effect unless you use it to override a previous *note -u: 28. option.
 
@@ -9182,7 +9195,7 @@ changed to bring them in line with the other new numeric matrix
 conversions (`int**' etc.). In particular, the matrix data can now be
 modified in-place and type checking is more strict (`int*' requires an
 int matrix, etc.). Also, there's now support for `argv'-style vector
-arguments (`char**' and `void**'). Please see the *note C Types: f4.
+arguments (`char**' and `void**'). Please see the *note C Types: f5.
 section for details.
 
   Pure 0.47 added a bunch of new features which have been on the
@@ -9190,7 +9203,7 @@ wishlist for the forthcoming 1.0 release:
 
    * You can now define your own interactive commands by placing
      suitable function definitions in the special `__cmd__' namespace;
-     see *note User-Defined Commands: 10d. for details.
+     see *note User-Defined Commands: 10e. for details.
 
    * The syntax used to denote *note inline code: 74. sections was
      changed from `%{...%}' to `%<...%>'. This resolves an ambiguity in
@@ -9200,7 +9213,7 @@ wishlist for the forthcoming 1.0 release:
 
    * It is now possible to declare variadic externs, so that functions
      like `printf' can be called without much ado; see *note Variadic C
-     Functions: f5.
+     Functions: f6.
 
    * Support for simple kinds of matrix *note patterns: a3. like
      `{x,y}', `{x::int,y}', `{x,y;z,t}', `{{x,y},z}' was added.
@@ -9210,8 +9223,8 @@ wishlist for the forthcoming 1.0 release:
      in the middle of a quoted expression. Now they will produce a
      special meta representation in terms of built-in macros, in order
      to support the advanced metaprogramming capabilities discussed in
-     *note Built-in Macros and Special Expressions: e2. and *note
-     Reflection: ed.
+     *note Built-in Macros and Special Expressions: e3. and *note
+     Reflection: ee.
 
    * Last but not least, Pure 0.47 sports a new, more flexible type tag
      feature which defines type tags as unary predicates implemented
@@ -9518,7 +9531,7 @@ subject expression:
 
 This is the same kind of `failed_match' exception that you'll get, e.g.,
 if the subject term fails to match all patterns in a *note case: 87.
-construct, cf. *note Exception Handling: ee. However, note that the
+construct, cf. *note Exception Handling: ef. However, note that the
 exception will only be generated if the symbol actually has any
 defining equations, so a "pure constructor" (i.e., a symbol without
 defining equations) will still return a normal form even if it is also
@@ -9611,7 +9624,7 @@ File: pure.info,  Node: Handling of Asynchronous Signals,  Next: Recursive Types
 13.10 Handling of Asynchronous Signals
 ======================================
 
-As described in section *note Exception Handling: ee, signals delivered
+As described in section *note Exception Handling: ef, signals delivered
 to the process can be caught and handled with Pure's exception handling
 facilities.  This has its limitations, however. Since Pure code cannot
 be executed directly from a C signal handler, checks for pending
@@ -9799,7 +9812,7 @@ interface types anyway.
 operations are completely defined on the target data domain. This may
 sometimes force you to add default or error rules raising exceptions
 which may interfere with symbolic evaluation (cf. *note Exception
-Handling: ee. and *note Defined Functions: 5d.). This can be a real
+Handling: ef. and *note Defined Functions: 5d.). This can be a real
 issue, but it is almost always possible to work around this, e.g., by
 just adding in the missing type members manually. To these ends, Pure
 allows an interface type to be augmented with ordinary type rules as
@@ -9822,16 +9835,32 @@ section as follows:
 Finally, Pure's interface types are really a compromise between
 theoretical soundness and practicality. From the theoretical point of
 view, we'd actually like an interface type to be the _intersection_ of
-the instances of the candidate patterns for each interface function.
-Unfortunately, the set of patterns for such an intersection might well
+the interface types for the individual interface functions.
+Unfortunately, the pattern set for such an intersection type might well
 be exponential in size. Hence the approach taken in Pure is to
 eliminate those candidate patterns which aren't supported by all
-interface functions. In general, this will produce a subtype of the
-theoretically optimal intersection type, but it can be computed much
-faster. In fact, this method also has the nice advantage that the
-compiler can warn about potentially missing rules for eliminated
-patterns in some of the interface operations. We've seen in the *note
-Interface Types: a0. section that this can be fairly useful at times.
+interface functions. This can be done much more efficiently, but will in
+general only produce a subtype of the intersection type. (On the other
+hand, this method also has the advantage that the compiler can warn
+about potentially missing rules in some of the interface operations.
+We've seen in the *note Interface Types: a0. section that this can be
+fairly useful at times.)
+
+  Another issue arises with interface operations which allow the
+interface type in multiple arguments. A typical example are operators:
+
+    interface addable with x::addable + y::addable; end;
+
+In the present implementation, the pattern set will be the _union_ of
+the pattern sets for each argument, so the above definition is in fact
+equivalent to:
+
+    interface addable with x::addable + y; x + y::addable; end;
+
+This makes sense in most situations, but of course this depends on the
+particular operation. In some cases, you might have to decide on which
+argument you want to place the interface type tag, or even have
+different types for each possible argument position.
 
 
 File: pure.info,  Node: Numeric Calculations,  Next: Constant Definitions,  Prev: Interfaces,  Up: Caveats and Notes
@@ -10018,7 +10047,7 @@ initialization code in this case. For all practical purposes, this
 turns the constant into a read-only variable. (There's also a code
 generation option to force this behaviour even for "normal" constants
 for which it's not strictly necessary, in order to create smaller
-executables; see *note Options Affecting Code Size: 12c. for details.)
+executables; see *note Options Affecting Code Size: 12d. for details.)
 
 
 File: pure.info,  Node: External C Functions,  Next: Calling Special Forms,  Prev: Constant Definitions,  Up: Caveats and Notes
@@ -10026,17 +10055,17 @@ File: pure.info,  Node: External C Functions,  Next: Calling Special Forms,  Pre
 13.15 External C Functions
 ==========================
 
-The interpreter always takes your *note extern: c1. declarations of C
+The interpreter always takes your *note extern: c2. declarations of C
 routines at face value. It will not go and read any C header files to
 determine whether you actually declared the function correctly! So you
 have to be careful to give the proper declarations, otherwise your
 program might well give a segfault when calling the function. This
 problem can to some extent be alleviated by using the bitcode
-interface, see *note Importing LLVM Bitcode: ff. and *note Inline Code:
-74. in the *note C Interface: 3c. section. However, you always have to
-be careful when calling *note variadic C functions: f5, as the compiler
-has no way of checking which combinations of extra parameters a
-function like `printf' is to be invoked with. (As a remedy, the
+interface, see *note Importing LLVM Bitcode: 100. and *note Inline
+Code: 74. in the *note C Interface: 3c. section. However, you always
+have to be careful when calling *note variadic C functions: f6, as the
+compiler has no way of checking which combinations of extra parameters
+a function like `printf' is to be invoked with. (As a remedy, the
 standard library provides safe implementations of `printf' and other
 commonly used variadic functions from the C library, see the `purelib'
 for details.)
@@ -10050,7 +10079,7 @@ functionality, please see `pure-ffi' for details.
   Last but not least, to make it easier to create Pure interfaces to
 large C libraries, there's a separate pure-gen program available at the
 Pure website.  This program takes a C header (.h) file and creates a
-corresponding Pure module with definitions and *note extern: c1.
+corresponding Pure module with definitions and *note extern: c2.
 declarations for the constants and functions declared in the header.
 Please refer to `pure-gen' for details.
 
@@ -10061,7 +10090,7 @@ File: pure.info,  Node: Calling Special Forms,  Next: Laziness,  Prev: External 
 ===========================
 
 Special forms are recognized at compile time only. Thus the *note
-catch: f0.  function, as well as *note quote: 80. and the operators
+catch: f1.  function, as well as *note quote: 80. and the operators
 *note &&: 7c, *note ||: 7d, *note $$: 7e. and *note &: 7f, are only
 treated as special forms in direct (saturated) calls. They can still be
 used if you pass them around as function values or in partial
@@ -10159,7 +10188,7 @@ File: pure.info,  Node: Showing Macro Expansions,  Prev: Laziness,  Up: Caveats 
 13.18 Showing Macro Expansions
 ==============================
 
-As mentioned in the *note Macro Hygiene: e1. section, Pure macros are
+As mentioned in the *note Macro Hygiene: e2. section, Pure macros are
 lexically scoped and thus "hygienic". So Pure macros are not suceptible
 to name capture, but there is also one Pure-related caveat here. The
 expression printer currently doesn't check for different bindings of
@@ -10306,13 +10335,13 @@ Bertrand
 Clang
      The new C/C++/Objective C compiler designed specifically to work
      on top of LLVM, <http://clang.llvm.org>. Clang provides a
-     comparatively light-weight alternative to *note llvm-gcc: 100.
+     comparatively light-weight alternative to *note llvm-gcc: 101.
      which is faster and has better and more friendly diagnostics than
      gcc.
 
 DragonEgg
      An LLVM backend for gcc 4.5 and later,
-     <http://dragonegg.llvm.org>. In contrast to *note llvm-gcc: 100,
+     <http://dragonegg.llvm.org>. In contrast to *note llvm-gcc: 101,
      DragonEgg is implemented as a plugin which hooks into your system
      compiler.
 
@@ -10344,7 +10373,7 @@ LLVM
 LLVM-GCC
      An LLVM-capable compiler based on gcc, see <http://llvm.org>. This
      is based on a fairly old gcc version (4.2) and is currently being
-     phased out in favour of the *note DragonEgg: 103. plugin.
+     phased out in favour of the *note DragonEgg: 104. plugin.
 
 Miranda
      David Turner's non-strict FPL, <http://miranda.org.uk>. Miranda
@@ -10961,520 +10990,520 @@ Ref: a0135977
 Ref: interface-types135977
 Ref: b2135977
 Ref: id7135977
-Node: Examples146710
-Ref: examples146797
-Ref: 94146797
-Node: List Comprehensions148526
-Ref: list comprehensions148624
-Ref: b6148624
-Ref: list-comprehensions148624
-Node: Lazy Evaluation and Streams150262
-Ref: lazy evaluation and streams150388
-Ref: 92150388
-Ref: lazy-evaluation-and-streams150388
-Ref: b7150388
-Ref: id9150388
-Node: Matrix Computations154933
-Ref: matrix computations155057
-Ref: a5155057
-Ref: matrix-computations155057
-Ref: b8155057
-Ref: id10155057
-Node: Symbolic Matrices163285
-Ref: symbolic matrices163393
-Ref: bc163393
-Ref: symbolic-matrices163393
-Node: Record Data165840
-Ref: record data165938
-Ref: be165938
-Ref: record-data165938
-Ref: bf165938
-Ref: id11165938
-Node: The Quote171462
-Ref: the quote171534
-Ref: 9a171534
-Ref: the-quote171534
-Node: Declarations175068
-Ref: declarations175150
-Ref: 3b175150
-Node: Symbol Declarations176211
-Ref: symbol declarations176305
-Ref: c3176305
-Ref: public176305
-Ref: c4176305
-Ref: private176305
-Ref: c5176305
-Ref: infix176305
-Ref: c6176305
-Ref: infixl176305
-Ref: c7176305
-Ref: infixr176305
-Ref: c8176305
-Ref: prefix176305
-Ref: c9176305
-Ref: postfix176305
-Ref: bd176305
-Ref: outfix176305
-Ref: 82176305
-Ref: nonfix176305
-Ref: 57176305
-Ref: symbol-declarations176305
-Node: Modules and Imports183446
-Ref: modules and imports183559
-Ref: 3a183559
-Ref: using183559
-Ref: cc183559
-Ref: modules-and-imports183559
-Ref: cd186917
-Ref: index-9186917
-Ref: ce187031
-Ref: index-10187031
-Ref: cf187329
-Ref: index-11187329
-Ref: d0187616
-Ref: index-12187616
-Ref: d1187644
-Ref: index-13187644
-Ref: d2189231
-Ref: index-14189231
-Node: Namespaces189535
-Ref: namespaces189620
-Ref: c2189620
-Ref: namespace189620
-Ref: 90189620
-Node: Using Namespaces193208
-Ref: using namespaces193304
-Ref: d4193304
-Ref: using-namespace193304
-Ref: d5193304
-Ref: using-namespaces193304
-Node: Symbol Lookup and Creation195743
-Ref: symbol lookup and creation195863
-Ref: 65195863
-Ref: symbol-lookup-and-creation195863
-Ref: d6195863
-Ref: id13195863
-Node: Private Symbols203386
-Ref: private symbols203513
-Ref: ca203513
-Ref: private-symbols203513
-Node: Hierarchical Namespaces204687
-Ref: hierarchical namespaces204805
-Ref: d7204805
-Ref: hierarchical-namespaces204805
-Ref: d8205947
-Ref: index-15205947
-Node: Scoped Namespaces206975
-Ref: scoped namespaces207069
-Ref: d3207069
-Ref: scoped-namespaces207069
-Node: Macros210318
-Ref: macros210410
-Ref: a1210410
-Ref: d9210410
-Ref: id14210410
-Node: Optimization Rules212327
-Ref: optimization rules212411
-Ref: da212411
-Ref: optimization-rules212411
-Ref: db212411
-Ref: id15212411
-Node: Recursive Macros215657
-Ref: recursive macros215776
-Ref: c0215776
-Ref: recursive-macros215776
-Ref: df218310
-Ref: index-16218310
-Node: User-Defined Special Forms218356
-Ref: user-defined special forms218470
-Ref: e0218470
-Ref: user-defined-special-forms218470
-Node: Macro Hygiene219866
-Ref: macro hygiene220003
-Ref: e1220003
-Ref: macro-hygiene220003
-Node: Built-in Macros and Special Expressions222402
-Ref: built-in macros and special expressions222534
-Ref: e2222534
-Ref: built-in-macros-and-special-expressions222534
-Ref: e3223012
-Ref: __ifelse__223012
-Ref: e4223146
-Ref: __lambda__223146
-Ref: e5223240
-Ref: __case__223240
-Ref: e7223517
-Ref: __when__223517
-Ref: e8223823
-Ref: __with__223823
-Ref: e6224127
-Ref: -->224127
-Ref: e9224186
-Ref: __if__224186
-Ref: ea224683
-Ref: __as__224683
-Ref: eb224750
-Ref: __type__224750
-Ref: ec230085
-Ref: __eval__230085
-Node: Advanced Optimization231506
-Ref: advanced optimization231635
-Ref: dd231635
-Ref: advanced-optimization231635
-Node: Reflection236531
-Ref: reflection236612
-Ref: ed236612
-Node: Exception Handling241231
-Ref: exception handling241327
-Ref: ee241327
-Ref: exception-handling241327
-Ref: ef241327
-Ref: id16241327
-Ref: f0241639
-Ref: catch241639
-Ref: f1242807
-Ref: index-17242807
-Node: Standard Library245977
-Ref: standard library246078
-Ref: 75246078
-Ref: standard-library246078
-Node: C Interface250339
-Ref: c interface250439
-Ref: 3c250439
-Ref: c-interface250439
-Node: Extern Declarations251967
-Ref: extern declarations252061
-Ref: c1252061
-Ref: extern252061
-Ref: f3252061
-Ref: extern-declarations252061
-Node: Variadic C Functions257118
-Ref: variadic c functions257228
-Ref: f5257228
-Ref: variadic-c-functions257228
-Node: C Types258479
-Ref: c types258597
-Ref: f4258597
-Ref: c-types258597
-Ref: f6258597
-Ref: id17258597
-Node: Basic C Types259839
-Ref: basic c types259916
-Ref: f7259916
-Ref: basic-c-types259916
-Node: Pointer Types262086
-Ref: pointer types262193
-Ref: f8262193
-Ref: pointer-types262193
-Node: Pointers and Matrices265387
-Ref: pointers and matrices265497
-Ref: f9265497
-Ref: pointers-and-matrices265497
-Node: Pointer Examples268675
-Ref: pointer examples268763
-Ref: fa268763
-Ref: pointer-examples268763
-Node: Importing Dynamic Libraries272989
-Ref: importing dynamic libraries273109
-Ref: fb273109
-Ref: importing-dynamic-libraries273109
-Ref: fc274232
-Ref: index-18274232
-Ref: fd274307
-Ref: index-19274307
-Ref: fe274518
-Ref: index-20274518
-Node: Importing LLVM Bitcode274910
-Ref: importing llvm bitcode275034
-Ref: ff275034
-Ref: importing-llvm-bitcode275034
-Node: Inline Code280766
-Ref: inline code280881
-Ref: 74280881
-Ref: inline-code280881
-Ref: 105285710
-Ref: index-21285710
-Ref: 106285824
-Ref: index-22285824
-Ref: 107286025
-Ref: index-23286025
-Ref: 108286037
-Ref: index-24286037
-Ref: 109286051
-Ref: index-25286051
-Ref: 10a286283
-Ref: index-26286283
-Node: Interfacing to C++287108
-Ref: interfacing to c++287221
-Ref: 10b287221
-Ref: interfacing-to-c287221
-Node: Interfacing to Faust289704
-Ref: interfacing to faust289797
-Ref: 104289797
-Ref: interfacing-to-faust289797
-Ref: 10c290941
-Ref: llvm-backend-for-faust290941
-Node: Interactive Usage302556
-Ref: interactive usage302657
-Ref: b302657
-Ref: interactive-usage302657
-Node: Online Help306087
-Ref: online help306179
-Ref: 4306179
-Ref: online-help306179
-Ref: 10e306648
-Ref: index-27306648
-Ref: 10f306676
-Ref: index-28306676
-Ref: 110308179
-Ref: docutils308179
-Node: Interactive Commands309120
-Ref: interactive commands309249
-Ref: dc309249
-Ref: interactive-commands309249
-Ref: 111309502
-Ref: index-29309502
-Ref: 112309549
-Ref: index-30309549
-Ref: 113309976
-Ref: index-31309976
-Ref: 114310302
-Ref: index-32310302
-Ref: 115310364
-Ref: index-33310364
-Ref: 119311353
-Ref: index-34311353
-Ref: 11a312130
-Ref: index-35312130
-Ref: 11c313650
-Ref: index-36313650
-Ref: 11d313978
-Ref: index-37313978
-Ref: 11e314044
-Ref: index-38314044
-Ref: 11f314595
-Ref: index-39314595
-Ref: 120314842
-Ref: index-40314842
-Ref: 121314922
-Ref: index-41314922
-Ref: 122314973
-Ref: index-42314973
-Ref: 123316658
-Ref: index-43316658
-Ref: 124316909
-Ref: index-44316909
-Ref: 125317322
-Ref: index-45317322
-Ref: 126317939
-Ref: index-46317939
-Ref: 127318559
-Ref: index-47318559
-Node: Specifying Symbol Selections319544
-Ref: specifying symbol selections319678
-Ref: 118319678
-Ref: specifying-symbol-selections319678
-Node: The show Command323085
-Ref: the show command323216
-Ref: b4323216
-Ref: the-show-command323216
-Ref: 128324318
-Ref: index-48324318
-Node: Definition Levels327913
-Ref: definition levels328025
-Ref: 117328025
-Ref: definition-levels328025
-Node: Debugging333275
-Ref: debugging333382
-Ref: 46333382
-Ref: 129335073
-Ref: index-49335073
-Node: Last Result344196
-Ref: last result344301
-Ref: 116344301
-Ref: last-result344301
-Node: Pretty-Printing345011
-Ref: pretty-printing345128
-Ref: bb345128
-Ref: ba345334
-Ref: __show__345334
-Node: User-Defined Commands348925
-Ref: user-defined commands349050
-Ref: 10d349050
-Ref: user-defined-commands349050
-Node: Interactive Startup354988
-Ref: interactive startup355089
-Ref: 11b355089
-Ref: interactive-startup355089
-Ref: 12a355454
-Ref: index-50355454
-Node: Batch Compilation356412
-Ref: batch compilation356519
-Ref: c356519
-Ref: batch-compilation356519
-Ref: 12b356519
-Ref: id18356519
-Ref: 12d361625
-Ref: partial-evaluation361625
-Node: Example361743
-Ref: example361838
-Ref: 12e361838
-Node: Options Affecting Code Size366330
-Ref: options affecting code size366459
-Ref: 12c366459
-Ref: options-affecting-code-size366459
-Node: Other Output Code Formats369947
-Ref: other output code formats370098
-Ref: 12f370098
-Ref: other-output-code-formats370098
-Ref: 130374607
-Ref: llvm-documentation374607
-Node: Calling Pure Functions From C374607
-Ref: calling pure functions from c374722
-Ref: 131374722
-Ref: calling-pure-functions-from-c374722
-Node: Caveats and Notes376215
-Ref: caveats and notes376311
-Ref: d376311
-Ref: caveats-and-notes376311
-Node: Etymology376973
-Ref: etymology377065
-Ref: 132377065
-Node: Backward Compatibility377956
-Ref: backward compatibility378071
-Ref: 133378071
-Ref: backward-compatibility378071
-Node: Error Recovery386604
-Ref: error recovery386723
-Ref: 136386723
-Ref: error-recovery386723
-Node: With and when387379
-Ref: with and when387495
-Ref: 137387495
-Ref: with-and-when387495
-Node: Non-Linear Patterns391186
-Ref: non-linear patterns391301
-Ref: 138391301
-Ref: non-linear-patterns391301
-Node: "As" Patterns392701
-Ref: "as" patterns392829
-Ref: de392829
-Ref: as-patterns392829
-Node: "Head = Function" Pitfalls393585
-Ref: "head = function" pitfalls393711
-Ref: 139393711
-Ref: head-function-pitfalls393711
-Node: Defined Functions397304
-Ref: defined functions397446
-Ref: 5d397446
-Ref: defined-functions397446
-Node: Stack Size and Tail Recursion400774
-Ref: stack size and tail recursion400922
-Ref: 4c400922
-Ref: stack-size-and-tail-recursion400922
-Ref: 13a401308
-Ref: index-51401308
-Ref: 13b401520
-Ref: index-52401520
-Ref: 13c401808
-Ref: index-53401808
-Node: Handling of Asynchronous Signals403172
-Ref: handling of asynchronous signals403318
-Ref: 4d403318
-Ref: handling-of-asynchronous-signals403318
-Node: Recursive Types405339
-Ref: recursive types405466
-Ref: b0405466
-Ref: recursive-types405466
-Ref: 13d408423
-Ref: continuation-passing408423
-Node: Interfaces410646
-Ref: interfaces410761
-Ref: 13e410761
-Node: Numeric Calculations413024
-Ref: numeric calculations413144
-Ref: 13f413144
-Ref: numeric-calculations413144
-Node: Constant Definitions415055
-Ref: constant definitions415185
-Ref: b5415185
-Ref: constant-definitions415185
-Node: External C Functions420930
-Ref: external c functions421061
-Ref: f2421061
-Ref: external-c-functions421061
-Ref: 140422341
-Ref: libffi422341
-Node: Calling Special Forms422726
-Ref: calling special forms422845
-Ref: 141422845
-Ref: calling-special-forms422845
-Node: Laziness423332
-Ref: laziness423455
-Ref: 142423455
-Node: Showing Macro Expansions427953
-Ref: showing macro expansions428046
-Ref: 144428046
-Ref: showing-macro-expansions428046
-Node: Author429681
-Ref: author429776
-Ref: 145429776
-Node: Acknowledgements429911
-Ref: acknowledgements429996
-Ref: 146429996
-Node: Copying431195
-Ref: copying431294
-Ref: 3431294
-Node: References and Links433656
-Ref: references and links433744
-Ref: 147433744
-Ref: references-and-links433744
-Ref: 97433793
-Ref: aardappel433793
-Ref: 143433934
-Ref: alice-ml433934
-Ref: 11434069
-Ref: baader-and-nipkow434069
-Ref: cb434187
-Ref: bertrand434187
-Ref: 101434447
-Ref: clang434447
-Ref: 103434736
-Ref: dragonegg434736
-Ref: 102434947
-Ref: faust434947
-Ref: 148435034
-Ref: gnu-multiprecision-library435034
-Ref: 8f435034
-Ref: gmp435034
-Ref: 149435142
-Ref: gnu-octave435142
-Ref: b9435142
-Ref: octave435142
-Ref: 93435286
-Ref: gnu-scientific-library435286
-Ref: 14a435286
-Ref: gsl435286
-Ref: b3435447
-Ref: go435447
-Ref: 7a435511
-Ref: haskell435511
-Ref: 8435577
-Ref: llvm435577
-Ref: 100435642
-Ref: llvm-gcc435642
-Ref: 135435858
-Ref: miranda435858
-Ref: 7b436029
-Ref: ml436029
-Ref: 10436188
-Ref: michael-o-donnell436188
-Ref: 134436338
-Ref: q436338
-Node: Index436423
-Ref: index436495
-Ref: 84452909
-Ref: 85452940
+Node: Examples147575
+Ref: examples147662
+Ref: 94147662
+Node: List Comprehensions149391
+Ref: list comprehensions149489
+Ref: b7149489
+Ref: list-comprehensions149489
+Node: Lazy Evaluation and Streams151127
+Ref: lazy evaluation and streams151253
+Ref: 92151253
+Ref: lazy-evaluation-and-streams151253
+Ref: b8151253
+Ref: id9151253
+Node: Matrix Computations155798
+Ref: matrix computations155922
+Ref: a5155922
+Ref: matrix-computations155922
+Ref: b9155922
+Ref: id10155922
+Node: Symbolic Matrices164150
+Ref: symbolic matrices164258
+Ref: bd164258
+Ref: symbolic-matrices164258
+Node: Record Data166705
+Ref: record data166803
+Ref: bf166803
+Ref: record-data166803
+Ref: c0166803
+Ref: id11166803
+Node: The Quote172327
+Ref: the quote172399
+Ref: 9a172399
+Ref: the-quote172399
+Node: Declarations175933
+Ref: declarations176015
+Ref: 3b176015
+Node: Symbol Declarations177076
+Ref: symbol declarations177170
+Ref: c4177170
+Ref: public177170
+Ref: c5177170
+Ref: private177170
+Ref: c6177170
+Ref: infix177170
+Ref: c7177170
+Ref: infixl177170
+Ref: c8177170
+Ref: infixr177170
+Ref: c9177170
+Ref: prefix177170
+Ref: ca177170
+Ref: postfix177170
+Ref: be177170
+Ref: outfix177170
+Ref: 82177170
+Ref: nonfix177170
+Ref: 57177170
+Ref: symbol-declarations177170
+Node: Modules and Imports184311
+Ref: modules and imports184424
+Ref: 3a184424
+Ref: using184424
+Ref: cd184424
+Ref: modules-and-imports184424
+Ref: ce187782
+Ref: index-9187782
+Ref: cf187896
+Ref: index-10187896
+Ref: d0188194
+Ref: index-11188194
+Ref: d1188481
+Ref: index-12188481
+Ref: d2188509
+Ref: index-13188509
+Ref: d3190096
+Ref: index-14190096
+Node: Namespaces190400
+Ref: namespaces190485
+Ref: c3190485
+Ref: namespace190485
+Ref: 90190485
+Node: Using Namespaces194073
+Ref: using namespaces194169
+Ref: d5194169
+Ref: using-namespace194169
+Ref: d6194169
+Ref: using-namespaces194169
+Node: Symbol Lookup and Creation196608
+Ref: symbol lookup and creation196728
+Ref: 65196728
+Ref: symbol-lookup-and-creation196728
+Ref: d7196728
+Ref: id13196728
+Node: Private Symbols204251
+Ref: private symbols204378
+Ref: cb204378
+Ref: private-symbols204378
+Node: Hierarchical Namespaces205552
+Ref: hierarchical namespaces205670
+Ref: d8205670
+Ref: hierarchical-namespaces205670
+Ref: d9206812
+Ref: index-15206812
+Node: Scoped Namespaces207840
+Ref: scoped namespaces207934
+Ref: d4207934
+Ref: scoped-namespaces207934
+Node: Macros211183
+Ref: macros211275
+Ref: a1211275
+Ref: da211275
+Ref: id14211275
+Node: Optimization Rules213192
+Ref: optimization rules213276
+Ref: db213276
+Ref: optimization-rules213276
+Ref: dc213276
+Ref: id15213276
+Node: Recursive Macros216522
+Ref: recursive macros216641
+Ref: c1216641
+Ref: recursive-macros216641
+Ref: e0219175
+Ref: index-16219175
+Node: User-Defined Special Forms219221
+Ref: user-defined special forms219335
+Ref: e1219335
+Ref: user-defined-special-forms219335
+Node: Macro Hygiene220731
+Ref: macro hygiene220868
+Ref: e2220868
+Ref: macro-hygiene220868
+Node: Built-in Macros and Special Expressions223267
+Ref: built-in macros and special expressions223399
+Ref: e3223399
+Ref: built-in-macros-and-special-expressions223399
+Ref: e4223877
+Ref: __ifelse__223877
+Ref: e5224011
+Ref: __lambda__224011
+Ref: e6224105
+Ref: __case__224105
+Ref: e8224382
+Ref: __when__224382
+Ref: e9224688
+Ref: __with__224688
+Ref: e7224992
+Ref: -->224992
+Ref: ea225051
+Ref: __if__225051
+Ref: eb225548
+Ref: __as__225548
+Ref: ec225615
+Ref: __type__225615
+Ref: ed230950
+Ref: __eval__230950
+Node: Advanced Optimization232371
+Ref: advanced optimization232500
+Ref: de232500
+Ref: advanced-optimization232500
+Node: Reflection237396
+Ref: reflection237477
+Ref: ee237477
+Node: Exception Handling242096
+Ref: exception handling242192
+Ref: ef242192
+Ref: exception-handling242192
+Ref: f0242192
+Ref: id16242192
+Ref: f1242504
+Ref: catch242504
+Ref: f2243672
+Ref: index-17243672
+Node: Standard Library246842
+Ref: standard library246943
+Ref: 75246943
+Ref: standard-library246943
+Node: C Interface251204
+Ref: c interface251304
+Ref: 3c251304
+Ref: c-interface251304
+Node: Extern Declarations252832
+Ref: extern declarations252926
+Ref: c2252926
+Ref: extern252926
+Ref: f4252926
+Ref: extern-declarations252926
+Node: Variadic C Functions257983
+Ref: variadic c functions258093
+Ref: f6258093
+Ref: variadic-c-functions258093
+Node: C Types259344
+Ref: c types259462
+Ref: f5259462
+Ref: c-types259462
+Ref: f7259462
+Ref: id17259462
+Node: Basic C Types260704
+Ref: basic c types260781
+Ref: f8260781
+Ref: basic-c-types260781
+Node: Pointer Types262951
+Ref: pointer types263058
+Ref: f9263058
+Ref: pointer-types263058
+Node: Pointers and Matrices266252
+Ref: pointers and matrices266362
+Ref: fa266362
+Ref: pointers-and-matrices266362
+Node: Pointer Examples269540
+Ref: pointer examples269628
+Ref: fb269628
+Ref: pointer-examples269628
+Node: Importing Dynamic Libraries273854
+Ref: importing dynamic libraries273974
+Ref: fc273974
+Ref: importing-dynamic-libraries273974
+Ref: fd275097
+Ref: index-18275097
+Ref: fe275172
+Ref: index-19275172
+Ref: ff275383
+Ref: index-20275383
+Node: Importing LLVM Bitcode275775
+Ref: importing llvm bitcode275899
+Ref: 100275899
+Ref: importing-llvm-bitcode275899
+Node: Inline Code281631
+Ref: inline code281746
+Ref: 74281746
+Ref: inline-code281746
+Ref: 106286576
+Ref: index-21286576
+Ref: 107286690
+Ref: index-22286690
+Ref: 108286891
+Ref: index-23286891
+Ref: 109286903
+Ref: index-24286903
+Ref: 10a286917
+Ref: index-25286917
+Ref: 10b287149
+Ref: index-26287149
+Node: Interfacing to C++287974
+Ref: interfacing to c++288087
+Ref: 10c288087
+Ref: interfacing-to-c288087
+Node: Interfacing to Faust290570
+Ref: interfacing to faust290663
+Ref: 105290663
+Ref: interfacing-to-faust290663
+Ref: 10d291807
+Ref: llvm-backend-for-faust291807
+Node: Interactive Usage303422
+Ref: interactive usage303523
+Ref: b303523
+Ref: interactive-usage303523
+Node: Online Help306953
+Ref: online help307045
+Ref: 4307045
+Ref: online-help307045
+Ref: 10f307514
+Ref: index-27307514
+Ref: 110307542
+Ref: index-28307542
+Ref: 111309045
+Ref: docutils309045
+Node: Interactive Commands309986
+Ref: interactive commands310115
+Ref: dd310115
+Ref: interactive-commands310115
+Ref: 112310368
+Ref: index-29310368
+Ref: 113310415
+Ref: index-30310415
+Ref: 114310842
+Ref: index-31310842
+Ref: 115311168
+Ref: index-32311168
+Ref: 116311230
+Ref: index-33311230
+Ref: 11a312219
+Ref: index-34312219
+Ref: 11b312996
+Ref: index-35312996
+Ref: 11d314516
+Ref: index-36314516
+Ref: 11e314844
+Ref: index-37314844
+Ref: 11f314910
+Ref: index-38314910
+Ref: 120315461
+Ref: index-39315461
+Ref: 121315708
+Ref: index-40315708
+Ref: 122315788
+Ref: index-41315788
+Ref: 123315839
+Ref: index-42315839
+Ref: 124317524
+Ref: index-43317524
+Ref: 125317775
+Ref: index-44317775
+Ref: 126318188
+Ref: index-45318188
+Ref: 127318805
+Ref: index-46318805
+Ref: 128319425
+Ref: index-47319425
+Node: Specifying Symbol Selections320410
+Ref: specifying symbol selections320544
+Ref: 119320544
+Ref: specifying-symbol-selections320544
+Node: The show Command323951
+Ref: the show command324082
+Ref: b4324082
+Ref: the-show-command324082
+Ref: 129325184
+Ref: index-48325184
+Node: Definition Levels328779
+Ref: definition levels328891
+Ref: 118328891
+Ref: definition-levels328891
+Node: Debugging334141
+Ref: debugging334248
+Ref: 46334248
+Ref: 12a335939
+Ref: index-49335939
+Node: Last Result345062
+Ref: last result345167
+Ref: 117345167
+Ref: last-result345167
+Node: Pretty-Printing345877
+Ref: pretty-printing345994
+Ref: bc345994
+Ref: bb346200
+Ref: __show__346200
+Node: User-Defined Commands349791
+Ref: user-defined commands349916
+Ref: 10e349916
+Ref: user-defined-commands349916
+Node: Interactive Startup355854
+Ref: interactive startup355955
+Ref: 11c355955
+Ref: interactive-startup355955
+Ref: 12b356320
+Ref: index-50356320
+Node: Batch Compilation357278
+Ref: batch compilation357385
+Ref: c357385
+Ref: batch-compilation357385
+Ref: 12c357385
+Ref: id18357385
+Ref: 12e362491
+Ref: partial-evaluation362491
+Node: Example362609
+Ref: example362704
+Ref: 12f362704
+Node: Options Affecting Code Size367196
+Ref: options affecting code size367325
+Ref: 12d367325
+Ref: options-affecting-code-size367325
+Node: Other Output Code Formats370813
+Ref: other output code formats370964
+Ref: 130370964
+Ref: other-output-code-formats370964
+Ref: 131375473
+Ref: llvm-documentation375473
+Node: Calling Pure Functions From C375473
+Ref: calling pure functions from c375588
+Ref: 132375588
+Ref: calling-pure-functions-from-c375588
+Node: Caveats and Notes377081
+Ref: caveats and notes377177
+Ref: d377177
+Ref: caveats-and-notes377177
+Node: Etymology377839
+Ref: etymology377931
+Ref: 133377931
+Node: Backward Compatibility378822
+Ref: backward compatibility378937
+Ref: 134378937
+Ref: backward-compatibility378937
+Node: Error Recovery387470
+Ref: error recovery387589
+Ref: 137387589
+Ref: error-recovery387589
+Node: With and when388245
+Ref: with and when388361
+Ref: 138388361
+Ref: with-and-when388361
+Node: Non-Linear Patterns392052
+Ref: non-linear patterns392167
+Ref: 139392167
+Ref: non-linear-patterns392167
+Node: "As" Patterns393567
+Ref: "as" patterns393695
+Ref: df393695
+Ref: as-patterns393695
+Node: "Head = Function" Pitfalls394451
+Ref: "head = function" pitfalls394577
+Ref: 13a394577
+Ref: head-function-pitfalls394577
+Node: Defined Functions398170
+Ref: defined functions398312
+Ref: 5d398312
+Ref: defined-functions398312
+Node: Stack Size and Tail Recursion401640
+Ref: stack size and tail recursion401788
+Ref: 4c401788
+Ref: stack-size-and-tail-recursion401788
+Ref: 13b402174
+Ref: index-51402174
+Ref: 13c402386
+Ref: index-52402386
+Ref: 13d402674
+Ref: index-53402674
+Node: Handling of Asynchronous Signals404038
+Ref: handling of asynchronous signals404184
+Ref: 4d404184
+Ref: handling-of-asynchronous-signals404184
+Node: Recursive Types406205
+Ref: recursive types406332
+Ref: b0406332
+Ref: recursive-types406332
+Ref: 13e409289
+Ref: continuation-passing409289
+Node: Interfaces411512
+Ref: interfaces411627
+Ref: b5411627
+Node: Numeric Calculations414527
+Ref: numeric calculations414647
+Ref: 13f414647
+Ref: numeric-calculations414647
+Node: Constant Definitions416558
+Ref: constant definitions416688
+Ref: b6416688
+Ref: constant-definitions416688
+Node: External C Functions422433
+Ref: external c functions422564
+Ref: f3422564
+Ref: external-c-functions422564
+Ref: 140423845
+Ref: libffi423845
+Node: Calling Special Forms424230
+Ref: calling special forms424349
+Ref: 141424349
+Ref: calling-special-forms424349
+Node: Laziness424836
+Ref: laziness424959
+Ref: 142424959
+Node: Showing Macro Expansions429457
+Ref: showing macro expansions429550
+Ref: 144429550
+Ref: showing-macro-expansions429550
+Node: Author431185
+Ref: author431280
+Ref: 145431280
+Node: Acknowledgements431415
+Ref: acknowledgements431500
+Ref: 146431500
+Node: Copying432699
+Ref: copying432798
+Ref: 3432798
+Node: References and Links435160
+Ref: references and links435248
+Ref: 147435248
+Ref: references-and-links435248
+Ref: 97435297
+Ref: aardappel435297
+Ref: 143435438
+Ref: alice-ml435438
+Ref: 11435573
+Ref: baader-and-nipkow435573
+Ref: cc435691
+Ref: bertrand435691
+Ref: 102435951
+Ref: clang435951
+Ref: 104436240
+Ref: dragonegg436240
+Ref: 103436451
+Ref: faust436451
+Ref: 148436538
+Ref: gnu-multiprecision-library436538
+Ref: 8f436538
+Ref: gmp436538
+Ref: 149436646
+Ref: gnu-octave436646
+Ref: ba436646
+Ref: octave436646
+Ref: 93436790
+Ref: gnu-scientific-library436790
+Ref: 14a436790
+Ref: gsl436790
+Ref: b3436951
+Ref: go436951
+Ref: 7a437015
+Ref: haskell437015
+Ref: 8437081
+Ref: llvm437081
+Ref: 101437146
+Ref: llvm-gcc437146
+Ref: 136437362
+Ref: miranda437362
+Ref: 7b437533
+Ref: ml437533
+Ref: 10437692
+Ref: michael-o-donnell437692
+Ref: 135437842
+Ref: q437842
+Node: Index437927
+Ref: index437999
+Ref: 84454413
+Ref: 85454444
 
 End Tag Table
 

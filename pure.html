@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.50, November 28, 2011</p>
+<p>Version 0.50, November 29, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -3265,20 +3265,20 @@ Examples:</p>
 &#39;rpn (stack []) [<span class="mi">2</span>,(*)]&#39;
 </pre></div>
 </div>
-<p>Ok, this is all nice and dandy, but it seems that so far we haven&#8217;t done much
-more than we could have achieved just as easily with plain lists instead. So
-what are the benefits of having an interface type?</p>
+<p>Ok, this is all very nice, but it seems that so far we haven&#8217;t done much more
+than we could have achieved just as easily with plain lists instead. So what
+are the benefits of having an interface type?</p>
 <p>First, an interface provides a fair amount of <strong class="dfn">safety</strong>. As long as we stick to
 the interface functions, we can be sure that the data is capable of carrying
 out the requested operations. At the same time, the interface also serves as a
 valuable piece of documentation, since it tells us at a glance exactly which
 operations are supported by the type.</p>
 <p>Second, an interface provides <strong class="dfn">data abstraction</strong>. We don&#8217;t need to know how
-the interface operations are implemented, our functions will work with <em>any</em>
-implementation of the interface. In fact, now that the interface is defined,
-we can easily supply alternative implementations. For instance, suppose that
-we&#8217;d like to use our little RPN calculator with &#8220;bounded stacks&#8221;, i.e., stacks
-which don&#8217;t grow beyond a certain limit. These can be implemented as follows:</p>
+the interface operations are implemented, and in fact functions coded against
+the interface will work with <em>any</em> implementation of the interface. For
+instance, suppose that we&#8217;d like to provide a &#8220;bounded stacks&#8221; data structure,
+i.e., stacks which don&#8217;t grow beyond a certain limit. These can be implemented
+as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre>push (n,xs<span class="p">@</span>[]) x | push (n,xs<span class="p">@</span>(_:_)) x =
   <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> (n-<span class="mi">1</span>,x:xs) <span class="kr">else</span> <span class="nb">throw</span> <span class="s">&quot;full stack&quot;</span><span class="p">;</span>
 pop (n,x:xs) = n+<span class="mi">1</span>,xs<span class="p">;</span>
@@ -3293,7 +3293,8 @@ still allow to be pushed). We also add a function to construct such values:</p>
 <div class="highlight-pure"><div class="highlight"><pre>bstack n<span class="p">::</span><span class="kt">int</span> xs<span class="p">::</span>list = (n-#xs,xs)<span class="p">;</span>
 </pre></div>
 </div>
-<p>Example:</p>
+<p>Without any further ado, our little RPN calculator works just fine with the
+new variation of the data structure:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>rpn (bstack <span class="mi">3</span> []) [<span class="mi">10</span>,<span class="mi">4</span>,<span class="mi">3</span>,(+),<span class="mi">2</span>,(*),(-)]<span class="p">;</span>
 <span class="mi">2</span>,[-<span class="mi">4</span>]
 <span class="gp">&gt; </span>rpn (bstack <span class="mi">2</span> []) [<span class="mi">10</span>,<span class="mi">4</span>,<span class="mi">3</span>,(+),<span class="mi">2</span>,(*),(-)]<span class="p">;</span>
@@ -3301,6 +3302,17 @@ still allow to be pushed). We also add a function to construct such values:</p>
 &#39;rpn (bstack <span class="mi">2</span> []) [<span class="mi">10</span>,<span class="mi">4</span>,<span class="mi">3</span>,(+),<span class="mi">2</span>,(*),(-)]&#39;
 </pre></div>
 </div>
+<p>While they&#8217;re quite useful in general, Pure&#8217;s interface types also have their
+limitations. In particular, the guarantees provided by an interface are of a
+purely syntactic nature; the signature doesn&#8217;t tell us anything about the
+actual meaning of the provided operations, so unit testing is still needed to
+ensure certain semantic properties of the implementation. Also, interface
+types are always defined in a purely syntactic way, by considering the
+left-hand sides of the definitions of the interface functions only. Guards are
+not taken into account, and thus the compiler cannot really guarantee that a
+member of an interface type will always be valid input to an interface
+function. Some further issues due to Pure&#8217;s dynamically typed nature are
+discussed under <a class="reference internal" href="#interfaces">Interfaces</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section.</p>
 </div>
 </div>
 <div class="section" id="examples">
@@ -9015,16 +9027,30 @@ top (x:xs) = x<span class="p">;</span>
 </div>
 <p>Finally, Pure&#8217;s interface types are really a compromise between theoretical
 soundness and practicality. From the theoretical point of view, we&#8217;d actually
-like an interface type to be the <em>intersection</em> of the instances of the
-candidate patterns for each interface function. Unfortunately, the set of
-patterns for such an intersection might well be exponential in size. Hence the
-approach taken in Pure is to eliminate those candidate patterns which aren&#8217;t
-supported by all interface functions. In general, this will produce a subtype
-of the theoretically optimal intersection type, but it can be computed much
-faster. In fact, this method also has the nice advantage that the compiler can
-warn about potentially missing rules for eliminated patterns in some of the
-interface operations. We&#8217;ve seen in the <a class="reference internal" href="#interface-types">Interface Types</a> section that this
-can be fairly useful at times.</p>
+like an interface type to be the <em>intersection</em> of the interface types for the
+individual interface functions. Unfortunately, the pattern set for such an
+intersection type might well be exponential in size. Hence the approach taken
+in Pure is to eliminate those candidate patterns which aren&#8217;t supported by all
+interface functions. This can be done much more efficiently, but will in
+general only produce a subtype of the intersection type. (On the other hand,
+this method also has the advantage that the compiler can warn about
+potentially missing rules in some of the interface operations. We&#8217;ve seen in
+the <a class="reference internal" href="#interface-types">Interface Types</a> section that this can be fairly useful at times.)</p>
+<p>Another issue arises with interface operations which allow the interface type
+in multiple arguments. A typical example are operators:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> addable <span class="kr">with</span> x<span class="p">::</span>addable + y<span class="p">::</span>addable<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In the present implementation, the pattern set will be the <em>union</em> of the
+pattern sets for each argument, so the above definition is in fact equivalent
+to:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> addable <span class="kr">with</span> x<span class="p">::</span>addable + y<span class="p">;</span> x + y<span class="p">::</span>addable<span class="p">;</span> <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This makes sense in most situations, but of course this depends on the
+particular operation. In some cases, you might have to decide on which
+argument you want to place the interface type tag, or even have different
+types for each possible argument position.</p>
 </div>
 <div class="section" id="numeric-calculations">
 <h3><a class="toc-backref" href="#id121">Numeric Calculations</a><a class="headerlink" href="#numeric-calculations" title="Permalink to this headline">¶</a></h3>

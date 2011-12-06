@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.50, November 29, 2011</p>
+<p>Version 0.50, December 06, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -983,12 +983,16 @@ optional and alternative code paths. This is supposed to cover the most common
 cases where conditional compilation is needed. (For more elaborate needs you
 can always use real Pure code which enables you to configure your program at
 runtime using, e.g., the <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> function.)</p>
-<p>Pure&#8217;s conditional compilation pragmas are based on the use of user-defined
+<p>Pure&#8217;s conditional compilation pragmas are based on the notion of user-defined
 symbols (which can be really any text that does not contain whitespace or any
 of the shell wildcard characters <tt class="docutils literal"><span class="pre">*?[]</span></tt>) called compilation <strong class="dfn">options</strong>. By
-default, all options are enabled. It is possible to disable an option by
-default, by setting a corresponding environment variable <tt class="docutils literal"><span class="pre">PURE_NOOPTION</span></tt>,
-where <tt class="docutils literal"><span class="pre">OPTION</span></tt> is the option symbol in uppercase.</p>
+default, all options are <em>undefined</em> and <em>enabled</em>. An option becomes
+<em>defined</em> as soon as it is set explicitly, either with an environment variable
+or one of the <a class="reference internal" href="#cmdoption-pure-pragma--enable"><em class="xref std std-option">--enable</em></a> and <a class="reference internal" href="#cmdoption-pure-pragma--disable"><em class="xref std std-option">--disable</em></a> pragmas, see below.</p>
+<p>You can define the value of an option by setting a corresponding environment
+variable <tt class="docutils literal"><span class="pre">PURE_OPTION_OPT</span></tt>, where <tt class="docutils literal"><span class="pre">OPT</span></tt> is the option symbol in uppercase.
+The value of the environment variable should either be <tt class="docutils literal"><span class="pre">0</span></tt> (disabled) or
+<tt class="docutils literal"><span class="pre">1</span></tt> (enabled).</p>
 <p>Options can be enabled and disabled in Pure scripts with the following
 pragmas, which are also available as command line options when invoking the
 Pure interpreter:</p>
@@ -997,11 +1001,24 @@ Pure interpreter:</p>
 <tt class="descname">--enable</tt><tt class="descclassname"> option</tt><a class="headerlink" href="#cmdoption-pure-pragma--enable" title="Permalink to this definition">¶</a></dt>
 <dt id="cmdoption-pure-pragma--disable">
 <tt class="descname">--disable</tt><tt class="descclassname"> option</tt><a class="headerlink" href="#cmdoption-pure-pragma--disable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enable or disable the given option, respectively.</p>
+<dd><p>Enable or disable the given option, respectively. Note that an option
+specified in the environment is overridden by a value specified with these
+options on the command line, which in turn is overridden by a corresponding
+pragma in source code.</p>
 </dd></dl>
 
-<p>The actual conditional compilation pragmas work in exactly the same fashion as
-the C preprocessor directives <tt class="docutils literal"><span class="pre">#ifdef</span></tt> and <tt class="docutils literal"><span class="pre">#ifndef</span></tt>.</p>
+<p>The actual conditional compilation pragmas work in pretty much the same
+fashion as the C preprocessor directives <tt class="docutils literal"><span class="pre">#if</span></tt>, <tt class="docutils literal"><span class="pre">#ifdef</span></tt> etc. (except
+that, as already mentioned, an option is always <em>enabled</em> if it is undefined).</p>
+<dl class="option">
+<dt id="cmdoption-pure-pragma--ifdef">
+<tt class="descname">--ifdef</tt><tt class="descclassname"> option</tt><a class="headerlink" href="#cmdoption-pure-pragma--ifdef" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-pure-pragma--ifndef">
+<tt class="descname">--ifndef</tt><tt class="descclassname"> option</tt><a class="headerlink" href="#cmdoption-pure-pragma--ifndef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Begins a code section which should be included in the program if the given
+option is defined or undefined, respectively.</p>
+</dd></dl>
+
 <dl class="option">
 <dt id="cmdoption-pure-pragma--if">
 <tt class="descname">--if</tt><tt class="descclassname"> option</tt><a class="headerlink" href="#cmdoption-pure-pragma--if" title="Permalink to this definition">¶</a></dt>
@@ -1015,8 +1032,8 @@ option is enabled or disabled, respectively.</p>
 <dt id="cmdoption-pure-pragma--else">
 <tt class="descname">--else</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-pure-pragma--else" title="Permalink to this definition">¶</a></dt>
 <dd><p>Begins an alternative code section which is included in the program if the
-corresponding <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or <a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> section was excluded, and
-vice versa.</p>
+corresponding <a class="reference internal" href="#cmdoption-pure-pragma--ifdef"><em class="xref std std-option">--ifdef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--ifndef"><em class="xref std std-option">--ifndef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or
+<a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> section was excluded, and vice versa.</p>
 </dd></dl>
 
 <dl class="option">
@@ -1026,20 +1043,35 @@ vice versa.</p>
 </dd></dl>
 
 <p>Conditional code sections may be nested to an arbitrary depth. Each
-<a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or <a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> pragma must be followed by a matching
-<a class="reference internal" href="#cmdoption-pure-pragma--endif"><em class="xref std std-option">--endif</em></a>. The <a class="reference internal" href="#cmdoption-pure-pragma--else"><em class="xref std std-option">--else</em></a> section is optional; if present, it
-applies to the most recent <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or <a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> section not
-terminated by a matching <a class="reference internal" href="#cmdoption-pure-pragma--endif"><em class="xref std std-option">--endif</em></a>. Unmatched <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a>,
-<a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--else"><em class="xref std std-option">--else</em></a> and <a class="reference internal" href="#cmdoption-pure-pragma--endif"><em class="xref std std-option">--endif</em></a> pragmas warrant an
-error message by the compiler.</p>
+<a class="reference internal" href="#cmdoption-pure-pragma--ifdef"><em class="xref std std-option">--ifdef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--ifndef"><em class="xref std std-option">--ifndef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or <a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a>
+pragma must be followed by a matching <a class="reference internal" href="#cmdoption-pure-pragma--endif"><em class="xref std std-option">--endif</em></a>. The <a class="reference internal" href="#cmdoption-pure-pragma--else"><em class="xref std std-option">--else</em></a>
+section is optional; if present, it applies to the most recent
+<a class="reference internal" href="#cmdoption-pure-pragma--ifdef"><em class="xref std std-option">--ifdef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--ifndef"><em class="xref std std-option">--ifndef</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a> or <a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a>
+section not terminated by a matching <a class="reference internal" href="#cmdoption-pure-pragma--endif"><em class="xref std std-option">--endif</em></a>. Unmatched conditional
+pragmas warrant an error message by the compiler.</p>
 <p>Conditional code is handled at the level of the lexical analyzer. Excluded
 code sections are treated like comments, i.e., the parser never gets to see
 them.</p>
+<p>The <a class="reference internal" href="#cmdoption-pure-pragma--ifdef"><em class="xref std std-option">--ifdef</em></a> and <a class="reference internal" href="#cmdoption-pure-pragma--ifndef"><em class="xref std std-option">--ifndef</em></a> pragmas are typically used to
+change the default of an option without globbering defaults set by the user
+through an environment variable or a command line option. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --ifndef opt</span>
+<span class="cp">#! --disable opt</span>
+<span class="cp">#! --endif</span>
+</pre></div>
+</div>
 <p>Here&#8217;s a (rather contrived) example which shows all these pragmas in action.
 You may want to type this in the interpreter to verify that the code sections
 are indeed included and excluded from the Pure program as indicated:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="c1">// disable the &#39;bar&#39; option</span>
 <span class="cp">#! --disable bar</span>
+
+<span class="cp">#! --ifdef foo</span>
+<span class="mi">1</span>/<span class="mi">2</span><span class="p">;</span> <span class="c1">// excluded</span>
+<span class="cp">#! --endif</span>
+<span class="cp">#! --ifndef bar</span>
+<span class="mi">1</span>/<span class="mi">3</span><span class="p">;</span> <span class="c1">// excluded</span>
+<span class="cp">#! --endif</span>
 
 <span class="cp">#! --if foo</span>
 foo x = x+<span class="mi">1</span><span class="p">;</span> <span class="c1">// included</span>
@@ -1062,11 +1094,11 @@ baz x = <span class="mi">2</span>*x<span class="p">;</span> <span class="c1">// 
 <span class="cp">#! --endif // not foo</span>
 </pre></div>
 </div>
-<p>A few options are always provided as &#8220;builtins&#8221; by the interpreter. This
+<p>A few options are always predefined as &#8220;builtins&#8221; by the interpreter. This
 includes all of the options described under <a class="reference internal" href="#code-generation-options">Code Generation Options</a> and
 <a class="reference internal" href="#warning-options">Warning Options</a>, so that these can also be queried with <a class="reference internal" href="#cmdoption-pure-pragma--if"><em class="xref std std-option">--if</em></a>,
-<a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> and set with <a class="reference internal" href="#cmdoption-pure-pragma--enable"><em class="xref std std-option">--enable</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--disable"><em class="xref std std-option">--disable</em></a>.
-For instance:</p>
+<a class="reference internal" href="#cmdoption-pure-pragma--ifnot"><em class="xref std std-option">--ifnot</em></a> and set with <a class="reference internal" href="#cmdoption-pure-pragma--enable"><em class="xref std std-option">--enable</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--disable"><em class="xref std std-option">--disable</em></a>. For
+instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --ifnot checks</span>
 puts <span class="s">&quot;This program uses deep recursion, so we enable stack checks here!&quot;</span><span class="p">;</span>
 <span class="cp">#! --enable checks</span>
@@ -1082,15 +1114,16 @@ puts <span class="s">&quot;I have only proved it correct, not tried it.&quot;</s
 useful for handling special compilation requirements as well as system and
 version dependencies.</p>
 <ul>
-<li><p class="first">The <tt class="docutils literal"><span class="pre">compiled</span></tt> option is set if a program is batch-compiled. This lets you
-pick alternative code paths depending on whether a script is compiled to a
-native executable or not. Please see the example at the end of the <a class="reference internal" href="#batch-compilation">Batch
+<li><p class="first">The <tt class="docutils literal"><span class="pre">compiled</span></tt> option is enabled if a program is batch-compiled. This lets
+you pick alternative code paths depending on whether a script is compiled to
+a native executable or not. Please see the example at the end of the <a class="reference internal" href="#batch-compilation">Batch
 Compilation</a> section for details.</p>
 </li>
-<li><p class="first">The <tt class="docutils literal"><span class="pre">interactive</span></tt> and <tt class="docutils literal"><span class="pre">debugging</span></tt> options are set if a program runs in
-interactive (<a class="reference internal" href="#cmdoption-pure-i"><em class="xref std std-option">-i</em></a>) and/or debugging (<a class="reference internal" href="#cmdoption-pure-g"><em class="xref std std-option">-g</em></a>)
-mode, respectively. These options are read-only; they cannot be changed with
-<a class="reference internal" href="#cmdoption-pure-pragma--enable"><em class="xref std std-option">--enable</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--disable"><em class="xref std std-option">--disable</em></a>. Example:</p>
+<li><p class="first">The <tt class="docutils literal"><span class="pre">interactive</span></tt> and <tt class="docutils literal"><span class="pre">debugging</span></tt> options are enabled if a program runs
+in interactive (<a class="reference internal" href="#cmdoption-pure-i"><em class="xref std std-option">-i</em></a>) and/or debugging
+(<a class="reference internal" href="#cmdoption-pure-g"><em class="xref std std-option">-g</em></a>) mode, respectively. These options are read-only;
+they cannot be changed with <a class="reference internal" href="#cmdoption-pure-pragma--enable"><em class="xref std std-option">--enable</em></a>, <a class="reference internal" href="#cmdoption-pure-pragma--disable"><em class="xref std std-option">--disable</em></a>.
+Example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --if interactive</span>
 puts <span class="s">&quot;Usage: run &#39;main filename&#39;&quot;</span><span class="p">;</span>
 <span class="cp">#! --else</span>

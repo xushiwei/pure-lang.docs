@@ -14,7 +14,7 @@ File: pd-pure.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-pure
 *******
 
-  Version 0.15, December 15, 2011
+  Version 0.15, December 17, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -27,7 +27,9 @@ versions 0.34 and later. In particular, note that Pure is a _compiled_
 language and thus there are some inevitable latencies at startup, when
 the embedded Pure interpreter loads your Pure scripts and compiles them
 on the fly. However, once the scripts have been compiled, they are
-executed very efficiently.
+executed very efficiently. As of pd-pure 0.15, it is also possible to
+_precompile_ a collection of Pure objects to a library in binary format
+which can be loaded much faster with Pd's `-lib' option.
 
 * Menu:
 
@@ -61,6 +63,7 @@ Advanced Features
 * Controlling the Runtime::
 * Livecoding::
 * Remote Control::
+* Compiling Objects::
 * Programming Interface::
 
 
@@ -758,6 +761,7 @@ give an overview of the API provided for pd-pure programmers.
 * Controlling the Runtime::
 * Livecoding::
 * Remote Control::
+* Compiling Objects::
 * Programming Interface::
 
 
@@ -1069,7 +1073,7 @@ additions to support the `pd_save'/`pd_restore' protocol:
 
 
 
-File: pd-pure.info,  Node: Remote Control,  Next: Programming Interface,  Prev: Livecoding,  Up: Advanced Features
+File: pd-pure.info,  Node: Remote Control,  Next: Compiling Objects,  Prev: Livecoding,  Up: Advanced Features
 
 6.6 Remote Control
 ==================
@@ -1119,9 +1123,37 @@ gives you a nice interactive environment for developing pd-pure
 applications.
 
 
-File: pd-pure.info,  Node: Programming Interface,  Prev: Remote Control,  Up: Advanced Features
+File: pd-pure.info,  Node: Compiling Objects,  Next: Programming Interface,  Prev: Remote Control,  Up: Advanced Features
 
-6.7 Programming Interface
+6.7 Compiling Objects
+=====================
+
+pd-pure's livecoding abilities require that objects are run from source
+code.  As already mentioned, this needs some (in some cases,
+substantial) time at startup when the Pure interpreter is loaded and
+your Pure scripts are compiled to native code on the fly. This is
+wasted effort if you are finished developing your Pure objects and just
+want to run them as they are.
+
+  Therefore pd-pure also supports compiling a collection of Pure
+objects to a binary which can be loaded with Pd's `-lib' option just
+like any other external library of Pd objects. This basically involves
+using the Pure interpreter as a batch compiler to translate the Pure
+scripts implementing the objects to a shared library. You also have to
+link in a small amount of C code so that the shared module can be
+loaded by Pd and registers its Pd object classes with pd-pure. The
+examples/lib folder contains a complete example showing how this is
+done.
+
+  Note that even if you load all your pd-pure objects from such
+libraries, you still need to load the pd-pure module first, since it
+provides the basic infrastructure required to run any kind of pd-pure
+object (no matter whether it's implemented in compiled or source form).
+
+
+File: pd-pure.info,  Node: Programming Interface,  Prev: Compiling Objects,  Up: Advanced Features
+
+6.8 Programming Interface
 =========================
 
 The Pure loader provides a number of interface routines which can be
@@ -1164,7 +1196,7 @@ order to access these functions, you'll have to add the corresponding
      `menu-open' action (accessible by right-clicking on a Pure object
      and selecting `Open'). This is usually the Pure script of the
      object, if available, but this can be changed with *note
-     pd_setfile: 23. below. The function must be called during object
+     pd_setfile: 24. below. The function must be called during object
      creation or in the method calls of an object, so that it is clear
      what the current object is; otherwise the function will fail.
 
@@ -1184,7 +1216,7 @@ order to access these functions, you'll have to add the corresponding
      "%s" s'.
 
  -- Function: extern void pd_error_s (char *s)
-     Like *note pd_post: 24, but prints an error message instead. If
+     Like *note pd_post: 25, but prints an error message instead. If
      this routine is invoked from an object (i.e., during object
      creation or a method call) then Pd's `pd_error()' function is
      called, which allows the object to be tracked down with Pd's `Find
@@ -1225,7 +1257,7 @@ order to access these functions, you'll have to add the corresponding
      Pd and Pure scripts; see *note Reading and Writing Audio Data: 1a.
      above for an example.
 
-     *note pd_getbuffersize: 27. and *note pd_setbuffersize: 28. gets
+     *note pd_getbuffersize: 28. and *note pd_setbuffersize: 29. gets
      or sets the size of the given buffer, respectively.
 
      *note pd_getbuffer: 1b. reads the contents of the buffer and
@@ -1289,122 +1321,126 @@ Tag Table:
 Node: Top261
 Ref: 0554
 Ref: pd554
-Node: Copying1518
-Ref: copying1599
-Ref: 11599
-Ref: pd-pure-pd-loader-for-pure-scripts1599
-Ref: 21599
-Node: Installation1771
-Ref: installation1854
-Ref: 31854
-Node: pd-pure on Windows2808
-Ref: pd-pure on windows2876
-Ref: 42876
-Ref: pd-pure-on-windows2876
-Ref: 54176
-Ref: mingw4176
-Node: Usage4176
-Ref: usage4267
-Ref: 64267
-Node: Control Objects7605
-Ref: control objects7697
-Ref: 77697
-Ref: control-objects7697
-Node: Simple Objects10507
-Ref: simple objects10601
-Ref: a10601
-Ref: simple-objects10601
-Node: Creation Arguments11016
-Ref: creation arguments11136
-Ref: b11136
-Ref: creation-arguments11136
-Node: The [pure] Object11450
-Ref: the [pure] object11586
-Ref: c11586
-Ref: the-pure-object11586
-Node: Configuring Inlets and Outlets12665
-Ref: configuring inlets and outlets12794
-Ref: e12794
-Ref: configuring-inlets-and-outlets12794
-Node: Local State15567
-Ref: local state15670
-Ref: f15670
-Ref: local-state15670
-Node: Audio Objects16305
-Ref: audio objects16409
-Ref: 816409
-Ref: audio-objects16409
-Ref: 1024527
-Ref: faust24527
-Node: Advanced Features30343
-Ref: advanced features30437
-Ref: 930437
-Ref: advanced-features30437
-Node: Asynchronous Messages30933
-Ref: asynchronous messages31036
-Ref: 1231036
-Ref: asynchronous-messages31036
-Node: Wireless Messaging34453
-Ref: wireless messaging34595
-Ref: 1534595
-Ref: wireless-messaging34595
-Ref: 1836118
-Ref: tips-and-tricks36118
-Ref: 1936118
-Ref: id136118
-Node: Reading and Writing Audio Data37402
-Ref: reading and writing audio data37546
-Ref: 1a37546
-Ref: reading-and-writing-audio-data37546
-Node: Controlling the Runtime38924
-Ref: controlling the runtime39060
-Ref: d39060
-Ref: controlling-the-runtime39060
-Node: Livecoding40632
-Ref: livecoding40752
-Ref: 1140752
-Node: Remote Control45288
-Ref: remote control45406
-Ref: 1d45406
-Ref: remote-control45406
-Node: Programming Interface48036
-Ref: programming interface48135
-Ref: 1448135
-Ref: programming-interface48135
-Ref: 1e48434
-Ref: pd_version_s48434
-Ref: 1f48838
-Ref: pd_path48838
-Ref: 2049089
-Ref: pd_libdir49089
-Ref: 2149281
-Ref: pd_getdir49281
-Ref: 2249832
-Ref: pd_getfile49832
-Ref: 2350345
-Ref: pd_setfile50345
-Ref: 2450822
-Ref: pd_post50822
-Ref: 2551094
-Ref: pd_error_s51094
-Ref: 1351580
-Ref: pd_time51580
-Ref: 1651850
-Ref: pd_send51850
-Ref: 1752084
-Ref: pd_receive52084
-Ref: 2652566
-Ref: pd_unreceive52566
-Ref: 1b52751
-Ref: pd_getbuffer52751
-Ref: 1c52805
-Ref: pd_setbuffer52805
-Ref: 2752868
-Ref: pd_getbuffersize52868
-Ref: 2852924
-Ref: pd_setbuffersize52924
-Node: Index54080
-Ref: index54152
+Node: Copying1712
+Ref: copying1793
+Ref: 11793
+Ref: pd-pure-pd-loader-for-pure-scripts1793
+Ref: 21793
+Node: Installation1965
+Ref: installation2048
+Ref: 32048
+Node: pd-pure on Windows3002
+Ref: pd-pure on windows3070
+Ref: 43070
+Ref: pd-pure-on-windows3070
+Ref: 54370
+Ref: mingw4370
+Node: Usage4370
+Ref: usage4461
+Ref: 64461
+Node: Control Objects7799
+Ref: control objects7891
+Ref: 77891
+Ref: control-objects7891
+Node: Simple Objects10701
+Ref: simple objects10795
+Ref: a10795
+Ref: simple-objects10795
+Node: Creation Arguments11210
+Ref: creation arguments11330
+Ref: b11330
+Ref: creation-arguments11330
+Node: The [pure] Object11644
+Ref: the [pure] object11780
+Ref: c11780
+Ref: the-pure-object11780
+Node: Configuring Inlets and Outlets12859
+Ref: configuring inlets and outlets12988
+Ref: e12988
+Ref: configuring-inlets-and-outlets12988
+Node: Local State15761
+Ref: local state15864
+Ref: f15864
+Ref: local-state15864
+Node: Audio Objects16499
+Ref: audio objects16603
+Ref: 816603
+Ref: audio-objects16603
+Ref: 1024721
+Ref: faust24721
+Node: Advanced Features30537
+Ref: advanced features30631
+Ref: 930631
+Ref: advanced-features30631
+Node: Asynchronous Messages31149
+Ref: asynchronous messages31252
+Ref: 1231252
+Ref: asynchronous-messages31252
+Node: Wireless Messaging34669
+Ref: wireless messaging34811
+Ref: 1534811
+Ref: wireless-messaging34811
+Ref: 1836334
+Ref: tips-and-tricks36334
+Ref: 1936334
+Ref: id136334
+Node: Reading and Writing Audio Data37618
+Ref: reading and writing audio data37762
+Ref: 1a37762
+Ref: reading-and-writing-audio-data37762
+Node: Controlling the Runtime39140
+Ref: controlling the runtime39276
+Ref: d39276
+Ref: controlling-the-runtime39276
+Node: Livecoding40848
+Ref: livecoding40968
+Ref: 1140968
+Node: Remote Control45504
+Ref: remote control45618
+Ref: 1d45618
+Ref: remote-control45618
+Node: Compiling Objects48248
+Ref: compiling objects48373
+Ref: 1e48373
+Ref: compiling-objects48373
+Node: Programming Interface49618
+Ref: programming interface49720
+Ref: 1449720
+Ref: programming-interface49720
+Ref: 1f50019
+Ref: pd_version_s50019
+Ref: 2050423
+Ref: pd_path50423
+Ref: 2150674
+Ref: pd_libdir50674
+Ref: 2250866
+Ref: pd_getdir50866
+Ref: 2351417
+Ref: pd_getfile51417
+Ref: 2451930
+Ref: pd_setfile51930
+Ref: 2552407
+Ref: pd_post52407
+Ref: 2652679
+Ref: pd_error_s52679
+Ref: 1353165
+Ref: pd_time53165
+Ref: 1653435
+Ref: pd_send53435
+Ref: 1753669
+Ref: pd_receive53669
+Ref: 2754151
+Ref: pd_unreceive54151
+Ref: 1b54336
+Ref: pd_getbuffer54336
+Ref: 1c54390
+Ref: pd_setbuffer54390
+Ref: 2854453
+Ref: pd_getbuffersize54453
+Ref: 2954509
+Ref: pd_setbuffersize54509
+Node: Index55665
+Ref: index55737
 
 End Tag Table
 

@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.50, December 15, 2011</p>
+<p>Version 0.50, December 18, 2011</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -464,6 +464,12 @@ this flag will be ignored.</p>
 <dt id="cmdoption-pure-l">
 <tt class="descname">-l</tt><tt class="descclassname"> libname</tt><a class="headerlink" href="#cmdoption-pure-l" title="Permalink to this definition">¶</a></dt>
 <dd><p>Library to be linked in batch compilation.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-pure--main">
+<tt class="descname">--main</tt><tt class="descclassname"> name</tt><a class="headerlink" href="#cmdoption-pure--main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of main entry point in batch compilation.</p>
 </dd></dl>
 
 <dl class="option">
@@ -8520,8 +8526,29 @@ position-independent code is generated:</p>
 <div class="highlight-pure"><div class="highlight"><pre>$ pure -c -fPIC pure-odbc/examples/menagerie.pure -o menagerie.o
 </pre></div>
 </div>
-<p>Also note that even when building a shared module, you&#8217;ll have to supply an
+<p>Note that even when building a shared module, you&#8217;ll have to supply an
 initialization routine which calls <tt class="docutils literal"><span class="pre">__pure_main__</span></tt> somewhere.</p>
+<p>Also note that since Pure doesn&#8217;t support separate compilation in the present
+implementation, if you create different shared modules like this, each will
+contain their own copy all the required Pure functions from the prelude and
+other imported Pure modules. This becomes a problem when trying to link
+several separate batch-compiled modules into the same executable or library,
+because you&#8217;ll get many name clashes for routines present in different modules
+(including the <tt class="docutils literal"><span class="pre">__pure_main__</span></tt> entry point). To prevent this, the batch
+compiler can be invoked with the <a class="reference internal" href="#cmdoption-pure--main"><em class="xref std std-option">--main</em></a> option to explicitly set a
+name for the main entry point. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre>$ pure -c hello.pure -o hello.o --main __hello_main__
+</pre></div>
+</div>
+<p>This has two effects. First, the main entry point will be called whatever you
+specified with <a class="reference internal" href="#cmdoption-pure--main"><em class="xref std std-option">--main</em></a>, so you have to call this function instead of
+<tt class="docutils literal"><span class="pre">__pure_main__</span></tt> to initialize the module. Second, if <a class="reference internal" href="#cmdoption-pure--main"><em class="xref std std-option">--main</em></a> is
+specified, then all Pure functions in the module will be changed to internal
+linkage (like <tt class="docutils literal"><span class="pre">static</span></tt> functions in C) to prevent any possible name clashes
+between different modules. (Alas, this also makes it impossible to employ
+<tt class="docutils literal"><span class="pre">pure_funcall</span></tt> to call Pure functions directly from C, as described in the
+following section, so you&#8217;ll have to use other runtime routines such as
+<tt class="docutils literal"><span class="pre">pure_eval</span></tt> or <tt class="docutils literal"><span class="pre">pure_appl</span></tt> to achieve this in an indirect way.)</p>
 <p>Last but not least, <tt class="docutils literal"><span class="pre">pure</span> <span class="pre">-c</span></tt> can also generate just plain LLVM assembler
 code:</p>
 <div class="highlight-pure"><div class="highlight"><pre>pure -c hello.pure -o hello.ll

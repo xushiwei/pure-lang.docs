@@ -14,7 +14,7 @@ File: pd-pure.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-pure
 *******
 
-  Version 0.15, December 17, 2011
+  Version 0.15, December 18, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -29,7 +29,8 @@ the embedded Pure interpreter loads your Pure scripts and compiles them
 on the fly. However, once the scripts have been compiled, they are
 executed very efficiently. As of pd-pure 0.15, it is also possible to
 _precompile_ a collection of Pure objects to a library in binary format
-which can be loaded much faster with Pd's `-lib' option.
+which can be loaded much faster with Pd's `-lib' option. (This requires
+Pure 0.50 or later.)
 
 * Menu:
 
@@ -112,31 +113,11 @@ File: pd-pure.info,  Node: pd-pure on Windows,  Up: Installation
 2.1 pd-pure on Windows
 ======================
 
-There's a binary package in MSI format available at the Pure website. In
-addition, you'll need the Pure interpreter, and a version of Pd which
-has been compiled with mingw (http://mingw.org); for your convenience,
-we provide a package for that as well. You can find all packages on the
-Download page at <http://pure-lang.googlecode.com>. For instance, at
-the time of this writing, the available packages are:
-
-   * <http://pure-lang.googlecode.com/files/pure-0.50.msi>
-
-   * <http://pure-lang.googlecode.com/files/pd-mingw-0.42-5.msi>
-
-   * <http://pure-lang.googlecode.com/files/pd-pure-0.15.msi>
-
-  Make sure that you get the latest versions of these packages. After
-installing the packages, you still have to configure Pd to load the
-`pure' external at startup (see above).
-
-  Please note that our binary pd-pure package does _not_ work with the
-official Windows binaries of Pd available at
-<http://crca.ucsd.edu/~msp/software.html>.  Apparently, some
-mingw-compiled plugins fail to load in a Pd version compiled with MSVC
-because of version mismatches in required libraries. Unfortunately,
-pd-pure is one of those (pthreadGC2.dll seems to be the main culprit
-here). So you'll have to use the mingw-compiled Pd version we provide,
-or roll your own.
+There's a binary package in MSI format available at the Pure website:
+<http://pure-lang.googlecode.com/files/pd-pure-0.15.msi>. Use that if
+you can. You'll also need the latest Pure version (0.50 at the time of
+this writing), and Pd 0.43 or later, which is available from Miller
+Puckette's website: <http://crca.ucsd.edu/~msp/software.html>.
 
 
 File: pd-pure.info,  Node: Usage,  Next: Control Objects,  Prev: Installation,  Up: Top
@@ -212,10 +193,10 @@ named Pure object in a text editor, provided that your Pd version
 supports the `menu-open' command.)
 
   In the following section, we first discuss in detail how *note
-control objects: 7.  are defined and used. After that, the necessary
-adjustments for implementing *note audio objects: 8. are explained.
+control objects: 6.  are defined and used. After that, the necessary
+adjustments for implementing *note audio objects: 7. are explained.
 Some advanced uses of pd-pure are described under *note Advanced
-Features: 9.
+Features: 8.
 
 
 File: pd-pure.info,  Node: Control Objects,  Next: Audio Objects,  Prev: Usage,  Up: Top
@@ -321,7 +302,7 @@ without actually preparing a script file. The creation parameter of
 function, or you can define it on the fly in a `with' clause. (It is
 also possible to explicitly load additional script files needed to
 implement objects defined using `[pure]'; see *note Controlling the
-Runtime: d. for details.)
+Runtime: c. for details.)
 
   For instance, `[pure succ]' uses the predefined Pure function `succ'
 which adds 1 to its input, while the object `[pure add 5 with add x y =
@@ -740,7 +721,7 @@ However, invoking Faust dsps via Pure also offers some benefits. In
 particular, it enables you to add more sophisticated control
 processing, interface to other 3rd party software for additional pre-
 and postprocessing of the signal data, or do live editing of Faust
-programs using the facilities described in *note Livecoding: 11. below.
+programs using the facilities described in *note Livecoding: 10. below.
 
 
 File: pd-pure.info,  Node: Advanced Features,  Next: Index,  Prev: Audio Objects,  Up: Top
@@ -820,9 +801,9 @@ More elaborate functionality can be built on top of the basic timer
 facility.  The following example shows how to maintain a timed message
 queue in a Pure list, in order to implement a simple delay line similar
 to Pd's builtin `pipe' object. Here we also employ the *note pd_time:
-13. function, which is provided by the Pure loader so that Pure scripts
+12. function, which is provided by the Pure loader so that Pure scripts
 can access the current logical Pd time in milliseconds (see *note
-Programming Interface: 14. below). This is convenient if we need to
+Programming Interface: 13. below). This is convenient if we need to
 deal with absolute time values, which we use in this example to keep
 track of the times at which messages in the queue are to be delivered:
 
@@ -849,8 +830,8 @@ As of version 0.14, pd-pure offers some facilities for sending and
 receiving messages directly, without any wired connections to the
 inlets and outlets of an object (similar to what the Pd `[send]' and
 `[receive]' objects provide). See the description for the *note
-pd_send: 16. and *note pd_receive: 17. routines in the *note
-Programming Interface: 14. section.
+pd_send: 15. and *note pd_receive: 16. routines in the *note
+Programming Interface: 13. section.
 
   For instance, here's how you can use the `pd_send' function to send
 messages to the Pd runtime:
@@ -923,8 +904,8 @@ loop, or as waveshaping functions used to implement distortion effects.
   Each array has a name (Pd symbol) under which it can be accessed from
 Pure code. pd-pure makes it possible to transfer audio data directly
 between Pd arrays and Pure double vectors by means of the *note
-pd_getbuffer: 1b. and *note pd_setbuffer: 1c. routines. Please see
-*note Programming Interface: 14. below for a closer description of the
+pd_getbuffer: 1a. and *note pd_setbuffer: 1b. routines. Please see
+*note Programming Interface: 13. below for a closer description of the
 provided routines.
 
   For instance, here is a `randomwave' object which fills a Pd array
@@ -1036,7 +1017,7 @@ does have some limitations:
 
   Also note that the reloading of object scripts amounts to a "cold
 restart" of the Pure objects in your patches. If a Pure object keeps
-some *note local state: f, it will be lost. As a remedy, the loader
+some *note local state: e, it will be lost. As a remedy, the loader
 implements a simple protocol which allows Pure objects to record their
 internal state before a script gets reloaded, and restore it
 afterwards. To these ends, a Pure object may respond to the following
@@ -1060,7 +1041,7 @@ two messages:
 object must subscribe to it. This is done by setting `pd_save' as a
 sentry on the object function (see the description of the `sentry'
 function in the `purelib' for details). For instance, here's the
-counter example from *note Local State: f. again, with the necessary
+counter example from *note Local State: e. again, with the necessary
 additions to support the `pd_save'/`pd_restore' protocol:
 
     nonfix bang pd_save;
@@ -1196,7 +1177,7 @@ order to access these functions, you'll have to add the corresponding
      `menu-open' action (accessible by right-clicking on a Pure object
      and selecting `Open'). This is usually the Pure script of the
      object, if available, but this can be changed with *note
-     pd_setfile: 24. below. The function must be called during object
+     pd_setfile: 23. below. The function must be called during object
      creation or in the method calls of an object, so that it is clear
      what the current object is; otherwise the function will fail.
 
@@ -1216,7 +1197,7 @@ order to access these functions, you'll have to add the corresponding
      "%s" s'.
 
  -- Function: extern void pd_error_s (char *s)
-     Like *note pd_post: 25, but prints an error message instead. If
+     Like *note pd_post: 24, but prints an error message instead. If
      this routine is invoked from an object (i.e., during object
      creation or a method call) then Pd's `pd_error()' function is
      called, which allows the object to be tracked down with Pd's `Find
@@ -1228,7 +1209,7 @@ order to access these functions, you'll have to add the corresponding
      Retrieves the current Pd time as a double value in milliseconds,
      which is useful, in particular, when used in conjunction with the
      asynchronous message facility described under *note Asynchronous
-     Messages: 12.
+     Messages: 11.
 
  -- Function: extern void pd_send (char *sym, expr *x)
      Sends a message, specified as a Pure term `x', to the receiver
@@ -1254,22 +1235,22 @@ order to access these functions, you'll have to add the corresponding
  -- Function: extern void pd_setbuffersize (char *name, uint32_t sz)
      Routines to access the Pd array (sample buffer) with the given
      name. These functions can be used to transfer audio data between
-     Pd and Pure scripts; see *note Reading and Writing Audio Data: 1a.
+     Pd and Pure scripts; see *note Reading and Writing Audio Data: 19.
      above for an example.
 
-     *note pd_getbuffersize: 28. and *note pd_setbuffersize: 29. gets
+     *note pd_getbuffersize: 27. and *note pd_setbuffersize: 28. gets
      or sets the size of the given buffer, respectively.
 
-     *note pd_getbuffer: 1b. reads the contents of the buffer and
+     *note pd_getbuffer: 1a. reads the contents of the buffer and
      returns it as a Pure vector (or fails if the array with the given
      name doesn't exist).
 
-     *note pd_setbuffer: 1c. sets the contents of the buffer from the
+     *note pd_setbuffer: 1b. sets the contents of the buffer from the
      given Pure vector `x'. If the size of the vector exceeds the size
      of the buffer, the former is truncated. Conversely, if the size of
      the buffer exceeds the size of the Pure vector, the trailing
      samples are unaffected. _Note:_ The second argument of *note
-     pd_setbuffer: 1c. can also be a pair `(i,x)' denoting an offset
+     pd_setbuffer: 1b. can also be a pair `(i,x)' denoting an offset
      `i' into the array at which the sample data is to be written, so
      that this routine allows you to overwrite any part of the array.
 
@@ -1321,126 +1302,124 @@ Tag Table:
 Node: Top261
 Ref: 0554
 Ref: pd554
-Node: Copying1712
-Ref: copying1793
-Ref: 11793
-Ref: pd-pure-pd-loader-for-pure-scripts1793
-Ref: 21793
-Node: Installation1965
-Ref: installation2048
-Ref: 32048
-Node: pd-pure on Windows3002
-Ref: pd-pure on windows3070
-Ref: 43070
-Ref: pd-pure-on-windows3070
-Ref: 54370
-Ref: mingw4370
-Node: Usage4370
-Ref: usage4461
-Ref: 64461
-Node: Control Objects7799
-Ref: control objects7891
-Ref: 77891
-Ref: control-objects7891
-Node: Simple Objects10701
-Ref: simple objects10795
-Ref: a10795
-Ref: simple-objects10795
-Node: Creation Arguments11210
-Ref: creation arguments11330
-Ref: b11330
-Ref: creation-arguments11330
-Node: The [pure] Object11644
-Ref: the [pure] object11780
-Ref: c11780
-Ref: the-pure-object11780
-Node: Configuring Inlets and Outlets12859
-Ref: configuring inlets and outlets12988
-Ref: e12988
-Ref: configuring-inlets-and-outlets12988
-Node: Local State15761
-Ref: local state15864
-Ref: f15864
-Ref: local-state15864
-Node: Audio Objects16499
-Ref: audio objects16603
-Ref: 816603
-Ref: audio-objects16603
-Ref: 1024721
-Ref: faust24721
-Node: Advanced Features30537
-Ref: advanced features30631
-Ref: 930631
-Ref: advanced-features30631
-Node: Asynchronous Messages31149
-Ref: asynchronous messages31252
-Ref: 1231252
-Ref: asynchronous-messages31252
-Node: Wireless Messaging34669
-Ref: wireless messaging34811
-Ref: 1534811
-Ref: wireless-messaging34811
-Ref: 1836334
-Ref: tips-and-tricks36334
-Ref: 1936334
-Ref: id136334
-Node: Reading and Writing Audio Data37618
-Ref: reading and writing audio data37762
-Ref: 1a37762
-Ref: reading-and-writing-audio-data37762
-Node: Controlling the Runtime39140
-Ref: controlling the runtime39276
-Ref: d39276
-Ref: controlling-the-runtime39276
-Node: Livecoding40848
-Ref: livecoding40968
-Ref: 1140968
-Node: Remote Control45504
-Ref: remote control45618
-Ref: 1d45618
-Ref: remote-control45618
-Node: Compiling Objects48248
-Ref: compiling objects48373
-Ref: 1e48373
-Ref: compiling-objects48373
-Node: Programming Interface49618
-Ref: programming interface49720
-Ref: 1449720
-Ref: programming-interface49720
-Ref: 1f50019
-Ref: pd_version_s50019
-Ref: 2050423
-Ref: pd_path50423
-Ref: 2150674
-Ref: pd_libdir50674
-Ref: 2250866
-Ref: pd_getdir50866
-Ref: 2351417
-Ref: pd_getfile51417
-Ref: 2451930
-Ref: pd_setfile51930
-Ref: 2552407
-Ref: pd_post52407
-Ref: 2652679
-Ref: pd_error_s52679
-Ref: 1353165
-Ref: pd_time53165
-Ref: 1653435
-Ref: pd_send53435
-Ref: 1753669
-Ref: pd_receive53669
-Ref: 2754151
-Ref: pd_unreceive54151
-Ref: 1b54336
-Ref: pd_getbuffer54336
-Ref: 1c54390
-Ref: pd_setbuffer54390
-Ref: 2854453
-Ref: pd_getbuffersize54453
-Ref: 2954509
-Ref: pd_setbuffersize54509
-Node: Index55665
-Ref: index55737
+Node: Copying1748
+Ref: copying1829
+Ref: 11829
+Ref: pd-pure-pd-loader-for-pure-scripts1829
+Ref: 21829
+Node: Installation2001
+Ref: installation2084
+Ref: 32084
+Node: pd-pure on Windows3038
+Ref: pd-pure on windows3106
+Ref: 43106
+Ref: pd-pure-on-windows3106
+Node: Usage3496
+Ref: usage3587
+Ref: 53587
+Node: Control Objects6925
+Ref: control objects7017
+Ref: 67017
+Ref: control-objects7017
+Node: Simple Objects9827
+Ref: simple objects9921
+Ref: 99921
+Ref: simple-objects9921
+Node: Creation Arguments10336
+Ref: creation arguments10456
+Ref: a10456
+Ref: creation-arguments10456
+Node: The [pure] Object10770
+Ref: the [pure] object10906
+Ref: b10906
+Ref: the-pure-object10906
+Node: Configuring Inlets and Outlets11985
+Ref: configuring inlets and outlets12114
+Ref: d12114
+Ref: configuring-inlets-and-outlets12114
+Node: Local State14887
+Ref: local state14990
+Ref: e14990
+Ref: local-state14990
+Node: Audio Objects15625
+Ref: audio objects15729
+Ref: 715729
+Ref: audio-objects15729
+Ref: f23847
+Ref: faust23847
+Node: Advanced Features29663
+Ref: advanced features29757
+Ref: 829757
+Ref: advanced-features29757
+Node: Asynchronous Messages30275
+Ref: asynchronous messages30378
+Ref: 1130378
+Ref: asynchronous-messages30378
+Node: Wireless Messaging33795
+Ref: wireless messaging33937
+Ref: 1433937
+Ref: wireless-messaging33937
+Ref: 1735460
+Ref: tips-and-tricks35460
+Ref: 1835460
+Ref: id135460
+Node: Reading and Writing Audio Data36744
+Ref: reading and writing audio data36888
+Ref: 1936888
+Ref: reading-and-writing-audio-data36888
+Node: Controlling the Runtime38266
+Ref: controlling the runtime38402
+Ref: c38402
+Ref: controlling-the-runtime38402
+Node: Livecoding39974
+Ref: livecoding40094
+Ref: 1040094
+Node: Remote Control44630
+Ref: remote control44744
+Ref: 1c44744
+Ref: remote-control44744
+Node: Compiling Objects47374
+Ref: compiling objects47499
+Ref: 1d47499
+Ref: compiling-objects47499
+Node: Programming Interface48744
+Ref: programming interface48846
+Ref: 1348846
+Ref: programming-interface48846
+Ref: 1e49145
+Ref: pd_version_s49145
+Ref: 1f49549
+Ref: pd_path49549
+Ref: 2049800
+Ref: pd_libdir49800
+Ref: 2149992
+Ref: pd_getdir49992
+Ref: 2250543
+Ref: pd_getfile50543
+Ref: 2351056
+Ref: pd_setfile51056
+Ref: 2451533
+Ref: pd_post51533
+Ref: 2551805
+Ref: pd_error_s51805
+Ref: 1252291
+Ref: pd_time52291
+Ref: 1552561
+Ref: pd_send52561
+Ref: 1652795
+Ref: pd_receive52795
+Ref: 2653277
+Ref: pd_unreceive53277
+Ref: 1a53462
+Ref: pd_getbuffer53462
+Ref: 1b53516
+Ref: pd_setbuffer53516
+Ref: 2753579
+Ref: pd_getbuffersize53579
+Ref: 2853635
+Ref: pd_setbuffersize53635
+Node: Index54791
+Ref: index54863
 
 End Tag Table
 

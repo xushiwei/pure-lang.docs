@@ -14,7 +14,7 @@ File: pd-faust.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-faust
 ********
 
-  Version 0.1, December 19, 2011
+  Version 0.2, December 20, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -126,10 +126,20 @@ library modules in Pd's `Preferences/Startup' dialog.
   Some further build options are described in the Makefile. In
 particular, it is possible to compile the Faust dsps to LLVM bitcode
 which can be loaded directly by the Pure interpreter, but for that
-you'll need an LLVM-capable C/C++ compiler such as clang or gcc with
-the dragonegg plugin (please check the LLVM (http://llvm.org/) website
-for details). Also note that dsps in bitcode format don't work with the
-precompiled pd-faust module yet.
+you'll need a special Faust version (see the Faust2
+(http://www.grame.fr/~letz/faust_llvm.html) website for how to get this
+version up and running) and an LLVM-capable C/C++ compiler such as
+clang or gcc with the dragonegg plugin (please check the Makefile and
+the LLVM (http://llvm.org/) website for details).
+
+  If you have the required tools then you can build the bitcode modules
+by running `make bitcode' after `make'. If you run `make install'
+afterwards, the bitcode modules will be installed along with the
+"normal" Faust plugins. In addition, a second object library called
+`pdfaust2' will be built and installed, which can be used as a drop-in
+replacement for `pdfaust' and lets you run the bitcode modules. (Note
+that in the present implementation it is not possible to load both
+`pdfaust' and `pdfaust2' in Pd, you'll have to pick one or the other.)
 
 
 File: pd-faust.info,  Node: Usage,  Next: Caveats and Bugs,  Prev: Installation,  Up: Top
@@ -147,7 +157,7 @@ by the Faust units to Pd's audio interface (`dac~').
   For your convenience, the distribution also includes a `midiosc'
 object which can be used to handle MIDI input and playback as well as
 OSC controller automation. This useful helper abstraction is described
-in more detail under *note Operating the Patches: a. below.
+in more detail under *note Operating the Patches: b. below.
 
 * Menu:
 
@@ -175,9 +185,10 @@ The `fdsp~' object is invoked as follows:
      note that the Faust dsp must be provided in a form which can be
      loaded in _Pure_ (not Pd!), so the `pure.cpp' architecture
      included in recent Faust versions must be used to compile the dsp
-     to a shared library. (If you're already running Faust2, you can
-     also compile to an LLVM bitcode file instead; Pure has built-in
-     support for loading these.) The Makefiles included in the pd-faust
+     to a shared library. (If you're already running Faust2
+     (http://www.grame.fr/~letz/faust_llvm.html), you can also compile
+     to an LLVM bitcode file instead; Pure has built-in support for
+     loading these.) The Makefiles included in the pd-faust
      distribution show how to do this.
 
    * `instname' denotes the name of the instance of the Faust unit.
@@ -246,7 +257,7 @@ the General MIDI standard.
    * `write' outputs the current control settings to external MIDI
      and/or OSC devices. This message can also be invoked with a
      numeric argument to toggle the "write mode" of the unit; please
-     see *note External MIDI and OSC Controllers: c. below for details.
+     see *note External MIDI and OSC Controllers: d. below for details.
 
    * `reload' reloads the Faust unit. This also reloads the shared
      library or bitcode file if the unit was recompiled since the
@@ -290,7 +301,7 @@ corresponding `fdsp~' or `fsynth~' object is created, and whenever the
 unit gets reloaded at runtime.
 
   As with faust2pd, the default appearance of the GUI can be adjusted
-in various ways; see *note Tweaking the GUI Layout: e. below for
+in various ways; see *note Tweaking the GUI Layout: f. below for
 details.
 
   The relative order in which you insert an `fdsp~' or `fsynth~' object
@@ -424,7 +435,7 @@ available controls:
      Faust instruments. The `write' button does the same with MIDI and
      OSC controller data generated either through automation data or by
      manually operating the control elements in the Pd GUI, see *note
-     External MIDI and OSC Controllers: c. below for details.
+     External MIDI and OSC Controllers: d. below for details.
 
   Note that `midiosc' is merely an example which should cover most
 common uses. If you don't need all the fancy functionality it provides,
@@ -629,15 +640,13 @@ current implementation:
      Faust controls.
 
    * With the present `pure-faust' version, dynamic reloading of a
-     Faust module only works if there is only a single instance of the
-     module in the patch. This is actually a limitation of pure-faust,
-     so it doesn't affect the reloading of Faust bitcode modules which
-     are handled directly by the Pure interpreter. Our expectation is
-     that pure-faust will eventually be phased out in favour of Pure's
-     native Faust interface, but Faust bitcode modules often don't
-     perform quite as well as Faust modules compiled to native code
-     using gcc yet, so using Pure's native Faust interface isn't the
-     default right now. This might change in the future.
+     (native) Faust module only works if there is only a single
+     instance of the module in the patch. However, this doesn't affect
+     the reloading of Faust2 (http://www.grame.fr/~letz/faust_llvm.html)
+     bitcode modules which are handled directly by the Pure
+     interpreter. Thus if you need this functionality then you should
+     use dsps in bitcode format. To these ends, load the `pdfaust2'
+     object library in Pd instead of `pdfaust'.
 
   Also, please check the TODO file included in the distribution for
 other issues which we are already aware of and which will hopefully be
@@ -670,50 +679,52 @@ Ref: 53183
 Ref: pd3183
 Ref: 63183
 Ref: pure3183
-Ref: 84912
-Ref: llvm4912
-Node: Usage4912
-Ref: usage5005
-Ref: 95005
-Node: The fdsp~ and fsynth~ Objects5866
-Ref: the fdsp~ and fsynth~ objects5962
-Ref: b5962
-Ref: the-fdsp-and-fsynth-objects5962
-Node: GUI Subpatches11243
-Ref: gui subpatches11356
-Ref: d11356
-Ref: gui-subpatches11356
-Node: Examples13568
-Ref: examples13673
-Ref: 713673
-Node: Operating the Patches15349
-Ref: operating the patches15473
-Ref: a15473
-Ref: operating-the-patches15473
-Node: External MIDI and OSC Controllers19373
-Ref: external midi and osc controllers19512
-Ref: c19512
-Ref: external-midi-and-osc-controllers19512
-Ref: f23164
-Ref: pd-extended23164
-Ref: 1023164
-Ref: osc-externals23164
-Node: Tweaking the GUI Layout23164
-Ref: tweaking the gui layout23296
-Ref: e23296
-Ref: tweaking-the-gui-layout23296
-Node: Remote Control26338
-Ref: remote control26428
-Ref: 1126428
-Ref: remote-control26428
-Ref: 1227098
-Ref: faust-mode27098
-Node: Caveats and Bugs27098
-Ref: caveats and bugs27184
-Ref: 1327184
-Ref: caveats-and-bugs27184
-Node: Index29064
-Ref: index29136
+Ref: 84978
+Ref: llvm4978
+Ref: 94978
+Ref: faust24978
+Node: Usage5529
+Ref: usage5622
+Ref: a5622
+Node: The fdsp~ and fsynth~ Objects6483
+Ref: the fdsp~ and fsynth~ objects6579
+Ref: c6579
+Ref: the-fdsp-and-fsynth-objects6579
+Node: GUI Subpatches11909
+Ref: gui subpatches12022
+Ref: e12022
+Ref: gui-subpatches12022
+Node: Examples14234
+Ref: examples14339
+Ref: 714339
+Node: Operating the Patches16015
+Ref: operating the patches16139
+Ref: b16139
+Ref: operating-the-patches16139
+Node: External MIDI and OSC Controllers20039
+Ref: external midi and osc controllers20178
+Ref: d20178
+Ref: external-midi-and-osc-controllers20178
+Ref: 1023830
+Ref: pd-extended23830
+Ref: 1123830
+Ref: osc-externals23830
+Node: Tweaking the GUI Layout23830
+Ref: tweaking the gui layout23962
+Ref: f23962
+Ref: tweaking-the-gui-layout23962
+Node: Remote Control27004
+Ref: remote control27094
+Ref: 1227094
+Ref: remote-control27094
+Ref: 1327764
+Ref: faust-mode27764
+Node: Caveats and Bugs27764
+Ref: caveats and bugs27850
+Ref: 1427850
+Ref: caveats-and-bugs27850
+Node: Index29569
+Ref: index29641
 
 End Tag Table
 

@@ -14,7 +14,7 @@ File: pd-faust.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-faust
 ********
 
-  Version 0.2, December 20, 2011
+  Version 0.2, December 21, 2011
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -74,7 +74,7 @@ included COPYING and COPYING.LESSER files for details.
 
   This package also includes the faust-stk instruments which are
 distributed under an MIT-style license, please check the
-examples/synths/README-STK file and the dsp files for authorship
+examples/dsp/README-STK file and the dsp files for authorship
 information and licensing details pertaining to these. The original
 faust-stk sources can be found in the Faust distribution, cf.
 <http://faust.grame.fr/>.
@@ -93,8 +93,9 @@ been tested.
   The pd-faust objects are written in the Pure
 (http://pure-lang.googlecode.com/) programming language, so you'll also
 need an installation of the Pure interpreter (0.50 or later), along with
-the following packages: `pd-pure' (0.15 or later), `pure-faust' (0.6 or
-later) and `pure-stldict' (any version).
+the following packages (minimum required versions are given in
+parentheses): `pd-pure' (0.15), `pure-faust' (0.6), `pure-midi' (0.5)
+and `pure-stldict' (0.3).
 
   Finally, gcc and GNU make (or compatible) are required to compile the
 helper dsps and the example instruments; please check the Makefile for
@@ -158,6 +159,15 @@ by the Faust units to Pd's audio interface (`dac~').
 object which can be used to handle MIDI input and playback as well as
 OSC controller automation. This useful helper abstraction is described
 in more detail under *note Operating the Patches: b. below.
+
+     Note: pd-faust interprets MIDI, OSC and Faust dsp filenames
+     relative to the hosting Pd patch by default. It will also search
+     the `midi', `osc' and `dsp' subfolders, if they exist, for the
+     corresponding types of files. Failing that, it finally searches
+     the directories on the Pd library path (including their `midi',
+     `osc' and `dsp' subfolders). To disable this search, just use
+     absolute pathnames (or pathnames relative to the `.' or `..'
+     directory) instead.
 
 * Menu:
 
@@ -337,9 +347,10 @@ File: pd-faust.info,  Node: Examples,  Next: Operating the Patches,  Prev: GUI S
 
 The examples folder contains a few example patches which illustrate how
 this all works. Having installed pd-faust as described above, you can
-run these from the examples directory, e.g.: `pd test.pd'. You can also
-run the examples without actually installing pd-faust, if you add the
-`-path ..' option when running Pd from the examples directory.
+run these from the examples directory, e.g.: `pd test.pd'. (You can
+also run the examples without actually installing pd-faust if you
+invoke Pd from the main pd-faust source directory, e.g., as follows:
+`pd -lib lib/pdfaust examples/test.pd'.)
 
   Here are some of the examples that are currently available:
 
@@ -352,22 +363,16 @@ run the examples without actually installing pd-faust, if you add the
 
   For your convenience, related MIDI and OSC files as well as the Faust
 sources of the instruments and effects are contained in corresponding
-subdirectories (midi, osc, synths) of the examples directory. A
-slightly modified version of the faust-stk instruments from the Faust
-distribution is also included, please check the
-examples/synths/README-STK file for more information about these.
+subdirectories (midi, osc, dsp) of the examples directory. A slightly
+modified version of the faust-stk instruments from the Faust
+distribution is also included, please check the examples/dsp/README-STK
+file for more information about these.
 
   The MIDI files are all in standard MIDI file format. (Some of these
 come from the faust-stk distribution, others can be found on the web.)
 The OSC files used by pd-faust for controller automation are plain
 ASCII files suitable for hand-editing if you know what you are doing;
 the format should be fairly self-explanatory.
-
-  Please note that in the present version the patch directory layout
-(MIDI, OSC and Faust source files can be found in the midi, osc and
-synths subfolders, respectively) is hardwired, so you'll have to follow
-this layout for your own pd-faust patches unless you're prepared to
-change the pd-faust sources.
 
 
 File: pd-faust.info,  Node: Operating the Patches,  Next: External MIDI and OSC Controllers,  Prev: Examples,  Up: Usage
@@ -435,6 +440,12 @@ available controls:
      OSC controller data generated either through automation data or by
      manually operating the control elements in the Pd GUI, see *note
      External MIDI and OSC Controllers: d. below for details.
+
+     Note: If you use the `midiosc' abstraction in your own patches, you
+     should copy it to the directory containing your patch and other
+     required files, so that MIDI and OSC files are properly located.
+     Alternatively, you can also set up Pd's search path as described
+     at the beginning of the *note Usage: a. section.
 
   Note that `midiosc' is merely an example which should cover most
 common uses. If you don't need all the fancy functionality it provides,
@@ -626,7 +637,9 @@ current implementation:
    * Passive Faust controls are only supported in `fdsp~' objects.
 
    * The names of the voice controls in the `fsynth~' object (`freq',
-     `gain', `gate') are currently hard-coded.
+     `gain', `gate') are currently hard-coded, as are the names of the
+     `midi', `osc' and `dsp' subfolders used to locate various kinds of
+     files.
 
    * Polyphonic aftertouch and channel pressure messages are not
      supported in the MIDI interface right now, so you'll have to use
@@ -666,61 +679,61 @@ Node: Copying1799
 Ref: copying1881
 Ref: 11881
 Ref: 21881
-Node: Installation2403
-Ref: installation2487
-Ref: 32487
-Ref: 43183
-Ref: faust3183
-Ref: 53183
-Ref: pd3183
-Ref: 63183
-Ref: pure3183
-Ref: 84978
-Ref: llvm4978
-Ref: 94978
-Ref: faust24978
-Node: Usage5529
-Ref: usage5622
-Ref: a5622
-Node: The fdsp~ and fsynth~ Objects6483
-Ref: the fdsp~ and fsynth~ objects6579
-Ref: c6579
-Ref: the-fdsp-and-fsynth-objects6579
-Node: GUI Subpatches11862
-Ref: gui subpatches11975
-Ref: e11975
-Ref: gui-subpatches11975
-Node: Examples14187
-Ref: examples14292
-Ref: 714292
-Node: Operating the Patches15968
-Ref: operating the patches16092
-Ref: b16092
-Ref: operating-the-patches16092
-Node: External MIDI and OSC Controllers19992
-Ref: external midi and osc controllers20131
-Ref: d20131
-Ref: external-midi-and-osc-controllers20131
-Ref: 1023783
-Ref: pd-extended23783
-Ref: 1123783
-Ref: osc-externals23783
-Node: Tweaking the GUI Layout23783
-Ref: tweaking the gui layout23915
-Ref: f23915
-Ref: tweaking-the-gui-layout23915
-Node: Remote Control26957
-Ref: remote control27047
-Ref: 1227047
-Ref: remote-control27047
-Ref: 1327717
-Ref: faust-mode27717
-Node: Caveats and Bugs27717
-Ref: caveats and bugs27803
-Ref: 1427803
-Ref: caveats-and-bugs27803
-Node: Index29428
-Ref: index29500
+Node: Installation2400
+Ref: installation2484
+Ref: 32484
+Ref: 43226
+Ref: faust3226
+Ref: 53226
+Ref: pd3226
+Ref: 63226
+Ref: pure3226
+Ref: 85021
+Ref: llvm5021
+Ref: 95021
+Ref: faust25021
+Node: Usage5572
+Ref: usage5665
+Ref: a5665
+Node: The fdsp~ and fsynth~ Objects7026
+Ref: the fdsp~ and fsynth~ objects7122
+Ref: c7122
+Ref: the-fdsp-and-fsynth-objects7122
+Node: GUI Subpatches12405
+Ref: gui subpatches12518
+Ref: e12518
+Ref: gui-subpatches12518
+Node: Examples14730
+Ref: examples14835
+Ref: 714835
+Node: Operating the Patches16237
+Ref: operating the patches16361
+Ref: b16361
+Ref: operating-the-patches16361
+Node: External MIDI and OSC Controllers20598
+Ref: external midi and osc controllers20737
+Ref: d20737
+Ref: external-midi-and-osc-controllers20737
+Ref: 1024389
+Ref: pd-extended24389
+Ref: 1124389
+Ref: osc-externals24389
+Node: Tweaking the GUI Layout24389
+Ref: tweaking the gui layout24521
+Ref: f24521
+Ref: tweaking-the-gui-layout24521
+Node: Remote Control27563
+Ref: remote control27653
+Ref: 1227653
+Ref: remote-control27653
+Ref: 1328323
+Ref: faust-mode28323
+Node: Caveats and Bugs28323
+Ref: caveats and bugs28409
+Ref: 1428409
+Ref: caveats-and-bugs28409
+Node: Index30142
+Ref: index30214
 
 End Tag Table
 

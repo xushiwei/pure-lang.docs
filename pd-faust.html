@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, December 20, 2011</p>
+<p>Version 0.2, December 21, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -83,7 +83,7 @@ are regenerated automatically and on the fly as needed.</li>
 <p>pd-faust is distributed under the GNU LGPL v3+. Please see the included
 COPYING and COPYING.LESSER files for details.</p>
 <p>This package also includes the faust-stk instruments which are distributed
-under an MIT-style license, please check the examples/synths/README-STK file
+under an MIT-style license, please check the examples/dsp/README-STK file
 and the dsp files for authorship information and licensing details pertaining
 to these. The original faust-stk sources can be found in the Faust
 distribution, cf. <a class="reference external" href="http://faust.grame.fr/">http://faust.grame.fr/</a>.</p>
@@ -95,9 +95,9 @@ required. Faust versions 0.9.45 and 2.0.a3 and Pd version 0.43.1 have been
 tested.</p>
 <p>The pd-faust objects are written in the <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> programming language, so you&#8217;ll
 also need an installation of the Pure interpreter (0.50 or later), along with
-the following packages: <a class="reference internal" href="pd-pure.html"><em>pd-pure</em></a> (0.15 or later),
-<a class="reference internal" href="pure-faust.html"><em>pure-faust</em></a> (0.6 or later) and
-<a class="reference internal" href="pure-stldict.html"><em>pure-stldict</em></a> (any version).</p>
+the following packages (minimum required versions are given in parentheses):
+<a class="reference internal" href="pd-pure.html"><em>pd-pure</em></a> (0.15), <a class="reference internal" href="pure-faust.html"><em>pure-faust</em></a> (0.6),
+<a class="reference internal" href="pure-midi.html"><em>pure-midi</em></a> (0.5) and <a class="reference internal" href="pure-stldict.html"><em>pure-stldict</em></a> (0.3).</p>
 <p>Finally, gcc and GNU make (or compatible) are required to compile the helper
 dsps and the example instruments; please check the Makefile for details.</p>
 <p>For a basic installation run <tt class="docutils literal"><span class="pre">make</span></tt>, then <tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></tt>. This will
@@ -149,6 +149,16 @@ and outputs the signals produced by the Faust units to Pd&#8217;s audio interfac
 which can be used to handle MIDI input and playback as well as OSC controller
 automation. This useful helper abstraction is described in more detail under
 <a class="reference internal" href="#operating-the-patches">Operating the Patches</a> below.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">pd-faust interprets MIDI, OSC and Faust dsp filenames relative to
+the hosting Pd patch by default. It will also search the <tt class="docutils literal"><span class="pre">midi</span></tt>, <tt class="docutils literal"><span class="pre">osc</span></tt>
+and <tt class="docutils literal"><span class="pre">dsp</span></tt> subfolders, if they exist, for the corresponding types of
+files. Failing that, it finally searches the directories on the Pd library
+path (including their <tt class="docutils literal"><span class="pre">midi</span></tt>, <tt class="docutils literal"><span class="pre">osc</span></tt> and <tt class="docutils literal"><span class="pre">dsp</span></tt> subfolders). To disable
+this search, just use absolute pathnames (or pathnames relative to the
+<tt class="docutils literal"><span class="pre">.</span></tt> or <tt class="docutils literal"><span class="pre">..</span></tt> directory) instead.</p>
+</div>
 <div class="section" id="the-fdsp-and-fsynth-objects">
 <h3>The fdsp~ and fsynth~ Objects<a class="headerlink" href="#the-fdsp-and-fsynth-objects" title="Permalink to this headline">¶</a></h3>
 <p>The <tt class="docutils literal"><span class="pre">fdsp~</span></tt> object is invoked as follows:</p>
@@ -285,9 +295,10 @@ again.)</p>
 <h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
 <p>The examples folder contains a few example patches which illustrate how this
 all works. Having installed pd-faust as described above, you can run these
-from the examples directory, e.g.: <tt class="docutils literal"><span class="pre">pd</span> <span class="pre">test.pd</span></tt>. You can also run the
-examples without actually installing pd-faust, if you add the <tt class="docutils literal"><span class="pre">-path</span> <span class="pre">..</span></tt>
-option when running Pd from the examples directory.</p>
+from the examples directory, e.g.: <tt class="docutils literal"><span class="pre">pd</span> <span class="pre">test.pd</span></tt>. (You can also run the
+examples without actually installing pd-faust if you invoke Pd from the main
+pd-faust source directory, e.g., as follows: <tt class="docutils literal"><span class="pre">pd</span> <span class="pre">-lib</span> <span class="pre">lib/pdfaust</span>
+<span class="pre">examples/test.pd</span></tt>.)</p>
 <p>Here are some of the examples that are currently available:</p>
 <ul class="simple">
 <li>test.pd: Simple patch running a single Faust instrument.</li>
@@ -296,18 +307,14 @@ option when running Pd from the examples directory.</p>
 </ul>
 <p>For your convenience, related MIDI and OSC files as well as the Faust sources
 of the instruments and effects are contained in corresponding subdirectories
-(midi, osc, synths) of the examples directory. A slightly modified version of
+(midi, osc, dsp) of the examples directory. A slightly modified version of
 the faust-stk instruments from the Faust distribution is also included, please
-check the examples/synths/README-STK file for more information about these.</p>
+check the examples/dsp/README-STK file for more information about these.</p>
 <p>The MIDI files are all in standard MIDI file format. (Some of these come from
 the faust-stk distribution, others can be found on the web.) The OSC files
 used by pd-faust for controller automation are plain ASCII files suitable for
 hand-editing if you know what you are doing; the format should be fairly
 self-explanatory.</p>
-<p>Please note that in the present version the patch directory layout (MIDI, OSC
-and Faust source files can be found in the midi, osc and synths subfolders,
-respectively) is hardwired, so you&#8217;ll have to follow this layout for your own
-pd-faust patches unless you&#8217;re prepared to change the pd-faust sources.</p>
 </div>
 <div class="section" id="operating-the-patches">
 <h3>Operating the Patches<a class="headerlink" href="#operating-the-patches" title="Permalink to this headline">¶</a></h3>
@@ -359,6 +366,14 @@ same with MIDI and OSC controller data generated either through automation
 data or by manually operating the control elements in the Pd GUI, see
 <a class="reference internal" href="#external-midi-and-osc-controllers">External MIDI and OSC Controllers</a> below for details.</li>
 </ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you use the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction in your own patches, you
+should copy it to the directory containing your patch and other required
+files, so that MIDI and OSC files are properly located. Alternatively, you
+can also set up Pd&#8217;s search path as described at the beginning of the
+<a class="reference internal" href="#usage">Usage</a> section.</p>
+</div>
 <p>Note that <tt class="docutils literal"><span class="pre">midiosc</span></tt> is merely an example which should cover most common
 uses. If you don&#8217;t need all the fancy functionality it provides, your patches
 may simply feed control messages directly into <tt class="docutils literal"><span class="pre">fdsp~</span></tt> and <tt class="docutils literal"><span class="pre">fsynth~</span></tt>
@@ -509,7 +524,9 @@ implementation:</p>
 <ul class="simple">
 <li>Passive Faust controls are only supported in <tt class="docutils literal"><span class="pre">fdsp~</span></tt> objects.</li>
 <li>The names of the voice controls in the <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object (<tt class="docutils literal"><span class="pre">freq</span></tt>,
-<tt class="docutils literal"><span class="pre">gain</span></tt>, <tt class="docutils literal"><span class="pre">gate</span></tt>) are currently hard-coded.</li>
+<tt class="docutils literal"><span class="pre">gain</span></tt>, <tt class="docutils literal"><span class="pre">gate</span></tt>) are currently hard-coded, as are the names of the
+<tt class="docutils literal"><span class="pre">midi</span></tt>, <tt class="docutils literal"><span class="pre">osc</span></tt> and <tt class="docutils literal"><span class="pre">dsp</span></tt> subfolders used to locate various kinds of
+files.</li>
 <li>Polyphonic aftertouch and channel pressure messages are not supported in the
 MIDI interface right now, so you&#8217;ll have to use ordinary MIDI controllers
 for these parameters instead. Coarse/fine pairs of MIDI controllers aren&#8217;t

@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, December 21, 2011</p>
+<p>Version 0.2, December 23, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -145,10 +145,10 @@ and wiring up the Faust units in some variation of a synth-effects chain which
 typically takes input from Pd&#8217;s MIDI interface (<tt class="docutils literal"><span class="pre">notein</span></tt>, <tt class="docutils literal"><span class="pre">ctlin</span></tt>, etc.)
 and outputs the signals produced by the Faust units to Pd&#8217;s audio interface
 (<tt class="docutils literal"><span class="pre">dac~</span></tt>).</p>
-<p>For your convenience, the distribution also includes a <tt class="docutils literal"><span class="pre">midiosc</span></tt> object
-which can be used to handle MIDI input and playback as well as OSC controller
-automation. This useful helper abstraction is described in more detail under
-<a class="reference internal" href="#operating-the-patches">Operating the Patches</a> below.</p>
+<p>For convenience, pd-faust also includes the <tt class="docutils literal"><span class="pre">midiseq</span></tt> and <tt class="docutils literal"><span class="pre">oscseq</span></tt> objects
+and a corresponding <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction which can be used to handle MIDI
+input and playback as well as OSC controller automation. This useful helper
+abstraction is described in more detail under <a class="reference internal" href="#operating-the-patches">Operating the Patches</a> below.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">pd-faust interprets MIDI, OSC and Faust dsp filenames relative to
@@ -325,10 +325,13 @@ enables recording of OSC automation data.</p>
 <p>In case the operation of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction in the provided examples
 is not immediately obvious, here is a brief rundown of the available controls:</p>
 <ul class="simple">
-<li>The creation argument of <tt class="docutils literal"><span class="pre">midiosc</span></tt> is the name of the MIDI file, either as
-a Pure identifier (in this case the .mid filename extension is supplied
-automatically) or as a double-quoted string. This argument can also be
-omitted if you don&#8217;t need MIDI file playback.</li>
+<li>The first creation argument of <tt class="docutils literal"><span class="pre">midiosc</span></tt> is the name of the MIDI file,
+either as a Pure identifier (in this case the .mid filename extension is
+supplied automatically) or as a double-quoted string. Similarly, the second
+argument specifies the name of the OSC file. Both arguments are optional; if
+the second argument is omitted, it defaults to the name of the MIDI file
+with new extension .osc. You can also omit both arguments if neither MIDI
+file playback nor saving recorded OSC data is required.</li>
 <li>The abstraction has a single control outlet through which it feeds the
 generated MIDI and other messages to the connected <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and <tt class="docutils literal"><span class="pre">fdsp~</span></tt>
 objects. In addition, live MIDI input is also accepted and forwarded to the
@@ -339,20 +342,26 @@ elements start, stop and continue MIDI and OSC playback, respectively. The
 <tt class="docutils literal"><span class="pre">echo</span></tt> toggle in this row causes played MIDI events to be printed in the
 Pd main window.</li>
 <li>The gray &#8220;record&#8221; toggle in the upper right corner of the abstraction
-enables recording of OSC controller automation data from any of the Faust
-units which have their &#8220;record&#8221; toggle switched on. Once <tt class="docutils literal"><span class="pre">midiosc</span></tt>&#8216;s
-&#8220;record&#8221; toggle is switched on, recording will be started and stopped with
-the <tt class="docutils literal"><span class="pre">start</span></tt>, <tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">cont</span></tt> controls in the first row.</li>
+enables recording of OSC controller automation data. Note that this toggle
+merely <em>arms</em> the OSC recorder; you still have to actually start the
+recording with the <tt class="docutils literal"><span class="pre">start</span></tt> button. However, you can also first start
+playback with <tt class="docutils literal"><span class="pre">start</span></tt> and then switch recording on and off as needed at
+any point in the sequence. The <tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">cont</span></tt> controls stop and
+continue both playback and recording as usual. Pushing the <tt class="docutils literal"><span class="pre">stop</span></tt> button
+also stores the recorded sequence for later playback. Also note that before
+you can start recording any OSC data, you first have to arm the Faust units
+that you want to record. This is done with the &#8220;record&#8221; toggle in the Pd GUI
+of each unit.</li>
 <li>There are some additional controls related to OSC recording in the <em>second</em>
 row: <tt class="docutils literal"><span class="pre">save</span></tt> saves the currently recorded data in an OSC file for later use
-(this file will be located in the osc subdirectory, and have the same name
-as the MIDI file with new extension .osc); <tt class="docutils literal"><span class="pre">abort</span></tt> is like <tt class="docutils literal"><span class="pre">stop</span></tt> in
+(this file will have the same basename as the MIDI file set with the
+creation argument, with new extension .osc); <tt class="docutils literal"><span class="pre">abort</span></tt> is like <tt class="docutils literal"><span class="pre">stop</span></tt> in
 that it stops recording and playback, but also throws away the data recorded
-in this run (while <tt class="docutils literal"><span class="pre">stop</span></tt> keeps it for later playback); and <tt class="docutils literal"><span class="pre">clear</span></tt>
-clears the entire recorded OSC sequence so that you can start a new one.</li>
+in this take (rather than keeping it for later playback); and <tt class="docutils literal"><span class="pre">clear</span></tt>
+purges the entire recorded OSC sequence so that you can start a new one.</li>
 <li>Once some automation data has been recorded, it will be played back along
 with the MIDI file. You can then just listen to it, or go on to record more
-automation data, etc., ad lib. Use the <tt class="docutils literal"><span class="pre">echo</span></tt> toggle in the second row to
+automation data as needed. Use the <tt class="docutils literal"><span class="pre">echo</span></tt> toggle in the second row to
 print the OSC messages as they are played back. If you save the automation
 data with the <tt class="docutils literal"><span class="pre">save</span></tt> button, it will be reloaded from its OSC file next
 time the patch is opened.</li>

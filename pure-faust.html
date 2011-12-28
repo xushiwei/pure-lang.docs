@@ -57,7 +57,7 @@
             
   <div class="section" id="module-faust">
 <span id="pure-faust"></span><h1>pure-faust<a class="headerlink" href="#module-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.7, December 21, 2011</p>
+<p>Version 0.8, December 28, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>This module lets you load and run Faust-generated signal processing modules in
 <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a>. <a class="reference external" href="http://faust.grame.fr/">Faust</a> (an acronym for Functional AUdio STreams) is a functional
@@ -95,7 +95,7 @@ with this program.  If not, see &lt;<a class="reference external" href="http://w
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>Get the latest source from
-<a class="reference external" href="http://pure-lang.googlecode.com/files/pure-faust-0.7.tar.gz">http://pure-lang.googlecode.com/files/pure-faust-0.7.tar.gz</a>.</p>
+<a class="reference external" href="http://pure-lang.googlecode.com/files/pure-faust-0.8.tar.gz">http://pure-lang.googlecode.com/files/pure-faust-0.8.tar.gz</a>.</p>
 <p>Binary packages can be found at <a class="reference external" href="http://pure-lang.googlecode.com/">http://pure-lang.googlecode.com/</a>. To install
 from source, run the usual <tt class="docutils literal"><span class="pre">make</span> <span class="pre">&amp;&amp;</span> <span class="pre">sudo</span> <span class="pre">make</span> <span class="pre">install</span></tt>. This requires Pure,
 of course (the present version will work with Pure 0.51 and later). The
@@ -144,11 +144,23 @@ load the dsp as follows:</p>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">faust_init</span></tt> function loads the <tt class="docutils literal"><span class="pre">&quot;mydsp.so&quot;</span></tt> module (the <tt class="docutils literal"><span class="pre">.so</span></tt>
 suffix is supplied automatically) and returns a pointer to the Faust dsp
-object which can then be used in subsequent operations. The second parameter
-of <tt class="docutils literal"><span class="pre">faust_init</span></tt>, 48000 in this example, denotes the sample rate in Hz. This
-can be an arbitrary integer value which is available to the hosted dsp (it&#8217;s
-up to the dsp whether it actually uses this value in some way). The sample
-rate can also be changed on the fly with the <tt class="docutils literal"><span class="pre">faust_reinit</span></tt> function:</p>
+object which can then be used in subsequent operations.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><tt class="docutils literal"><span class="pre">faust_init</span></tt> only loads the dsp module if it hasn&#8217;t been loaded
+before. However, as of pure-faust 0.8, <tt class="docutils literal"><span class="pre">faust_init</span></tt> also checks the
+modification time of the module and reloads it if the module was recompiled
+since it was last loaded. (This is for compatibility with Pure&#8217;s built-in
+Faust interface which behaves in the same way.) If this happens, <em>all</em>
+existing dsp instances created with the old version of the module become
+invalid immediately (i.e., all subsequent operations on them will fail,
+except <tt class="docutils literal"><span class="pre">faust_exit</span></tt>) and must be recreated.</p>
+</div>
+<p>The second parameter of <tt class="docutils literal"><span class="pre">faust_init</span></tt>, 48000 in this example, denotes the
+sample rate in Hz. This can be an arbitrary integer value which is available
+to the hosted dsp (it&#8217;s up to the dsp whether it actually uses this value in
+some way). The sample rate can also be changed on the fly with the
+<tt class="docutils literal"><span class="pre">faust_reinit</span></tt> function:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>faust_reinit dsp <span class="mi">44100</span><span class="p">;</span>
 </pre></div>
 </div>

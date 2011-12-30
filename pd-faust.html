@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, December 28, 2011</p>
+<p>Version 0.2, December 30, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -331,12 +331,20 @@ supplied automatically) or as a double-quoted string. Similarly, the second
 argument specifies the name of the OSC file. Both arguments are optional; if
 the second argument is omitted, it defaults to the name of the MIDI file
 with new extension .osc. You can also omit both arguments if neither MIDI
-file playback nor saving recorded OSC data is required.</li>
+file playback nor saving recorded OSC data is required. Or you can leave the
+first parameter empty (specify <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt> or <tt class="docutils literal"><span class="pre">0</span></tt> instead) to only set an OSC
+filename, if you don&#8217;t need MIDI playback. The latter is useful, in
+particular, if you use <tt class="docutils literal"><span class="pre">midiosc</span></tt> with an external MIDI sequencer (see
+below).</li>
 <li>The abstraction has a single control outlet through which it feeds the
 generated MIDI and other messages to the connected <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and <tt class="docutils literal"><span class="pre">fdsp~</span></tt>
-objects. In addition, live MIDI input is also accepted and forwarded to the
-control outlet, after being translated to the format understood by
-<tt class="docutils literal"><span class="pre">fsynth~</span></tt> and <tt class="docutils literal"><span class="pre">fdsp~</span></tt> objects.</li>
+objects. Live MIDI input is also accepted and forwarded to the control
+outlet, after being translated to the format understood by <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and
+<tt class="docutils literal"><span class="pre">fdsp~</span></tt> objects. In addition, <tt class="docutils literal"><span class="pre">midiosc</span></tt> can also be controlled through
+an external MIDI sequencer connected to Pd&#8217;s MIDI input. To these ends,
+<a class="reference external" href="http://en.wikipedia.org/wiki/MIDI_Machine_Control">MIDI Machine Control</a> (MMC) can be used to start and stop OSC playback and
+recording with the transport controls of the external sequencer program. To
+make this work, the external sequencer must be configured as an MMC master.</li>
 <li>The <tt class="docutils literal"><span class="pre">start</span></tt>, <tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">cont</span></tt> controls in the <em>first</em> row of control
 elements start, stop and continue MIDI and OSC playback, respectively. The
 <tt class="docutils literal"><span class="pre">echo</span></tt> toggle in this row causes played MIDI events to be printed in the
@@ -352,6 +360,15 @@ also stores the recorded sequence for later playback. Also note that before
 you can start recording any OSC data, you first have to arm the Faust units
 that you want to record. This is done with the &#8220;record&#8221; toggle in the Pd GUI
 of each unit.</li>
+<li>The &#8220;bang&#8221; button next to the &#8220;record&#8221; toggle lets you record a static
+snapshot of the current parameter settings of all armed units. This is also
+done automatically when starting a fresh recording. The &#8220;bang&#8221; button lets
+you change the starting defaults of parameters of an existing recording. It
+is also useful if you just want to record a static snapshot of the current
+parameter settings without recording any live parameter changes. To do this,
+recording must be enabled and playback must be <em>off</em>. Then just arm the
+Faust units that you wish to record, change the controls to what you want
+their values to be, and finally push the &#8220;bang&#8221; button.</li>
 <li>There are some additional controls related to OSC recording in the <em>second</em>
 row: <tt class="docutils literal"><span class="pre">save</span></tt> saves the currently recorded data in an OSC file for later
 use; <tt class="docutils literal"><span class="pre">abort</span></tt> is like <tt class="docutils literal"><span class="pre">stop</span></tt> in that it stops recording and playback, but

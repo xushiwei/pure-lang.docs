@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, December 30, 2011</p>
+<p>Version 0.2, December 31, 2011</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -322,29 +322,39 @@ self-explanatory.</p>
 with <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> (which see). The only obvious change is the
 addition of a &#8220;record&#8221; button (gray toggle in the upper right corner) which
 enables recording of OSC automation data.</p>
-<p>In case the operation of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction in the provided examples
-is not immediately obvious, here is a brief rundown of the available controls:</p>
-<ul class="simple">
-<li>The first creation argument of <tt class="docutils literal"><span class="pre">midiosc</span></tt> is the name of the MIDI file,
+<p>In each example distributed with pd-faust you can also find an instance of the
+<tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction which serves as a little sequencer applet that enables
+you to control MIDI playback and OSC recording. The usage of this abstraction
+should be fairly obvious, but you can also find a brief description below.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you use the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction in your own patches, you
+should copy it to the directory containing your patch and other required
+files, so that MIDI and OSC files are properly located. Alternatively, you
+can also set up Pd&#8217;s search path as described at the beginning of the
+<a class="reference internal" href="#usage">Usage</a> section.</p>
+</div>
+<p>The first creation argument of <tt class="docutils literal"><span class="pre">midiosc</span></tt> is the name of the MIDI file,
 either as a Pure identifier (in this case the .mid filename extension is
 supplied automatically) or as a double-quoted string. Similarly, the second
 argument specifies the name of the OSC file. Both arguments are optional; if
-the second argument is omitted, it defaults to the name of the MIDI file
-with new extension .osc. You can also omit both arguments if neither MIDI
-file playback nor saving recorded OSC data is required. Or you can leave the
-first parameter empty (specify <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt> or <tt class="docutils literal"><span class="pre">0</span></tt> instead) to only set an OSC
-filename, if you don&#8217;t need MIDI playback. The latter is useful, in
-particular, if you use <tt class="docutils literal"><span class="pre">midiosc</span></tt> with an external MIDI sequencer (see
-below).</li>
-<li>The abstraction has a single control outlet through which it feeds the
+the second argument is omitted, it defaults to the name of the MIDI file with
+new extension .osc. You can also omit both arguments if neither MIDI file
+playback nor saving recorded OSC data is required. Or you can leave the first
+parameter empty (specify <tt class="docutils literal"><span class="pre">&quot;&quot;</span></tt> or <tt class="docutils literal"><span class="pre">0</span></tt> instead) to only set an OSC filename,
+if you don&#8217;t need MIDI playback. The latter is useful, in particular, if you
+use <tt class="docutils literal"><span class="pre">midiosc</span></tt> with an external MIDI sequencer (see below).</p>
+<p>The abstraction has a single control outlet through which it feeds the
 generated MIDI and other messages to the connected <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and <tt class="docutils literal"><span class="pre">fdsp~</span></tt>
-objects. Live MIDI input is also accepted and forwarded to the control
-outlet, after being translated to the format understood by <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and
-<tt class="docutils literal"><span class="pre">fdsp~</span></tt> objects. In addition, <tt class="docutils literal"><span class="pre">midiosc</span></tt> can also be controlled through
-an external MIDI sequencer connected to Pd&#8217;s MIDI input. To these ends,
-<a class="reference external" href="http://en.wikipedia.org/wiki/MIDI_Machine_Control">MIDI Machine Control</a> (MMC) can be used to start and stop OSC playback and
-recording with the transport controls of the external sequencer program. To
-make this work, the external sequencer must be configured as an MMC master.</li>
+objects. Live MIDI input is also accepted and forwarded to the control outlet,
+after being translated to the format understood by <tt class="docutils literal"><span class="pre">fsynth~</span></tt> and <tt class="docutils literal"><span class="pre">fdsp~</span></tt>
+objects. In addition, <tt class="docutils literal"><span class="pre">midiosc</span></tt> can also be controlled through an external
+MIDI sequencer connected to Pd&#8217;s MIDI input. To these ends, <a class="reference external" href="http://en.wikipedia.org/wiki/MIDI_Machine_Control">MIDI Machine
+Control</a> (MMC) can be used to start and stop OSC playback and recording with
+the transport controls of the external sequencer program. To make this work,
+the external sequencer must be configured as an MMC master.</p>
+<p>Here is a brief rundown of the available controls:</p>
+<ul class="simple">
 <li>The <tt class="docutils literal"><span class="pre">start</span></tt>, <tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">cont</span></tt> controls in the <em>first</em> row of control
 elements start, stop and continue MIDI and OSC playback, respectively. The
 <tt class="docutils literal"><span class="pre">echo</span></tt> toggle in this row causes played MIDI events to be printed in the
@@ -390,22 +400,21 @@ device in addition to the Faust instruments. The <tt class="docutils literal"><s
 same with MIDI and OSC controller data generated either through automation
 data or by manually operating the control elements in the Pd GUI, see
 <a class="reference internal" href="#external-midi-and-osc-controllers">External MIDI and OSC Controllers</a> below for details.</li>
+<li>At the bottom of the abstraction there is a little progress bar along with a
+time display which indicates the current song position. If playback is
+stopped, you can also use these to change the start position for playback
+and recording. Note that if you drive <tt class="docutils literal"><span class="pre">midiosc</span></tt> from an external MIDI
+sequencer instead, then it is a good idea to load the same MIDI file in
+<tt class="docutils literal"><span class="pre">midiosc</span></tt> anyway, so that it knows about the length of the MIDI sequence.
+This will make the progress bar display the proper position in the file.</li>
 </ul>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you use the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction in your own patches, you
-should copy it to the directory containing your patch and other required
-files, so that MIDI and OSC files are properly located. Alternatively, you
-can also set up Pd&#8217;s search path as described at the beginning of the
-<a class="reference internal" href="#usage">Usage</a> section.</p>
-</div>
-<p>Note that <tt class="docutils literal"><span class="pre">midiosc</span></tt> is merely an example which should cover most common
-uses. If you don&#8217;t need all the fancy functionality it provides, your patches
-may simply feed control messages directly into <tt class="docutils literal"><span class="pre">fdsp~</span></tt> and <tt class="docutils literal"><span class="pre">fsynth~</span></tt>
-objects instead. On the other hand, if you need even more elaborate
-input/output interfacing than what <tt class="docutils literal"><span class="pre">midiosc</span></tt> provides, <tt class="docutils literal"><span class="pre">midiosc</span></tt> can be
-used as a starting point for your own input/output abstractions driving the
-<tt class="docutils literal"><span class="pre">fdsp~</span></tt> and <tt class="docutils literal"><span class="pre">fsynth~</span></tt> objects in your patch.</p>
+<p>Please note that <tt class="docutils literal"><span class="pre">midiosc</span></tt> is merely an example which should cover most
+common uses. If you don&#8217;t need all the fancy functionality it provides, your
+patches may simply feed control messages directly into <tt class="docutils literal"><span class="pre">fdsp~</span></tt> and
+<tt class="docutils literal"><span class="pre">fsynth~</span></tt> objects instead. On the other hand, if you need even more
+elaborate input/output interfacing than what <tt class="docutils literal"><span class="pre">midiosc</span></tt> provides, <tt class="docutils literal"><span class="pre">midiosc</span></tt>
+can be used as a starting point for your own input/output abstractions driving
+the <tt class="docutils literal"><span class="pre">fdsp~</span></tt> and <tt class="docutils literal"><span class="pre">fsynth~</span></tt> objects in your patch.</p>
 </div>
 <div class="section" id="external-midi-and-osc-controllers">
 <h3>External MIDI and OSC Controllers<a class="headerlink" href="#external-midi-and-osc-controllers" title="Permalink to this headline">¶</a></h3>

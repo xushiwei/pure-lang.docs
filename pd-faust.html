@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, December 31, 2011</p>
+<p>Version 0.2, January 03, 2012</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -353,6 +353,14 @@ MIDI sequencer connected to Pd&#8217;s MIDI input. To these ends, <a class="refe
 Control</a> (MMC) can be used to start and stop OSC playback and recording with
 the transport controls of the external sequencer program. To make this work,
 the external sequencer must be configured as an MMC master.</p>
+<p>At the bottom of the abstraction there is a little progress bar along with a
+time display which indicates the current song position. If playback is
+stopped, you can also use these to change the current position for playback,
+recording and a number of other operations as described below. Note that if
+you drive <tt class="docutils literal"><span class="pre">midiosc</span></tt> from an external MIDI sequencer instead, then it is a
+good idea to load the same MIDI file in <tt class="docutils literal"><span class="pre">midiosc</span></tt> anyway, so that it knows
+about the length of the MIDI sequence. This will make the progress bar
+display the proper position in the file.</p>
 <p>Here is a brief rundown of the available controls:</p>
 <ul class="simple">
 <li>The <tt class="docutils literal"><span class="pre">start</span></tt>, <tt class="docutils literal"><span class="pre">stop</span></tt> and <tt class="docutils literal"><span class="pre">cont</span></tt> controls in the <em>first</em> row of control
@@ -375,10 +383,15 @@ snapshot of the current parameter settings of all armed units. This is also
 done automatically when starting a fresh recording. The &#8220;bang&#8221; button lets
 you change the starting defaults of parameters of an existing recording. It
 is also useful if you just want to record a static snapshot of the current
-parameter settings without recording any live parameter changes. To do this,
-recording must be enabled and playback must be <em>off</em>. Then just arm the
-Faust units that you wish to record, change the controls to what you want
-their values to be, and finally push the &#8220;bang&#8221; button.</li>
+parameter settings without recording any live parameter changes. Moreover,
+you can also set the parameters at any given point in the piece if you first
+position the progress bar or the time display accordingly; in this case you
+may first want to recall the parameter settings at the given point with the
+<tt class="docutils literal"><span class="pre">send</span></tt> button described below. In either case, recording must be enabled
+and playback must be <em>off</em>. Then just arm the Faust units that you wish to
+record, set the playback position as needed, change the controls to what you
+want their values to be (maybe after recalling the current settings), and
+finally push the &#8220;bang&#8221; button.</li>
 <li>There are some additional controls related to OSC recording in the <em>second</em>
 row: <tt class="docutils literal"><span class="pre">save</span></tt> saves the currently recorded data in an OSC file for later
 use; <tt class="docutils literal"><span class="pre">abort</span></tt> is like <tt class="docutils literal"><span class="pre">stop</span></tt> in that it stops recording and playback, but
@@ -400,13 +413,12 @@ device in addition to the Faust instruments. The <tt class="docutils literal"><s
 same with MIDI and OSC controller data generated either through automation
 data or by manually operating the control elements in the Pd GUI, see
 <a class="reference internal" href="#external-midi-and-osc-controllers">External MIDI and OSC Controllers</a> below for details.</li>
-<li>At the bottom of the abstraction there is a little progress bar along with a
-time display which indicates the current song position. If playback is
-stopped, you can also use these to change the start position for playback
-and recording. Note that if you drive <tt class="docutils literal"><span class="pre">midiosc</span></tt> from an external MIDI
-sequencer instead, then it is a good idea to load the same MIDI file in
-<tt class="docutils literal"><span class="pre">midiosc</span></tt> anyway, so that it knows about the length of the MIDI sequence.
-This will make the progress bar display the proper position in the file.</li>
+<li>There&#8217;s one additional button in the third row, the <tt class="docutils literal"><span class="pre">send</span></tt> button which
+recalls the recorded OSC parameter settings at a given point in the
+sequence. Playback must be off for this to work. After setting the playback
+position as desired, just push the <tt class="docutils literal"><span class="pre">send</span></tt> button. This sets the controls
+to the current parameter values at the given point, for <em>all</em> parameters
+which have been recorded up to (and including) this point.</li>
 </ul>
 <p>Please note that <tt class="docutils literal"><span class="pre">midiosc</span></tt> is merely an example which should cover most
 common uses. If you don&#8217;t need all the fancy functionality it provides, your
@@ -471,11 +483,16 @@ attribute.</p>
 <p>Also note that while the necessary infrastructure to support OSC input and
 output is already provided by pd-faust, the OSC input and output facilities
 themselves which are needed to make this actually work are not implemented in
-the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction right now. That&#8217;s because Pd doesn&#8217;t provide any
-built-in objects for OSC input and output, although a few different solutions
-exist and are included in Hans-Christoph Steiner&#8217;s <a class="reference external" href="http://puredata.info/community/projects/software/pd-extended">Pd-extended</a> distribution,
-such as Martin Peach&#8217;s <a class="reference external" href="http://puredata.info/Members/martinrp/OSCobjects">OSC externals</a>. Thus, you&#8217;ll have to edit the
-<tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction and add OSC input/output yourself if you need this.</p>
+the default version of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction distributed with pd-faust.
+That&#8217;s because Pd doesn&#8217;t provide any built-in objects for OSC input and
+output, although a few different solutions exist and are included in
+Hans-Christoph Steiner&#8217;s <a class="reference external" href="http://puredata.info/community/projects/software/pd-extended">Pd-extended</a> distribution, such as Martin Peach&#8217;s
+<a class="reference external" href="http://puredata.info/Members/martinrp/OSCobjects">OSC externals</a>.</p>
+<p>The distribution includes a version of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction which
+implements OSC input and output using Martin Peach&#8217;s objects in the
+midiosc-mrpeach.pd file. You most likely have to edit this abstraction for
+your purposes; at least you&#8217;ll have to change the network addresses so that it
+works with the OSC device or application that you use.</p>
 </div>
 <div class="section" id="tweaking-the-gui-layout">
 <h3>Tweaking the GUI Layout<a class="headerlink" href="#tweaking-the-gui-layout" title="Permalink to this headline">¶</a></h3>

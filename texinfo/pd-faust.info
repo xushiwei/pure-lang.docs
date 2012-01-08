@@ -14,7 +14,7 @@ File: pd-faust.info,  Node: Top,  Next: Copying,  Up: (dir)
 pd-faust
 ********
 
-  Version 0.2, January 03, 2012
+  Version 0.3, January 08, 2012
 
   Albert Graef <<Dr.Graef@t-online.de>>
 
@@ -87,7 +87,7 @@ File: pd-faust.info,  Node: Installation,  Next: Usage,  Prev: Copying,  Up: Top
 
 You'll need Faust (http://faust.grame.fr/) and Pd
 (http://puredata.info/), obviously. Fairly recent versions of these are
-required. Faust versions 0.9.45 and 2.0.a3 and Pd version 0.43.1 have
+required. Faust versions 0.9.46 and 2.0.a3 and Pd version 0.43.1 have
 been tested.
 
   The pd-faust objects are written in the Pure
@@ -523,30 +523,25 @@ File: pd-faust.info,  Node: External MIDI and OSC Controllers,  Next: Tweaking t
 The `fsynth~' object has built-in (and hard-wired) support for MIDI
 notes, pitch bend and MIDI controller 123 (all notes off).
 
-  Other MIDI and OSC controller data can be handled as well, by
-configuring the controls in your Faust units accordingly. pd-faust's
-treatment of such controller data depends on the _mode_ the `fdsp~' or
-`fsynth~' object is in.
-
-  The default mode is _read mode_, in which controller data received
-from external MIDI and OSC devices is interpreted according to the
-controller mappings defined in the Faust source (this is explained
-below), by updating the corresponding GUI elements and the control
-variables of the Faust dsp.  For obvious reasons, this only works with
-_active_ Faust controls.
+  Other controller data received from external MIDI and OSC devices is
+interpreted according to the controller mappings defined in the Faust
+source (this is explained below), by updating the corresponding GUI
+elements and the control variables of the Faust dsp. For obvious
+reasons, this only works with _active_ Faust controls.
 
   An `fdsp~' or `fsynth~' object can also be put in _write mode_ by
-feeding a message of the form `write 1' into its control inlet. For
-convenience, the `write' toggle in the `midiosc' abstraction allows you
-to do this simultaneously for all Faust units connected to `midiosc''s
-control outlet.
+feeding a message of the form `write 1' into its control inlet (the
+`write 0' message disables write mode again). For convenience, the
+`write' toggle in the `midiosc' abstraction allows you to do this
+simultaneously for all Faust units connected to `midiosc''s control
+outlet.
 
-  Once an object is in write mode, it does not interpret incoming MIDI
-and OSC controller data any more, but rather _outputs_ MIDI and OSC
+  When an object is in write mode, it also _outputs_ MIDI and OSC
 controller data in response to both automation data and the manual
 operation of the Pd GUI elements, again according to the controller
-mappings defined in the Faust source. Note that this works with both
-_active_ and _passive_ Faust controls.
+mappings defined in the Faust source, so that it can drive an external
+device such as a MIDI fader box or a multitouch OSC controller. Note
+that this works with both _active_ and _passive_ Faust controls.
 
   To configure MIDI controller assignments, the labels of the Faust
 control elements have to be marked up with the special `midi' attribute
@@ -555,20 +550,18 @@ may be implemented in the Faust source as follows:
 
     pan = hslider("pan [midi:ctrl 10]", 0, -1, 1, 0.01);
 
-In read mode, pd-faust will then provide the necessary logic to handle
-MIDI input from controller 10 by changing the pan control in the Faust
-unit accordingly, mapping the controller values 0..127 to the range and
-step size given in the Faust source. Conversely, in write mode
-corresponding MIDI controller data will be generated and sent to Pd's
-MIDI output, on the MIDI channel specified in the creation arguments of
-the Faust unit (0 meaning "omni", i.e., output on all MIDI channels),
-so that it can drive an external MIDI device such as a keyboard or a
-faderbox.
+pd-faust will then provide the necessary logic to handle MIDI input from
+controller 10 by changing the pan control in the Faust unit accordingly,
+mapping the controller values 0..127 to the range and step size given
+in the Faust source. Moreover, in write mode corresponding MIDI
+controller data will be generated and sent to Pd's MIDI output, on the
+MIDI channel specified in the creation arguments of the Faust unit (0
+meaning "omni", i.e., output on all MIDI channels).
 
-  In principle, the same functionality is also available for external
-OSC devices, employing explicit OSC controller assignments in the Faust
-source by means of the `osc' attribute. E.g., the following enables
-input and output of OSC messages for the OSC `/pan' address:
+  The same functionality is also available for external OSC devices,
+employing explicit OSC controller assignments in the Faust source by
+means of the `osc' attribute. E.g., the following enables input and
+output of OSC messages for the OSC `/pan' address:
 
     pan = hslider("pan [osc:/pan]", 0, -1, 1, 0.01);
 
@@ -771,26 +764,26 @@ Node: External MIDI and OSC Controllers24090
 Ref: external midi and osc controllers24229
 Ref: d24229
 Ref: external-midi-and-osc-controllers24229
-Ref: 1127817
-Ref: pd-extended27817
-Ref: 1227817
-Ref: osc-externals27817
-Node: Tweaking the GUI Layout28168
-Ref: tweaking the gui layout28300
-Ref: f28300
-Ref: tweaking-the-gui-layout28300
-Node: Remote Control31342
-Ref: remote control31432
-Ref: 1331432
-Ref: remote-control31432
-Ref: 1432102
-Ref: faust-mode32102
-Node: Caveats and Bugs32102
-Ref: caveats and bugs32188
-Ref: 1532188
-Ref: caveats-and-bugs32188
-Node: Index33399
-Ref: index33471
+Ref: 1127516
+Ref: pd-extended27516
+Ref: 1227516
+Ref: osc-externals27516
+Node: Tweaking the GUI Layout27867
+Ref: tweaking the gui layout27999
+Ref: f27999
+Ref: tweaking-the-gui-layout27999
+Node: Remote Control31041
+Ref: remote control31131
+Ref: 1331131
+Ref: remote-control31131
+Ref: 1431801
+Ref: faust-mode31801
+Node: Caveats and Bugs31801
+Ref: caveats and bugs31887
+Ref: 1531887
+Ref: caveats-and-bugs31887
+Node: Index33098
+Ref: index33170
 
 End Tag Table
 

@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.2, January 03, 2012</p>
+<p>Version 0.3, January 08, 2012</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -91,7 +91,7 @@ distribution, cf. <a class="reference external" href="http://faust.grame.fr/">ht
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>You&#8217;ll need <a class="reference external" href="http://faust.grame.fr/">Faust</a> and <a class="reference external" href="http://puredata.info/">Pd</a>, obviously. Fairly recent versions of these are
-required. Faust versions 0.9.45 and 2.0.a3 and Pd version 0.43.1 have been
+required. Faust versions 0.9.46 and 2.0.a3 and Pd version 0.43.1 have been
 tested.</p>
 <p>The pd-faust objects are written in the <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> programming language, so you&#8217;ll
 also need an installation of the Pure interpreter (0.51 or later), along with
@@ -432,25 +432,22 @@ the <tt class="docutils literal"><span class="pre">fdsp~</span></tt> and <tt cla
 <h3>External MIDI and OSC Controllers<a class="headerlink" href="#external-midi-and-osc-controllers" title="Permalink to this headline">¶</a></h3>
 <p>The <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object has built-in (and hard-wired) support for MIDI notes,
 pitch bend and MIDI controller 123 (all notes off).</p>
-<p>Other MIDI and OSC controller data can be handled as well, by configuring the
-controls in your Faust units accordingly. pd-faust&#8217;s treatment of such
-controller data depends on the <em>mode</em> the <tt class="docutils literal"><span class="pre">fdsp~</span></tt> or <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object is
-in.</p>
-<p>The default mode is <em>read mode</em>, in which controller data received from
-external MIDI and OSC devices is interpreted according to the controller
-mappings defined in the Faust source (this is explained below), by updating
-the corresponding GUI elements and the control variables of the Faust dsp.
-For obvious reasons, this only works with <em>active</em> Faust controls.</p>
+<p>Other controller data received from external MIDI and OSC devices is
+interpreted according to the controller mappings defined in the Faust source
+(this is explained below), by updating the corresponding GUI elements and the
+control variables of the Faust dsp. For obvious reasons, this only works with
+<em>active</em> Faust controls.</p>
 <p>An <tt class="docutils literal"><span class="pre">fdsp~</span></tt> or <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object can also be put in <em>write mode</em> by feeding
-a message of the form <tt class="docutils literal"><span class="pre">write</span> <span class="pre">1</span></tt> into its control inlet. For convenience, the
-<tt class="docutils literal"><span class="pre">write</span></tt> toggle in the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction allows you to do this
-simultaneously for all Faust units connected to <tt class="docutils literal"><span class="pre">midiosc</span></tt>&#8216;s control
-outlet.</p>
-<p>Once an object is in write mode, it does not interpret incoming MIDI and OSC
-controller data any more, but rather <em>outputs</em> MIDI and OSC controller data in
-response to both automation data and the manual operation of the Pd GUI
-elements, again according to the controller mappings defined in the Faust
-source. Note that this works with both <em>active</em> and <em>passive</em> Faust controls.</p>
+a message of the form <tt class="docutils literal"><span class="pre">write</span> <span class="pre">1</span></tt> into its control inlet (the <tt class="docutils literal"><span class="pre">write</span> <span class="pre">0</span></tt>
+message disables write mode again). For convenience, the <tt class="docutils literal"><span class="pre">write</span></tt> toggle in
+the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction allows you to do this simultaneously for all Faust
+units connected to <tt class="docutils literal"><span class="pre">midiosc</span></tt>&#8216;s control outlet.</p>
+<p>When an object is in write mode, it also <em>outputs</em> MIDI and OSC controller
+data in response to both automation data and the manual operation of the Pd
+GUI elements, again according to the controller mappings defined in the Faust
+source, so that it can drive an external device such as a MIDI fader box or a
+multitouch OSC controller. Note that this works with both <em>active</em> and
+<em>passive</em> Faust controls.</p>
 <p>To configure MIDI controller assignments, the labels of the Faust control
 elements have to be marked up with the special <tt class="docutils literal"><span class="pre">midi</span></tt> attribute in the Faust
 source. For instance, a pan control (MIDI controller 10) may be implemented in
@@ -458,18 +455,17 @@ the Faust source as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre>pan = hslider(<span class="s">&quot;pan [midi:ctrl 10]&quot;</span>, <span class="mi">0</span>, -<span class="mi">1</span>, <span class="mi">1</span>, <span class="mf">0.01</span>)<span class="p">;</span>
 </pre></div>
 </div>
-<p>In read mode, pd-faust will then provide the necessary logic to handle MIDI
-input from controller 10 by changing the pan control in the Faust unit
-accordingly, mapping the controller values 0..127 to the range and step size
-given in the Faust source. Conversely, in write mode corresponding MIDI
-controller data will be generated and sent to Pd&#8217;s MIDI output, on the MIDI
-channel specified in the creation arguments of the Faust unit (0 meaning
-&#8220;omni&#8221;, i.e., output on all MIDI channels), so that it can drive an external
-MIDI device such as a keyboard or a faderbox.</p>
-<p>In principle, the same functionality is also available for external OSC
-devices, employing explicit OSC controller assignments in the Faust source by
-means of the <tt class="docutils literal"><span class="pre">osc</span></tt> attribute. E.g., the following enables input and output
-of OSC messages for the OSC <tt class="docutils literal"><span class="pre">/pan</span></tt> address:</p>
+<p>pd-faust will then provide the necessary logic to handle MIDI input from
+controller 10 by changing the pan control in the Faust unit accordingly,
+mapping the controller values 0..127 to the range and step size given in the
+Faust source. Moreover, in write mode corresponding MIDI controller data will
+be generated and sent to Pd&#8217;s MIDI output, on the MIDI channel specified in
+the creation arguments of the Faust unit (0 meaning &#8220;omni&#8221;, i.e., output on
+all MIDI channels).</p>
+<p>The same functionality is also available for external OSC devices, employing
+explicit OSC controller assignments in the Faust source by means of the
+<tt class="docutils literal"><span class="pre">osc</span></tt> attribute. E.g., the following enables input and output of OSC
+messages for the OSC <tt class="docutils literal"><span class="pre">/pan</span></tt> address:</p>
 <div class="highlight-pure"><div class="highlight"><pre>pan = hslider(<span class="s">&quot;pan [osc:/pan]&quot;</span>, <span class="mi">0</span>, -<span class="mi">1</span>, <span class="mi">1</span>, <span class="mf">0.01</span>)<span class="p">;</span>
 </pre></div>
 </div>

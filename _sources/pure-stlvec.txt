@@ -109,7 +109,7 @@ stlvec module. ::
     > sv1!![2,4,6];
     [2,4,6]
 
-    > update sv1 3 33; members sv1;
+    > put (sv1,3) 33; members sv1;
     STLVEC #<pointer 0xaf4d2c0>
     [0,1,2,33,4,5,6,7]
 
@@ -211,7 +211,7 @@ that points to an element and the element's position (starting at zero) in the
 vector.  pure-stlvec uses this correspondence to designate a stlvec's members
 in a way that makes it relatively easy to see how pure-stlvec's functions are
 acting on the stlvec's underlying STL vector by referencing the STL's
-documentation. Thus, if sv is a stlvec, and j is an int, "update sv j x" uses
+documentation. Thus, if sv is a stlvec, and j is an int, "put (sv,j) x" uses
 the STL to replace the element pointed to by the iterator for position j of
 sv's underlying STL vector. If, in addition, k is an int, stl::sort (sv,j,k)
 (<) uses the STL to sort the elements in the range designated by the "jth" and
@@ -347,8 +347,8 @@ is mutable. ::
    > let v = const_stlvec $ stlvec (0..3); v2;
    CONST_STLVEC #<pointer 0x8c1dbf0>
 
-   > update v 0 100; // fails
-   update (CONST_STLVEC #<pointer 0x9f07690>) 0 100
+   > put (v,0) 100; // fails
+   put (CONST_STLVEC #<pointer 0x9f07690>,0) 100
 
 Types
 -----
@@ -394,7 +394,7 @@ const_stlvecs (usually after they have been created and modified within a
 function) by the ``const_stlvec`` function. This function converts a mutable
 stlvec to an immutable stlvec without changing the underlying STL vector. 
 
-Typically, a "pure" function that "updates" a stlvec passed to it as an
+Typically, a "pure" function that "modifies" a stlvec passed to it as an
 argument will first copy the input stlvec to a new locally scoped (mutable)
 stlvec using the stlvec function. It will then modify the new stlvec and use
 const_stlvec to make the new stlvec immutable before it is returned. It should
@@ -416,7 +416,7 @@ If desired, in Pure it is easy to write functions that have automatic
 copy-on-write semantics. E.g., ::
 
     > my_update csv::const_stlvec i x = my_update (stlvec csv) i x;
-    > my_update sv::stlvec i x = update sv i x;
+    > my_update sv::stlvec i x = replace sv i x;
 
 Documentation
 -------------
@@ -689,12 +689,14 @@ Note that if list is applied to an iterator tuple, it will return a list
 holding the elements of the tuple not the elements of the range denoted by the
 tuple. It is recommended that you use members instead.
 
-.. function:: update /stlvec msv i x
-              update /stlvec csv i x
+.. function:: replace /stlvec msv i x
 
-   replace the i\ th member of msv by x and return msv; copy the immutable
-   stlvec, csv a new stlvec, sv, replace the i\ th member of sv by x, convert
-   sv to an immutable stlvec and return the new immutable stlvec 
+   replace the i\ th member of msv by x and return x; throws out_of_bounds if
+   i is less than 0 or great or equal to the #msv
+
+.. function:: update /stlvec msv i x
+
+   same as replace  // FIX - kill this function
 
 .. function:: append /stlvec sv x
 
@@ -962,10 +964,6 @@ Operations
    sv1[first1,last1) sv2[first2,n) and and places the
    resulting sequence in msv[p, p+n) where n is last1 -
    first1. Returns (msv,p+n)
-
-.. function:: replace (msv,first,last) x y
-
-   same as :func:`replace_if` (msv,first,last) (x==) y
 
 .. function:: replace_if (msv,first,last) unary_pred x
 
@@ -1398,35 +1396,12 @@ Examples
 
 See ut_numeric.pure in the pure-stlvec/ut directory.
 
-Trace Mode
-==========
+Reference Counting
+==================
 
-If the pure-stlvec dlls are built using 'make debug' (as opposed to 'make',
-'make all' or 'make dlls'), the pure-stlvec tracing functions will be
-enabled. These functions, all of which are defined in the stl namespace, can
-be used to trace the creation and deletion of stlvecs as well as the changes
-in ref counts that occur as Pure objects are moved and copied. In addition to
-being useful for maintaining the pure-stlvec modules, these functions can be
-used to observe STL copy semantics.
-
-.. function:: set_sv_trace on_off::int
-
-   enables or disables tracing the creation and deletion of stlvecs
-
-.. function:: sv_trace_enabled
-
-   returns 1 if stlvec tracing is enabled, else 0
-
-.. function:: set_px_trace on_off::int
-
-   enables or disables tracing 'copying' of Pure expressions
-
-.. function:: px_trace_enabled
-
-   returns 1 if Pure expression tracing is enabled, else 0
-
-In addition, the following function, also in the stl namespace, is available
-whether or not debug is passed to make.
+The following function, also in the stl namespace, is available if you want to
+observe how pure-stlvec maintains reference counts for items in its
+containers.
 
 .. function:: refc x
 

@@ -57,7 +57,7 @@
             
   <div class="section" id="module-stlvec">
 <span id="pure-stlvec"></span><h1>pure-stlvec<a class="headerlink" href="#module-stlvec" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.3, December 20, 2011</p>
+<p>Version 0.3, February 17, 2012</p>
 <div class="line-block">
 <div class="line">Peter Summerland &lt;<a class="reference external" href="mailto:p&#46;summerland&#37;&#52;&#48;gmail&#46;com">p<span>&#46;</span>summerland<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</div>
 </div>
@@ -137,7 +137,7 @@ them.</p>
 <li><a class="reference internal" href="#id21" id="id72">Examples</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#trace-mode" id="id73">Trace Mode</a></li>
+<li><a class="reference internal" href="#reference-counting" id="id73">Reference Counting</a></li>
 </ul>
 </div>
 <div class="section" id="copying">
@@ -216,7 +216,7 @@ STLVEC <span class="kt">#&lt;pointer 0xaf4d2c0&gt;</span>
 <span class="gp">&gt; </span>sv1!![<span class="mi">2</span>,<span class="mi">4</span>,<span class="mi">6</span>]<span class="p">;</span>
 [<span class="mi">2</span>,<span class="mi">4</span>,<span class="mi">6</span>]
 
-<span class="gp">&gt; </span>update sv1 <span class="mi">3</span> <span class="mi">33</span><span class="p">;</span> members sv1<span class="p">;</span>
+<span class="gp">&gt; </span>put (sv1,<span class="mi">3</span>) <span class="mi">33</span><span class="p">;</span> members sv1<span class="p">;</span>
 STLVEC <span class="kt">#&lt;pointer 0xaf4d2c0&gt;</span>
 [<span class="mi">0</span>,<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">33</span>,<span class="mi">4</span>,<span class="mi">5</span>,<span class="mi">6</span>,<span class="mi">7</span>]
 
@@ -314,7 +314,7 @@ that points to an element and the element&#8217;s position (starting at zero) in
 vector.  pure-stlvec uses this correspondence to designate a stlvec&#8217;s members
 in a way that makes it relatively easy to see how pure-stlvec&#8217;s functions are
 acting on the stlvec&#8217;s underlying STL vector by referencing the STL&#8217;s
-documentation. Thus, if sv is a stlvec, and j is an int, &#8220;update sv j x&#8221; uses
+documentation. Thus, if sv is a stlvec, and j is an int, &#8220;put (sv,j) x&#8221; uses
 the STL to replace the element pointed to by the iterator for position j of
 sv&#8217;s underlying STL vector. If, in addition, k is an int, stl::sort (sv,j,k)
 (&lt;) uses the STL to sort the elements in the range designated by the &#8220;jth&#8221; and
@@ -436,8 +436,8 @@ is mutable.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> v = const_stlvec $ stlvec (<span class="mi">0</span>..<span class="mi">3</span>)<span class="p">;</span> v2<span class="p">;</span>
 CONST_STLVEC <span class="kt">#&lt;pointer 0x8c1dbf0&gt;</span>
 
-<span class="gp">&gt; </span>update v <span class="mi">0</span> <span class="mi">100</span><span class="p">;</span> <span class="c1">// fails</span>
-update (CONST_STLVEC <span class="kt">#&lt;pointer 0x9f07690&gt;</span>) <span class="mi">0</span> <span class="mi">100</span>
+<span class="gp">&gt; </span>put (v,<span class="mi">0</span>) <span class="mi">100</span><span class="p">;</span> <span class="c1">// fails</span>
+put (CONST_STLVEC <span class="kt">#&lt;pointer 0x9f07690&gt;</span>,<span class="mi">0</span>) <span class="mi">100</span>
 </pre></div>
 </div>
 </div>
@@ -491,7 +491,7 @@ are passed a const_stlvec when they expect a mutable_stlvec.</p>
 const_stlvecs (usually after they have been created and modified within a
 function) by the <tt class="docutils literal"><span class="pre">const_stlvec</span></tt> function. This function converts a mutable
 stlvec to an immutable stlvec without changing the underlying STL vector.</p>
-<p>Typically, a &#8220;pure&#8221; function that &#8220;updates&#8221; a stlvec passed to it as an
+<p>Typically, a &#8220;pure&#8221; function that &#8220;modifies&#8221; a stlvec passed to it as an
 argument will first copy the input stlvec to a new locally scoped (mutable)
 stlvec using the stlvec function. It will then modify the new stlvec and use
 const_stlvec to make the new stlvec immutable before it is returned. It should
@@ -511,7 +511,7 @@ sv2.</p>
 <p>If desired, in Pure it is easy to write functions that have automatic
 copy-on-write semantics. E.g.,</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>my_update csv<span class="p">::</span>const_stlvec i x = my_update (stlvec csv) i x<span class="p">;</span>
-<span class="gp">&gt; </span>my_update sv<span class="p">::</span>stlvec i x = update sv i x<span class="p">;</span>
+<span class="gp">&gt; </span>my_update sv<span class="p">::</span>stlvec i x = replace sv i x<span class="p">;</span>
 </pre></div>
 </div>
 </div>
@@ -789,13 +789,16 @@ tuple.</p>
 holding the elements of the tuple not the elements of the range denoted by the
 tuple. It is recommended that you use members instead.</p>
 <dl class="function">
+<dt id="replace/stlvec">
+<tt class="descname">replace</tt> msv i x<a class="headerlink" href="#replace/stlvec" title="Permalink to this definition">¶</a></dt>
+<dd><p>replace the ith member of msv by x and return x; throws out_of_bounds if
+i is less than 0 or great or equal to the #msv</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="update/stlvec">
 <tt class="descname">update</tt> msv i x<a class="headerlink" href="#update/stlvec" title="Permalink to this definition">¶</a></dt>
-<dt>
-<tt class="descname">update</tt> csv i x</dt>
-<dd><p>replace the ith member of msv by x and return msv; copy the immutable
-stlvec, csv a new stlvec, sv, replace the ith member of sv by x, convert
-sv to an immutable stlvec and return the new immutable stlvec</p>
+<dd><p>same as replace  // FIX - kill this function</p>
 </dd></dl>
 
 <dl class="function">
@@ -1137,12 +1140,6 @@ first1. Returns (msv,p+n)</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="stl::replace">
-<tt class="descclassname">stl::</tt><tt class="descname">replace</tt> (msv,first,last) x y<a class="headerlink" href="#stl::replace" title="Permalink to this definition">¶</a></dt>
-<dd><p>same as <a class="reference internal" href="#stl::replace_if" title="stl::replace_if"><tt class="xref pure pure-func docutils literal"><span class="pre">replace_if</span></tt></a> (msv,first,last) (x==) y</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="stl::replace_if">
 <tt class="descclassname">stl::</tt><tt class="descname">replace_if</tt> (msv,first,last) unary_pred x<a class="headerlink" href="#stl::replace_if" title="Permalink to this definition">¶</a></dt>
 <dd><p>replace the elements of msv[first,last) that satistfy
@@ -1152,7 +1149,7 @@ unary_pred with x</p>
 <dl class="function">
 <dt id="stl::replace_copy">
 <tt class="descclassname">stl::</tt><tt class="descname">replace_copy</tt> (sv,first,last) (msv,p) x y<a class="headerlink" href="#stl::replace_copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>same as <a class="reference internal" href="#stl::replace" title="stl::replace"><tt class="xref pure pure-func docutils literal"><span class="pre">replace</span></tt></a> (msv,first,last) x y except that
+<dd><p>same as <tt class="xref pure pure-func docutils literal"><span class="pre">replace</span></tt> (msv,first,last) x y except that
 the modified sequence is placed in msv[p,p+last-first)</p>
 </dd></dl>
 
@@ -1648,41 +1645,11 @@ msv[m,q) is the new sequence</p>
 <p>See ut_numeric.pure in the pure-stlvec/ut directory.</p>
 </div>
 </div>
-<div class="section" id="trace-mode">
-<h2><a class="toc-backref" href="#id73">Trace Mode</a><a class="headerlink" href="#trace-mode" title="Permalink to this headline">¶</a></h2>
-<p>If the pure-stlvec dlls are built using &#8216;make debug&#8217; (as opposed to &#8216;make&#8217;,
-&#8216;make all&#8217; or &#8216;make dlls&#8217;), the pure-stlvec tracing functions will be
-enabled. These functions, all of which are defined in the stl namespace, can
-be used to trace the creation and deletion of stlvecs as well as the changes
-in ref counts that occur as Pure objects are moved and copied. In addition to
-being useful for maintaining the pure-stlvec modules, these functions can be
-used to observe STL copy semantics.</p>
-<dl class="function">
-<dt id="stl::set_sv_trace">
-<tt class="descclassname">stl::</tt><tt class="descname">set_sv_trace</tt> on_off::int<a class="headerlink" href="#stl::set_sv_trace" title="Permalink to this definition">¶</a></dt>
-<dd><p>enables or disables tracing the creation and deletion of stlvecs</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="stl::sv_trace_enabled">
-<tt class="descclassname">stl::</tt><tt class="descname">sv_trace_enabled</tt><a class="headerlink" href="#stl::sv_trace_enabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns 1 if stlvec tracing is enabled, else 0</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="stl::set_px_trace">
-<tt class="descclassname">stl::</tt><tt class="descname">set_px_trace</tt> on_off::int<a class="headerlink" href="#stl::set_px_trace" title="Permalink to this definition">¶</a></dt>
-<dd><p>enables or disables tracing &#8216;copying&#8217; of Pure expressions</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="stl::px_trace_enabled">
-<tt class="descclassname">stl::</tt><tt class="descname">px_trace_enabled</tt><a class="headerlink" href="#stl::px_trace_enabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns 1 if Pure expression tracing is enabled, else 0</p>
-</dd></dl>
-
-<p>In addition, the following function, also in the stl namespace, is available
-whether or not debug is passed to make.</p>
+<div class="section" id="reference-counting">
+<h2><a class="toc-backref" href="#id73">Reference Counting</a><a class="headerlink" href="#reference-counting" title="Permalink to this headline">¶</a></h2>
+<p>The following function, also in the stl namespace, is available if you want to
+observe how pure-stlvec maintains reference counts for items in its
+containers.</p>
 <dl class="function">
 <dt id="stl::refc">
 <tt class="descclassname">stl::</tt><tt class="descname">refc</tt> x<a class="headerlink" href="#stl::refc" title="Permalink to this definition">¶</a></dt>
@@ -1773,7 +1740,7 @@ garbage collection purposes)</p>
 <li><a class="reference internal" href="#id21">Examples</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#trace-mode">Trace Mode</a></li>
+<li><a class="reference internal" href="#reference-counting">Reference Counting</a></li>
 </ul>
 </li>
 </ul>

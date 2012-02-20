@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.51, February 18, 2012</p>
+<p>Version 0.52, February 20, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -249,7 +249,7 @@ the benefit that the compiled code runs much faster than the usual kinds of
 <p>You can use the interpreter as a sophisticated kind of &#8220;desktop calculator&#8221;
 program. Simply run the program from the shell as follows:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure
-<span class="go">Pure 0.51 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef</span>
+<span class="go">Pure 0.52 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef</span>
 <span class="go">(Type &#39;help&#39; for help, &#39;help copying&#39; for license information.)</span>
 <span class="go">Loaded prelude from /usr/local/lib/pure/prelude.pure.</span>
 
@@ -2401,13 +2401,10 @@ swap [<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</sp
 in such cases), but is a crucial feature of term rewriting languages, as it
 opens the door to symbolic evaluation techniques, see <a class="reference internal" href="#definitions-and-expression-evaluation">Definitions and
 Expression Evaluation</a>.</p>
-<p>Pretty much any kind of legal Pure expression can be used as a pattern; the
-only exceptions are list and matrix comprehensions. (These are in fact
-syntactic sugar for ordinary expressions, cf. <a class="reference internal" href="#primary-expressions">Primary Expressions</a>; in
-patterns, you will have to represent them in their &#8220;unsugared&#8221; form.)
-Syntactically, patterns are <a class="reference internal" href="#simple-expressions">simple expressions</a>, thus <a class="reference internal" href="#special-expressions">special expressions</a>
-need to be parenthesized if they occur in a pattern. (Special expressions in a
-pattern are automatically translated to their quoted representations, see <a class="reference internal" href="#the-quote">The
+<p>Any kind of legal Pure expression can be used as a pattern. Syntactically,
+patterns are <a class="reference internal" href="#simple-expressions">simple expressions</a>, thus <a class="reference internal" href="#special-expressions">special expressions</a> need to be
+parenthesized if they occur in a pattern. (Special expressions in a pattern
+are automatically translated to their quoted representations, see <a class="reference internal" href="#the-quote">The
 Quote</a>. These are typically used in macro definitions, see the <a class="reference internal" href="#macros">Macros</a>
 section for details.)</p>
 <p>Also note that the pattern matching capabilities for matrices are somewhat
@@ -5248,6 +5245,18 @@ __lambda__ [x] (x+<span class="mi">1</span>)
 f __with__ [f x--&gt;y __when__ [y--&gt;x+<span class="mi">1</span>]]
 </pre></div>
 </div>
+<p>List and matrix comprehensions can also be quoted. These are basically
+syntactic sugar for lambda applications, cf. <a class="reference internal" href="#primary-expressions">Primary Expressions</a>. The
+compiler expands them to their &#8220;unsugared&#8221; form already before macro
+substitution, so no special kinds of built-in macros are needed to represent
+them. When quoted, comprehensions are thus denoted in their unsugared form,
+which consists of a pile of lambda expressions and list or matrix construction
+functions for the generation clauses, and possibly some conditionals for the
+filter clauses of the comprehension. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>&#39;[<span class="mi">2</span>*x | x = <span class="mi">1</span>..<span class="mi">3</span>]<span class="p">;</span>
+listmap (__lambda__ [x] (<span class="mi">2</span>*x)) (<span class="mi">1</span>..<span class="mi">3</span>)
+</pre></div>
+</div>
 <p>Here&#8217;s how type tags and &#8220;as&#8221; patterns in quoted specials look like:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>&#39;(\x<span class="p">::</span><span class="kt">int</span>-&gt;x+<span class="mi">1</span>)<span class="p">;</span>
 __lambda__ [x __type__ <span class="kt">int</span>] (x+<span class="mi">1</span>)
@@ -5589,7 +5598,7 @@ Types</a>):</p>
 <p>Or let&#8217;s lists all global variables along with their values:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>catmap get_vardef (globsym <span class="s">&quot;*&quot;</span> <span class="mi">0</span>)<span class="p">;</span>
 [(argc--&gt;<span class="mi">0</span>),(argv--&gt;[]),(compiling--&gt;<span class="mi">0</span>),
-(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.51&quot;</span>)]
+(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.52&quot;</span>)]
 </pre></div>
 </div>
 <p>The counterparts of <a class="reference internal" href="purelib.html#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> and <a class="reference internal" href="purelib.html#del_fundef" title="del_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">del_fundef</span></tt></a> are provided as
@@ -7455,7 +7464,7 @@ argc       var  argc = <span class="mi">0</span><span class="p">;</span>
 argv       var  argv = []<span class="p">;</span>
 compiling  var  compiling = <span class="mi">0</span><span class="p">;</span>
 sysinfo    var  sysinfo = <span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span><span class="p">;</span>
-version    var  version = <span class="s">&quot;0.51&quot;</span><span class="p">;</span>
+version    var  version = <span class="s">&quot;0.52&quot;</span><span class="p">;</span>
 <span class="mi">5</span> variables
 </pre></div>
 </div>

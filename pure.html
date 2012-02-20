@@ -1380,8 +1380,7 @@ which provides you with thousands of characters from most of the languages of
 the world, as well as an abundance of special symbols for almost any purpose.
 If your text editor supports the UTF-8 encoding (most editors do nowadays),
 you can use all Unicode characters in your Pure programs, not only inside
-strings, but also for denoting identifiers and special operator and constant
-symbols.</p>
+strings, but also for denoting identifiers and special operator symbols.</p>
 <p>The customary notations for identifiers, numbers and strings are all
 provided. In addition, Pure also allows you to define your own operator
 symbols. Identifiers and other symbols are described by the following grammar
@@ -1395,7 +1394,7 @@ rules in EBNF format:</p>
 <strong id="grammar-token-punct">punct     </strong> ::=  &quot;!&quot;|&quot;#&quot;|&quot;$&quot;|&quot;%&quot;|&quot;&amp;&quot;|...
 </pre>
 <p>Pure uses the following rules to distinguish &#8220;punctuation&#8221; (which may only
-occur in declared operator and constant symbols) and &#8220;letters&#8221; (identifier
+occur in declared operator symbols) and &#8220;letters&#8221; (identifier
 constituents). In addition to the punctuation symbols in the 7 bit ASCII
 range, the following code points in the Unicode repertoire are considered as
 punctuation: U+00A1 through U+00BF, U+00D7, U+00F7, and U+20D0 through
@@ -1624,7 +1623,7 @@ interpreter, while identifiers in variable positions denote, well,
 variables. We also refer to this convention as the <strong class="dfn">head = function rule</strong>. It
 is quite intuitive and lets us get away without declaring the variables in
 equations. (There are some corner cases not covered here, however. In
-particular, Pure allows you to declare special constant symbols, if you need a
+particular, Pure allows you to declare special &#8220;nonfix&#8221; symbols, if you need a
 symbol to be recognized as a literal even if it occurs in a variable
 position. This is done by means of a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> declaration, see
 <a class="reference internal" href="#symbol-declarations">Symbol Declarations</a> for details.)</p>
@@ -1792,23 +1791,23 @@ occurring on the left-hand side of an equation, is special; it denotes the
 variable. Identifiers can also be prefixed with a namespace identifier,
 like in <tt class="docutils literal"><span class="pre">foo::bar</span></tt>. (This requires that the given namespace has already
 been created, as explained under <a class="reference internal" href="#namespaces">Namespaces</a> in the <a class="reference internal" href="#declarations">Declarations</a> section.)</dd>
-<dt>Operator and constant symbols: <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">not</span></tt></dt>
+<dt>Operator symbols: <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">not</span></tt></dt>
 <dd><p class="first">For convenience, Pure also provides you with a limited means to extend the
-syntax of the language with special operator and constant symbols by means
-of a corresponding <strong class="dfn">fixity</strong> declaration, as discussed in section <a class="reference internal" href="#symbol-declarations">Symbol
+syntax of the language with special operator symbols by means of a
+corresponding <strong class="dfn">fixity</strong> declaration, as discussed in section <a class="reference internal" href="#symbol-declarations">Symbol
 Declarations</a>. Besides the usual infix, prefix and postfix operators,
-Pure also provides outfix (bracket) and nonfix (constant) symbols. (Nonfix
-symbols actually work more or less like ordinary identifiers, but the
-<a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> attribute tells the compiler that when such a symbol
-occurs on the left-hand side of an equation, it is always to be
-interpreted as a literal constant, cf. <a class="reference internal" href="#variables-in-equations">Variables in Equations</a>.)</p>
-<p>Operator and constant symbols may take the form of an identifier or a
-sequence of punctuation characters. They must always be declared before
-use. Once declared, they are always special, and can&#8217;t be used as ordinary
+Pure also provides outfix (bracket) and nonfix (nullary operator)
+symbols. (Nonfix symbols actually work more or less like ordinary
+identifiers, but the <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> attribute tells the compiler that
+when such a symbol occurs on the left-hand side of an equation, it is
+always to be interpreted as a literal, cf. <a class="reference internal" href="#variables-in-equations">Variables in Equations</a>.)</p>
+<p>Operator (and nonfix) symbols may take the form of an identifier or a
+sequence of punctuation characters, which may optionally be qualified with
+a namespace prefix. These symbols must always be declared before use. Once
+declared, they are always special, and can&#8217;t be used as ordinary
 identifiers any more. However, like in Haskell, by enclosing an operator
 in parentheses, such as <tt class="docutils literal"><span class="pre">(+)</span></tt> or <tt class="docutils literal"><span class="pre">(not)</span></tt>, you can turn it into an
-ordinary function symbol. Also, operators and constant symbols can be
-qualified with a namespace just like normal identifiers.</p>
+ordinary function symbol.</p>
 <div class="last admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The common operator symbols like <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">-</span></tt>, <tt class="docutils literal"><span class="pre">*</span></tt>, <tt class="docutils literal"><span class="pre">/</span></tt>
@@ -4159,9 +4158,9 @@ used as a prefix in any of the special symbol declarations discussed below, to
 specify the scope of the declared symbols (if the scope prefix is omitted, it
 defaults to <a class="reference internal" href="#public"><tt class="xref std std-keyword docutils literal"><span class="pre">public</span></tt></a>).</p>
 <p>The following &#8220;fixity&#8221; declarations are available for introducing special
-operator and constant symbols. This changes the way that these symbols are
-parsed and thus provides you with a limited means to extend the Pure language
-at the lexical and syntactical level.</p>
+operator symbols. This changes the way that these symbols are parsed and thus
+provides you with a limited means to extend the Pure language at the lexical
+and syntactical level.</p>
 <dl class="describe">
 <dt>
 <tt class="descname">infix level symbol ...;</tt></dt>
@@ -4198,6 +4197,19 @@ table can be found in the <a class="reference internal" href="purelib.html#prelu
 <span class="kr">prefix</span> <span class="mi">2600</span> # <span class="p">;</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Unary minus plays a special role in the syntax. Like in Haskell and
+following mathematical tradition, unary minus is the only prefix operator
+symbol which is also used as an infix operator, and is always on the same
+precedence level as binary minus, whose precedence may be chosen freely in
+the prelude. (The minus operator is the only symbol which gets that special
+treatment; all other operators must have distinct lexical representations.)
+Thus, with the standard prelude, <tt class="docutils literal"><span class="pre">-x+y</span></tt> will be parsed as <tt class="docutils literal"><span class="pre">(-x)+y</span></tt>,
+whereas <tt class="docutils literal"><span class="pre">-x*y</span></tt> is the same as <tt class="docutils literal"><span class="pre">-(x*y)</span></tt>. Also note that the notation
+<tt class="docutils literal"><span class="pre">(-)</span></tt> always denotes the binary minus operator; the unary minus operation
+can be denoted using the built-in <tt class="docutils literal"><span class="pre">neg</span></tt> function.</p>
+</div>
 <p>Instead of denoting the precedence by an explicit integer value, you can also
 specify an existing operator symbol enclosed in parentheses. Thus the
 following declaration gives the <tt class="docutils literal"><span class="pre">++</span></tt> operator the same precedence as <tt class="docutils literal"><span class="pre">+</span></tt>:</p>
@@ -4231,9 +4243,9 @@ distinct). For instance:</p>
 other operators, you can turn outfix symbols into ordinary functions by
 enclosing them in parentheses, but you have to specify the symbols in matching
 pairs, such as <tt class="docutils literal"><span class="pre">(BEGIN</span> <span class="pre">END)</span></tt>.</p>
-<p>Pure also has a notation for &#8220;nullary&#8221; operators, i.e., &#8220;operators without
-operands&#8221;, which are used to denote special constants. These are introduced
-using a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> declaration:</p>
+<p>Pure also has a notation for &#8220;nullary&#8221; operators, that is, &#8220;operators without
+operands&#8221;. These are used to denote special literals which simply stand for
+themselves. They are introduced using a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> declaration:</p>
 <dl class="describe">
 <dt>
 <tt class="descname">nonfix symbol ...;</tt></dt>
@@ -4243,11 +4255,19 @@ using a <a class="reference internal" href="#nonfix"><tt class="xref std std-key
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">nonfix</span> red green blue<span class="p">;</span>
 </pre></div>
 </div>
-<p>Syntactically, these work just like ordinary identifiers, so they may stand
-whereever an identifier is allowed (no parentheses are required to &#8220;escape&#8221;
-them). The difference to ordinary identifiers is that nonfix symbols are
-always interpreted as literals, even if they occur in a variable position on
-the left-hand side of a rule. So, with the above declaration, you can write
+<p>Semantically, nonfix symbols are a kind of &#8220;symbolic constants&#8221;. However, it
+is important to note the difference to <em>defined</em> constants, which are symbols
+bound to a constant value by means of a <a class="reference internal" href="#const"><tt class="xref std std-keyword docutils literal"><span class="pre">const</span></tt></a> definition. In fact,
+there are some use cases where a symbol may be <em>both</em> a defined constant and a
+nonfix symbol, see <a class="reference internal" href="#constant-definitions">Constant Definitions</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section
+for details.</p>
+<p>Syntactically, nonfix symbols work just like ordinary identifiers, so they may
+stand whereever an identifier is allowed (no parentheses are required to
+&#8220;escape&#8221; them). However, just like other kinds of operators, they may also
+consist of punctuation (which isn&#8217;t allowed in ordinary identifiers). The
+other difference to ordinary identifiers is that nonfix symbols are always
+interpreted as literals, even if they occur in a variable position on the
+left-hand side of a rule. So, with the above declaration, you can write
 something like:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo x = <span class="kr">case</span> x <span class="kr">of</span> red = green<span class="p">;</span> green = blue<span class="p">;</span> blue = red <span class="kr">end</span><span class="p">;</span>
 <span class="gp">&gt; </span>map foo [red,green,blue]<span class="p">;</span>
@@ -4256,8 +4276,8 @@ something like:</p>
 </div>
 <p>Thus nonfix symbols are pretty much like nullary constructor symbols in
 languages like Haskell. Non-fixity is just a syntactic attribute,
-however. Pure doesn&#8217;t enforce that such values are really &#8220;constant&#8221;, so you
-can still write a &#8220;constructor equation&#8221; like the following:</p>
+however. Pure doesn&#8217;t enforce that such values are irreducible, so you can
+still write a &#8220;constructor equation&#8221; like the following:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>red = blue<span class="p">;</span>
 <span class="gp">&gt; </span>map foo [red,green,blue]<span class="p">;</span>
 [blue,blue,blue]
@@ -4268,16 +4288,6 @@ can still write a &#8220;constructor equation&#8221; like the following:</p>
 relational, logical) operator symbols as well as the list and pair
 constructors &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">,</span></tt>&#8216;, and a few nonfix symbols (mostly for
 denoting different kinds of exceptions).</p>
-<p>One final thing worth noting here is that unary minus plays a special role in
-the syntax. Like in Haskell and following mathematical tradition, unary minus
-is the only prefix operator symbol which is also used as an infix operator,
-and is always on the same precedence level as binary minus, whose precedence
-may be chosen freely in the prelude. (The minus operator is the only symbol
-which gets that special treatment; all other operators must have distinct
-lexical representations.) Thus, with the standard prelude, <tt class="docutils literal"><span class="pre">-x+y</span></tt> will be
-parsed as <tt class="docutils literal"><span class="pre">(-x)+y</span></tt>, whereas <tt class="docutils literal"><span class="pre">-x*y</span></tt> is the same as <tt class="docutils literal"><span class="pre">-(x*y)</span></tt>. Also note
-that the notation <tt class="docutils literal"><span class="pre">(-)</span></tt> always denotes the binary minus operator; the unary
-minus operation can be denoted using the built-in <tt class="docutils literal"><span class="pre">neg</span></tt> function.</p>
 </div>
 <div class="section" id="modules-and-imports">
 <span id="using"></span><h3><a class="toc-backref" href="#id63">Modules and Imports</a><a class="headerlink" href="#modules-and-imports" title="Permalink to this headline">¶</a></h3>
@@ -4438,7 +4448,7 @@ namespaces can be created with the <a class="reference internal" href="#namespac
 also switches to the given namespace (makes it the <em>current</em> namespace), so
 that new symbols are then created in that namespace rather than the default
 one. The current namespace also applies to all kinds of symbol declarations,
-including operator and constant symbol declarations, as well as
+including operator and nonfix symbol declarations, as well as
 <a class="reference internal" href="#extern"><tt class="xref std std-keyword docutils literal"><span class="pre">extern</span></tt></a> declarations (the latter are described in the <a class="reference internal" href="#c-interface">C Interface</a>
 section).</p>
 <p>The basic form of the <a class="reference internal" href="#namespace"><tt class="xref std std-keyword docutils literal"><span class="pre">namespace</span></tt></a> declaration has the following
@@ -5652,7 +5662,7 @@ subject term fails to match the pattern in a pattern-matching lambda
 abstraction, or a <a class="reference internal" href="#let"><tt class="xref std std-keyword docutils literal"><span class="pre">let</span></tt></a>, <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> or <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>
 construct. These types of exceptions are reported using the symbols
 <a class="reference internal" href="purelib.html#stack_fault" title="stack_fault"><tt class="xref pure pure-cons docutils literal"><span class="pre">stack_fault</span></tt></a>, <a class="reference internal" href="purelib.html#failed_cond" title="failed_cond"><tt class="xref pure pure-cons docutils literal"><span class="pre">failed_cond</span></tt></a> and <a class="reference internal" href="purelib.html#failed_match" title="failed_match"><tt class="xref pure pure-cons docutils literal"><span class="pre">failed_match</span></tt></a>,
-respectively, which are declared as constant symbols in the standard
+respectively, which are declared as nonfix symbols in the standard
 prelude. You can use <a class="reference internal" href="#catch" title="catch"><tt class="xref pure pure-func docutils literal"><span class="pre">catch</span></tt></a> to handle these kinds of exceptions just
 like any other. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact(n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
@@ -8258,11 +8268,11 @@ executed as usual, i.e., the script is also run <em>at compile time</em>. This m
 first seem to be a big annoyance, but it actually opens the door for some
 powerful programming techniques like <a class="reference external" href="http://en.wikipedia.org/wiki/Partial_evaluation">partial evaluation</a>. It is also a
 necessity because of Pure&#8217;s highly dynamic nature. For instance, Pure allows
-you to define constants by evaluating an arbitrary expression (see <a class="reference internal" href="#constant-definitions">Constant
-Definitions</a> below), and using <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> a program can easily modify
-itself in even more unforeseeable ways. Therefore pretty much anything in your
-program can actually depend on previous computations performed while the
-program is being executed.</p>
+you to define constants by evaluating an arbitrary expression (cf. <a class="reference internal" href="#constant-definitions">Constant
+Definitions</a>), and using <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> a program can easily modify itself in
+even more unforeseeable ways. Therefore pretty much anything in your program
+can actually depend on previous computations performed while the program is
+being executed.</p>
 <div class="section" id="example">
 <h3><a class="toc-backref" href="#id105">Example</a><a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
 <p>For the sake of a concrete example, consider the following little script:</p>

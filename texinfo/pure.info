@@ -1356,7 +1356,7 @@ of the languages of the world, as well as an abundance of special
 symbols for almost any purpose.  If your text editor supports the UTF-8
 encoding (most editors do nowadays), you can use all Unicode characters
 in your Pure programs, not only inside strings, but also for denoting
-identifiers and special operator and constant symbols.
+identifiers and special operator symbols.
 
   The customary notations for identifiers, numbers and strings are all
 provided. In addition, Pure also allows you to define your own operator
@@ -1371,24 +1371,24 @@ grammar rules in EBNF format:
     punct      ::= "!"|"#"|"$"|"%"|"&"|...
 
 Pure uses the following rules to distinguish "punctuation" (which may
-only occur in declared operator and constant symbols) and "letters"
-(identifier constituents). In addition to the punctuation symbols in
-the 7 bit ASCII range, the following code points in the Unicode
-repertoire are considered as punctuation: U+00A1 through U+00BF,
-U+00D7, U+00F7, and U+20D0 through U+2BFF. This comprises the special
-symbols in the Latin-1 repertoire, as well as the Combining Diacritical
-Marks for Symbols, Letterlike Symbols, Number Forms, Arrows,
-Mathematical Symbols, Miscellaneous Technical Symbols, Control
-Pictures, OCR, Enclosed Alphanumerics, Box Drawing, Blocks, Geometric
-Shapes, Miscellaneous Symbols, Dingbats, Miscellaneous Mathematical
-Symbols A, Supplemental Arrows A, Supplemental Arrows B, Miscellaneous
-Mathematical Symbols B, Supplemental Mathematical Operators, and
-Miscellaneous Symbols and Arrows. This should cover almost everything
-you'd ever want to use in an operator symbol. All other extended
-Unicode characters are effectively treated as "letters" which can be
-used as identifier constituents. (Charts of all Unicode symbols can be
-found at the Code Charts (http://www.unicode.org/charts/) page of the
-Unicode Consortium (http://www.unicode.org/).)
+only occur in declared operator symbols) and "letters" (identifier
+constituents). In addition to the punctuation symbols in the 7 bit ASCII
+range, the following code points in the Unicode repertoire are
+considered as punctuation: U+00A1 through U+00BF, U+00D7, U+00F7, and
+U+20D0 through U+2BFF. This comprises the special symbols in the
+Latin-1 repertoire, as well as the Combining Diacritical Marks for
+Symbols, Letterlike Symbols, Number Forms, Arrows, Mathematical
+Symbols, Miscellaneous Technical Symbols, Control Pictures, OCR,
+Enclosed Alphanumerics, Box Drawing, Blocks, Geometric Shapes,
+Miscellaneous Symbols, Dingbats, Miscellaneous Mathematical Symbols A,
+Supplemental Arrows A, Supplemental Arrows B, Miscellaneous Mathematical
+Symbols B, Supplemental Mathematical Operators, and Miscellaneous
+Symbols and Arrows. This should cover almost everything you'd ever want
+to use in an operator symbol. All other extended Unicode characters are
+effectively treated as "letters" which can be used as identifier
+constituents. (Charts of all Unicode symbols can be found at the Code
+Charts (http://www.unicode.org/charts/) page of the Unicode Consortium
+(http://www.unicode.org/).)
 
   The following are examples of valid identifiers: `foo', `foo_bar',
 `FooBar', `BAR', `bar99'. Case is significant in identifiers, so `Bar'
@@ -1643,7 +1643,7 @@ well, variables. We also refer to this convention as the *head =
 function rule*. It is quite intuitive and lets us get away without
 declaring the variables in equations. (There are some corner cases not
 covered here, however. In particular, Pure allows you to declare
-special constant symbols, if you need a symbol to be recognized as a
+special "nonfix" symbols, if you need a symbol to be recognized as a
 literal even if it occurs in a variable position. This is done by means
 of a *note nonfix: 85. declaration, see *note Symbol Declarations: 58.
 for details.)
@@ -1789,27 +1789,25 @@ Function and variable symbols: `foo', `foo_bar', `BAR', `foo::bar'
      been created, as explained under *note Namespaces: 93. in the
      *note Declarations: 3c. section.)
 
-Operator and constant symbols: `+', `==', `not'
+Operator symbols: `+', `==', `not'
      For convenience, Pure also provides you with a limited means to
-     extend the syntax of the language with special operator and
-     constant symbols by means of a corresponding *fixity* declaration,
-     as discussed in section *note Symbol Declarations: 58. Besides the
-     usual infix, prefix and postfix operators, Pure also provides
-     outfix (bracket) and nonfix (constant) symbols. (Nonfix symbols
-     actually work more or less like ordinary identifiers, but the
-     *note nonfix: 85. attribute tells the compiler that when such a
-     symbol occurs on the left-hand side of an equation, it is always
-     to be interpreted as a literal constant, cf. *note Variables in
-     Equations: 84.)
+     extend the syntax of the language with special operator symbols by
+     means of a corresponding *fixity* declaration, as discussed in
+     section *note Symbol Declarations: 58. Besides the usual infix,
+     prefix and postfix operators, Pure also provides outfix (bracket)
+     and nonfix (nullary operator) symbols. (Nonfix symbols actually
+     work more or less like ordinary identifiers, but the *note nonfix:
+     85. attribute tells the compiler that when such a symbol occurs on
+     the left-hand side of an equation, it is always to be interpreted
+     as a literal, cf. *note Variables in Equations: 84.)
 
-     Operator and constant symbols may take the form of an identifier
-     or a sequence of punctuation characters. They must always be
+     Operator (and nonfix) symbols may take the form of an identifier
+     or a sequence of punctuation characters, which may optionally be
+     qualified with a namespace prefix. These symbols must always be
      declared before use. Once declared, they are always special, and
      can't be used as ordinary identifiers any more. However, like in
      Haskell, by enclosing an operator in parentheses, such as `(+)' or
-     `(not)', you can turn it into an ordinary function symbol. Also,
-     operators and constant symbols can be qualified with a namespace
-     just like normal identifiers.
+     `(not)', you can turn it into an ordinary function symbol.
 
           Note: The common operator symbols like `+', `-', `*', `/'
           etc. are all declared at the beginning of the prelude, see the
@@ -4373,9 +4371,9 @@ the declared symbols (if the scope prefix is omitted, it defaults to
 *note public: c8.).
 
   The following "fixity" declarations are available for introducing
-special operator and constant symbols. This changes the way that these
-symbols are parsed and thus provides you with a limited means to extend
-the Pure language at the lexical and syntactical level.
+special operator symbols. This changes the way that these symbols are
+parsed and thus provides you with a limited means to extend the Pure
+language at the lexical and syntactical level.
 
  -- Description: infix level symbol ...;
  -- Description: infixl level symbol ...;
@@ -4409,7 +4407,21 @@ of the `purelib'):
     infixr 2500 ^ ;
     prefix 2600 # ;
 
-Instead of denoting the precedence by an explicit integer value, you
+
+     Note: Unary minus plays a special role in the syntax. Like in
+     Haskell and following mathematical tradition, unary minus is the
+     only prefix operator symbol which is also used as an infix
+     operator, and is always on the same precedence level as binary
+     minus, whose precedence may be chosen freely in the prelude. (The
+     minus operator is the only symbol which gets that special
+     treatment; all other operators must have distinct lexical
+     representations.)  Thus, with the standard prelude, `-x+y' will be
+     parsed as `(-x)+y', whereas `-x*y' is the same as `-(x*y)'. Also
+     note that the notation `(-)' always denotes the binary minus
+     operator; the unary minus operation can be denoted using the
+     built-in `neg' function.
+
+  Instead of denoting the precedence by an explicit integer value, you
 can also specify an existing operator symbol enclosed in parentheses.
 Thus the following declaration gives the `++' operator the same
 precedence as `+':
@@ -4443,9 +4455,10 @@ Just like other operators, you can turn outfix symbols into ordinary
 functions by enclosing them in parentheses, but you have to specify the
 symbols in matching pairs, such as `(BEGIN END)'.
 
-  Pure also has a notation for "nullary" operators, i.e., "operators
-without operands", which are used to denote special constants. These
-are introduced using a *note nonfix: 85. declaration:
+  Pure also has a notation for "nullary" operators, that is, "operators
+without operands". These are used to denote special literals which
+simply stand for themselves. They are introduced using a *note nonfix:
+85. declaration:
 
  -- Description: nonfix symbol ...;
 
@@ -4453,12 +4466,21 @@ are introduced using a *note nonfix: 85. declaration:
 
     nonfix red green blue;
 
-Syntactically, these work just like ordinary identifiers, so they may
-stand whereever an identifier is allowed (no parentheses are required
-to "escape" them). The difference to ordinary identifiers is that
-nonfix symbols are always interpreted as literals, even if they occur
-in a variable position on the left-hand side of a rule. So, with the
-above declaration, you can write something like:
+Semantically, nonfix symbols are a kind of "symbolic constants".
+However, it is important to note the difference to _defined_ constants,
+which are symbols bound to a constant value by means of a *note const:
+51. definition. In fact, there are some use cases where a symbol may be
+_both_ a defined constant and a nonfix symbol, see *note Constant
+Definitions: ba. in the *note Caveats and Notes: d. section for details.
+
+  Syntactically, nonfix symbols work just like ordinary identifiers, so
+they may stand whereever an identifier is allowed (no parentheses are
+required to "escape" them). However, just like other kinds of
+operators, they may also consist of punctuation (which isn't allowed in
+ordinary identifiers). The other difference to ordinary identifiers is
+that nonfix symbols are always interpreted as literals, even if they
+occur in a variable position on the left-hand side of a rule. So, with
+the above declaration, you can write something like:
 
     > foo x = case x of red = green; green = blue; blue = red end;
     > map foo [red,green,blue];
@@ -4466,8 +4488,8 @@ above declaration, you can write something like:
 
 Thus nonfix symbols are pretty much like nullary constructor symbols in
 languages like Haskell. Non-fixity is just a syntactic attribute,
-however. Pure doesn't enforce that such values are really "constant",
-so you can still write a "constructor equation" like the following:
+however. Pure doesn't enforce that such values are irreducible, so you
+can still write a "constructor equation" like the following:
 
     > red = blue;
     > map foo [red,green,blue];
@@ -4478,18 +4500,6 @@ _prelude_ which declares a bunch of standard (arithmetic, relational,
 logical) operator symbols as well as the list and pair constructors
 '`:'' and '`,'', and a few nonfix symbols (mostly for denoting
 different kinds of exceptions).
-
-  One final thing worth noting here is that unary minus plays a special
-role in the syntax. Like in Haskell and following mathematical
-tradition, unary minus is the only prefix operator symbol which is also
-used as an infix operator, and is always on the same precedence level
-as binary minus, whose precedence may be chosen freely in the prelude.
-(The minus operator is the only symbol which gets that special
-treatment; all other operators must have distinct lexical
-representations.) Thus, with the standard prelude, `-x+y' will be
-parsed as `(-x)+y', whereas `-x*y' is the same as `-(x*y)'. Also note
-that the notation `(-)' always denotes the binary minus operator; the
-unary minus operation can be denoted using the built-in `neg' function.
 
 
 File: pure.info,  Node: Modules and Imports,  Next: Namespaces,  Prev: Symbol Declarations,  Up: Declarations
@@ -4661,7 +4671,7 @@ namespace: c7. declaration, which also switches to the given namespace
 (makes it the _current_ namespace), so that new symbols are then
 created in that namespace rather than the default one. The current
 namespace also applies to all kinds of symbol declarations, including
-operator and constant symbol declarations, as well as *note extern: c6.
+operator and nonfix symbol declarations, as well as *note extern: c6.
 declarations (the latter are described in the *note C Interface: 3d.
 section).
 
@@ -6004,7 +6014,7 @@ and when the subject term fails to match the pattern in a
 pattern-matching lambda abstraction, or a *note let: 9f, *note case:
 8a. or *note when: 8b.  construct. These types of exceptions are
 reported using the symbols `stack_fault', `failed_cond' and
-`failed_match', respectively, which are declared as constant symbols in
+`failed_match', respectively, which are declared as nonfix symbols in
 the standard prelude. You can use *note catch: f5. to handle these
 kinds of exceptions just like any other. For instance:
 
@@ -8876,11 +8886,10 @@ opens the door for some powerful programming techniques like partial
 evaluation (http://en.wikipedia.org/wiki/Partial_evaluation). It is
 also a necessity because of Pure's highly dynamic nature. For instance,
 Pure allows you to define constants by evaluating an arbitrary
-expression (see *note Constant Definitions: ba. below), and using
-`eval' a program can easily modify itself in even more unforeseeable
-ways. Therefore pretty much anything in your program can actually
-depend on previous computations performed while the program is being
-executed.
+expression (cf. *note Constant Definitions: ba.), and using `eval' a
+program can easily modify itself in even more unforeseeable ways.
+Therefore pretty much anything in your program can actually depend on
+previous computations performed while the program is being executed.
 
 * Menu:
 
@@ -11139,656 +11148,656 @@ Node: Lexical Matters52244
 Ref: lexical matters52353
 Ref: 5752353
 Ref: lexical-matters52353
-Ref: 7a56167
-Ref: code-charts56167
-Ref: 7b56167
-Ref: unicode-consortium56167
-Ref: 7c58999
-Ref: id158999
-Node: Definitions and Expression Evaluation59000
-Ref: definitions and expression evaluation59135
-Ref: 5d59135
-Ref: definitions-and-expression-evaluation59135
-Node: Variables in Equations65720
-Ref: variables in equations65814
-Ref: 8465814
-Ref: variables-in-equations65814
-Node: Expression Syntax68008
-Ref: expression syntax68141
-Ref: 8668141
-Ref: expression-syntax68141
-Node: Primary Expressions71861
-Ref: primary expressions71959
-Ref: 9071959
-Ref: primary-expressions71959
-Ref: 9171959
-Ref: id271959
-Node: Simple Expressions84281
-Ref: simple expressions84407
-Ref: 9884407
-Ref: simple-expressions84407
-Node: Special Expressions87521
-Ref: special expressions87619
-Ref: 8d87619
-Ref: if87619
-Ref: 8e87619
-Ref: then87619
-Ref: 8f87619
-Ref: else87619
-Ref: 8a87619
-Ref: case87619
-Ref: 8b87619
-Ref: when87619
-Ref: 8c87619
-Ref: with87619
-Ref: 7987619
-Ref: end87619
-Ref: 9987619
-Ref: special-expressions87619
-Node: Special Forms90131
-Ref: special forms90235
-Ref: 9490235
-Ref: special-forms90235
-Ref: 9b90235
-Ref: id390235
-Ref: 7f90635
-Ref: &&/special90635
-Ref: 8090656
-Ref: ||/special90656
-Ref: 8192374
-Ref: $$92374
-Ref: 8293178
-Ref: &93178
-Ref: 8394191
-Ref: quote94191
-Ref: 9c94213
-Ref: '94213
-Node: Toplevel94887
-Ref: toplevel94987
-Ref: 9e94987
-Ref: def94987
-Ref: 9f94987
-Ref: let94987
-Ref: 5194987
-Ref: const94987
-Ref: a094987
-Ref: otherwise94987
-Ref: a194987
-Node: Scoping Rules98953
-Ref: scoping rules99031
-Ref: a599031
-Ref: scoping-rules99031
-Node: Rule Syntax102058
-Ref: rule syntax102146
-Ref: 89102146
-Ref: rule-syntax102146
-Node: Patterns103512
-Ref: patterns103584
-Ref: a6103584
-Node: Type Tags112095
-Ref: type tags112189
-Ref: a9112189
-Ref: type-tags112189
-Ref: aa112189
-Ref: id5112189
-Ref: ac113760
-Ref: int/type113760
-Ref: ad113810
-Ref: bigint/type113810
-Ref: ae113889
-Ref: double/type113889
-Ref: af113965
-Ref: string/type113965
-Ref: a7114019
-Ref: matrix/type114019
-Ref: ab114094
-Ref: pointer/type114094
-Node: General Rules119415
-Ref: general rules119513
-Ref: b0119513
-Ref: general-rules119513
-Node: Simple Rules122745
-Ref: simple rules122844
-Ref: b1122844
-Ref: simple-rules122844
-Node: Type Rules124374
-Ref: type rules124475
-Ref: a2124475
-Ref: type124475
-Ref: 54124475
-Ref: type-rules124475
-Ref: b2124475
-Ref: id6124475
-Node: Interface Types137246
-Ref: interface types137326
-Ref: b4137326
-Ref: interface137326
-Ref: a3137326
-Ref: interface-types137326
-Ref: b5137326
-Ref: id7137326
-Ref: b8144161
-Ref: go-faq144161
-Node: Examples150237
-Ref: examples150324
-Ref: 97150324
-Node: List Comprehensions152053
-Ref: list comprehensions152151
-Ref: bb152151
-Ref: list-comprehensions152151
-Node: Lazy Evaluation and Streams153789
-Ref: lazy evaluation and streams153915
-Ref: 95153915
-Ref: lazy-evaluation-and-streams153915
-Ref: bc153915
-Ref: id9153915
-Node: Matrix Computations158460
-Ref: matrix computations158584
-Ref: a8158584
-Ref: matrix-computations158584
-Ref: bd158584
-Ref: id10158584
-Node: Symbolic Matrices166812
-Ref: symbolic matrices166920
-Ref: c1166920
-Ref: symbolic-matrices166920
-Node: Record Data169367
-Ref: record data169465
-Ref: c3169465
-Ref: record-data169465
-Ref: c4169465
-Ref: id11169465
-Node: The Quote174989
-Ref: the quote175061
-Ref: 9d175061
-Ref: the-quote175061
-Node: Declarations178595
-Ref: declarations178677
-Ref: 3c178677
-Node: Symbol Declarations179738
-Ref: symbol declarations179832
-Ref: c8179832
-Ref: public179832
-Ref: c9179832
-Ref: private179832
-Ref: ca179832
-Ref: infix179832
-Ref: cb179832
-Ref: infixl179832
-Ref: cc179832
-Ref: infixr179832
-Ref: cd179832
-Ref: prefix179832
-Ref: ce179832
-Ref: postfix179832
-Ref: c2179832
-Ref: outfix179832
-Ref: 85179832
-Ref: nonfix179832
-Ref: 58179832
-Ref: symbol-declarations179832
-Node: Modules and Imports186973
-Ref: modules and imports187086
-Ref: 3b187086
-Ref: using187086
-Ref: d1187086
-Ref: modules-and-imports187086
-Ref: d2190444
-Ref: index-9190444
-Ref: d3190558
-Ref: index-10190558
-Ref: d4190856
-Ref: index-11190856
-Ref: d5191143
-Ref: index-12191143
-Ref: d6191171
-Ref: index-13191171
-Ref: d7192758
-Ref: index-14192758
-Node: Namespaces193062
-Ref: namespaces193147
-Ref: c7193147
-Ref: namespace193147
-Ref: 93193147
-Node: Using Namespaces196735
-Ref: using namespaces196831
-Ref: d9196831
-Ref: using-namespace196831
-Ref: da196831
-Ref: using-namespaces196831
-Node: Symbol Lookup and Creation199270
-Ref: symbol lookup and creation199390
-Ref: 68199390
-Ref: symbol-lookup-and-creation199390
-Ref: db199390
-Ref: id13199390
-Node: Private Symbols206913
-Ref: private symbols207040
-Ref: cf207040
-Ref: private-symbols207040
-Node: Hierarchical Namespaces208214
-Ref: hierarchical namespaces208332
-Ref: dc208332
-Ref: hierarchical-namespaces208332
-Ref: dd209474
-Ref: index-15209474
-Node: Scoped Namespaces210502
-Ref: scoped namespaces210596
-Ref: d8210596
-Ref: scoped-namespaces210596
-Node: Macros213845
-Ref: macros213937
-Ref: a4213937
-Ref: de213937
-Ref: id14213937
-Node: Optimization Rules215854
-Ref: optimization rules215938
-Ref: df215938
-Ref: optimization-rules215938
-Ref: e0215938
-Ref: id15215938
-Node: Recursive Macros219184
-Ref: recursive macros219303
-Ref: c5219303
-Ref: recursive-macros219303
-Ref: e4221837
-Ref: index-16221837
-Node: User-Defined Special Forms221883
-Ref: user-defined special forms221997
-Ref: e5221997
-Ref: user-defined-special-forms221997
-Node: Macro Hygiene223393
-Ref: macro hygiene223530
-Ref: e6223530
-Ref: macro-hygiene223530
-Node: Built-in Macros and Special Expressions225929
-Ref: built-in macros and special expressions226061
-Ref: e7226061
-Ref: built-in-macros-and-special-expressions226061
-Ref: e8226539
-Ref: __ifelse__226539
-Ref: e9226673
-Ref: __lambda__226673
-Ref: ea226767
-Ref: __case__226767
-Ref: ec227044
-Ref: __when__227044
-Ref: ed227350
-Ref: __with__227350
-Ref: eb227654
-Ref: -->227654
-Ref: ee227713
-Ref: __if__227713
-Ref: ef228210
-Ref: __as__228210
-Ref: f0228277
-Ref: __type__228277
-Ref: f1234261
-Ref: __eval__234261
-Node: Advanced Optimization235682
-Ref: advanced optimization235811
-Ref: e2235811
-Ref: advanced-optimization235811
-Node: Reflection240707
-Ref: reflection240788
-Ref: f2240788
-Node: Exception Handling245407
-Ref: exception handling245503
-Ref: f3245503
-Ref: exception-handling245503
-Ref: f4245503
-Ref: id16245503
-Ref: f5245815
-Ref: catch245815
-Ref: f6246983
-Ref: index-17246983
-Node: Standard Library250153
-Ref: standard library250254
-Ref: 78250254
-Ref: standard-library250254
-Node: C Interface254515
-Ref: c interface254615
-Ref: 3d254615
-Ref: c-interface254615
-Node: Extern Declarations256143
-Ref: extern declarations256237
-Ref: c6256237
-Ref: extern256237
-Ref: f8256237
-Ref: extern-declarations256237
-Node: Variadic C Functions261294
-Ref: variadic c functions261404
-Ref: fa261404
-Ref: variadic-c-functions261404
-Node: C Types262655
-Ref: c types262773
-Ref: f9262773
-Ref: c-types262773
-Ref: fb262773
-Ref: id17262773
-Node: Basic C Types264015
-Ref: basic c types264092
-Ref: fc264092
-Ref: basic-c-types264092
-Node: Pointer Types266262
-Ref: pointer types266369
-Ref: fd266369
-Ref: pointer-types266369
-Node: Pointers and Matrices269563
-Ref: pointers and matrices269673
-Ref: fe269673
-Ref: pointers-and-matrices269673
-Node: Pointer Examples272851
-Ref: pointer examples272939
-Ref: ff272939
-Ref: pointer-examples272939
-Node: Importing Dynamic Libraries277165
-Ref: importing dynamic libraries277285
-Ref: 100277285
-Ref: importing-dynamic-libraries277285
-Ref: 101278408
-Ref: index-18278408
-Ref: 102278483
-Ref: index-19278483
-Ref: 103278694
-Ref: index-20278694
-Node: Importing LLVM Bitcode279086
-Ref: importing llvm bitcode279210
-Ref: 104279210
-Ref: importing-llvm-bitcode279210
-Node: Inline Code286678
-Ref: inline code286793
-Ref: 77286793
-Ref: inline-code286793
-Ref: 10a290676
-Ref: index-21290676
-Ref: 10b290790
-Ref: index-22290790
-Ref: 10c290991
-Ref: index-23290991
-Ref: 10d291003
-Ref: index-24291003
-Ref: 10e291017
-Ref: index-25291017
-Ref: 10f291249
-Ref: index-26291249
-Node: Interfacing to C++292074
-Ref: interfacing to c++292187
-Ref: 110292187
-Ref: interfacing-to-c292187
-Node: Interfacing to Faust294670
-Ref: interfacing to faust294763
-Ref: 109294763
-Ref: interfacing-to-faust294763
-Ref: 111294763
-Ref: id18294763
-Ref: 112295901
-Ref: llvm-backend-for-faust295901
-Ref: 113297943
-Ref: index-27297943
-Ref: 114298339
-Ref: index-28298339
-Node: Interactive Usage311434
-Ref: interactive usage311535
-Ref: b311535
-Ref: interactive-usage311535
-Node: Online Help314965
-Ref: online help315057
-Ref: 4315057
-Ref: online-help315057
-Ref: 116315526
-Ref: index-29315526
-Ref: 117315554
-Ref: index-30315554
-Ref: 118317057
-Ref: docutils317057
-Node: Interactive Commands317998
-Ref: interactive commands318127
-Ref: e1318127
-Ref: interactive-commands318127
-Ref: 119318380
-Ref: index-31318380
-Ref: 11a318427
-Ref: index-32318427
-Ref: 11b318854
-Ref: index-33318854
-Ref: 11c319180
-Ref: index-34319180
-Ref: 11d319242
-Ref: index-35319242
-Ref: 121320231
-Ref: index-36320231
-Ref: 122321008
-Ref: index-37321008
-Ref: 124322528
-Ref: index-38322528
-Ref: 125322856
-Ref: index-39322856
-Ref: 126322922
-Ref: index-40322922
-Ref: 127323473
-Ref: index-41323473
-Ref: 128323720
-Ref: index-42323720
-Ref: 129323800
-Ref: index-43323800
-Ref: 12a323851
-Ref: index-44323851
-Ref: 12b325536
-Ref: index-45325536
-Ref: 12c325787
-Ref: index-46325787
-Ref: 12d326200
-Ref: index-47326200
-Ref: 12e326817
-Ref: index-48326817
-Ref: 12f327437
-Ref: index-49327437
-Node: Specifying Symbol Selections328422
-Ref: specifying symbol selections328556
-Ref: 120328556
-Ref: specifying-symbol-selections328556
-Node: The show Command331963
-Ref: the show command332094
-Ref: b7332094
-Ref: the-show-command332094
-Ref: 130333196
-Ref: index-50333196
-Node: Definition Levels336791
-Ref: definition levels336903
-Ref: 11f336903
-Ref: definition-levels336903
-Node: Debugging342153
-Ref: debugging342260
-Ref: 47342260
-Ref: 131343951
-Ref: index-51343951
-Node: Last Result353074
-Ref: last result353179
-Ref: 11e353179
-Ref: last-result353179
-Node: Pretty-Printing353889
-Ref: pretty-printing354006
-Ref: c0354006
-Ref: bf354212
-Ref: __show__354212
-Node: User-Defined Commands357803
-Ref: user-defined commands357928
-Ref: 115357928
-Ref: user-defined-commands357928
-Node: Interactive Startup363866
-Ref: interactive startup363967
-Ref: 123363967
-Ref: interactive-startup363967
-Ref: 132364332
-Ref: index-52364332
-Node: Batch Compilation365290
-Ref: batch compilation365397
-Ref: c365397
-Ref: batch-compilation365397
-Ref: 133365397
-Ref: id19365397
-Ref: 135370503
-Ref: partial-evaluation370503
-Node: Example370621
-Ref: example370716
-Ref: 136370716
-Node: Options Affecting Code Size375208
-Ref: options affecting code size375337
-Ref: 134375337
-Ref: options-affecting-code-size375337
-Node: Other Output Code Formats378825
-Ref: other output code formats378976
-Ref: 137378976
-Ref: other-output-code-formats378976
-Ref: 138384864
-Ref: llvm-documentation384864
-Node: Calling Pure Functions From C384864
-Ref: calling pure functions from c384979
-Ref: 139384979
-Ref: calling-pure-functions-from-c384979
-Node: Caveats and Notes386472
-Ref: caveats and notes386568
-Ref: d386568
-Ref: caveats-and-notes386568
-Node: Etymology387230
-Ref: etymology387322
-Ref: 13a387322
-Node: Backward Compatibility388213
-Ref: backward compatibility388328
-Ref: 13b388328
-Ref: backward-compatibility388328
-Node: Error Recovery396861
-Ref: error recovery396980
-Ref: 13e396980
-Ref: error-recovery396980
-Node: With and when397636
-Ref: with and when397752
-Ref: 13f397752
-Ref: with-and-when397752
-Node: Non-Linear Patterns401443
-Ref: non-linear patterns401558
-Ref: 140401558
-Ref: non-linear-patterns401558
-Node: "As" Patterns402958
-Ref: "as" patterns403086
-Ref: e3403086
-Ref: as-patterns403086
-Node: "Head = Function" Pitfalls403842
-Ref: "head = function" pitfalls403968
-Ref: 141403968
-Ref: head-function-pitfalls403968
-Node: Defined Functions407561
-Ref: defined functions407703
-Ref: 5e407703
-Ref: defined-functions407703
-Node: Stack Size and Tail Recursion411031
-Ref: stack size and tail recursion411179
-Ref: 4d411179
-Ref: stack-size-and-tail-recursion411179
-Ref: 142411565
-Ref: index-53411565
-Ref: 143411777
-Ref: index-54411777
-Ref: 144412065
-Ref: index-55412065
-Node: Handling of Asynchronous Signals413429
-Ref: handling of asynchronous signals413575
-Ref: 4e413575
-Ref: handling-of-asynchronous-signals413575
-Node: Recursive Types415596
-Ref: recursive types415723
-Ref: b3415723
-Ref: recursive-types415723
-Ref: 145418680
-Ref: continuation-passing418680
-Node: Interfaces420903
-Ref: interfaces421018
-Ref: b9421018
-Node: Numeric Calculations424645
-Ref: numeric calculations424765
-Ref: 146424765
-Ref: numeric-calculations424765
-Node: Constant Definitions426676
-Ref: constant definitions426806
-Ref: ba426806
-Ref: constant-definitions426806
-Node: External C Functions432551
-Ref: external c functions432682
-Ref: f7432682
-Ref: external-c-functions432682
-Ref: 147433963
-Ref: libffi433963
-Node: Calling Special Forms434348
-Ref: calling special forms434467
-Ref: 148434467
-Ref: calling-special-forms434467
-Node: Laziness434954
-Ref: laziness435077
-Ref: 149435077
-Node: Showing Macro Expansions439575
-Ref: showing macro expansions439668
-Ref: 14b439668
-Ref: showing-macro-expansions439668
-Node: Author441303
-Ref: author441398
-Ref: 14c441398
-Node: Acknowledgements441533
-Ref: acknowledgements441618
-Ref: 14d441618
-Node: Copying442817
-Ref: copying442916
-Ref: 3442916
-Node: References and Links445278
-Ref: references and links445366
-Ref: 14e445366
-Ref: references-and-links445366
-Ref: 9a445415
-Ref: aardappel445415
-Ref: 14a445556
-Ref: alice-ml445556
-Ref: 11445691
-Ref: baader-and-nipkow445691
-Ref: d0445809
-Ref: bertrand445809
-Ref: 105446069
-Ref: clang446069
-Ref: 107446358
-Ref: dragonegg446358
-Ref: 108446569
-Ref: faust446569
-Ref: 14f446656
-Ref: gnu-multiprecision-library446656
-Ref: 92446656
-Ref: gmp446656
-Ref: 150446764
-Ref: gnu-octave446764
-Ref: be446764
-Ref: octave446764
-Ref: 96446908
-Ref: gnu-scientific-library446908
-Ref: 151446908
-Ref: gsl446908
-Ref: b6447069
-Ref: go447069
-Ref: 7d447133
-Ref: haskell447133
-Ref: 8447199
-Ref: llvm447199
-Ref: 106447264
-Ref: llvm-gcc447264
-Ref: 13d447480
-Ref: miranda447480
-Ref: 7e447651
-Ref: ml447651
-Ref: 10447810
-Ref: michael-o-donnell447810
-Ref: 13c447960
-Ref: q447960
-Node: Index448045
-Ref: index448117
-Ref: 88465445
-Ref: 87465476
+Ref: 7a56141
+Ref: code-charts56141
+Ref: 7b56141
+Ref: unicode-consortium56141
+Ref: 7c58973
+Ref: id158973
+Node: Definitions and Expression Evaluation58974
+Ref: definitions and expression evaluation59109
+Ref: 5d59109
+Ref: definitions-and-expression-evaluation59109
+Node: Variables in Equations65694
+Ref: variables in equations65788
+Ref: 8465788
+Ref: variables-in-equations65788
+Node: Expression Syntax67982
+Ref: expression syntax68115
+Ref: 8668115
+Ref: expression-syntax68115
+Node: Primary Expressions71835
+Ref: primary expressions71933
+Ref: 9071933
+Ref: primary-expressions71933
+Ref: 9171933
+Ref: id271933
+Node: Simple Expressions84185
+Ref: simple expressions84311
+Ref: 9884311
+Ref: simple-expressions84311
+Node: Special Expressions87425
+Ref: special expressions87523
+Ref: 8d87523
+Ref: if87523
+Ref: 8e87523
+Ref: then87523
+Ref: 8f87523
+Ref: else87523
+Ref: 8a87523
+Ref: case87523
+Ref: 8b87523
+Ref: when87523
+Ref: 8c87523
+Ref: with87523
+Ref: 7987523
+Ref: end87523
+Ref: 9987523
+Ref: special-expressions87523
+Node: Special Forms90035
+Ref: special forms90139
+Ref: 9490139
+Ref: special-forms90139
+Ref: 9b90139
+Ref: id390139
+Ref: 7f90539
+Ref: &&/special90539
+Ref: 8090560
+Ref: ||/special90560
+Ref: 8192278
+Ref: $$92278
+Ref: 8293082
+Ref: &93082
+Ref: 8394095
+Ref: quote94095
+Ref: 9c94117
+Ref: '94117
+Node: Toplevel94791
+Ref: toplevel94891
+Ref: 9e94891
+Ref: def94891
+Ref: 9f94891
+Ref: let94891
+Ref: 5194891
+Ref: const94891
+Ref: a094891
+Ref: otherwise94891
+Ref: a194891
+Node: Scoping Rules98857
+Ref: scoping rules98935
+Ref: a598935
+Ref: scoping-rules98935
+Node: Rule Syntax101962
+Ref: rule syntax102050
+Ref: 89102050
+Ref: rule-syntax102050
+Node: Patterns103416
+Ref: patterns103488
+Ref: a6103488
+Node: Type Tags111999
+Ref: type tags112093
+Ref: a9112093
+Ref: type-tags112093
+Ref: aa112093
+Ref: id5112093
+Ref: ac113664
+Ref: int/type113664
+Ref: ad113714
+Ref: bigint/type113714
+Ref: ae113793
+Ref: double/type113793
+Ref: af113869
+Ref: string/type113869
+Ref: a7113923
+Ref: matrix/type113923
+Ref: ab113998
+Ref: pointer/type113998
+Node: General Rules119319
+Ref: general rules119417
+Ref: b0119417
+Ref: general-rules119417
+Node: Simple Rules122649
+Ref: simple rules122748
+Ref: b1122748
+Ref: simple-rules122748
+Node: Type Rules124278
+Ref: type rules124379
+Ref: a2124379
+Ref: type124379
+Ref: 54124379
+Ref: type-rules124379
+Ref: b2124379
+Ref: id6124379
+Node: Interface Types137150
+Ref: interface types137230
+Ref: b4137230
+Ref: interface137230
+Ref: a3137230
+Ref: interface-types137230
+Ref: b5137230
+Ref: id7137230
+Ref: b8144065
+Ref: go-faq144065
+Node: Examples150141
+Ref: examples150228
+Ref: 97150228
+Node: List Comprehensions151957
+Ref: list comprehensions152055
+Ref: bb152055
+Ref: list-comprehensions152055
+Node: Lazy Evaluation and Streams153693
+Ref: lazy evaluation and streams153819
+Ref: 95153819
+Ref: lazy-evaluation-and-streams153819
+Ref: bc153819
+Ref: id9153819
+Node: Matrix Computations158364
+Ref: matrix computations158488
+Ref: a8158488
+Ref: matrix-computations158488
+Ref: bd158488
+Ref: id10158488
+Node: Symbolic Matrices166716
+Ref: symbolic matrices166824
+Ref: c1166824
+Ref: symbolic-matrices166824
+Node: Record Data169271
+Ref: record data169369
+Ref: c3169369
+Ref: record-data169369
+Ref: c4169369
+Ref: id11169369
+Node: The Quote174893
+Ref: the quote174965
+Ref: 9d174965
+Ref: the-quote174965
+Node: Declarations178499
+Ref: declarations178581
+Ref: 3c178581
+Node: Symbol Declarations179642
+Ref: symbol declarations179736
+Ref: c8179736
+Ref: public179736
+Ref: c9179736
+Ref: private179736
+Ref: ca179736
+Ref: infix179736
+Ref: cb179736
+Ref: infixl179736
+Ref: cc179736
+Ref: infixr179736
+Ref: cd179736
+Ref: prefix179736
+Ref: ce179736
+Ref: postfix179736
+Ref: c2179736
+Ref: outfix179736
+Ref: 85179736
+Ref: nonfix179736
+Ref: 58179736
+Ref: symbol-declarations179736
+Node: Modules and Imports187485
+Ref: modules and imports187598
+Ref: 3b187598
+Ref: using187598
+Ref: d1187598
+Ref: modules-and-imports187598
+Ref: d2190956
+Ref: index-9190956
+Ref: d3191070
+Ref: index-10191070
+Ref: d4191368
+Ref: index-11191368
+Ref: d5191655
+Ref: index-12191655
+Ref: d6191683
+Ref: index-13191683
+Ref: d7193270
+Ref: index-14193270
+Node: Namespaces193574
+Ref: namespaces193659
+Ref: c7193659
+Ref: namespace193659
+Ref: 93193659
+Node: Using Namespaces197245
+Ref: using namespaces197341
+Ref: d9197341
+Ref: using-namespace197341
+Ref: da197341
+Ref: using-namespaces197341
+Node: Symbol Lookup and Creation199780
+Ref: symbol lookup and creation199900
+Ref: 68199900
+Ref: symbol-lookup-and-creation199900
+Ref: db199900
+Ref: id13199900
+Node: Private Symbols207423
+Ref: private symbols207550
+Ref: cf207550
+Ref: private-symbols207550
+Node: Hierarchical Namespaces208724
+Ref: hierarchical namespaces208842
+Ref: dc208842
+Ref: hierarchical-namespaces208842
+Ref: dd209984
+Ref: index-15209984
+Node: Scoped Namespaces211012
+Ref: scoped namespaces211106
+Ref: d8211106
+Ref: scoped-namespaces211106
+Node: Macros214355
+Ref: macros214447
+Ref: a4214447
+Ref: de214447
+Ref: id14214447
+Node: Optimization Rules216364
+Ref: optimization rules216448
+Ref: df216448
+Ref: optimization-rules216448
+Ref: e0216448
+Ref: id15216448
+Node: Recursive Macros219694
+Ref: recursive macros219813
+Ref: c5219813
+Ref: recursive-macros219813
+Ref: e4222347
+Ref: index-16222347
+Node: User-Defined Special Forms222393
+Ref: user-defined special forms222507
+Ref: e5222507
+Ref: user-defined-special-forms222507
+Node: Macro Hygiene223903
+Ref: macro hygiene224040
+Ref: e6224040
+Ref: macro-hygiene224040
+Node: Built-in Macros and Special Expressions226439
+Ref: built-in macros and special expressions226571
+Ref: e7226571
+Ref: built-in-macros-and-special-expressions226571
+Ref: e8227049
+Ref: __ifelse__227049
+Ref: e9227183
+Ref: __lambda__227183
+Ref: ea227277
+Ref: __case__227277
+Ref: ec227554
+Ref: __when__227554
+Ref: ed227860
+Ref: __with__227860
+Ref: eb228164
+Ref: -->228164
+Ref: ee228223
+Ref: __if__228223
+Ref: ef228720
+Ref: __as__228720
+Ref: f0228787
+Ref: __type__228787
+Ref: f1234771
+Ref: __eval__234771
+Node: Advanced Optimization236192
+Ref: advanced optimization236321
+Ref: e2236321
+Ref: advanced-optimization236321
+Node: Reflection241217
+Ref: reflection241298
+Ref: f2241298
+Node: Exception Handling245917
+Ref: exception handling246013
+Ref: f3246013
+Ref: exception-handling246013
+Ref: f4246013
+Ref: id16246013
+Ref: f5246325
+Ref: catch246325
+Ref: f6247491
+Ref: index-17247491
+Node: Standard Library250661
+Ref: standard library250762
+Ref: 78250762
+Ref: standard-library250762
+Node: C Interface255023
+Ref: c interface255123
+Ref: 3d255123
+Ref: c-interface255123
+Node: Extern Declarations256651
+Ref: extern declarations256745
+Ref: c6256745
+Ref: extern256745
+Ref: f8256745
+Ref: extern-declarations256745
+Node: Variadic C Functions261802
+Ref: variadic c functions261912
+Ref: fa261912
+Ref: variadic-c-functions261912
+Node: C Types263163
+Ref: c types263281
+Ref: f9263281
+Ref: c-types263281
+Ref: fb263281
+Ref: id17263281
+Node: Basic C Types264523
+Ref: basic c types264600
+Ref: fc264600
+Ref: basic-c-types264600
+Node: Pointer Types266770
+Ref: pointer types266877
+Ref: fd266877
+Ref: pointer-types266877
+Node: Pointers and Matrices270071
+Ref: pointers and matrices270181
+Ref: fe270181
+Ref: pointers-and-matrices270181
+Node: Pointer Examples273359
+Ref: pointer examples273447
+Ref: ff273447
+Ref: pointer-examples273447
+Node: Importing Dynamic Libraries277673
+Ref: importing dynamic libraries277793
+Ref: 100277793
+Ref: importing-dynamic-libraries277793
+Ref: 101278916
+Ref: index-18278916
+Ref: 102278991
+Ref: index-19278991
+Ref: 103279202
+Ref: index-20279202
+Node: Importing LLVM Bitcode279594
+Ref: importing llvm bitcode279718
+Ref: 104279718
+Ref: importing-llvm-bitcode279718
+Node: Inline Code287186
+Ref: inline code287301
+Ref: 77287301
+Ref: inline-code287301
+Ref: 10a291184
+Ref: index-21291184
+Ref: 10b291298
+Ref: index-22291298
+Ref: 10c291499
+Ref: index-23291499
+Ref: 10d291511
+Ref: index-24291511
+Ref: 10e291525
+Ref: index-25291525
+Ref: 10f291757
+Ref: index-26291757
+Node: Interfacing to C++292582
+Ref: interfacing to c++292695
+Ref: 110292695
+Ref: interfacing-to-c292695
+Node: Interfacing to Faust295178
+Ref: interfacing to faust295271
+Ref: 109295271
+Ref: interfacing-to-faust295271
+Ref: 111295271
+Ref: id18295271
+Ref: 112296409
+Ref: llvm-backend-for-faust296409
+Ref: 113298451
+Ref: index-27298451
+Ref: 114298847
+Ref: index-28298847
+Node: Interactive Usage311942
+Ref: interactive usage312043
+Ref: b312043
+Ref: interactive-usage312043
+Node: Online Help315473
+Ref: online help315565
+Ref: 4315565
+Ref: online-help315565
+Ref: 116316034
+Ref: index-29316034
+Ref: 117316062
+Ref: index-30316062
+Ref: 118317565
+Ref: docutils317565
+Node: Interactive Commands318506
+Ref: interactive commands318635
+Ref: e1318635
+Ref: interactive-commands318635
+Ref: 119318888
+Ref: index-31318888
+Ref: 11a318935
+Ref: index-32318935
+Ref: 11b319362
+Ref: index-33319362
+Ref: 11c319688
+Ref: index-34319688
+Ref: 11d319750
+Ref: index-35319750
+Ref: 121320739
+Ref: index-36320739
+Ref: 122321516
+Ref: index-37321516
+Ref: 124323036
+Ref: index-38323036
+Ref: 125323364
+Ref: index-39323364
+Ref: 126323430
+Ref: index-40323430
+Ref: 127323981
+Ref: index-41323981
+Ref: 128324228
+Ref: index-42324228
+Ref: 129324308
+Ref: index-43324308
+Ref: 12a324359
+Ref: index-44324359
+Ref: 12b326044
+Ref: index-45326044
+Ref: 12c326295
+Ref: index-46326295
+Ref: 12d326708
+Ref: index-47326708
+Ref: 12e327325
+Ref: index-48327325
+Ref: 12f327945
+Ref: index-49327945
+Node: Specifying Symbol Selections328930
+Ref: specifying symbol selections329064
+Ref: 120329064
+Ref: specifying-symbol-selections329064
+Node: The show Command332471
+Ref: the show command332602
+Ref: b7332602
+Ref: the-show-command332602
+Ref: 130333704
+Ref: index-50333704
+Node: Definition Levels337299
+Ref: definition levels337411
+Ref: 11f337411
+Ref: definition-levels337411
+Node: Debugging342661
+Ref: debugging342768
+Ref: 47342768
+Ref: 131344459
+Ref: index-51344459
+Node: Last Result353582
+Ref: last result353687
+Ref: 11e353687
+Ref: last-result353687
+Node: Pretty-Printing354397
+Ref: pretty-printing354514
+Ref: c0354514
+Ref: bf354720
+Ref: __show__354720
+Node: User-Defined Commands358311
+Ref: user-defined commands358436
+Ref: 115358436
+Ref: user-defined-commands358436
+Node: Interactive Startup364374
+Ref: interactive startup364475
+Ref: 123364475
+Ref: interactive-startup364475
+Ref: 132364840
+Ref: index-52364840
+Node: Batch Compilation365798
+Ref: batch compilation365905
+Ref: c365905
+Ref: batch-compilation365905
+Ref: 133365905
+Ref: id19365905
+Ref: 135371005
+Ref: partial-evaluation371005
+Node: Example371123
+Ref: example371218
+Ref: 136371218
+Node: Options Affecting Code Size375710
+Ref: options affecting code size375839
+Ref: 134375839
+Ref: options-affecting-code-size375839
+Node: Other Output Code Formats379327
+Ref: other output code formats379478
+Ref: 137379478
+Ref: other-output-code-formats379478
+Ref: 138385366
+Ref: llvm-documentation385366
+Node: Calling Pure Functions From C385366
+Ref: calling pure functions from c385481
+Ref: 139385481
+Ref: calling-pure-functions-from-c385481
+Node: Caveats and Notes386974
+Ref: caveats and notes387070
+Ref: d387070
+Ref: caveats-and-notes387070
+Node: Etymology387732
+Ref: etymology387824
+Ref: 13a387824
+Node: Backward Compatibility388715
+Ref: backward compatibility388830
+Ref: 13b388830
+Ref: backward-compatibility388830
+Node: Error Recovery397363
+Ref: error recovery397482
+Ref: 13e397482
+Ref: error-recovery397482
+Node: With and when398138
+Ref: with and when398254
+Ref: 13f398254
+Ref: with-and-when398254
+Node: Non-Linear Patterns401945
+Ref: non-linear patterns402060
+Ref: 140402060
+Ref: non-linear-patterns402060
+Node: "As" Patterns403460
+Ref: "as" patterns403588
+Ref: e3403588
+Ref: as-patterns403588
+Node: "Head = Function" Pitfalls404344
+Ref: "head = function" pitfalls404470
+Ref: 141404470
+Ref: head-function-pitfalls404470
+Node: Defined Functions408063
+Ref: defined functions408205
+Ref: 5e408205
+Ref: defined-functions408205
+Node: Stack Size and Tail Recursion411533
+Ref: stack size and tail recursion411681
+Ref: 4d411681
+Ref: stack-size-and-tail-recursion411681
+Ref: 142412067
+Ref: index-53412067
+Ref: 143412279
+Ref: index-54412279
+Ref: 144412567
+Ref: index-55412567
+Node: Handling of Asynchronous Signals413931
+Ref: handling of asynchronous signals414077
+Ref: 4e414077
+Ref: handling-of-asynchronous-signals414077
+Node: Recursive Types416098
+Ref: recursive types416225
+Ref: b3416225
+Ref: recursive-types416225
+Ref: 145419182
+Ref: continuation-passing419182
+Node: Interfaces421405
+Ref: interfaces421520
+Ref: b9421520
+Node: Numeric Calculations425147
+Ref: numeric calculations425267
+Ref: 146425267
+Ref: numeric-calculations425267
+Node: Constant Definitions427178
+Ref: constant definitions427308
+Ref: ba427308
+Ref: constant-definitions427308
+Node: External C Functions433053
+Ref: external c functions433184
+Ref: f7433184
+Ref: external-c-functions433184
+Ref: 147434465
+Ref: libffi434465
+Node: Calling Special Forms434850
+Ref: calling special forms434969
+Ref: 148434969
+Ref: calling-special-forms434969
+Node: Laziness435456
+Ref: laziness435579
+Ref: 149435579
+Node: Showing Macro Expansions440077
+Ref: showing macro expansions440170
+Ref: 14b440170
+Ref: showing-macro-expansions440170
+Node: Author441805
+Ref: author441900
+Ref: 14c441900
+Node: Acknowledgements442035
+Ref: acknowledgements442120
+Ref: 14d442120
+Node: Copying443319
+Ref: copying443418
+Ref: 3443418
+Node: References and Links445780
+Ref: references and links445868
+Ref: 14e445868
+Ref: references-and-links445868
+Ref: 9a445917
+Ref: aardappel445917
+Ref: 14a446058
+Ref: alice-ml446058
+Ref: 11446193
+Ref: baader-and-nipkow446193
+Ref: d0446311
+Ref: bertrand446311
+Ref: 105446571
+Ref: clang446571
+Ref: 107446860
+Ref: dragonegg446860
+Ref: 108447071
+Ref: faust447071
+Ref: 14f447158
+Ref: gnu-multiprecision-library447158
+Ref: 92447158
+Ref: gmp447158
+Ref: 150447266
+Ref: gnu-octave447266
+Ref: be447266
+Ref: octave447266
+Ref: 96447410
+Ref: gnu-scientific-library447410
+Ref: 151447410
+Ref: gsl447410
+Ref: b6447571
+Ref: go447571
+Ref: 7d447635
+Ref: haskell447635
+Ref: 8447701
+Ref: llvm447701
+Ref: 106447766
+Ref: llvm-gcc447766
+Ref: 13d447982
+Ref: miranda447982
+Ref: 7e448153
+Ref: ml448153
+Ref: 10448312
+Ref: michael-o-donnell448312
+Ref: 13c448462
+Ref: q448462
+Node: Index448547
+Ref: index448619
+Ref: 88465947
+Ref: 87465978
 
 End Tag Table
 

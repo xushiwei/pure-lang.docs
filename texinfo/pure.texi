@@ -1641,8 +1641,7 @@ which provides you with thousands of characters from most of the languages of
 the world, as well as an abundance of special symbols for almost any purpose.
 If your text editor supports the UTF-8 encoding (most editors do nowadays),
 you can use all Unicode characters in your Pure programs, not only inside
-strings, but also for denoting identifiers and special operator and constant
-symbols.
+strings, but also for denoting identifiers and special operator symbols.
 
 The customary notations for identifiers, numbers and strings are all
 provided. In addition, Pure also allows you to define your own operator
@@ -1660,7 +1659,7 @@ punct      ::= "!"|"#"|"$"|"%"|"&"|...
 
 @noindent
 Pure uses the following rules to distinguish "punctuation" (which may only
-occur in declared operator and constant symbols) and "letters" (identifier
+occur in declared operator symbols) and "letters" (identifier
 constituents). In addition to the punctuation symbols in the 7 bit ASCII
 range, the following code points in the Unicode repertoire are considered as
 punctuation: U+00A1 through U+00BF, U+00D7, U+00F7, and U+20D0 through
@@ -1943,7 +1942,7 @@ interpreter, while identifiers in variable positions denote, well,
 variables. We also refer to this convention as the @strong{head = function rule}. It
 is quite intuitive and lets us get away without declaring the variables in
 equations. (There are some corner cases not covered here, however. In
-particular, Pure allows you to declare special constant symbols, if you need a
+particular, Pure allows you to declare special "nonfix" symbols, if you need a
 symbol to be recognized as a literal even if it occurs in a variable
 position. This is done by means of a @pxref{85,,nonfix} declaration, see
 @pxref{58,,Symbol Declarations} for details.)
@@ -2111,23 +2110,23 @@ variable. Identifiers can also be prefixed with a namespace identifier,
 like in @code{foo::bar}. (This requires that the given namespace has already
 been created, as explained under @pxref{93,,Namespaces} in the @pxref{3c,,Declarations} section.)
 
-@item Operator and constant symbols: @code{+}, @code{==}, @code{not}
+@item Operator symbols: @code{+}, @code{==}, @code{not}
 For convenience, Pure also provides you with a limited means to extend the
-syntax of the language with special operator and constant symbols by means
-of a corresponding @strong{fixity} declaration, as discussed in section @pxref{58,,Symbol Declarations}. Besides the usual infix, prefix and postfix operators,
-Pure also provides outfix (bracket) and nonfix (constant) symbols. (Nonfix
-symbols actually work more or less like ordinary identifiers, but the
-@pxref{85,,nonfix} attribute tells the compiler that when such a symbol
-occurs on the left-hand side of an equation, it is always to be
-interpreted as a literal constant, cf. @pxref{84,,Variables in Equations}.)
+syntax of the language with special operator symbols by means of a
+corresponding @strong{fixity} declaration, as discussed in section @pxref{58,,Symbol Declarations}. Besides the usual infix, prefix and postfix operators,
+Pure also provides outfix (bracket) and nonfix (nullary operator)
+symbols. (Nonfix symbols actually work more or less like ordinary
+identifiers, but the @pxref{85,,nonfix} attribute tells the compiler that
+when such a symbol occurs on the left-hand side of an equation, it is
+always to be interpreted as a literal, cf. @pxref{84,,Variables in Equations}.)
 
-Operator and constant symbols may take the form of an identifier or a
-sequence of punctuation characters. They must always be declared before
-use. Once declared, they are always special, and can't be used as ordinary
+Operator (and nonfix) symbols may take the form of an identifier or a
+sequence of punctuation characters, which may optionally be qualified with
+a namespace prefix. These symbols must always be declared before use. Once
+declared, they are always special, and can't be used as ordinary
 identifiers any more. However, like in Haskell, by enclosing an operator
 in parentheses, such as @code{(+)} or @code{(not)}, you can turn it into an
-ordinary function symbol. Also, operators and constant symbols can be
-qualified with a namespace just like normal identifiers.
+ordinary function symbol.
 
 
 @cartouche
@@ -5129,9 +5128,9 @@ specify the scope of the declared symbols (if the scope prefix is omitted, it
 defaults to @pxref{c8,,public}).
 
 The following "fixity" declarations are available for introducing special
-operator and constant symbols. This changes the way that these symbols are
-parsed and thus provides you with a limited means to extend the Pure language
-at the lexical and syntactical level.
+operator symbols. This changes the way that these symbols are parsed and thus
+provides you with a limited means to extend the Pure language at the lexical
+and syntactical level.
 
 @deffn {Description} infix level symbol ...;
 
@@ -5171,6 +5170,22 @@ prefix 2600 # ;
 @end example
 
 @noindent
+
+@cartouche
+@quotation Note
+Unary minus plays a special role in the syntax. Like in Haskell and
+following mathematical tradition, unary minus is the only prefix operator
+symbol which is also used as an infix operator, and is always on the same
+precedence level as binary minus, whose precedence may be chosen freely in
+the prelude. (The minus operator is the only symbol which gets that special
+treatment; all other operators must have distinct lexical representations.)
+Thus, with the standard prelude, @code{-x+y} will be parsed as @code{(-x)+y},
+whereas @code{-x*y} is the same as @code{-(x*y)}. Also note that the notation
+@code{(-)} always denotes the binary minus operator; the unary minus operation
+can be denoted using the built-in @code{neg} function.
+@end quotation
+@end cartouche
+
 Instead of denoting the precedence by an explicit integer value, you can also
 specify an existing operator symbol enclosed in parentheses. Thus the
 following declaration gives the @code{++} operator the same precedence as @code{+}:
@@ -5213,9 +5228,9 @@ other operators, you can turn outfix symbols into ordinary functions by
 enclosing them in parentheses, but you have to specify the symbols in matching
 pairs, such as @code{(BEGIN END)}.
 
-Pure also has a notation for "nullary" operators, i.e., "operators without
-operands", which are used to denote special constants. These are introduced
-using a @pxref{85,,nonfix} declaration:
+Pure also has a notation for "nullary" operators, that is, "operators without
+operands". These are used to denote special literals which simply stand for
+themselves. They are introduced using a @pxref{85,,nonfix} declaration:
 
 @deffn {Description} nonfix symbol ...;
 @end deffn
@@ -5227,11 +5242,20 @@ nonfix red green blue;
 @end example
 
 @noindent
-Syntactically, these work just like ordinary identifiers, so they may stand
-whereever an identifier is allowed (no parentheses are required to "escape"
-them). The difference to ordinary identifiers is that nonfix symbols are
-always interpreted as literals, even if they occur in a variable position on
-the left-hand side of a rule. So, with the above declaration, you can write
+Semantically, nonfix symbols are a kind of "symbolic constants". However, it
+is important to note the difference to @emph{defined} constants, which are symbols
+bound to a constant value by means of a @pxref{51,,const} definition. In fact,
+there are some use cases where a symbol may be @emph{both} a defined constant and a
+nonfix symbol, see @pxref{ba,,Constant Definitions} in the @pxref{d,,Caveats and Notes} section
+for details.
+
+Syntactically, nonfix symbols work just like ordinary identifiers, so they may
+stand whereever an identifier is allowed (no parentheses are required to
+"escape" them). However, just like other kinds of operators, they may also
+consist of punctuation (which isn't allowed in ordinary identifiers). The
+other difference to ordinary identifiers is that nonfix symbols are always
+interpreted as literals, even if they occur in a variable position on the
+left-hand side of a rule. So, with the above declaration, you can write
 something like:
 
 @example
@@ -5243,8 +5267,8 @@ something like:
 @noindent
 Thus nonfix symbols are pretty much like nullary constructor symbols in
 languages like Haskell. Non-fixity is just a syntactic attribute,
-however. Pure doesn't enforce that such values are really "constant", so you
-can still write a "constructor equation" like the following:
+however. Pure doesn't enforce that such values are irreducible, so you can
+still write a "constructor equation" like the following:
 
 @example
 > red = blue;
@@ -5258,17 +5282,6 @@ Examples for all types of symbol declarations can be found in the
 relational, logical) operator symbols as well as the list and pair
 constructors '@code{:}' and '@code{,}', and a few nonfix symbols (mostly for
 denoting different kinds of exceptions).
-
-One final thing worth noting here is that unary minus plays a special role in
-the syntax. Like in Haskell and following mathematical tradition, unary minus
-is the only prefix operator symbol which is also used as an infix operator,
-and is always on the same precedence level as binary minus, whose precedence
-may be chosen freely in the prelude. (The minus operator is the only symbol
-which gets that special treatment; all other operators must have distinct
-lexical representations.) Thus, with the standard prelude, @code{-x+y} will be
-parsed as @code{(-x)+y}, whereas @code{-x*y} is the same as @code{-(x*y)}. Also note
-that the notation @code{(-)} always denotes the binary minus operator; the unary
-minus operation can be denoted using the built-in @code{neg} function.
 
 
 @node Modules and Imports,Namespaces,Symbol Declarations,Declarations
@@ -5480,7 +5493,7 @@ namespaces can be created with the @pxref{c7,,namespace} declaration, which
 also switches to the given namespace (makes it the @emph{current} namespace), so
 that new symbols are then created in that namespace rather than the default
 one. The current namespace also applies to all kinds of symbol declarations,
-including operator and constant symbol declarations, as well as
+including operator and nonfix symbol declarations, as well as
 @pxref{c6,,extern} declarations (the latter are described in the @pxref{3d,,C Interface}
 section).
 
@@ -7028,7 +7041,7 @@ subject term fails to match the pattern in a pattern-matching lambda
 abstraction, or a @pxref{9f,,let}, @pxref{8a,,case} or @pxref{8b,,when}
 construct. These types of exceptions are reported using the symbols
 @code{stack_fault}, @code{failed_cond} and @code{failed_match},
-respectively, which are declared as constant symbols in the standard
+respectively, which are declared as nonfix symbols in the standard
 prelude. You can use @pxref{f5,,catch} to handle these kinds of exceptions just
 like any other. For instance:
 
@@ -10234,10 +10247,10 @@ executed as usual, i.e., the script is also run @emph{at compile time}. This mig
 first seem to be a big annoyance, but it actually opens the door for some
 powerful programming techniques like @uref{http://en.wikipedia.org/wiki/Partial_evaluation,partial evaluation}. It is also a
 necessity because of Pure's highly dynamic nature. For instance, Pure allows
-you to define constants by evaluating an arbitrary expression (see @pxref{ba,,Constant Definitions} below), and using @code{eval} a program can easily modify
-itself in even more unforeseeable ways. Therefore pretty much anything in your
-program can actually depend on previous computations performed while the
-program is being executed.
+you to define constants by evaluating an arbitrary expression (cf. @pxref{ba,,Constant Definitions}), and using @code{eval} a program can easily modify itself in
+even more unforeseeable ways. Therefore pretty much anything in your program
+can actually depend on previous computations performed while the program is
+being executed.
 
 @anchor{135}@anchor{partial-evaluation}
 @menu

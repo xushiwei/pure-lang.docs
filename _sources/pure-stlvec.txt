@@ -46,9 +46,9 @@ http://pure-lang.googlecode.com/files/pure-stlvec-0.3.tar.gz.
  
 To install pure-stlvec (on Linux), extract the source code (e.g., tar -xzf
 pure-stlvec-0.3.tar.gz), cd to the pure-stlvec-0.3 directory, and
-run ``make``. After this you can (and should) also run ``make test`` to run a
+run ``make``. After this you can (and should) also run ``make check`` to run a
 few unit tests to make sure that pure-stlvec works properly on your system. If
-``make test`` works, run ``sudo make install`` to install pure-stlvec on your
+``make check`` works, run ``sudo make install`` to install pure-stlvec on your
 system.  ``make`` tries to guess your Pure installation directory and
 platform-specific setup. If it gets this wrong, you can set some variables
 manually. In particular, ``make install prefix=/usr`` sets the installation
@@ -109,7 +109,7 @@ stlvec module. ::
     > sv1!![2,4,6];
     [2,4,6]
 
-    > put (sv1,3) 33; members sv1;
+    > replace sv1 3 33; members sv1;
     STLVEC #<pointer 0xaf4d2c0>
     [0,1,2,33,4,5,6,7]
 
@@ -211,7 +211,7 @@ that points to an element and the element's position (starting at zero) in the
 vector.  pure-stlvec uses this correspondence to designate a stlvec's members
 in a way that makes it relatively easy to see how pure-stlvec's functions are
 acting on the stlvec's underlying STL vector by referencing the STL's
-documentation. Thus, if sv is a stlvec, and j is an int, "put (sv,j) x" uses
+documentation. Thus, if sv is a stlvec, and j is an int, "replace sv j x" uses
 the STL to replace the element pointed to by the iterator for position j of
 sv's underlying STL vector. If, in addition, k is an int, stl::sort (sv,j,k)
 (<) uses the STL to sort the elements in the range designated by the "jth" and
@@ -347,8 +347,8 @@ is mutable. ::
    > let v = const_stlvec $ stlvec (0..3); v2;
    CONST_STLVEC #<pointer 0x8c1dbf0>
 
-   > put (v,0) 100; // fails
-   put (CONST_STLVEC #<pointer 0x9f07690>,0) 100
+   > replace v 0 100; // fails
+   replace (CONST_STLVEC #<pointer 0x9f07690> 0 100
 
 Types
 -----
@@ -415,8 +415,8 @@ sv2.
 If desired, in Pure it is easy to write functions that have automatic
 copy-on-write semantics. E.g., ::
 
-    > my_update csv::const_stlvec i x = my_update (stlvec csv) i x;
-    > my_update sv::stlvec i x = replace sv i x;
+    > my_replace csv::const_stlvec i x = my_replace (stlvec csv) i x;
+    > my_replace sv::stlvec i x = replace sv i x;
 
 Documentation
 -------------
@@ -680,11 +680,12 @@ tuple.
 .. function:: replace /stlvec msv i x
 
    replace the i\ th member of msv by x and return x; throws out_of_bounds if
-   i is less than 0 or great or equal to the #msv
+   i is less than 0 or great or equal to the number of elements in msv
 
 .. function:: update /stlvec msv i x
 
-   same as replace  // FIX - kill this function
+   the same as replace except that update returns msv instead of x. This
+   function is DEPRECATED.
 
 .. function:: append /stlvec sv x
 
@@ -1399,3 +1400,34 @@ containers.
 
    returns the x's reference count (maintained by the Pure runtime for
    garbage collection purposes)
+
+Backward Compatibilty
+=====================
+
+This section documents changes in stlvec that might have introduced backward
+compatiblity issues.
+
+stlvec-0.3
+---------- 
+
+Version 0.3 reflects some changes made to make stlvec consistent with its
+sister package, stlmap.
+
+The :func:`update` function was deprecated. Please use :func:`replace`
+instead.
+
+The :func:`replace` function was added to the stlvec module. This function is
+the same as :func:`update` except that ":func:`replace` sv i x" returns x
+instead of sv.
+
+The :func:`stl::replace` function was removed from the stlvec/modifying
+module. You can use ":func:`stl::replace_if` (sv,first,last) (x==) y" instead
+of ":func:`stl::replace (sv,first,last) x y" to replace all instances of x in
+the specified range.
+
+The function :func:`null` was removed and :func:`stl::empty` was added to
+replace it.
+
+The function :func:`list` was removed. You can use :func:`members` instead.
+
+All of the tracing functions were removed.

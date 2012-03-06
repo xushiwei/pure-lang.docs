@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.52, March 05, 2012</p>
+<p>Version 0.52, March 06, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -213,7 +213,7 @@ and the latest sources can be found under the following URLs:</p>
 <li><a class="reference internal" href="#external-c-functions" id="id124">External C Functions</a></li>
 <li><a class="reference internal" href="#calling-special-forms" id="id125">Calling Special Forms</a></li>
 <li><a class="reference internal" href="#laziness" id="id126">Laziness</a></li>
-<li><a class="reference internal" href="#showing-macro-expansions" id="id127">Showing Macro Expansions</a></li>
+<li><a class="reference internal" href="#name-capture" id="id127">Name Capture</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#author" id="id128">Author</a></li>
@@ -908,15 +908,16 @@ so that they can be queried and set using the facilities described under
 option, e.g., <tt class="docutils literal"><span class="pre">checks</span></tt> for the <a class="reference internal" href="#cmdoption-pure--checks"><em class="xref std std-option">--checks</em></a>, <a class="reference internal" href="#cmdoption-pure--nochecks"><em class="xref std std-option">--nochecks</em></a>
 option and pragma.)</p>
 </div>
-<p>Besides these, there are the following special pragmas affecting the code
-generation of some global function, which is specified in the pragma. These
-pragmas can only be used in source code, they cannot be controlled using
-command line options or environment variables. Note that the given symbol
-<tt class="docutils literal"><span class="pre">fun</span></tt> may in fact be an arbitrary symbol (not just an identifier), so that
-these pragmas can also be applied to special operator symbols (cf. <a class="reference internal" href="#lexical-matters">Lexical
-Matters</a>). Also note that each of these pragmas also implicitly declares the
-symbol, so if a symbol needs any special attributes then it must be declared
-before any pragmas involving it (cf. <a class="reference internal" href="#symbol-declarations">Symbol Declarations</a>).</p>
+<p>Besides these, there are the following special pragmas affecting the
+evaluation of some global function or macro, which is specified in the
+pragma. These pragmas can only be used in source code, they cannot be
+controlled using command line options or environment variables. Note that the
+given symbol <tt class="docutils literal"><span class="pre">fun</span></tt> may in fact be an arbitrary symbol (not just an
+identifier), so that these pragmas can also be applied to special operator
+symbols (cf. <a class="reference internal" href="#lexical-matters">Lexical Matters</a>). Also note that each of these pragmas also
+implicitly declares the symbol, so if a symbol needs any special attributes
+then it must be declared before any pragmas involving it (cf. <a class="reference internal" href="#symbol-declarations">Symbol
+Declarations</a>).</p>
 <dl class="option">
 <dt id="cmdoption-pure-pragma--eager">
 <tt class="descname">--eager</tt><tt class="descclassname"> fun</tt><a class="headerlink" href="#cmdoption-pure-pragma--eager" title="Permalink to this definition">¶</a></dt>
@@ -978,6 +979,15 @@ a+<span class="mi">1</span>
 </div>
 <p>More information and examples for common uses of the <a class="reference internal" href="#cmdoption-pure-pragma--defined"><em class="xref std std-option">--defined</em></a>
 pragma can be found under <a class="reference internal" href="#defined-functions">Defined Functions</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a>
+section.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-pure-pragma--quoteargs">
+<tt class="descname">--quoteargs</tt><tt class="descclassname"> fun</tt><a class="headerlink" href="#cmdoption-pure-pragma--quoteargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This pragma tells the macro evaluator (cf. <a class="reference internal" href="#macros">Macros</a>) that the given macro
+should receive its arguments unevaluated, i.e., in quoted form. This is
+described in more detail in the <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros and Special Expressions</a>
 section.</p>
 </dd></dl>
 
@@ -4083,10 +4093,12 @@ x+<span class="mi">1</span> __when__ [x--&gt;&#39;(<span class="mi">2</span>*<sp
 <p>Note that these placeholders are in fact special built-in macros which
 reconstruct the special expression when evaluated. Moreover, special
 expressions are implicitly quoted when they occur on the left-hand side of an
-equation or as an argument of a macro call. This is often used to implement
-macros which manipulate these constructs as literals. For instance, the
-following macro swaps the arguments in a lambda:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> bar (\x y -&gt; z) = __eval__ (&#39;(\y x -&gt; z))<span class="p">;</span>
+equation or as an argument of a &#8220;<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">quoteargs</em></a>&#8221;
+macro call. This is often used to implement macros which manipulate these
+constructs as literals. For instance, the following macro swaps the arguments
+in a lambda:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="cp">#! --quoteargs bar</span>
+<span class="gp">&gt; </span><span class="kr">def</span> bar (\x y -&gt; z) = __eval__ (&#39;(\y x -&gt; z))<span class="p">;</span>
 <span class="gp">&gt; </span>show bar
 <span class="kr">def</span> bar (__lambda__ [x,y] z) = __eval__ (&#39;__lambda__ [y,x] z)<span class="p">;</span>
 <span class="gp">&gt; </span>baz = bar (\a b -&gt; a-b)<span class="p">;</span>
@@ -4960,8 +4972,8 @@ evaluated by reducing them to normal form using the available macro rules. The
 resulting expressions are then substituted for the macro calls. All macro
 substitution happens before constant substitutions and the actual compilation
 step. Macros can be defined in terms of other macros (also recursively), and
-are evaluated using call by value (i.e., macro calls in macro arguments are
-expanded before the macro gets applied to its parameters).</p>
+are normally evaluated using call by value (i.e., macro calls in macro
+arguments are expanded before the macro gets applied to its parameters).</p>
 <div class="section" id="optimization-rules">
 <span id="id15"></span><h3><a class="toc-backref" href="#id71">Optimization Rules</a><a class="headerlink" href="#optimization-rules" title="Permalink to this headline">¶</a></h3>
 <p>Let&#8217;s begin with a simple example of an optimization rule from the prelude,
@@ -5144,8 +5156,9 @@ form of name capture:</p>
 of <tt class="docutils literal"><span class="pre">y</span></tt>, even though <tt class="docutils literal"><span class="pre">y</span></tt> is locally defined in the context of the macro
 call. (In some languages this form of name capture is sometimes used
 deliberately in order to make the macro use the binding of the symbol which is
-active at the point of the macro call. This never works in Pure, hence in such
-cases you will have to explicitly pass such symbols to the macro.)</p>
+active at the point of the macro call. Normally, this won&#8217;t work in Pure,
+although there is a way to force this behaviour in Pure as well, see <a class="reference internal" href="#name-capture">Name
+Capture</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section.)</p>
 <p>In contrast, the second form of name capture is usually not intended, and is
 therefore more dangerous. Consider the following example:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> F x = x+y <span class="kr">when</span> y = x+<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
@@ -5333,19 +5346,23 @@ need real (i.e., unquoted) type tags or &#8220;as&#8221; patterns in a placehold
 pattern. We&#8217;ll see examples of these later.</p>
 <p>Quoted specials can be manipulated with macros just as well as with functions.
 In fact, this is quite common and thus the macro evaluator has some special
-support to make this more convenient. First, special expressions in macro
-arguments are implicitly quoted. To illustrate this, let&#8217;s redefine <tt class="docutils literal"><span class="pre">swap</span></tt>
-as a macro:</p>
+support to make this more convenient. Specifically, it is possible to make a
+macro quote its arguments in an automatic fashion, by means of the
+<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">--quoteargs</em></a> pragma. To illustrate this,
+let&#8217;s redefine <tt class="docutils literal"><span class="pre">swap</span></tt> as a macro:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear swap
+<span class="gp">&gt; </span><span class="cp">#! --quoteargs swap</span>
 <span class="gp">&gt; </span><span class="kr">def</span> swap (\x y -&gt; z) = &#39;(\y x -&gt; z)<span class="p">;</span>
 <span class="gp">&gt; </span>swap (\a b-&gt;a-b)<span class="p">;</span>
 __lambda__ [b,a] (a-b)
 </pre></div>
 </div>
-<p>Note that the quote on the lambda argument of <tt class="docutils literal"><span class="pre">swap</span></tt> can now be omitted.
-However, the result is still a quoted lambda. It&#8217;s tempting to just omit the
-quote on the right-hand side of the macro definition as well, in order to get
-a real lambda instead:</p>
+<p>The <a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">--quoteargs</em></a> pragma makes the <tt class="docutils literal"><span class="pre">swap</span></tt>
+macro receive its argument unevaluated, as if it was quoted (but without a
+literal quote around it). Therefore the quote on the lambda argument of
+<tt class="docutils literal"><span class="pre">swap</span></tt> can now be omitted.  However, the result is still a quoted
+lambda. It&#8217;s tempting to just omit the quote on the right-hand side of the
+macro definition as well, in order to get a real lambda instead:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear swap
 <span class="gp">&gt; </span><span class="kr">def</span> swap (\x y -&gt; z) = \y x -&gt; z<span class="p">;</span>
 <span class="gp">&gt; </span>swap (\a b-&gt;a-b)<span class="p">;</span>
@@ -5379,9 +5396,10 @@ macro in a direct way, as we&#8217;ve seen before:</p>
 <span class="mi">1</span>
 </pre></div>
 </div>
-<p>This works, but sometimes it&#8217;s more convenient to first construct a quoted
-term involving the necessary specials and then have it evaluated during macro
-evaluation. Pure provides yet another built-in macro for this purpose:</p>
+<p>This works, but doesn&#8217;t look very nice. Often it&#8217;s more convenient to first
+construct a quoted term involving the necessary specials and then have it
+evaluated during macro evaluation. Pure provides yet another built-in macro
+for this purpose:</p>
 <dl class="macro">
 <dt id="__eval__">
 <em class="property">macro </em><tt class="descname">__eval__</tt> x<a class="headerlink" href="#__eval__" title="Permalink to this definition">¶</a></dt>
@@ -5402,18 +5420,20 @@ resulting unquoted subexpressions.</p>
 <span class="mi">1</span>
 </pre></div>
 </div>
-<p>Lisp programmers should note the difference: Lisp macros usually yield a
+<p>Lisp programmers should note the difference. In Lisp, macros usually yield a
 quoted expression which is evaluated implicitly during macro expansion. This
 is never done automatically in Pure, since many Pure macros work perfectly
 well without it. Instead, quotes in a macro expansion are treated as literals,
 and you&#8217;ll have to explicitly call <tt class="docutils literal"><span class="pre">__eval__</span></tt> to remove them during macro
 evaluation.</p>
-<p>Finally, note that placeholder terms for specials are just simple expressions;
+<p>A final caveat: Placeholder terms for specials are just simple expressions;
 they don&#8217;t do any variable binding by themselves. Thus the rules of <a class="reference internal" href="#macro-hygiene">macro
 hygiene</a> don&#8217;t apply to them, which makes it possible to manipulate lambdas
 and local definitions in any desired way. On the other hand, this means that
 it is the programmer&#8217;s responsibility to avoid accidental name capture when
-using these facilities.</p>
+using these facilities. Most macro code will work all right when written in a
+straightforward way, but there are some corner cases which need special
+attention (cf. <a class="reference internal" href="#name-capture">Name Capture</a>).</p>
 </div>
 <div class="section" id="advanced-optimization">
 <h3><a class="toc-backref" href="#id76">Advanced Optimization</a><a class="headerlink" href="#advanced-optimization" title="Permalink to this headline">¶</a></h3>
@@ -5421,24 +5441,22 @@ using these facilities.</p>
 macros defined in the prelude. Most of the following macros can be found near
 the end of the prelude.pure module; they are used to optimize the case of
 &#8220;throwaway&#8221; list comprehensions. This is useful if a comprehension is
-evaluated solely for its side effects. (In fact, there are some more rules
-like these in the prelude to handle the case of matrix comprehensions.
-However, as these are analogous, for the sake of simplicity we only discuss
-the case of list comprehensions here.)</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="kr">def</span> <span class="kt">void</span> [x] = <span class="kt">void</span> x<span class="p">;</span>
-<span class="kr">def</span> <span class="kt">void</span> (catmap f x) | <span class="kt">void</span> (listmap f x) = __do__ f x<span class="p">;</span>
+evaluated solely for its side effects. To keep things simple, we discuss a
+slightly abridged version here which only deals with list comprehensions.
+Please check the actual prelude code for the full version.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --quoteargs __do__</span>
 
-<span class="c1">// Handle the case of an outermost filter clause.</span>
-<span class="kr">def</span> <span class="kt">void</span> (__ifelse__ y z []) = __ifelse__ y (<span class="kt">void</span> z) ()<span class="p">;</span>
+<span class="kr">def</span> <span class="kt">void</span> [x] = <span class="kt">void</span> x<span class="p">;</span>
+<span class="kr">def</span> <span class="kt">void</span> (catmap f x) | <span class="kt">void</span> (listmap f x) = __do__ f x<span class="p">;</span>
 
 <span class="c1">// Recurse into embedded generator clauses.</span>
 <span class="kr">def</span> __do__ (__lambda__ [x] y<span class="p">@</span>(listmap _ _)) |
     __do__ (__lambda__ [x] y<span class="p">@</span>(catmap _ _)) =
-    __do__ (__lambda__ [x] (<span class="kt">void</span> y))<span class="p">;</span>
+    __do__ $ (__lambda__ [x] (<span class="kt">void</span> y))<span class="p">;</span>
 
 <span class="c1">// Recurse into embedded filter clauses.</span>
 <span class="kr">def</span> __do__ (__lambda__ [x] (__ifelse__ y z [])) =
-    __do__ (__lambda__ [x] (__ifelse__ y (<span class="kt">void</span> z) ()))<span class="p">;</span>
+    __do__ $ (__lambda__ [x] (__ifelse__ y (<span class="kt">void</span> z) ()))<span class="p">;</span>
 
 <span class="c1">// Eliminate extra calls to &#39;void&#39; in generator clauses.</span>
 <span class="kr">def</span> __do__ (__lambda__ [x] (<span class="kt">void</span> y)) = __do__ (__lambda__ [x] y)<span class="p">;</span>
@@ -5516,7 +5534,19 @@ h = do (\x -&gt; do (\y -&gt; puts (str (x,y))) (<span class="mi">1</span>..<spa
 </div>
 <p>Again, you should run this with macro tracing enabled to see how the
 <tt class="docutils literal"><span class="pre">__do__</span></tt> macro recurses into the outer lambda body of the list
-comprehension.</p>
+comprehension. Here&#8217;s the rule which actually does this:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">def</span> __do__ (__lambda__ [x] y<span class="p">@</span>(catmap _ _)) =
+    __do__ $ (__lambda__ [x] (<span class="kt">void</span> y))<span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that <tt class="docutils literal"><span class="pre">__do__</span></tt> is actually implemented as a
+&#8220;<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">quoteargs</em></a>&#8221; macro so that it can inspect
+and recurse into the lambda terms in its argument. Also note the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> on
+the right-hand side of this rule; this is also implemented as a macro in the
+prelude. Here the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> operator is used to forcibly evaluate the macro
+argument <tt class="docutils literal"><span class="pre">__lambda__</span> <span class="pre">[x]</span> <span class="pre">(void</span> <span class="pre">y)</span></tt>, so that the embedded call to the
+<tt class="docutils literal"><span class="pre">void</span></tt> macro gets expanded. (Without the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> the argument to
+<tt class="docutils literal"><span class="pre">__do__</span></tt> would be quoted and thus not be evaluated.)</p>
 </div>
 <div class="section" id="reflection">
 <h3><a class="toc-backref" href="#id77">Reflection</a><a class="headerlink" href="#reflection" title="Permalink to this headline">¶</a></h3>
@@ -9583,13 +9613,50 @@ is being traversed, leading to rather nasty memory leaks. Please see the
 </li>
 </ul>
 </div>
-<div class="section" id="showing-macro-expansions">
-<h3><a class="toc-backref" href="#id127">Showing Macro Expansions</a><a class="headerlink" href="#showing-macro-expansions" title="Permalink to this headline">¶</a></h3>
-<p>As mentioned in the <a class="reference internal" href="#macro-hygiene">Macro Hygiene</a> section, Pure macros are lexically scoped
-and thus &#8220;hygienic&#8221;. So Pure macros are not suceptible to name capture, but
-there is also one Pure-related caveat here. The expression printer currently
-doesn&#8217;t check for different bindings of the same variable identifier when it
-prints a (compile time) expression. For instance, consider:</p>
+<div class="section" id="name-capture">
+<h3><a class="toc-backref" href="#id127">Name Capture</a><a class="headerlink" href="#name-capture" title="Permalink to this headline">¶</a></h3>
+<p>As explained in the <a class="reference internal" href="#macro-hygiene">Macro Hygiene</a> section, Pure macros are lexically scoped
+and thus &#8220;hygienic&#8221;. So in principle Pure macros are not susceptible to name
+capture. However, this principle only applies to &#8220;real&#8221; block constructs, not
+their quoted &#8220;placeholder&#8221; representations described in <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros and
+Special Expressions</a>. One (rather obscure) case which deserves special
+attention is the case of macros involving free variables which are being
+called inside quoted block constructs. Note that this corresponds to the
+&#8220;mild&#8221; first form of name capture described in the <a class="reference internal" href="#macro-hygiene">Macro Hygiene</a>
+section. For instance, consider the following example:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> G x = x+y<span class="p">;</span>
+<span class="gp">&gt; </span>&#39;(G <span class="mi">10</span> <span class="kr">when</span> y = <span class="mi">99</span> <span class="kr">end</span>)<span class="p">;</span>
+G <span class="mi">10</span> __when__ [y--&gt;<span class="mi">99</span>]
+<span class="gp">&gt; </span>eval ans<span class="p">;</span>
+<span class="mi">109</span>
+</pre></div>
+</div>
+<p>Here the free <tt class="docutils literal"><span class="pre">y</span></tt> variable of the macro <tt class="docutils literal"><span class="pre">G</span></tt> got captured by the quoted
+<a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> clause when the quoted expression is evaluated. This happens
+because, using call by value, the call <tt class="docutils literal"><span class="pre">G</span> <span class="pre">10</span></tt> gets evaluated before the
+<a class="reference internal" href="#__when__" title="__when__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__when__</span></tt></a> macro. So the behaviour of the macro evaluator in this case
+is in fact correct; the only remedy here is to avoid macros involving free
+variables inside a quoted block construct. The same applies to
+&#8220;<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">quoteargs</em></a>&#8221; macros which quote their
+arguments automatically, as described in <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros and Special
+Expressions</a>. On the other hand, the described behaviour might even be useful
+at times, to forcibly rebind a free macro variable. The following little
+helper macro illustrates this trick:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="cp">#! --quoteargs invoke</span>
+<span class="gp">&gt; </span><span class="kr">def</span> invoke x = x<span class="p">;</span>
+<span class="gp">&gt; </span>foo = invoke (G <span class="mi">10</span> <span class="kr">when</span> y = <span class="mi">99</span> <span class="kr">end</span>)<span class="p">;</span>
+<span class="gp">&gt; </span>show foo
+foo = <span class="mi">10</span>+y <span class="kr">when</span> y = <span class="mi">99</span> <span class="kr">end</span><span class="p">;</span>
+<span class="gp">&gt; </span>foo<span class="p">;</span>
+<span class="mi">109</span>
+</pre></div>
+</div>
+<p>Besides the above form of real name capture in quoted specials, there&#8217;s also a
+case of apparent name capture in the expression printer which isn&#8217;t actually
+real name capture, but just looks like it was. The reason for this is that the
+expression printer currently doesn&#8217;t check for different bindings of the same
+variable identifier when it prints a (compile time) expression. For instance,
+consider:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> F x = x+y <span class="kr">when</span> y = x+<span class="mi">1</span> <span class="kr">end</span><span class="p">;</span>
 <span class="gp">&gt; </span>foo y = F y<span class="p">;</span>
 <span class="gp">&gt; </span>show foo
@@ -9611,10 +9678,10 @@ up&#8221;) actually refers to the <tt class="docutils literal"><span class="pre"
 second instance refers to the local binding <tt class="docutils literal"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">y+1</span></tt> in the <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>
 clause.</p>
 <p>Alas, this means that if you use <tt class="docutils literal"><span class="pre">dump</span></tt> to write such a definition to a text
-file and read it back with <tt class="docutils literal"><span class="pre">run</span></tt> later, then you&#8217;ll get the wrong
-definition. This is an outright bug in the expression printer which will
-hopefully be fixed some time. But for the time being you will have to correct
-such glitches manually.</p>
+file and read it back with <tt class="docutils literal"><span class="pre">run</span></tt> later, then the apparent name capture
+becomes a real one and you&#8217;ll get the wrong definition. This is an outright
+bug in the expression printer which will hopefully be fixed some time. But for
+the time being you will have to correct such glitches manually.</p>
 </div>
 </div>
 <div class="section" id="author">
@@ -9673,7 +9740,7 @@ also find the license conditions in the COPYING and COPYING.LESSER files
 accompanying the software. Also, please see the source code for the copyright
 and license notes pertaining to individual source files which are part of this
 software.</p>
-<p>Pure uses <a class="reference internal" href="#llvm">LLVM</a> as its compiler backend. LLVM is under Copyright (c) 2003-2010
+<p>Pure uses <a class="reference internal" href="#llvm">LLVM</a> as its compiler backend. LLVM is under Copyright (c) 2003-2011
 by the University of Illinois at Urbana-Champaign, and is licensed under a
 3-clause BSD-style license, please read COPYING.LLVM included in the
 distribution for the exact licensing terms. You can also find the LLVM license
@@ -9919,7 +9986,7 @@ Computing. MIT Press, Cambridge, Mass., 1985.</dd>
 <li><a class="reference internal" href="#external-c-functions">External C Functions</a></li>
 <li><a class="reference internal" href="#calling-special-forms">Calling Special Forms</a></li>
 <li><a class="reference internal" href="#laziness">Laziness</a></li>
-<li><a class="reference internal" href="#showing-macro-expansions">Showing Macro Expansions</a></li>
+<li><a class="reference internal" href="#name-capture">Name Capture</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#author">Author</a></li>

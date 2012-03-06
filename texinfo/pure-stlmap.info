@@ -14,7 +14,7 @@ File: pure-stlmap.info,  Node: Top,  Next: Copying,  Up: (dir)
 pure-stlmap
 ***********
 
-  Version 0.1, March 05, 2012
+  Version 0.1, March 06, 2012
 
     Peter Summerland <<p.summerland@gmail.com>> 
   pure-stlmap is a Pure (http://pure-lang.googlecode.com) interface to
@@ -137,12 +137,12 @@ File: pure-stlmap.info,  Node: Interface,  Prev: Supported Containers,  Up: Intr
 pure-stlmap provides a "key-based" interface that can be used to work
 with the supported STL containers in a way that should feel natural to
 Pure programmers. For example, the (!) operator can be used to access
-values associated with keys and functions like map, foldl, filter and
-do can be used to operate on all or part of a container's elements
-without using an explict tail recursive loop. In addition, for the
-ordered containers, stlmap, stlmmap, stlset and stlmset, pure-stlmap
-provides an "interator-based" interface that corresponds to the C++
-interface on a one-to-one basis.
+values associated with keys and functions like `map', `foldl', `filter'
+and `do' can be used to operate on all or part of a container's
+elements without using an explict tail recursive loop. In addition, for
+the ordered containers, stlmap, stlmmap, stlset and stlmset,
+pure-stlmap provides an "interator-based" interface that corresponds to
+the C++ interface on a one-to-one basis.
 
   The interface for the unordered or "hash table" containers, stlhmap
 and stlhset, is limited compared to that provided for the ordered
@@ -250,12 +250,13 @@ prompt.
     > let shs = stlhset ["a","b","c","d","e"];
     > let sms = stlmset ["a","b","c","c","d"];
 
-The `using' statement imports the three modules provided by
-pure-stlmap: the stlmap module provides the interface to stlmap and
-stlset, the stlmmap module provides the interface to stlmmap and
-stlmset and stlhmap provides the interface to stlhmap and stlhset. The
-let statements set up an instance of each of the containers provided by
-pure-stlmap, loaded with some sample elements.
+The `using' statement imports the three modules provided by pure-stlmap:
+*note stlmap: 4. provides the interface for the stlmap and stlset
+containers, *note stlmmap: 0. provides the interface the stlmmap and
+stlmset containers, and *note stlhmap: 1. provides the interface to the
+stlhmap and stlhset containers. The `let' statements set up an instance
+of each of the containers provided by pure-stlmap, loaded with some
+sample elements.
 
   To save typing you can run readme-data.pure, a file that contains the
 corresponding source code. It can be found in in the
@@ -302,10 +303,10 @@ For the ordered containers (stlmap, stlset, stlmmap and stlmset) you
 can work with subsequences, called "ranges", of the containers'
 elements. A range is specified by a tuple that consists of a container
 and two keys. If (sm, first_key, last_key) designates a range, the
-elements of the range are all of elements of the container whose keys
-are equivalent to or greater than first_key and less_than last_key. If
-first_key and last_key are left out of the tuple, the range consists of
-all of sm's elements.
+elements of the range are all of elements of the container sm whose
+keys are equivalent to or greater than first_key and less than
+last_key. If first_key and last_key are left out of the tuple, the
+range consists of all of sm's elements.
 
     > members sm;               // no range keys - the whole container
     ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5]
@@ -319,7 +320,7 @@ all of sm's elements.
     > members shm;              // works on a unordered set (with no range keys)
     ["c"=>3,"d"=>4,"e"=>5,"a"=>1,"b"=>2]
 
-Two special keys, `stl::smbeg' and `stl::end' are reserved for use in
+Two special keys, `stl::smbeg' and `stl::smend' are reserved for use in
 ranges to designate the first element in a container and the imaginary
 "past-end" element.
 
@@ -359,7 +360,7 @@ For the maps, the elements to inserted are specified as hash-pairs
     > catch id $ replace sm1 "x" 10;    // replace never inserts new elements
     out_of_bounds
 
-    > insert sm1 ("e"=>25);             // 0 values changed, "e" already stored
+    > insert sm1 ("e"=>25);             // insert never changes existing elements
     0
     > members sm1;
     ["e"=>15]
@@ -398,9 +399,9 @@ File: pure-stlmap.info,  Node: Access,  Next: Erasing Elements,  Prev: Inserting
 5.5 Access
 ==========
 
-If you want to see if a key is "stored" in a container use the `member'
-function. (A key, k, is considered to be stored in a container if there
-is an element in the container that is equivalent to k.)
+If you want to see if a key is stored in a container use the `member'
+function. (A key, k, is considered to be "stored" in a container if
+there is an element in the container that is equivalent to k.)
 
     > member sm "x";  // ("x"=>val) is not an element of sm for any val
     0
@@ -557,7 +558,7 @@ List comprehensions also work.
     {"B"=>102,"C"=>131,"C"=>132,"D"=>104}
 
 It is highly recommended that you use the functional programming
-operations, as opposed to recursive loops whenever possible.
+operations, as opposed to recursive loops, whenever possible.
 
 
 File: pure-stlmap.info,  Node: Concepts,  Next: Modules,  Prev: Quick Start,  Up: Top
@@ -602,7 +603,7 @@ a set as if it were a map where each element, key and value are the
 same object.
 
   The "ordered" containers, stlmap, stlset, stlmmap and stlmset, each
-have a "key-less-than function" that they use keep their elements in a
+have a "key-less-than" function that they use keep their elements in a
 sequence that is ordered by keys. The default key-less-than function is
 `(<)', but this can be changed when the container is created. The
 elements stored in a stlmap or stlset have unique keys, i.e., two
@@ -612,7 +613,7 @@ key-less-than the other. In contrast, stlmmap and stlmset do not have
 unique keys. I.e., it is possible for different elements stored in a
 stlmmap or stlmset can have equivalent keys.
 
-  The "hashed" containers, sthmap and stlhset do not keep there
+  The "hashed" containers, sthmap and stlhset do not keep their
 elements in a sequence. Instead they store their elments in a hash
 table using a "key-hash" function and a "key-equal" function. Currently
 the key-hash function is always `hash' and the key-equal function is
@@ -622,10 +623,10 @@ stored in the container will never by "key-equal". At times we say that
 two keys stored in a hashed container are "equivalent" if they are
 key-equal.
 
-  The "ordered maps", stlmap and stlmmap, each have a value-less-than
+  The "ordered maps", stlmap and stlmmap, each have a "value-less-than"
 function and a "value-equal" function that is used for lexicographical
-comparisons. The default functions are (<) and (==) respectively, but
-these can customized when the container is created.
+comparisons. The default functions are `(<)' and `(==)' respectively,
+but these can customized when the container is created.
 
   As is the case for the underlying C++ functions, set operations
 (i.e., union, intersection, etc.) and container equivalence for the
@@ -648,10 +649,10 @@ File: pure-stlmap.info,  Node: Ranges<2>,  Next: Iterators,  Prev: Containers an
 
 For the ordered containers (stlmap, stlset, stlmmap and stlmset), you
 can work with a subsequences or "range" of a container's elements.
-Given an ordered container, oc, and keys k and l, the range (oc,k,l)
+Given an ordered container, oc, and keys f and l, the range (oc,f,l)
 consists of all of the elements in oc starting with the first element
-that is not less than k up to but not including the first element that
-is greater or equal to l. Note that k and l do not have to be stored in
+that is not less than f up to but not including the first element that
+is greater or equal to l. Note that f and l do not have to be stored in
 oc.
 
     > members (sm,"b","e");
@@ -688,8 +689,8 @@ for its unordered containers (stlhmap and stlhset).
 
   Iterators are most useful when dealing with stlmmaps where elements
 with different values can have equivalent keys. In most cases, it is
-recommended that you avoid using iterators. Functions that operate on
-or return iterators are discussed separately at the end of this
+recommended that you avoid using iterators. The functions that operate
+on or return iterators are discussed separately at the end of this
 document.
 
 
@@ -713,14 +714,16 @@ pair is an element of a stlmap.
     bad_argument
 
 In the last line of code, `member' treats (a=>1) as a key. Because
-(a=>1) cannot be compared to string using `(<)', the ersatz key is
+(a=>1) cannot be compared to a string using `(<)', the ersatz key is
 treated as a bad argument.
 
   This "key access only" approach can be an issue for stlmmaps and
-because multiple elements can have equivalent keys. Accordingly, for
-stlmmap and stlmset `(!)' and `replace' work with lists of elements
-associated with a given key rather than, say, the first elment with the
-given key.
+because multiple elements can have equivalent keys. I.e., given a
+stlmmap, smm, that containes multiple element with keys equivalent to,
+say, k, which element should `(!)' return? pure-stlmap dodges this
+issue by returning all on them. Thus, for stlmmap and stlmset `(!)' and
+`replace' work with lists of elements associated with a given key
+rather than, say, the first elment with the given key.
 
     > members smm;
     ["a"=>1,"b"=>2,"c"=>31,"c"=>32,"d"=>4];
@@ -734,8 +737,9 @@ given key.
     > replace smm "c" []; members smm;
     ["a"=>1,"b"=>2,"d"=>4,"e"=>5]
 
-If selecting elements by keys alone is not convenient, you can always
-use iterators to track down and modify any specific element.
+If selecting and replacing lists of elements with the same key is not
+convenient, you can always use iterators to track down and modify any
+specific element.
 
 
 File: pure-stlmap.info,  Node: C++ Implementation,  Prev: Selecting Elements Using Keys,  Up: Concepts
@@ -777,26 +781,27 @@ File: pure-stlmap.info,  Node: The stlhmap Module,  Next: The stlmap Module,  Up
 7.1 The stlhmap Module
 ======================
 
-If all you want is quick lookup and you don't care about the order of
-the elements stored in the container, and do use set operations like
-map_intersection, the `stlhamp' is probably the best choices. The
-supported containers, stlhmap and stlhset are simpler and faster than
-the other containers provided by pure-stlmap.
+If all you want is fast insertion and lookup, you don't care about the
+order of the elements stored in the container, and you do not want to
+use set operations like `map_intersection', then `stlhamp' is probably
+your best choice. The supported containers, stlhmap and stlhset are
+simpler to use and faster than the other containers provided by
+pure-stlmap.
 
-  You can import the *note stlhmap: 1. module by adding the following
-using statement to your code.
+  The *note stlhmap: 1. module defines stlhmaps and stlhsets and
+provides functions for dealing with them. You can import it by adding
+the following `using' statement to your code.
 
     > using stlhmap;
 
-This module provides functions for dealing with stlhmaps and stlhsets
-and defines types to describe them.
+The *note stlhmap: 1. module defines types two types:
 
  -- type: stlhmap
  -- type: stlhset
 
   Please note that a stlhset is just a stlhmap where the values
 associated with keys cannot be accessed or modified. I.e., a stlhset is
-specialized kind of stlhmap.
+a specialized kind of stlhmap.
 
 
 File: pure-stlmap.info,  Node: The stlmap Module,  Next: The stlmmap Module,  Prev: The stlhmap Module,  Up: Modules
@@ -856,7 +861,7 @@ stlmset, along with their iterators and ranges defined on them.
 
  -- type: stlmmap_iter
 
- -- type: stlmacon_rng
+ -- type: stlmmap_rng
 
   Please note that a stlmset is just a stlmmap where the values
 associated with keys cannot be accessed or modified. I.e., a stlmset is
@@ -895,12 +900,10 @@ File: pure-stlmap.info,  Node: Container Construction,  Next: Information,  Up: 
 8.1 Container Construction
 ==========================
 
-New empty containers can be constructed using optional parameters that
-allow you to specify customized key-less-than functions, default values,
-value-less-than and value-equal functions for the ordered associative
-containers (stlmap, stlset, stlmmap and stlmset) as well as hash,
-key-equal and value-equal functions for the unordered associative
-containers (stlhmap and stlhset).
+New empty ordered containers (stlmap, stlset, stlmmap and stlmset) can
+be constructed using optional parameters that allow you to specify
+customized key-less-than functions, default values, value-less-than and
+value-equal functions.
 
  -- Function: mkstlmap (klt,dflt,vlt,veq)
  -- Function: mkstlmmap (klt,dflt,vlt,veq)
@@ -920,6 +923,9 @@ containers (stlhmap and stlhset).
 stlset, stlmmap and stlmset) are optimized to avoid callbacks if the
 container's key-less-than function is is `(>)' or `(<)' and the keys
 being compared are a pair of strings, ints, bigints or doubles.
+
+  You can create an empty associative container using default values
+for using *note emptystlmap: 30. and friends.
 
  -- Function: emptystlmap
  -- Function: emptystlmmap
@@ -1023,28 +1029,35 @@ File: pure-stlmap.info,  Node: Modification,  Next: Accessing Elements,  Prev: I
 8.3 Modification
 ================
 
-You can insert new items or, for maps replace values associated with
-keys using the `insert', `replace' or `insert_or_replace' functions.
+You can insert new items or, for the maps (stlmap, stlmmap and stlhmap),
+replace values associated with keys using the `insert', `replace' or
+`insert_or_replace' functions.
 
   Please note that when working with the ordered containers (stlmap,
 stlset, stlmmap and stlmset) the keys of elements passed to these
 functions must be compatible with the container's key-less-than
 function and keys that are already inserted. E.g.,
 
-  > members ss; ["a","b","c","d","e"]
+    > members ss;
+    ["a","b","c","d","e"]
 
-  > catch id $ insert ss 1;   // e.g., 1<"a" is not defined bad_argument
+    > catch id $ insert ss 1;   // e.g., 1<"a" is not defined
+    bad_argument
 
-  Currently there is no similar restriction for stlhmaps and stlhsets
+Currently there is no similar restriction for stlhmaps and stlhsets
 because (a) they do not have a key-less-than function and (b) the
 function they do use for testing equality, the key-equal function is
 always (===), a function that can compare any two objects.
 
-  > members shs; ["c","d","e","a","b"]
+    > members shs;
+    ["c","d","e","a","b"]
 
-  > insert shs 1; 1 > members shs; ["c",1,"d","e","a","b"]
+    > insert shs 1;
+    1
+    > members shs;
+    ["c",1,"d","e","a","b"]
 
-  Elements can be inserted into a pure-stlmap container individually or
+Elements can be inserted into a pure-stlmap container individually or
 en masse from a list, vector, stlvec or another container of the same
 type. If there is a key in the container that is equivalent to the key
 of the element being inserted, the element will not be inserted (unless
@@ -1056,16 +1069,16 @@ elements with equivalent keys).
      `acon' which can be any pure-stlmap container. A valid insert
      source is (a) a single element, (b) a list, vector, stlvec of
      elements or (c), a range over an associative container of the same
-     type as acon. If `acon' is an associative map (stlmap, stlmmap or
-     stlhmap), the `src' itself, or all the elements of `src', must be
-     key value pairs of the form (k=>v). In contrast, if `acon' is a
+     type as `acon'. If `acon' is an associative map (stlmap, stlmmap
+     or stlhmap), the `src' itself, or all the elements of `src', must
+     be key value pairs of the form (k=>v). In contrast, if `acon' is a
      stlset, stlmset or stlhset, `src' or all of its elements can be
      any pure object (except `stl::smbeg' or `stl::smend'). If `acon'
      is a stlmap, stlset, stlhmap or stlhset, the element will not be
      inserted if its key is already stored in the target container.
      Returns the number of elements inserted, if any.
 
-  If you are dealing with a stlmap or stlhset and want to override the
+  If you are dealing with a stlmap or stlhmap and want to override the
 values of elements have keys that equivalent to the keys of the items
 you wan to insert you can use the `insert_or_replace' function.
 
@@ -1086,29 +1099,30 @@ you wan to insert you can use the `insert_or_replace' function.
      one, to the elements of `x'. Add or delete elements as necessary
      so that, when the smoke clears, the values of `map'!"key" are
      copies of the elements of `x'. In all cases, if `key' is stored in
-     `map' returns `x'. E.g.,
+     `map' returns `x'.
 
-         > members sm1;
-         ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5]
+  Here are some examples using `replace'.
 
-         > replace sm1 "e" 50;
-         ()
+    > members sm1;
+    ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5]
 
-         > members sm1;
-         ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>50]
+    > replace sm1 "e" 50;
+    50
 
-         > members smm1;
-         ["a"=>1,"b"=>2,"c"=>31,"c"=>32,"d"=>4,"e"=>5]
+    > members sm1;
+    ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>50]
 
-         > replace smm1 "c" [31,33,35,36] $$ smm1!"c";
-         [31,33,35,36]
+    > members smm1;
+    ["a"=>1,"b"=>2,"c"=>31,"c"=>32,"d"=>4,"e"=>5]
 
-         > replace smm1 "c" [] $$ smm1!"c";
-         []
+    > replace smm1 "c" [31,33,35,36] $$ smm1!"c";
+    [31,33,35,36]
 
-         > members smm1;
-         ["a"=>1,"b"=>2,"d"=>4,"e"=>5]
+    > replace smm1 "c" [] $$ smm1!"c";
+    []
 
+    > members smm1;
+    ["a"=>1,"b"=>2,"d"=>4,"e"=>5]
 
 
  -- Function: stl::replace_with fun map (k=>v)
@@ -1117,8 +1131,8 @@ you wan to insert you can use the `insert_or_replace' function.
      where dflt is ``map''s dflt value, (b) `replace' `map' `k' nv when
      nv = `fun' `v' (`map'!"k") end. Returns `map'.
 
-  Here is an example using replace_with in which a stlmmap is converted
-to a stlmap.
+  Here is an example using *note replace_with: 49. in which a stlmmap
+is converted to a stlmap.
 
     > let sm1 = emptystlmap;
 
@@ -1145,20 +1159,22 @@ Here is another example in which items are counted.
     ["a"=>1,"b"=>1,"c"=>2,"d"=>1]
 
 You can remove all the elements in a container, remove all the elements
-equivalent to a given key or a range of elements using the `erase'
-function.
+equivalent to a given key or a remove a range of elements using the
+`erase' function.
 
  -- Function: stl::erase acon
  -- Function: stl::erase (acon,k)
  -- Function: stl::erase (acon,k1,k2)
-     The first form erases all elements in `acon' which can be any
-     container provided by pure-stlmap. The second erases all elements
-     in `acon' with key equivalent to `k'. The third erases the
-     elements in the range (`acon',"k1","k2"). The third form only
-     applys to the ordered containers (stlmap, stlmmap, stlset and
-     stlmset), not stlhmap or stlhset (because ranges are not defined
-     for stlhmaps or stlhsets). Returns the number of elements removed
-     from the container. E.g.,:
+          The first form erases all elements in `acon' which can be any
+          container provided by pure-stlmap. The second erases all
+          elements in `acon' with key equivalent to `k'. The third
+          erases the elements in the range (`acon',"k1","k2"). The
+          third form only applys to the ordered containers (stlmap,
+          stlmmap, stlset and stlmset), not stlhmap or stlhset (because
+          ranges are not defined for stlhmaps or stlhsets). Returns the
+          number of elements removed from the container.
+
+     E.g.,:
 
          > members smm;
          ["a"=>1,"b"=>2,"c"=>31,"c"=>32,"d"=>4,"e"=>5]
@@ -1229,7 +1245,7 @@ relatively slow for large containers.
 (key, C++ iterator) pairs for recently accessed keys. During lookup,
 the cache is checked for a matching key, and if the key is found, the
 element pointed to by the C++ iterator is used immediately. Thus, when
-applied to a stlmap or stlset bump_wc will use only one O(log N)
+applied to a stlmap or Sstlset bump_wc will use only one O(log N)
 search, rather than two or three. For these purposes, a key matches a
 key in the cache only if it is the same Pure object (i.e., the test is
 C++ pointer equality, not Pure's `(===)' or `(==)' functions). For
@@ -1237,8 +1253,8 @@ example, the following will result in two O(log N) lookups.
 
     > if member sm "a" then sm!"a" else insert sm ("a"=>10);
 
-Here each "a" is a distinct Pure object. The two objects are (==) and
-even (===) but they are not the same internally and the caching
+Here each "a" is a distinct Pure object. The two "a"s are `(==)' and
+even `(===)' but they are not the same internally and the caching
 mechanism will not help.
 
   Almost any pure-stlmap function that accepts a stlmap or stlset as an
@@ -1254,10 +1270,10 @@ function that shows caching in action.
     > members sm;
     ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5]
 
-    > member sm a_key;       // a_key is not yet in the cache
+    > member sm a_key;           // a_key is not yet in the cache
     1
 
-    > sm!a_key;              // a_key is found in the cache
+    > sm!a_key;                  // a_key is found in the cache
     found iterator for: "a"
     1
 
@@ -1265,7 +1281,7 @@ function that shows caching in action.
     found iterator for: "a"
     10
 
-    > sm!"a";   // "a" is a new key, not same C++ pointer as k or a_key
+    > sm!"a";                    // "a" is a new key, not same C++ pointer as k or a_key
     1
 
     > let k = next_key sm a_key; // now k is in the cache, in front of a_key
@@ -1274,7 +1290,7 @@ function that shows caching in action.
     > let k1 = next_key sm k;    // now k1 is at the head of the queue
     found iterator for: "b"
 
-    > put (sm,k1) 30;
+    > replace sm k1 30;
     found iterator for: "c"
     30
 
@@ -1282,7 +1298,7 @@ function that shows caching in action.
     ["a"=>10,"b"=>2,"c"=>30,"d"=>4,"e"=>5]
 
 These examples show that caching can be effective wnen visiting
-elements of a stlmap or stlset in order using next_key or prev_key.
+elements of a stlmap or stlset in order using `next_key' or `prev_key'.
 
 
 File: pure-stlmap.info,  Node: Conversions<2>,  Next: Functional Programming<2>,  Prev: Accessing Elements,  Up: Container Operations
@@ -1294,10 +1310,10 @@ The contents of a pure-stlmap container can be copied to a list, vector,
 stlvec. For stlmaps, stlsets, stlmmaps and stlmsets, these operations
 act on ranges as well as on the entire container.
 
- -- Function: stl::members rng
- -- Function: stl::members rng
- -- Function: stl::keys rng
- -- Function: stl::vals rng
+ -- Function: members rng
+ -- Function: members rng
+ -- Function: keys rng
+ -- Function: vals rng
      members returns a list of the elments in the range, rng. keys and
      vals return the keys and vals of the range's elements. E.g.,:
 
@@ -1312,15 +1328,15 @@ act on ranges as well as on the entire container.
 
 
 
- -- Function: stl::vector rng
- -- Function: stl::stlvec rng
+ -- Function: vector rng
+ -- Function: stlvec rng
      Return a vector or stlvec containing the elments of in the range,
      rng.
 
   You can also convert an ordered container (stlmap, stlset, stlmmap or
 stlmset) into a stream of elements.
 
- -- Function: stl::stream rng
+ -- Function: stream rng
      Returns a stream consisting of the range's elements.
 
   Here is an example using the stream function on a stlmmap.
@@ -1347,11 +1363,12 @@ were lists.
 
     * :func:`do`, :func:`map`, :func:`listmap`, :func:`catmap`, :func:`foldl`, :func:`foldl1`
 
-    * :func:`rowmap`, :func:`rowcatmap`, :func:`colmap`, :func:`colcatmap`
 
-    * :func:`foldr`, :func:`foldr1` (not applicable to stlhmaps or stlhsets)
+   * `rowmap', `rowcatmap', `colmap', `colcatmap'
 
-Here are some examples.
+   * `foldr', `foldr1' (not applicable to stlhmaps or stlhsets)
+
+  Here are some examples.
 
     > members sm;
     ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5]
@@ -1401,7 +1418,7 @@ are equivalent and, if the container is a stlmap, stlmap or stlhmap,
 the values associated with equal keys are equal (using the container's
 value-equal function).
 
- -- Function: map_equal rng1 rng2
+ -- Function: stl::map_equal rng1 rng2
 
  -- Function: rng1 == rng2
  -- Function: rng1 ~= rng2
@@ -1498,16 +1515,16 @@ Pure standard library the right hand set has priority of elements. This
 can make a difference when applying set operations to a pair of stlmaps
 or stlmmaps.
 
- -- Function: map_merge rng1 rng2
+ -- Function: stl::map_merge rng1 rng2
      Construct a new ordered container from `rng1' and then insert the
-     elments of `rng2' into the new container and return it."rng1" and
+     elments of `rng2' into the new container and return it. `rng1' and
      `rng2' must be defined on the same type of ordered container.
 
- -- Function: map_union rng1 rng2
- -- Function: map_difference rng1 rng2
- -- Function: map_intersection rng1 rng2
- -- Function: map_symmetric_difference rng1 rng2
- -- Function: map_includes rng1 rng2
+ -- Function: stl::map_union rng1 rng2
+ -- Function: stl::map_difference rng1 rng2
+ -- Function: stl::map_intersection rng1 rng2
+ -- Function: stl::map_symmetric_difference rng1 rng2
+ -- Function: stl::map_includes rng1 rng2
      Returns a new ordered associative container of the same type as
      the ordered containers underlying `rng1' and `rng2'. If the ranges
      are defined over a stlmap or stlmmap elements of `rng1' have
@@ -1543,18 +1560,17 @@ File: pure-stlmap.info,  Node: Direct C Calls,  Prev: Set Algorithms,  Up: Conta
 ==================
 
 It is very common to encounter code that (a) tests if a key is stored
-in a container using the member functin and (b) in the case of maps,
-retreives the value or values associated with the key using (!) and/or
-change the value or values using the replace function. Depending on
-what modules have been loaded these functions may be "heavily"
-overloaded which can cause a small delay when the functions are called.
-To avoid this, pure-stlmap exposes the corresponding C functions so
-that they can be called directly. For stlhmaps the functions begin with
-a prefix `shm_':
+in a container using `member`and (b) in the case of maps, retreives the
+value or values associated with the key using :func:`(!)' and/or (c)
+change the value or values using `replace'. Depending on what modules
+have been loaded these functions may be "heavily" overloaded which can
+cause a small delay when the functions are called. To avoid this,
+pure-stlmap exposes the corresponding C functions so that they can be
+called directly. For stlhmaps the functions begin with a prefix `shm_':
 
- -- Function: shm_member shm key
- -- Function: shm_get shm key
- -- Function: shm_put shm key val
+ -- Function: stl::shm_member shm key
+ -- Function: stl::shm_get shm key
+ -- Function: stl::shm_put shm key val
      These are the direct C call equivalents of (member shm key),
      (shm!key) and (replace shm key val) where shm is a stlhmap.
 
@@ -1590,7 +1606,7 @@ points to.
     > let sm1 = stlmap sm; members sm1;
     ["a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5];
 
-    > let i = find sm1 "b";
+    > let i = find sm1 "b";   // use find to get an iterator - like C++
 
     > get_elm i;
     "b"=>2
@@ -1650,13 +1666,13 @@ File: pure-stlmap.info,  Node: Exceptions,  Next: Functions,  Prev: Concepts<2>,
 9.2 Exceptions
 ==============
 
-In pure-stlmap functions that accept iterators throw a bad_argument
+In pure-stlmap functions that accept iterators throw a `bad_argument'
 exception if called with an invalid iterator. An iterator remains valid
 until the element it was pointing to has been erased. These functions
-also attempt to throw bad argument exceptions for bad uses that would
-otherwise result in undefined behavior. An example of an invalid use
-would be a range specified by iterators from different containers. Here
-are some examples of iterator errors.
+also attempt to throw bad argument exceptions for invalid usage that
+would otherwise result in undefined behavior. An example of an invalid
+use would be a range specified by iterators from different containers.
+Here are some examples of iterator errors.
 
     > let i,j = find sm "a", find sm "d";
 
@@ -1691,25 +1707,26 @@ File: pure-stlmap.info,  Node: Functions,  Next: Examples<2>,  Prev: Exceptions,
 In this section "acon" always denotes one of the containers that
 supports interators (stlmap, stlset, stlmmap and stlmset).
 
- -- Function: iterator i
+ -- Function: stl::iterator i
      Returns a new iterator that points to the same element as `i'.
 
- -- Function: begin acon
- -- Function: pastend acon
+ -- Function: stl::begin acon
+ -- Function: stl::pastend acon
      Returns `acon''s begin or past-end iterator.
 
- -- Function: find acon k
+ -- Function: stl::find acon k
      Creates a new iterator that points to an element in `acon' with key
      equivalent to `k' (if any) or `acon''s past-end iterator if no such
      element exists.
 
- -- Function: find_with_default map k
+ -- Function: stl::find_with_default map k
      Returns an iterator pointing to the element in `map', a stlmap,
      with key equivalent to `k'. If no such element existed before the
      call, one is created and inserted using `k' and `map''s default
-     value.
+     value. This function is pure-stlmap's version of C++'s [] operator
+     for associative containers.
 
- -- Function: insert_elm acon elm
+ -- Function: stl::insert_elm acon elm
      Attempts to insert `elm' into `acon'. (If `acon' is a stlmap or
      stlmmap, then elm must be a key value pair, (k=>v)). If acon is a
      stlmap or stlset (i.e., with unique keys) `insert_elm' returns a
@@ -1720,31 +1737,31 @@ supports interators (stlmap, stlset, stlmmap and stlmset).
      contrast, if `acon' is a multi-keyed container (stlmmap or
      stlmset) the insert will always be successful and `insert_elm'
      returns an iterator pointing to the element with key k that was
-     just inserted.
+     just inserted, instead of an (iterator, boolean) tuple.
 
- -- Function: insert_elm acon (elm,i)
-     This is the same as the previous function except that (a) i is
+ -- Function: stl::insert_elm acon (elm,i)
+     This is the same as the previous function except that (a) `i' is
      passed in as a hint to where the new element should be inserted
      and (b) a single iterator is returned rather than a
      iterator,boolean pair. If the new element is inserted just after
-     i, the insertion can have constant time complexity.
+     `i', the insertion can have constant time complexity.
 
- -- Function: l_bound acon k
+ -- Function: stl::l_bound acon k
      Return a new iterator that points to the first element in `acon', a
      stlmap, stlset, stlmmap or stlmset, that is not less than `k', or
      `acon''s past-end iterator if none exists.
 
- -- Function: u_bound acon k
+ -- Function: stl::u_bound acon k
      Return a new iterator that points to the first element in `acon', a
      stlmap, stlset, stlmmap or stlmset, that is greater than `k', or
      `acon''s past-end iterator if none exists.
 
- -- Function: lu_bounds acon k
+ -- Function: stl::lu_bounds acon k
      Return the pair l_bound `acon' `k', u_bound `acon' `k'.
 
- -- Function: inc i
- -- Function: dec i
- -- Function: move i n::int
+ -- Function: stl::inc i
+ -- Function: stl::dec i
+ -- Function: stl::move i n::int
      Move the iterator `i' forward one, back one or forward `n' elements
      respectively, where n can be negative.  The iterator is mutated by
      these operations, provided the move is successful. An attempt to
@@ -1752,32 +1769,32 @@ supports interators (stlmap, stlset, stlmmap and stlmset).
      out-of-bounds exception. Moves past the last element return the
      past-end iterator for the container that `i' is defined on.
 
- -- Function: get_elm i
- -- Function: get_key i
- -- Function: get_val i
+ -- Function: stl::get_elm i
+ -- Function: stl::get_key i
+ -- Function: stl::get_val i
      Return the element pointed to by the iterator `i', or the
      element's key or value. For maps the element is returned as a
      key=>value hash rocket pair. For sets, get_elem, get_key and
      get_val all return the element (which is the same as its key).
 
- -- Function: put_val i newvalue
+ -- Function: stl::put_val i newvalue
      Change the value of the element pointed to by the iterator `i' to
-     newvalue. The element's key cannot be changed. The iterator must
+     `newvalue'. The element's key cannot be changed. The iterator must
      point into a stlmap or stlmmap.
 
- -- Function: beginp i
- -- Function: pastendp i
+ -- Function: stl::beginp i
+ -- Function: stl::pastendp i
      Returns true if the iterator `i' is the begin iterator or pastend
      iterator of the container it is defined on.
 
- -- Function: get_info i
+ -- Function: stl::get_info i
      Returns a tuple (is_valid,acon,key,val) where is_valid is true if
      the iterator `i' is valid or false if not, acon is the container
      that i is defined on, and key, val are the key and value of the
      element `i' points to, if any. If `i' is the past-end iterator,
      key and val are set to `stl::smend' and `[]', respectively.
 
- -- Function: i == j
+ -- Function: i stl::== j
      Returns true if the iterators `i' and `j' point to the same
      element.
 
@@ -1785,7 +1802,7 @@ supports interators (stlmap, stlset, stlmmap and stlmset).
  -- Function: erase (acon,i,j)
      Erases the element pointed to by `i' or the elements in the range
      (`i',"j"). Both `i' and `j' are must be iterators defined on
-     `acon' (or a bad_argument exception will be thrown).
+     `acon' (or a `bad_argument' exception will be thrown).
 
 
 File: pure-stlmap.info,  Node: Examples<2>,  Prev: Functions,  Up: Iterators<2>
@@ -1848,107 +1865,107 @@ Index
 * # prefix function:                     Information.         (line  12)
 * < infix function:                      Comparison.          (line  50)
 * <= infix function:                     Comparison.          (line  57)
-* == infix function <1>:                 Functions.           (line  95)
 * == infix function:                     Comparison.          (line  15)
 * > infix function:                      Comparison.          (line  57)
 * >= infix function:                     Comparison.          (line  57)
-* begin function:                        Functions.           (line  12)
-* beginp function:                       Functions.           (line  83)
-* dec function:                          Functions.           (line  60)
 * emptystlhmap function:                 Container Construction.
-                                                              (line  39)
+                                                              (line  40)
 * emptystlhset function:                 Container Construction.
-                                                              (line  39)
+                                                              (line  40)
 * emptystlmap function:                  Container Construction.
-                                                              (line  32)
+                                                              (line  33)
 * emptystlmmap function:                 Container Construction.
-                                                              (line  32)
+                                                              (line  33)
 * emptystlmset function:                 Container Construction.
-                                                              (line  32)
+                                                              (line  33)
 * emptystlset function:                  Container Construction.
-                                                              (line  32)
-* erase function:                        Functions.           (line  99)
-* find function:                         Functions.           (line  16)
-* find_with_default function:            Functions.           (line  21)
-* get_elm function:                      Functions.           (line  70)
-* get_info function:                     Functions.           (line  88)
-* get_key function:                      Functions.           (line  70)
-* get_val function:                      Functions.           (line  70)
-* inc function:                          Functions.           (line  60)
-* insert_elm function:                   Functions.           (line  27)
-* iterator function:                     Functions.           (line   9)
-* l_bound function:                      Functions.           (line  47)
-* lu_bounds function:                    Functions.           (line  57)
-* map_difference function:               Set Algorithms.      (line  30)
-* map_equal function:                    Comparison.          (line  13)
-* map_includes function:                 Set Algorithms.      (line  30)
-* map_intersection function:             Set Algorithms.      (line  30)
-* map_merge function:                    Set Algorithms.      (line  25)
-* map_symmetric_difference function:     Set Algorithms.      (line  30)
-* map_union function:                    Set Algorithms.      (line  30)
+                                                              (line  33)
+* erase function:                        Functions.           (line 100)
+* keys function:                         Conversions<2>.      (line  10)
 * member function:                       Accessing Elements.  (line   9)
+* members function:                      Conversions<2>.      (line  10)
 * mkstlmap function:                     Container Construction.
-                                                              (line  13)
+                                                              (line  11)
 * mkstlmmap function:                    Container Construction.
-                                                              (line  13)
+                                                              (line  11)
 * mkstlmset function:                    Container Construction.
-                                                              (line  22)
+                                                              (line  20)
 * mkstlset function:                     Container Construction.
-                                                              (line  22)
-* move function:                         Functions.           (line  60)
-* pastend function:                      Functions.           (line  12)
-* pastendp function:                     Functions.           (line  83)
-* put_val function:                      Functions.           (line  78)
-* shm_get function:                      Direct C Calls.      (line  16)
-* shm_member function:                   Direct C Calls.      (line  16)
-* shm_put function:                      Direct C Calls.      (line  16)
+                                                              (line  20)
+* stl == infix function:                 Functions.           (line  96)
+* stl begin function:                    Functions.           (line  12)
+* stl beginp function:                   Functions.           (line  84)
 * stl bounds function:                   Information.         (line  27)
 * stl bucket_size function:              Information.         (line  55)
 * stl container_info function:           Information.         (line  46)
 * stl count function:                    Information.         (line  23)
+* stl dec function:                      Functions.           (line  61)
 * stl distance function:                 Information.         (line  18)
 * stl empty function:                    Information.         (line  15)
-* stl erase function:                    Modification.        (line 131)
+* stl erase function:                    Modification.        (line 139)
+* stl find function:                     Functions.           (line  16)
+* stl find_with_default function:        Functions.           (line  21)
+* stl get_elm function:                  Functions.           (line  71)
+* stl get_info function:                 Functions.           (line  89)
+* stl get_key function:                  Functions.           (line  71)
+* stl get_val function:                  Functions.           (line  71)
 * stl hash_reserve function:             Information.         (line  59)
-* stl insert function:                   Modification.        (line  34)
-* stl insert_or_replace function:        Modification.        (line  52)
-* stl keys function:                     Conversions<2>.      (line  10)
-* stl members function:                  Conversions<2>.      (line  10)
+* stl inc function:                      Functions.           (line  61)
+* stl insert function:                   Modification.        (line  41)
+* stl insert_elm function:               Functions.           (line  28)
+* stl insert_or_replace function:        Modification.        (line  59)
+* stl iterator function:                 Functions.           (line   9)
+* stl l_bound function:                  Functions.           (line  48)
+* stl lu_bounds function:                Functions.           (line  58)
+* stl map_difference function:           Set Algorithms.      (line  30)
+* stl map_equal function:                Comparison.          (line  13)
+* stl map_includes function:             Set Algorithms.      (line  30)
+* stl map_intersection function:         Set Algorithms.      (line  30)
+* stl map_merge function:                Set Algorithms.      (line  25)
+* stl map_symmetric_difference function: Set Algorithms.      (line  30)
+* stl map_union function:                Set Algorithms.      (line  30)
+* stl move function:                     Functions.           (line  61)
 * stl next_key function:                 Accessing Elements.  (line  17)
+* stl pastend function:                  Functions.           (line  12)
+* stl pastendp function:                 Functions.           (line  84)
 * stl prev_key function:                 Accessing Elements.  (line  17)
-* stl replace function:                  Modification.        (line  59)
-* stl replace_with function:             Modification.        (line  94)
-* stl stlvec function:                   Conversions<2>.      (line  28)
-* stl stream function:                   Conversions<2>.      (line  36)
-* stl swap function:                     Modification.        (line 163)
-* stl vals function:                     Conversions<2>.      (line  10)
-* stl vector function:                   Conversions<2>.      (line  28)
+* stl put_val function:                  Functions.           (line  79)
+* stl replace function:                  Modification.        (line  66)
+* stl replace_with function:             Modification.        (line 101)
+* stl shm_get function:                  Direct C Calls.      (line  15)
+* stl shm_member function:               Direct C Calls.      (line  15)
+* stl shm_put function:                  Direct C Calls.      (line  15)
+* stl swap function:                     Modification.        (line 173)
+* stl u_bound function:                  Functions.           (line  53)
 * stlhmap function:                      Container Construction.
-                                                              (line  49)
+                                                              (line  50)
 * stlhmap module:                        Top.                 (line   6)
-* stlhmap type:                          The stlhmap Module.  (line  20)
+* stlhmap type:                          The stlhmap Module.  (line  21)
 * stlhset function:                      Container Construction.
-                                                              (line  49)
-* stlhset type:                          The stlhmap Module.  (line  20)
-* stlmacon_rng type:                     The stlmmap Module.  (line  26)
+                                                              (line  50)
+* stlhset type:                          The stlhmap Module.  (line  21)
 * stlmap function:                       Container Construction.
-                                                              (line  49)
+                                                              (line  50)
 * stlmap module:                         Top.                 (line   6)
 * stlmap type:                           The stlmap Module.   (line  19)
 * stlmap_iter type:                      The stlmap Module.   (line  22)
 * stlmap_rng type:                       The stlmap Module.   (line  24)
 * stlmmap function:                      Container Construction.
-                                                              (line  49)
+                                                              (line  50)
 * stlmmap module:                        Top.                 (line   6)
 * stlmmap type:                          The stlmmap Module.  (line  21)
 * stlmmap_iter type:                     The stlmmap Module.  (line  24)
+* stlmmap_rng type:                      The stlmmap Module.  (line  26)
 * stlmset function:                      Container Construction.
-                                                              (line  49)
+                                                              (line  50)
 * stlmset type:                          The stlmmap Module.  (line  21)
 * stlset function:                       Container Construction.
-                                                              (line  49)
+                                                              (line  50)
 * stlset type:                           The stlmap Module.   (line  19)
-* u_bound function:                      Functions.           (line  52)
+* stlvec function:                       Conversions<2>.      (line  28)
+* stream function:                       Conversions<2>.      (line  36)
+* vals function:                         Conversions<2>.      (line  10)
+* vector function:                       Conversions<2>.      (line  28)
 * ~= infix function:                     Comparison.          (line  15)
 
 
@@ -1979,310 +1996,312 @@ Ref: supported-containers2380
 Node: Interface2981
 Ref: interface3073
 Ref: 93073
-Node: Installation4969
-Ref: installation5064
-Ref: a5064
-Node: Examples5357
-Ref: examples5451
-Ref: b5451
-Node: Quick Start6150
-Ref: quick start6240
-Ref: c6240
-Ref: quick-start6240
-Node: Example Containers6695
-Ref: example containers6787
-Ref: d6787
-Ref: example-containers6787
-Node: Constructors8001
-Ref: constructors8108
-Ref: e8108
-Node: Ranges8873
-Ref: ranges8994
-Ref: f8994
-Node: Inserting and Replacing Elements10376
-Ref: inserting and replacing elements10491
-Ref: 1010491
-Ref: inserting-and-replacing-elements10491
-Node: Access11966
-Ref: access12091
-Ref: 1112091
-Node: Erasing Elements13277
-Ref: erasing elements13381
-Ref: 1213381
-Ref: erasing-elements13381
-Node: Conversions14562
-Ref: conversions14682
-Ref: 1314682
-Node: Functional Programming15900
-Ref: functional programming15995
-Ref: 1415995
-Ref: functional-programming15995
-Node: Concepts16703
-Ref: concepts16792
-Ref: 1516792
-Node: Containers and Elements17355
-Ref: containers and elements17446
-Ref: 1617446
-Ref: containers-and-elements17446
-Node: Ranges<2>20412
-Ref: ranges<2>20521
-Ref: 1720521
-Ref: id120521
-Node: Iterators21774
-Ref: iterators21889
-Ref: 1821889
-Node: Selecting Elements Using Keys22465
-Ref: selecting elements using keys22589
-Ref: 1922589
-Ref: selecting-elements-using-keys22589
-Node: C++ Implementation23892
-Ref: c++ implementation23998
-Ref: 1a23998
-Ref: c-implementation23998
-Ref: 1b24793
-Ref: c-standard-library-documentation24793
-Node: Modules24793
-Ref: modules24891
-Ref: 1c24891
-Node: The stlhmap Module25092
-Ref: the stlhmap module25185
-Ref: 1d25185
-Ref: the-stlhmap-module25185
-Ref: 1e25784
-Ref: stlhmap/type25784
-Ref: 1f25802
-Ref: stlhset/type25802
-Node: The stlmap Module25987
-Ref: the stlmap module26107
-Ref: 2026107
-Ref: the-stlmap-module26107
-Ref: 2126666
-Ref: stlmap/type26666
-Ref: 2226683
-Ref: stlset/type26683
-Ref: 2326701
-Ref: stlmap_iter/type26701
-Ref: 2426724
-Ref: stlmap_rng/type26724
-Node: The stlmmap Module27044
-Ref: the stlmmap module27137
-Ref: 2527137
-Ref: the-stlmmap-module27137
-Ref: 2627833
-Ref: stlmmap/type27833
-Ref: 2727851
-Ref: stlmset/type27851
-Ref: 2827870
-Ref: stlmmap_iter/type27870
-Ref: 2927894
-Ref: stlmacon_rng/type27894
-Node: Container Operations28222
-Ref: container operations28324
-Ref: 2a28324
-Ref: container-operations28324
-Node: Container Construction28965
-Ref: container construction29069
-Ref: 2b29069
-Ref: container-construction29069
-Ref: 2c29505
-Ref: mkstlmap29505
-Ref: 2d29547
-Ref: mkstlmmap29547
-Ref: 2e29957
-Ref: mkstlset29957
-Ref: 2f29984
-Ref: mkstlmset29984
-Ref: 3030374
-Ref: emptystlmap30374
-Ref: 3130400
-Ref: emptystlmmap30400
-Ref: 3230427
-Ref: emptystlset30427
-Ref: 3330453
-Ref: emptystlmset30453
-Ref: 3430605
-Ref: emptystlhmap30605
-Ref: 3530632
-Ref: emptystlhset30632
-Ref: 3631043
-Ref: stlmap/stlmap31043
-Ref: 3731068
-Ref: stlmmap/stlmmap31068
-Ref: 3831094
-Ref: stlset/stlmap31094
-Ref: 3931119
-Ref: stlmset/stlmmap31119
-Ref: 3a31145
-Ref: stlhmap/stlhmap31145
-Ref: 3b31171
-Ref: stlhset/stlhmap31171
-Node: Information31731
-Ref: information31856
-Ref: 3c31856
-Ref: 3d32229
-Ref: #/stlmap32229
-Ref: 3e32297
-Ref: stl empty/stlmap32297
-Ref: 3f32377
-Ref: stl distance/stlmap32377
-Ref: 4032564
-Ref: stl count/stlmap32564
-Ref: 4132716
-Ref: stl bounds/stlmap32716
-Ref: 4233289
-Ref: stl container_info/stlmap33289
-Ref: 4333776
-Ref: stl bucket_size/stlmap33776
-Ref: 4433933
-Ref: stl hash_reserve33933
-Node: Modification34152
-Ref: modification34273
-Ref: 4534273
-Ref: 4635565
-Ref: stl insert/stlmap35565
-Ref: 4736626
-Ref: stl insert_or_replace/stlmap36626
-Ref: 4837007
-Ref: stl replace/stlmap37007
-Ref: 4938166
-Ref: stl replace_with38166
-Ref: 4a39185
-Ref: stl erase/stlmap39185
-Ref: 4b40117
-Ref: stl swap/stlmap40117
-Node: Accessing Elements40335
-Ref: accessing elements40459
-Ref: 4c40459
-Ref: accessing-elements40459
-Ref: 4d40646
-Ref: member/stlmap40646
-Ref: 4e40986
-Ref: stl next_key/stlmap40986
-Ref: 4f41021
-Ref: stl prev_key/stlmap41021
-Node: Conversions<2>44093
-Ref: conversions<2>44230
-Ref: 5044230
-Ref: id244230
-Ref: 5144457
-Ref: stl members/stlmap44457
-Ref: 5244519
-Ref: stl keys/stlmap44519
-Ref: 5344547
-Ref: stl vals/stlmap44547
-Ref: 5445000
-Ref: stl vector/stlmap45000
-Ref: 5545030
-Ref: stl stlvec/stlmap45030
-Ref: 5645251
-Ref: stl stream/stlmap45251
-Node: Functional Programming<2>45579
-Ref: functional programming<2>45708
-Ref: 5745708
-Ref: id345708
-Node: Comparison46960
-Ref: comparison47089
-Ref: 5847089
-Ref: 5947496
-Ref: map_equal/stlmap47496
-Ref: 5a47531
-Ref: ==/stlmap47531
-Ref: 5b47558
-Ref: ~=/stlmap47558
-Ref: 5c48664
-Ref: </stlmap48664
-Ref: 5d49024
-Ref: >/stlmap49024
-Ref: 5e49050
-Ref: <=/stlmap49050
-Ref: 5f49077
-Ref: >=/stlmap49077
-Node: Set Algorithms50045
-Ref: set algorithms50163
-Ref: 6050163
-Ref: set-algorithms50163
-Ref: 6151289
-Ref: map_merge/stlmap51289
-Ref: 6251533
-Ref: map_union/stlmap51533
-Ref: 6351567
-Ref: map_difference/stlmap51567
-Ref: 6451606
-Ref: map_intersection/stlmap51606
-Ref: 6551647
-Ref: map_symmetric_difference/stlmap51647
-Ref: 6651696
-Ref: map_includes/stlmap51696
-Node: Direct C Calls52834
-Ref: direct c calls52933
-Ref: 6752933
-Ref: direct-c-calls52933
-Ref: 6853543
-Ref: shm_member53543
-Ref: 6953576
-Ref: shm_get53576
-Ref: 6a53606
-Ref: shm_put53606
-Node: Iterators<2>53924
-Ref: iterators<2>54024
-Ref: 6b54024
-Ref: id454024
-Node: Concepts<2>54223
-Ref: concepts<2>54307
-Ref: 6c54307
-Ref: id554307
-Node: Exceptions55780
-Ref: exceptions55882
-Ref: 6d55882
-Node: Functions56853
-Ref: functions56955
-Ref: 6e56955
-Ref: 6f57109
-Ref: iterator/stlmap57109
-Ref: 7057203
-Ref: begin/stlmap57203
-Ref: 7157228
-Ref: pastend/stlmap57228
-Ref: 7257306
-Ref: find/stlmap57306
-Ref: 7357500
-Ref: find_with_default/stlmap57500
-Ref: 7457760
-Ref: insert_elm/stlmap57760
-Ref: 7558859
-Ref: l_bound/stlmap58859
-Ref: 7659081
-Ref: u_bound/stlmap59081
-Ref: 7759302
-Ref: lu_bounds/stlmap59302
-Ref: 7859395
-Ref: inc/stlmap59395
-Ref: 7959415
-Ref: dec/stlmap59415
-Ref: 7a59435
-Ref: move/stlmap59435
-Ref: 7b59882
-Ref: get_elm/stlmap59882
-Ref: 7c59906
-Ref: get_key/stlmap59906
-Ref: 7d59930
-Ref: get_val/stlmap59930
-Ref: 7e60219
-Ref: put_val60219
-Ref: 7f60431
-Ref: beginp/stlmap60431
-Ref: 8060454
-Ref: pastendp/stlmap60454
-Ref: 8160600
-Ref: get_info/stlmap60600
-Ref: 8261071
-Ref: erase/stlmap61071
-Node: Examples<2>61327
-Ref: examples<2>61410
-Ref: 8361410
-Ref: id661410
-Node: Index62167
-Ref: index62238
+Node: Installation4977
+Ref: installation5072
+Ref: a5072
+Node: Examples5365
+Ref: examples5459
+Ref: b5459
+Node: Quick Start6158
+Ref: quick start6248
+Ref: c6248
+Ref: quick-start6248
+Node: Example Containers6703
+Ref: example containers6795
+Ref: d6795
+Ref: example-containers6795
+Node: Constructors8063
+Ref: constructors8170
+Ref: e8170
+Node: Ranges8935
+Ref: ranges9056
+Ref: f9056
+Node: Inserting and Replacing Elements10443
+Ref: inserting and replacing elements10558
+Ref: 1010558
+Ref: inserting-and-replacing-elements10558
+Node: Access12035
+Ref: access12160
+Ref: 1112160
+Node: Erasing Elements13346
+Ref: erasing elements13450
+Ref: 1213450
+Ref: erasing-elements13450
+Node: Conversions14631
+Ref: conversions14751
+Ref: 1314751
+Node: Functional Programming15969
+Ref: functional programming16064
+Ref: 1416064
+Ref: functional-programming16064
+Node: Concepts16773
+Ref: concepts16862
+Ref: 1516862
+Node: Containers and Elements17425
+Ref: containers and elements17516
+Ref: 1617516
+Ref: containers-and-elements17516
+Node: Ranges<2>20488
+Ref: ranges<2>20597
+Ref: 1720597
+Ref: id120597
+Node: Iterators21850
+Ref: iterators21965
+Ref: 1821965
+Node: Selecting Elements Using Keys22545
+Ref: selecting elements using keys22669
+Ref: 1922669
+Ref: selecting-elements-using-keys22669
+Node: C++ Implementation24178
+Ref: c++ implementation24284
+Ref: 1a24284
+Ref: c-implementation24284
+Ref: 1b25079
+Ref: c-standard-library-documentation25079
+Node: Modules25079
+Ref: modules25177
+Ref: 1c25177
+Node: The stlhmap Module25378
+Ref: the stlhmap module25471
+Ref: 1d25471
+Ref: the-stlhmap-module25471
+Ref: 1e26135
+Ref: stlhmap/type26135
+Ref: 1f26153
+Ref: stlhset/type26153
+Node: The stlmap Module26340
+Ref: the stlmap module26460
+Ref: 2026460
+Ref: the-stlmap-module26460
+Ref: 2127019
+Ref: stlmap/type27019
+Ref: 2227036
+Ref: stlset/type27036
+Ref: 2327054
+Ref: stlmap_iter/type27054
+Ref: 2427077
+Ref: stlmap_rng/type27077
+Node: The stlmmap Module27397
+Ref: the stlmmap module27490
+Ref: 2527490
+Ref: the-stlmmap-module27490
+Ref: 2628186
+Ref: stlmmap/type28186
+Ref: 2728204
+Ref: stlmset/type28204
+Ref: 2828223
+Ref: stlmmap_iter/type28223
+Ref: 2928247
+Ref: stlmmap_rng/type28247
+Node: Container Operations28574
+Ref: container operations28676
+Ref: 2a28676
+Ref: container-operations28676
+Node: Container Construction29317
+Ref: container construction29421
+Ref: 2b29421
+Ref: container-construction29421
+Ref: 2c29710
+Ref: mkstlmap29710
+Ref: 2d29752
+Ref: mkstlmmap29752
+Ref: 2e30162
+Ref: mkstlset30162
+Ref: 2f30189
+Ref: mkstlmset30189
+Ref: 3030695
+Ref: emptystlmap30695
+Ref: 3130721
+Ref: emptystlmmap30721
+Ref: 3230748
+Ref: emptystlset30748
+Ref: 3330774
+Ref: emptystlmset30774
+Ref: 3430926
+Ref: emptystlhmap30926
+Ref: 3530953
+Ref: emptystlhset30953
+Ref: 3631364
+Ref: stlmap/stlmap31364
+Ref: 3731389
+Ref: stlmmap/stlmmap31389
+Ref: 3831415
+Ref: stlset/stlmap31415
+Ref: 3931440
+Ref: stlmset/stlmmap31440
+Ref: 3a31466
+Ref: stlhmap/stlhmap31466
+Ref: 3b31492
+Ref: stlhset/stlhmap31492
+Node: Information32052
+Ref: information32177
+Ref: 3c32177
+Ref: 3d32550
+Ref: #/stlmap32550
+Ref: 3e32618
+Ref: stl empty/stlmap32618
+Ref: 3f32698
+Ref: stl distance/stlmap32698
+Ref: 4032885
+Ref: stl count/stlmap32885
+Ref: 4133037
+Ref: stl bounds/stlmap33037
+Ref: 4233610
+Ref: stl container_info/stlmap33610
+Ref: 4334097
+Ref: stl bucket_size/stlmap34097
+Ref: 4434254
+Ref: stl hash_reserve34254
+Node: Modification34473
+Ref: modification34594
+Ref: 4534594
+Ref: 4635949
+Ref: stl insert/stlmap35949
+Ref: 4737012
+Ref: stl insert_or_replace/stlmap37012
+Ref: 4837393
+Ref: stl replace/stlmap37393
+Ref: 4938517
+Ref: stl replace_with38517
+Ref: 4a39557
+Ref: stl erase/stlmap39557
+Ref: 4b40535
+Ref: stl swap/stlmap40535
+Node: Accessing Elements40753
+Ref: accessing elements40877
+Ref: 4c40877
+Ref: accessing-elements40877
+Ref: 4d41064
+Ref: member/stlmap41064
+Ref: 4e41404
+Ref: stl next_key/stlmap41404
+Ref: 4f41439
+Ref: stl prev_key/stlmap41439
+Node: Conversions<2>44544
+Ref: conversions<2>44681
+Ref: 5044681
+Ref: id244681
+Ref: 5144908
+Ref: members/stlmap44908
+Ref: 5244960
+Ref: keys/stlmap44960
+Ref: 5344983
+Ref: vals/stlmap44983
+Ref: 5445431
+Ref: vector/stlmap45431
+Ref: 5545456
+Ref: stlvec/stlmap45456
+Ref: 5645672
+Ref: stream/stlmap45672
+Node: Functional Programming<2>45995
+Ref: functional programming<2>46124
+Ref: 5746124
+Ref: id346124
+Node: Comparison47341
+Ref: comparison47470
+Ref: 5847470
+Ref: 5947877
+Ref: stl map_equal/stlmap47877
+Ref: 5a47917
+Ref: ==/stlmap47917
+Ref: 5b47944
+Ref: ~=/stlmap47944
+Ref: 5c49050
+Ref: </stlmap49050
+Ref: 5d49410
+Ref: >/stlmap49410
+Ref: 5e49436
+Ref: <=/stlmap49436
+Ref: 5f49463
+Ref: >=/stlmap49463
+Node: Set Algorithms50431
+Ref: set algorithms50549
+Ref: 6050549
+Ref: set-algorithms50549
+Ref: 6151675
+Ref: stl map_merge/stlmap51675
+Ref: 6251925
+Ref: stl map_union/stlmap51925
+Ref: 6351964
+Ref: stl map_difference/stlmap51964
+Ref: 6452008
+Ref: stl map_intersection/stlmap52008
+Ref: 6552054
+Ref: stl map_symmetric_difference/stlmap52054
+Ref: 6652108
+Ref: stl map_includes/stlmap52108
+Node: Direct C Calls53251
+Ref: direct c calls53350
+Ref: 6753350
+Ref: direct-c-calls53350
+Ref: 6853950
+Ref: stl shm_member53950
+Ref: 6953988
+Ref: stl shm_get53988
+Ref: 6a54023
+Ref: stl shm_put54023
+Node: Iterators<2>54346
+Ref: iterators<2>54446
+Ref: 6b54446
+Ref: id454446
+Node: Concepts<2>54645
+Ref: concepts<2>54729
+Ref: 6c54729
+Ref: id554729
+Node: Exceptions56246
+Ref: exceptions56348
+Ref: 6d56348
+Node: Functions57326
+Ref: functions57428
+Ref: 6e57428
+Ref: 6f57582
+Ref: stl iterator/stlmap57582
+Ref: 7057681
+Ref: stl begin/stlmap57681
+Ref: 7157711
+Ref: stl pastend/stlmap57711
+Ref: 7257794
+Ref: stl find/stlmap57794
+Ref: 7357993
+Ref: stl find_with_default/stlmap57993
+Ref: 7458351
+Ref: stl insert_elm/stlmap58351
+Ref: 7559505
+Ref: stl l_bound/stlmap59505
+Ref: 7659732
+Ref: stl u_bound/stlmap59732
+Ref: 7759958
+Ref: stl lu_bounds/stlmap59958
+Ref: 7860056
+Ref: stl inc/stlmap60056
+Ref: 7960081
+Ref: stl dec/stlmap60081
+Ref: 7a60106
+Ref: stl move/stlmap60106
+Ref: 7b60558
+Ref: stl get_elm/stlmap60558
+Ref: 7c60587
+Ref: stl get_key/stlmap60587
+Ref: 7d60616
+Ref: stl get_val/stlmap60616
+Ref: 7e60910
+Ref: stl put_val60910
+Ref: 7f61129
+Ref: stl beginp/stlmap61129
+Ref: 8061157
+Ref: stl pastendp/stlmap61157
+Ref: 8161308
+Ref: stl get_info/stlmap61308
+Ref: 8261683
+Ref: stl ==/stlmap61683
+Ref: 8361789
+Ref: erase/stlmap61789
+Node: Examples<2>62047
+Ref: examples<2>62130
+Ref: 8462130
+Ref: id662130
+Node: Index62887
+Ref: index62958
 
 End Tag Table
 

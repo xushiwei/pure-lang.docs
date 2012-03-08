@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.52, March 06, 2012</p>
+<p>Version 0.52, March 08, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -5440,11 +5440,11 @@ attention (cf. <a class="reference internal" href="#name-capture">Name Capture</
 <p>We are now in a position to have a look at some of the trickier optimization
 macros defined in the prelude. Most of the following macros can be found near
 the end of the prelude.pure module; they are used to optimize the case of
-&#8220;throwaway&#8221; list comprehensions. This is useful if a comprehension is
-evaluated solely for its side effects. To keep things simple, we discuss a
+&#8220;throwaway&#8221; list and matrix comprehensions. This is useful if a comprehension
+is evaluated solely for its side effects. To keep things simple, we discuss a
 slightly abridged version here which only deals with list comprehensions.
 Please check the actual prelude code for the full version.</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --quoteargs __do__</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --quoteargs __std__::__do__</span>
 
 <span class="kr">def</span> <span class="kt">void</span> [x] = <span class="kt">void</span> x<span class="p">;</span>
 <span class="kr">def</span> <span class="kt">void</span> (catmap f x) | <span class="kt">void</span> (listmap f x) = __do__ f x<span class="p">;</span>
@@ -5478,7 +5478,10 @@ need those results anyway. These are both defined in the prelude. The
 some optimizations along the way. (While the above rules for <tt class="docutils literal"><span class="pre">__do__</span></tt> are
 always valid optimizations for <tt class="docutils literal"><span class="pre">do</span></tt>, the prelude uses a separate macro here
 instead of clobbering <tt class="docutils literal"><span class="pre">do</span></tt> itself, so that these optimizations do not
-interfere with calls to <tt class="docutils literal"><span class="pre">do</span></tt> in ordinary user code.)</p>
+interfere with calls to <tt class="docutils literal"><span class="pre">do</span></tt> in ordinary user code. Also note that the
+<tt class="docutils literal"><span class="pre">__do__</span></tt> macro is not intended to be invoked directly by the programmer, so
+the prelude puts it into the <tt class="docutils literal"><span class="pre">__std__</span></tt> namespace, to keep the default
+namespace clean.)</p>
 <p>Before we further delve into this example, a few remarks are in order about
 the way list comprehensions are implemented in Pure. As already mentioned,
 list comprehensions are just syntactic sugar; the compiler immediately
@@ -5520,7 +5523,7 @@ course). Here&#8217;s how it looks like when we run the <tt class="docutils lite
 concert to rewrite a &#8220;voided&#8221; comprehension. To these ends, you can rerun the
 right-hand side of <tt class="docutils literal"><span class="pre">g</span></tt> with some tracing enabled, as follows (we omit the
 tracing output here for brevity):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m void __std__::__do__
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -a
 <span class="gp">&gt; </span><span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 </pre></div>
 </div>
@@ -7318,7 +7321,7 @@ the memory usage statistics.</p>
 
 <span class="target" id="index-48"></span><dl class="describe">
 <dt>
-<tt class="descname">trace [-m] [symbol ...]</tt></dt>
+<tt class="descname">trace [-a] [-m] [symbol ...]</tt></dt>
 <dd><p>Sets tracepoints on the given function or operator symbols. Without the
 <tt class="docutils literal"><span class="pre">-m</span></tt> option, this works like the <tt class="docutils literal"><span class="pre">break</span></tt> command (see above) but only
 prints rule invocations and reductions without actually interrupting the
@@ -7326,7 +7329,15 @@ evaluation; see <a class="reference internal" href="#debugging">Debugging</a> be
 <p>The <tt class="docutils literal"><span class="pre">-m</span></tt> option allows you to trace macro (rather than function)
 calls. If this option is specified, the compiler prints reductions by the
 given macro symbol, which is useful when debugging macros; see the <a class="reference internal" href="#macros">Macros</a>
-section for details and an example.</p>
+section for details and examples. Note that macro tracing works even if the
+interpreter was invoked without debugging mode.</p>
+<p>If the <tt class="docutils literal"><span class="pre">-a</span></tt> option is specified, tracepoints are set on <em>all</em> global
+function or macro symbols, respectively (in this case the symbol arguments
+are ignored). This is convenient if you want to show all reductions
+performed in a computation. Otherwise, if neither <tt class="docutils literal"><span class="pre">-a</span></tt> nor any symbols
+are specified then the currently defined tracepoints are printed. Note
+that, as with the <tt class="docutils literal"><span class="pre">break</span></tt> command, existing tracepoints can be deleted
+with the <tt class="docutils literal"><span class="pre">del</span></tt> command (see above).</p>
 </dd></dl>
 
 <span class="target" id="index-49"></span><dl class="describe">
@@ -7933,9 +7944,12 @@ to debug some functions while only tracing others.</p>
 <p>The current sets of breakpoints and tracepoints can be changed with the
 <tt class="docutils literal"><span class="pre">break</span></tt>, <tt class="docutils literal"><span class="pre">trace</span></tt> and <tt class="docutils literal"><span class="pre">del</span></tt> commands, as shown above, and just <tt class="docutils literal"><span class="pre">break</span></tt>
 or <tt class="docutils literal"><span class="pre">trace</span></tt> without any arguments lists the currently defined breakpoints or
-tracepoints, respectively. Please see <a class="reference internal" href="#interactive-commands">Interactive Commands</a> above for
-details. Also note that these are really interpreter commands, so to invoke
-them in the debugger you have to escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command.</p>
+tracepoints, respectively. Moreover, the <tt class="docutils literal"><span class="pre">trace</span></tt> command can also be invoked
+with the <tt class="docutils literal"><span class="pre">-a</span></tt> option to trace all global function or macro calls, which is
+convenient if you want to get a full transcript of a reduction sequence.
+Please see <a class="reference internal" href="#interactive-commands">Interactive Commands</a> above for details. Also note that these are
+really interpreter commands, so to invoke them in the debugger you have to
+escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command.</p>
 </div>
 <div class="section" id="last-result">
 <h3><a class="toc-backref" href="#id100">Last Result</a><a class="headerlink" href="#last-result" title="Permalink to this headline">¶</a></h3>

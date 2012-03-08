@@ -5391,6 +5391,7 @@ macro in a direct way, as we&#8217;ve seen before:</p>
 <span class="gp">&gt; </span><span class="kr">def</span> swap (__lambda__ [x,y] z) = __lambda__ [y,x] z<span class="p">;</span>
 <span class="gp">&gt; </span>swap (\a b-&gt;a-b)<span class="p">;</span>
 -- macro swap: swap (\a b -&gt; a-b) --&gt; __lambda__ [b,a] (a-b)
+-- macro __lambda__: __lambda__ [b,a] (a-b) --&gt; \b a -&gt; a-b
 <span class="kt">#&lt;closure 0x7f1934156f00&gt;</span>
 <span class="gp">&gt; </span>ans <span class="mi">2</span> <span class="mi">3</span><span class="p">;</span>
 <span class="mi">1</span>
@@ -5411,9 +5412,9 @@ resulting unquoted subexpressions.</p>
 <p>Using <a class="reference internal" href="#__eval__" title="__eval__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__eval__</span></tt></a>, we can implement the <tt class="docutils literal"><span class="pre">swap</span></tt> macro as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear swap
 <span class="gp">&gt; </span><span class="kr">def</span> swap (\x y -&gt; z) = __eval__ (&#39;(\y x -&gt; z))<span class="p">;</span>
-<span class="gp">&gt; </span>trace -m __eval__
 <span class="gp">&gt; </span>swap (\a b-&gt;a-b)<span class="p">;</span>
 -- macro swap: swap (\a b -&gt; a-b) --&gt; __eval__ (&#39;__lambda__ [b,a] (a-b))
+-- macro __lambda__: __lambda__ [b,a] (a-b) --&gt; \b a -&gt; a-b
 -- macro __eval__: __eval__ (&#39;__lambda__ [b,a] (a-b)) --&gt; \b a -&gt; a-b
 <span class="kt">#&lt;closure 0x7f7e1f867dc8&gt;</span>
 <span class="gp">&gt; </span>ans <span class="mi">2</span> <span class="mi">3</span><span class="p">;</span>
@@ -5523,7 +5524,7 @@ course). Here&#8217;s how it looks like when we run the <tt class="docutils lite
 concert to rewrite a &#8220;voided&#8221; comprehension. To these ends, you can rerun the
 right-hand side of <tt class="docutils literal"><span class="pre">g</span></tt> with some tracing enabled, as follows (we omit the
 tracing output here for brevity):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -a
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m void
 <span class="gp">&gt; </span><span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 </pre></div>
 </div>
@@ -7321,23 +7322,30 @@ the memory usage statistics.</p>
 
 <span class="target" id="index-48"></span><dl class="describe">
 <dt>
-<tt class="descname">trace [-a] [-m] [symbol ...]</tt></dt>
+<tt class="descname">trace [-a] [-m] [-r] [-s] [symbol ...]</tt></dt>
 <dd><p>Sets tracepoints on the given function or operator symbols. Without the
-<tt class="docutils literal"><span class="pre">-m</span></tt> option, this works like the <tt class="docutils literal"><span class="pre">break</span></tt> command (see above) but only
-prints rule invocations and reductions without actually interrupting the
-evaluation; see <a class="reference internal" href="#debugging">Debugging</a> below for details.</p>
+<tt class="docutils literal"><span class="pre">-m</span></tt> option, this works pretty much like the <tt class="docutils literal"><span class="pre">break</span></tt> command (see
+above) but only prints rule invocations and reductions without actually
+interrupting the evaluation; see <a class="reference internal" href="#debugging">Debugging</a> below for details.</p>
 <p>The <tt class="docutils literal"><span class="pre">-m</span></tt> option allows you to trace macro (rather than function)
-calls. If this option is specified, the compiler prints reductions by the
-given macro symbol, which is useful when debugging macros; see the <a class="reference internal" href="#macros">Macros</a>
-section for details and examples. Note that macro tracing works even if the
-interpreter was invoked without debugging mode.</p>
+calls. If this option is specified, the compiler prints reduction sequences
+involving the given macro symbol, which is useful when debugging macros;
+see the <a class="reference internal" href="#macros">Macros</a> section for details and examples. Note that macro tracing
+works even if the interpreter was invoked without debugging mode.</p>
 <p>If the <tt class="docutils literal"><span class="pre">-a</span></tt> option is specified, tracepoints are set on <em>all</em> global
 function or macro symbols, respectively (in this case the symbol arguments
-are ignored). This is convenient if you want to show all reductions
-performed in a computation. Otherwise, if neither <tt class="docutils literal"><span class="pre">-a</span></tt> nor any symbols
-are specified then the currently defined tracepoints are printed. Note
-that, as with the <tt class="docutils literal"><span class="pre">break</span></tt> command, existing tracepoints can be deleted
-with the <tt class="docutils literal"><span class="pre">del</span></tt> command (see above).</p>
+are ignored). This is convenient if you want to see any and all reductions
+performed in a computation.</p>
+<p>Tracing can actually be performed in two different modes, <em>recursive</em> mode
+in which the trace is triggered by any of the active tracepoints and
+continues until the corresponding call is finished, or <em>skip</em> mode in which
+<em>only</em> calls by the active tracepoints are reported. The former is usually
+more helpful and is the default. The <tt class="docutils literal"><span class="pre">-s</span></tt> option allows you to switch to
+skip mode, while the <tt class="docutils literal"><span class="pre">-r</span></tt> option switches back to recursive mode.</p>
+<p>Finally, if neither symbols nor any of the <tt class="docutils literal"><span class="pre">-a</span></tt>, <tt class="docutils literal"><span class="pre">-r</span></tt> and <tt class="docutils literal"><span class="pre">-s</span></tt>
+options are specified then the currently defined tracepoints are printed.
+Note that, as with the <tt class="docutils literal"><span class="pre">break</span></tt> command, existing tracepoints can be
+deleted with the <tt class="docutils literal"><span class="pre">del</span></tt> command (see above).</p>
 </dd></dl>
 
 <span class="target" id="index-49"></span><dl class="describe">
@@ -7933,6 +7941,11 @@ assuming the same example as above, let&#8217;s first remove the breakpoint on
 ++ [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">0</span>
      --&gt; <span class="mi">1</span>
+** [<span class="mi">2</span>] (*): x<span class="p">::</span><span class="kt">int</span>*y<span class="p">::</span><span class="kt">int</span> = x*y<span class="p">;</span>
+     x = <span class="mi">1</span><span class="p">;</span> y = <span class="mi">1</span>
+++ [<span class="mi">2</span>] (*): x<span class="p">::</span><span class="kt">int</span>*y<span class="p">::</span><span class="kt">int</span> = x*y<span class="p">;</span>
+     x = <span class="mi">1</span><span class="p">;</span> y = <span class="mi">1</span>
+     --&gt; <span class="mi">1</span>
 ++ [<span class="mi">1</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">1</span>
      --&gt; <span class="mi">1</span>
@@ -7941,15 +7954,44 @@ assuming the same example as above, let&#8217;s first remove the breakpoint on
 </div>
 <p>The <tt class="docutils literal"><span class="pre">break</span></tt> and <tt class="docutils literal"><span class="pre">trace</span></tt> commands can also be used in concert if you want
 to debug some functions while only tracing others.</p>
+<p>Note that the <tt class="docutils literal"><span class="pre">trace</span></tt> command can actually be run in two different modes:
+<em>recursive</em> mode in which the trace is triggered by any of the active
+tracepoints and continues until the corresponding call is finished, or <em>skip</em>
+mode in which <em>only</em> calls by the active tracepoints are reported. The former
+is the default and is often preferable, because it gives you a complete
+transcript of the reductions performed during a global function call,
+including reductions of local and anonymous function applications.</p>
+<p>If you don&#8217;t need that much detail, you can also switch to skip mode by
+invoking the <tt class="docutils literal"><span class="pre">trace</span></tt> command with the <tt class="docutils literal"><span class="pre">-s</span></tt> option. This allows you to see
+a quick summary of the computation which only shows reductions by rules
+directly involving the active breakpoints. (Note that it&#8217;s only possible to
+see reductions by global functions that way, since there&#8217;s no way to set
+breakpoints or tracepoints on a local function.) For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -s
+<span class="gp">&gt; </span>fact <span class="mi">1</span><span class="p">;</span>
+** [<span class="mi">1</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+     n = <span class="mi">1</span>
+** [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+     n = <span class="mi">0</span>
+++ [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+     n = <span class="mi">0</span>
+     --&gt; <span class="mi">1</span>
+++ [<span class="mi">1</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+     n = <span class="mi">1</span>
+     --&gt; <span class="mi">1</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<p>Moreover, the <tt class="docutils literal"><span class="pre">trace</span></tt> command can also be invoked with the <tt class="docutils literal"><span class="pre">-a</span></tt> option to
+trace all global function calls, which is convenient to quickly obtain a full
+transcript of a reduction sequence. The same options also work in an analogous
+fashion with macro calls, see the <a class="reference internal" href="#macros">Macros</a> section for some examples.</p>
 <p>The current sets of breakpoints and tracepoints can be changed with the
 <tt class="docutils literal"><span class="pre">break</span></tt>, <tt class="docutils literal"><span class="pre">trace</span></tt> and <tt class="docutils literal"><span class="pre">del</span></tt> commands, as shown above, and just <tt class="docutils literal"><span class="pre">break</span></tt>
 or <tt class="docutils literal"><span class="pre">trace</span></tt> without any arguments lists the currently defined breakpoints or
-tracepoints, respectively. Moreover, the <tt class="docutils literal"><span class="pre">trace</span></tt> command can also be invoked
-with the <tt class="docutils literal"><span class="pre">-a</span></tt> option to trace all global function or macro calls, which is
-convenient if you want to get a full transcript of a reduction sequence.
-Please see <a class="reference internal" href="#interactive-commands">Interactive Commands</a> above for details. Also note that these are
-really interpreter commands, so to invoke them in the debugger you have to
-escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command.</p>
+tracepoints, respectively. Please see <a class="reference internal" href="#interactive-commands">Interactive Commands</a> above for
+details. Also note that these are really interpreter commands, so to invoke
+them in the debugger you have to escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command.</p>
 </div>
 <div class="section" id="last-result">
 <h3><a class="toc-backref" href="#id100">Last Result</a><a class="headerlink" href="#last-result" title="Permalink to this headline">¶</a></h3>

@@ -6706,6 +6706,7 @@ macro in a direct way, as we've seen before:
 > def swap (__lambda__ [x,y] z) = __lambda__ [y,x] z;
 > swap (\a b->a-b);
 -- macro swap: swap (\a b -> a-b) --> __lambda__ [b,a] (a-b)
+-- macro __lambda__: __lambda__ [b,a] (a-b) --> \b a -> a-b
 #<closure 0x7f1934156f00>
 > ans 2 3;
 1
@@ -6731,9 +6732,9 @@ Using @pxref{f3,,__eval__}, we can implement the @code{swap} macro as follows:
 @example
 > clear swap
 > def swap (\x y -> z) = __eval__ ('(\y x -> z));
-> trace -m __eval__
 > swap (\a b->a-b);
 -- macro swap: swap (\a b -> a-b) --> __eval__ ('__lambda__ [b,a] (a-b))
+-- macro __lambda__: __lambda__ [b,a] (a-b) --> \b a -> a-b
 -- macro __eval__: __eval__ ('__lambda__ [b,a] (a-b)) --> \b a -> a-b
 #<closure 0x7f7e1f867dc8>
 > ans 2 3;
@@ -6860,7 +6861,7 @@ right-hand side of @code{g} with some tracing enabled, as follows (we omit the
 tracing output here for brevity):
 
 @example
-> trace -a
+> trace -m void
 > void [printf "%g\n" (2^x+1) | x=1..5; x mod 2];
 @end example
 
@@ -9118,26 +9119,35 @@ the memory usage statistics.
 
 @geindex trace command
 @anchor{130}@anchor{index-48}
-@deffn {Description} trace [-a] [-m] [symbol ...]
+@deffn {Description} trace [-a] [-m] [-r] [-s] [symbol ...]
 
 Sets tracepoints on the given function or operator symbols. Without the
-@code{-m} option, this works like the @code{break} command (see above) but only
-prints rule invocations and reductions without actually interrupting the
-evaluation; see @pxref{47,,Debugging} below for details.
+@code{-m} option, this works pretty much like the @code{break} command (see
+above) but only prints rule invocations and reductions without actually
+interrupting the evaluation; see @pxref{47,,Debugging} below for details.
 
 The @code{-m} option allows you to trace macro (rather than function)
-calls. If this option is specified, the compiler prints reductions by the
-given macro symbol, which is useful when debugging macros; see the @pxref{60,,Macros}
-section for details and examples. Note that macro tracing works even if the
-interpreter was invoked without debugging mode.
+calls. If this option is specified, the compiler prints reduction sequences
+involving the given macro symbol, which is useful when debugging macros;
+see the @pxref{60,,Macros} section for details and examples. Note that macro tracing
+works even if the interpreter was invoked without debugging mode.
 
 If the @code{-a} option is specified, tracepoints are set on @emph{all} global
 function or macro symbols, respectively (in this case the symbol arguments
-are ignored). This is convenient if you want to show all reductions
-performed in a computation. Otherwise, if neither @code{-a} nor any symbols
-are specified then the currently defined tracepoints are printed. Note
-that, as with the @code{break} command, existing tracepoints can be deleted
-with the @code{del} command (see above).
+are ignored). This is convenient if you want to see any and all reductions
+performed in a computation.
+
+Tracing can actually be performed in two different modes, @emph{recursive} mode
+in which the trace is triggered by any of the active tracepoints and
+continues until the corresponding call is finished, or @emph{skip} mode in which
+@emph{only} calls by the active tracepoints are reported. The former is usually
+more helpful and is the default. The @code{-s} option allows you to switch to
+skip mode, while the @code{-r} option switches back to recursive mode.
+
+Finally, if neither symbols nor any of the @code{-a}, @code{-r} and @code{-s}
+options are specified then the currently defined tracepoints are printed.
+Note that, as with the @code{break} command, existing tracepoints can be
+deleted with the @code{del} command (see above).
 @end deffn
 
 @geindex underride command
@@ -9832,6 +9842,11 @@ assuming the same example as above, let's first remove the breakpoint on
 ++ [2] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
      n = 0
      --> 1
+** [2] (*): x::int*y::int = x*y;
+     x = 1; y = 1
+++ [2] (*): x::int*y::int = x*y;
+     x = 1; y = 1
+     --> 1
 ++ [1] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
      n = 1
      --> 1
@@ -9842,15 +9857,49 @@ assuming the same example as above, let's first remove the breakpoint on
 The @code{break} and @code{trace} commands can also be used in concert if you want
 to debug some functions while only tracing others.
 
+Note that the @code{trace} command can actually be run in two different modes:
+@emph{recursive} mode in which the trace is triggered by any of the active
+tracepoints and continues until the corresponding call is finished, or @emph{skip}
+mode in which @emph{only} calls by the active tracepoints are reported. The former
+is the default and is often preferable, because it gives you a complete
+transcript of the reductions performed during a global function call,
+including reductions of local and anonymous function applications.
+
+If you don't need that much detail, you can also switch to skip mode by
+invoking the @code{trace} command with the @code{-s} option. This allows you to see
+a quick summary of the computation which only shows reductions by rules
+directly involving the active breakpoints. (Note that it's only possible to
+see reductions by global functions that way, since there's no way to set
+breakpoints or tracepoints on a local function.) For instance:
+
+@example
+> trace -s
+> fact 1;
+** [1] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
+     n = 1
+** [2] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
+     n = 0
+++ [2] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
+     n = 0
+     --> 1
+++ [1] fact: fact n::int = if n>0 then n*fact (n-1) else 1;
+     n = 1
+     --> 1
+1
+@end example
+
+@noindent
+Moreover, the @code{trace} command can also be invoked with the @code{-a} option to
+trace all global function calls, which is convenient to quickly obtain a full
+transcript of a reduction sequence. The same options also work in an analogous
+fashion with macro calls, see the @pxref{60,,Macros} section for some examples.
+
 The current sets of breakpoints and tracepoints can be changed with the
 @code{break}, @code{trace} and @code{del} commands, as shown above, and just @code{break}
 or @code{trace} without any arguments lists the currently defined breakpoints or
-tracepoints, respectively. Moreover, the @code{trace} command can also be invoked
-with the @code{-a} option to trace all global function or macro calls, which is
-convenient if you want to get a full transcript of a reduction sequence.
-Please see @pxref{e3,,Interactive Commands} above for details. Also note that these are
-really interpreter commands, so to invoke them in the debugger you have to
-escape them with the @code{!} command.
+tracepoints, respectively. Please see @pxref{e3,,Interactive Commands} above for
+details. Also note that these are really interpreter commands, so to invoke
+them in the debugger you have to escape them with the @code{!} command.
 
 
 @node Last Result,Pretty-Printing,Debugging,Interactive Usage

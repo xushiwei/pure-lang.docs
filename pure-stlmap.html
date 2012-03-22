@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.52',
+        VERSION:     '0.53',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -57,7 +57,7 @@
             
   <div class="section" id="module-stlmap">
 <span id="pure-stlmap"></span><h1>pure-stlmap<a class="headerlink" href="#module-stlmap" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-stlmmap"></span><span class="target" id="module-stlhmap"></span><p>Version 0.1, March 12, 2012</p>
+<span class="target" id="module-stlmmap"></span><span class="target" id="module-stlhmap"></span><p>Version 0.2, March 22, 2012</p>
 <div class="line-block">
 <div class="line">Peter Summerland &lt;<a class="reference external" href="mailto:p&#46;summerland&#37;&#52;&#48;gmail&#46;com">p<span>&#46;</span>summerland<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</div>
 </div>
@@ -118,6 +118,10 @@ unordered_set.</p>
 <li><a class="reference internal" href="#id6" id="id46">Examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#backward-compatibilty" id="id47">Backward Compatibilty</a><ul>
+<li><a class="reference internal" href="#pure-stlmap-0-2" id="id48">pure-stlmap-0.2</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="copying">
@@ -174,7 +178,7 @@ to understand the performance characteristics and corner case behavior of any
 pure-stlmap function that has a corresponding function in the STL.</p>
 <p>The C++ library is sometimes more complicated than the Pure Standard
 Library. For example many of the applicable C++ functions, including set
-operations and tests for equality assume that the containers are
+operations and tests for equality, assume that the containers are
 lexicographically ordered. The reward for playing by the rules (which occurs
 automatically for stlmap and stlset) is O(n) time complexity for comparison
 and set operations.</p>
@@ -182,7 +186,7 @@ and set operations.</p>
 </div>
 <div class="section" id="installation">
 <h2><a class="toc-backref" href="#id11">Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>pure-stlmap-0.1 is included in the &#8220;umbrella&#8221; addon, <a class="reference internal" href="pure-stllib.html"><em>pure-stllib</em></a>
+<p>pure-stlmap-0.2 is included in the &#8220;umbrella&#8221; addon, <a class="reference internal" href="pure-stllib.html"><em>pure-stllib</em></a>
 which is available at <a class="reference external" href="http://code.google.com/p/pure-lang/downloads/list">http://code.google.com/p/pure-lang/downloads/list</a>. After
 you have downloaded and installed <a class="reference internal" href="pure-stllib.html"><em>pure-stllib</em></a>, you will be able to use
 pure-stlmap (and <a class="reference internal" href="pure-stlvec.html"><em>pure-stlvec</em></a>, as well).</p>
@@ -1235,7 +1239,7 @@ lookups.</p>
 help.</p>
 <p>Almost any pure-stlmap function that accepts a stlmap or stlset as an argument
 will check the container&#8217;s cache before doing an O(log N) lookup.  Currently
-the cache is limited to hold only the three most recently used keys.</p>
+the cache is limited to hold only the most recently used key.</p>
 <p>Here are some examples produced by compiling pure-stlmap with a trace function
 that shows caching in action.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> a_key = <span class="s">&quot;a&quot;</span><span class="p">;</span>
@@ -1582,23 +1586,49 @@ applying set operations to a pair of stlmaps or stlmmaps. E.g.,</p>
 container using <a class="reference internal" href="#member/stlmap" title="member"><tt class="xref pure pure-func docutils literal"><span class="pre">member</span></tt></a> and (b) in the case of maps, retreives
 the value or values associated with the key using (!) and/or (c) changes the
 value or values using <a class="reference internal" href="#replace/stlmap" title="replace"><tt class="xref pure pure-func docutils literal"><span class="pre">replace</span></tt></a>. Depending on what modules have
-been loaded, these functions may be heavily overloaded which can cause a
-small delay when the functions are called. To avoid this, pure-stlmap exposes
-the corresponding C functions so that they can be called directly. For
-stlhmaps the functions begin with a prefix <tt class="docutils literal"><span class="pre">shm_</span></tt>:</p>
+been loaded, these functions may be heavily overloaded which can cause a small
+delay when the functions are called. To avoid this, pure-stlmap exposes the
+corresponding C functions so that they can be called directly. The C functions
+have the same name as the overloaded functions except for a prefix. E.g.,</p>
 <dl class="function">
-<dt id="stl::shm_member">
-<tt class="descclassname">stl::</tt><tt class="descname">shm_member</tt> shm key<a class="headerlink" href="#stl::shm_member" title="Permalink to this definition">¶</a></dt>
-<dt id="stl::shm_get">
-<tt class="descclassname">stl::</tt><tt class="descname">shm_get</tt> shm key<a class="headerlink" href="#stl::shm_get" title="Permalink to this definition">¶</a></dt>
-<dt id="stl::shm_put">
-<tt class="descclassname">stl::</tt><tt class="descname">shm_put</tt> shm key val<a class="headerlink" href="#stl::shm_put" title="Permalink to this definition">¶</a></dt>
-<dd><p>These are the direct C call equivalents of (member shm key), (shm!key) and
-(replace shm key val) where shm is a stlhmap.</p>
+<dt id="stl::sm_member/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">sm_member</tt> sm key<a class="headerlink" href="#stl::sm_member/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::sm_get/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">sm_get</tt> sm key<a class="headerlink" href="#stl::sm_get/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::sm_put/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">sm_put</tt> sm key val<a class="headerlink" href="#stl::sm_put/stlmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>These are the direct C call equivalents of (<a class="reference internal" href="#member/stlmap" title="member"><tt class="xref pure pure-func docutils literal"><span class="pre">::member</span></tt></a> <tt class="docutils literal"><span class="pre">sm</span></tt>
+<tt class="docutils literal"><span class="pre">key</span></tt>), (<tt class="docutils literal"><span class="pre">sm!key</span></tt>) and (<a class="reference internal" href="#replace/stlmap" title="replace"><tt class="xref pure pure-func docutils literal"><span class="pre">::replace</span></tt></a> <tt class="docutils literal"><span class="pre">sm</span></tt> <tt class="docutils literal"><span class="pre">key</span></tt>
+<tt class="docutils literal"><span class="pre">val</span></tt>) where <tt class="docutils literal"><span class="pre">sm</span></tt> is a stlmap or a stlset (except that sm_put is not
+defined for stlsets).</p>
 </dd></dl>
 
-<p>Similar functions are provided for all of the other associative containers. See
-pure-stlmap-functions.pdf, in the pure-stlmap/examples subdirectory.</p>
+<dl class="function">
+<dt id="stl::shm_member/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">shm_member</tt> shm key<a class="headerlink" href="#stl::shm_member/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::shm_get/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">shm_get</tt> shm key<a class="headerlink" href="#stl::shm_get/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::shm_put/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">shm_put</tt> shm key val<a class="headerlink" href="#stl::shm_put/stlmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>These are the direct C call equivalents of (<a class="reference internal" href="#member/stlmap" title="member"><tt class="xref pure pure-func docutils literal"><span class="pre">::member</span></tt></a> <tt class="docutils literal"><span class="pre">shm</span></tt>
+<tt class="docutils literal"><span class="pre">key</span></tt>), (<tt class="docutils literal"><span class="pre">shm!key</span></tt>) and (<a class="reference internal" href="#replace/stlmap" title="replace"><tt class="xref pure pure-func docutils literal"><span class="pre">::replace</span></tt></a> <tt class="docutils literal"><span class="pre">shm</span></tt> <tt class="docutils literal"><span class="pre">key</span></tt>
+<tt class="docutils literal"><span class="pre">val</span></tt>) where <tt class="docutils literal"><span class="pre">shm</span></tt> is a stlhmap or a stlhset (except that shm_put is not
+defined for stlhsets).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="stl::smm_member/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">smm_member</tt> smm key<a class="headerlink" href="#stl::smm_member/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::smm_get/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">smm_get</tt> smm key<a class="headerlink" href="#stl::smm_get/stlmap" title="Permalink to this definition">¶</a></dt>
+<dt id="stl::smm_put/stlmap">
+<tt class="descclassname">stl::</tt><tt class="descname">smm_put</tt> smm key val<a class="headerlink" href="#stl::smm_put/stlmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>These are the direct C call equivalents of (<a class="reference internal" href="#member/stlmap" title="member"><tt class="xref pure pure-func docutils literal"><span class="pre">::member</span></tt></a> <tt class="docutils literal"><span class="pre">smm</span></tt>
+<tt class="docutils literal"><span class="pre">key</span></tt>), (<tt class="docutils literal"><span class="pre">smm!key</span></tt>) and (<a class="reference internal" href="#replace/stlmap" title="replace"><tt class="xref pure pure-func docutils literal"><span class="pre">::replace</span></tt></a> <tt class="docutils literal"><span class="pre">smm</span></tt> <tt class="docutils literal"><span class="pre">key</span></tt>
+<tt class="docutils literal"><span class="pre">val</span></tt>) where <tt class="docutils literal"><span class="pre">smm</span></tt> is a stlmmap or a stlmset (except that smm_put is not
+defined for stlmsets).</p>
+</dd></dl>
+
 </div>
 </div>
 <div class="section" id="id4">
@@ -1908,6 +1938,15 @@ i <tt class="descname">==</tt> j</dt>
 </div>
 </div>
 </div>
+<div class="section" id="backward-compatibilty">
+<h2><a class="toc-backref" href="#id47">Backward Compatibilty</a><a class="headerlink" href="#backward-compatibilty" title="Permalink to this headline">¶</a></h2>
+<p>This section documents changes in pure-stlmap that might have introduced
+backward compatiblity issues.</p>
+<div class="section" id="pure-stlmap-0-2">
+<h3><a class="toc-backref" href="#id48">pure-stlmap-0.2</a><a class="headerlink" href="#pure-stlmap-0-2" title="Permalink to this headline">¶</a></h3>
+<p>Version 0.2 made no changes to the user interface.</p>
+</div>
+</div>
 </div>
 
 
@@ -1969,6 +2008,10 @@ i <tt class="descname">==</tt> j</dt>
 <li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backward-compatibilty">Backward Compatibilty</a><ul>
+<li><a class="reference internal" href="#pure-stlmap-0-2">pure-stlmap-0.2</a></li>
 </ul>
 </li>
 </ul>

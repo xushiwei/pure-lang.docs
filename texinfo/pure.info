@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.54, May 09, 2012
+  Version 0.55, June 04, 2012
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -209,7 +209,7 @@ that you find in traditional programming language interpreters.
 calculator" program. Simply run the program from the shell as follows:
 
     $ pure
-    Pure 0.54 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef
+    Pure 0.55 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef
     (Type 'help' for help, 'help copying' for license information.)
     Loaded prelude from /usr/local/lib/pure/prelude.pure.
 
@@ -5986,7 +5986,7 @@ Or let's lists all global variables along with their values:
 
     > catmap get_vardef (globsym "*" 0);
     [(argc-->0),(argv-->[]),(compiling-->0),
-    (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.54")]
+    (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.55")]
 
 The counterparts of `add_fundef' and `del_fundef' are provided as well.
 Not very surprisingly, they are named `add_typedef', `del_typedef',
@@ -6806,7 +6806,8 @@ dynamic libraries.
      offers faster compilation times and has much better diagnostics
      than gcc. On the other hand, llvm-gcc and dragonegg have the
      advantage that they also support alternative frontends so that you
-     can compile Fortran and Ada code as well.
+     can compile Fortran and Ada code as well. (But note that, as of
+     LLVM 3.x, llvm-gcc is not supported any more.)
 
   LLVM bitcode is loaded in a Pure script using the following special
 format of the *note using: 3b. clause:
@@ -6866,18 +6867,13 @@ compute the greatest common divisor of two (machine) integers:
     }
 
 Let's say that this code is in the file `mygcd.c', then you'd compile
-it to a bitcode module using *note llvm-gcc: 108. as follows:
-
-    llvm-gcc -emit-llvm -c mygcd.c -o mygcd.bc
-
-Or, if you prefer to use *note clang: 107, the new LLVM-based C/C++
-compiler:
+it to a bitcode module using *note clang: 107. as follows:
 
     clang -emit-llvm -c mygcd.c -o mygcd.bc
 
-Note that the `-emit-llvm -c' options instruct llvm-gcc or clang to
-build an LLVM bitcode module. Of course, you can also add optimizations
-and other options to the compile command as desired.
+Note that the `-emit-llvm -c' options instruct clang to build an LLVM
+bitcode module. Of course, you can also add optimizations and other
+options to the compile command as desired.
 
   Using *note dragonegg: 109. is somewhat more involved, as it doesn't
 provide a direct way to produce a bitcode file yet.  However, you can
@@ -6985,25 +6981,13 @@ usually better to import a separate bitcode module instead (see *note
 Importing LLVM Bitcode: 106.), or batch-compile your script to an
 executable (see *note Batch Compilation: c.).
 
-     Note: At present, the default LLVM compiler used by the Pure
-     interpreter is llvm-gcc, unless you compiled Pure itself using
-     clang, in which case clang is used as the default for C/C++
-     compilation. You can easily change the default with the
-     corresponding environment variables, see below. In the future
-     dragonegg might be used as the new default instead, as soon as it
-     is widely supported. Note that llvm-gcc is currently being phased
-     out in favour of dragonegg, and will not be supported in the LLVM
-     3.x series any more. Thus with LLVM 3.0 or later we recommend
-     using dragonegg or clang instead, although recent llvm-gcc
-     versions should continue to work as well, at least with LLVM 3.0.
-
-  Currently, C, C++, Fortran and Faust are supported as foreign source
-languages, with llvm-gcc, llvm-g++, llvm-gfortran and faust as the
-corresponding (default) compilers. C is the default language. The
-desired source language can be selected by placing an appropriate tag
-into the inline code section, immediately after the opening brace. (The
-tag is removed before the code is submitted to compilation.) For
-instance:
+  At present, C, C++, Fortran and Faust are supported as foreign source
+languages, with clang, clang++, gfortran (with the dragonegg plugin)
+and faust as the corresponding (default) compilers. C is the default
+language. The desired source language can be selected by placing an
+appropriate tag into the inline code section, immediately after the
+opening brace. (The tag is removed before the code is submitted to
+compilation.) For instance:
 
     %< -*- Fortran90 -*-
     function fact(n) result(p)
@@ -7042,9 +7026,9 @@ executable along with any debugging and optimization options that you
 may want to add. Likewise, `PURE_CXX', `PURE_FC' and `PURE_FAUST' are
 used for the C++, Fortran and Faust compilers, respectively.
 
-  For instance, if you prefer to use *note clang: 107. as your C
+  For instance, if you prefer to use *note llvm-gcc: 108. as your C
 compiler, and you'd like to invoke it with the `-O3' optimization
-option, you would set `PURE_CC' to `"clang -O3"'. (To verify the
+option, you would set `PURE_CC' to `"llvm-gcc -O3"'. (To verify the
 settings you made, you can have the interpreter echo the compilation
 commands which are actually executed, by running Pure with the `-v0100'
 option, see *note Verbosity and Debugging Options: 44. Also note that
@@ -8055,7 +8039,7 @@ their current values (using the "long" format):
     argv       var  argv = [];
     compiling  var  compiling = 0;
     sysinfo    var  sysinfo = "x86_64-unknown-linux-gnu";
-    version    var  version = "0.54";
+    version    var  version = "0.55";
     5 variables
 
 Or you can list just private symbols of the namespace `foo', as follows:
@@ -9600,6 +9584,14 @@ which make it possible to create the definition of a type from a
 description of its operations. To these ends, a new keyword *note
 interface: b6. was added to the language.
 
+  Pure 0.55 changed the default compilers for inline C, C++ and Fortran
+code to clang, clang++ and gfortran (with the dragonegg plugin),
+respectively. This was done in order to support LLVM 3.x which does not
+have llvm-gcc (the previous default) any more. If you're still running
+an older LLVM version and would like to keep using llvm-gcc, you will
+have to set some environment variables; please see the `installation
+instructions' for details.
+
 
 File: pure.info,  Node: Error Recovery,  Next: With and when,  Prev: Backward Compatibility,  Up: Caveats and Notes
 
@@ -10730,9 +10722,8 @@ Bertrand
 Clang
      The new C/C++/Objective C compiler designed specifically to work
      on top of LLVM, <http://clang.llvm.org>. Clang provides a
-     comparatively light-weight alternative to *note llvm-gcc: 108.
-     which is faster and has better and more friendly diagnostics than
-     gcc.
+     comparatively light-weight alternative to gcc which is faster and
+     has better and more friendly diagnostics.
 
 DragonEgg
      An LLVM backend for gcc 4.5 and later,
@@ -10767,8 +10758,8 @@ LLVM
 
 LLVM-GCC
      An LLVM-capable compiler based on gcc, see <http://llvm.org>. This
-     is based on a fairly old gcc version (4.2) and is currently being
-     phased out in favour of the *note DragonEgg: 109. plugin.
+     is based on a fairly old gcc version (4.2) and has been replaced
+     by the *note DragonEgg: 109.  plugin in the LLVM 3.x series.
 
 Miranda
      David Turner's non-strict FPL, <http://miranda.org.uk>. Miranda
@@ -10859,18 +10850,18 @@ Index
 * environment variable HOME:             Interactive Startup. (line  12)
 * environment variable LD_LIBRARY_PATH:  Importing Dynamic Libraries.
                                                               (line  32)
-* environment variable PATH <1>:         Inline Code.         (line  89)
+* environment variable PATH <1>:         Inline Code.         (line  77)
 * environment variable PATH <2>:         Hierarchical Namespaces.
                                                               (line  34)
 * environment variable PATH:             Modules and Imports. (line 134)
-* environment variable PURE_CC:          Inline Code.         (line  91)
-* environment variable PURE_CXX:         Inline Code.         (line  94)
+* environment variable PURE_CC:          Inline Code.         (line  79)
+* environment variable PURE_CXX:         Inline Code.         (line  82)
 * environment variable PURE_EAGER_JIT <1>: Environment.       (line  25)
 * environment variable PURE_EAGER_JIT:   Compiling Scripts.   (line  18)
 * environment variable PURE_FAUST <1>:   Interfacing to Faust.
                                                               (line  62)
-* environment variable PURE_FAUST:       Inline Code.         (line  94)
-* environment variable PURE_FC:          Inline Code.         (line  94)
+* environment variable PURE_FAUST:       Inline Code.         (line  82)
+* environment variable PURE_FC:          Inline Code.         (line  82)
 * environment variable PURE_HELP <1>:    Online Help.         (line  13)
 * environment variable PURE_HELP:        Environment.         (line  16)
 * environment variable PURE_INCLUDE <1>: Importing Dynamic Libraries.
@@ -10911,7 +10902,7 @@ Index
                                                               (line  97)
 * override command:                      Interactive Commands.
                                                               (line 107)
-* PATH <1>:                              Inline Code.         (line  89)
+* PATH <1>:                              Inline Code.         (line  77)
 * PATH <2>:                              Hierarchical Namespaces.
                                                               (line  34)
 * PATH:                                  Modules and Imports. (line 134)
@@ -10990,13 +10981,13 @@ Index
                                                               (line 120)
 * pure-pragma command line option --rewarn: Warning Options.  (line  20)
 * pure-pragma command line option --warn: Warning Options.    (line  15)
-* PURE_CC:                               Inline Code.         (line  91)
-* PURE_CXX:                              Inline Code.         (line  94)
+* PURE_CC:                               Inline Code.         (line  79)
+* PURE_CXX:                              Inline Code.         (line  82)
 * PURE_EAGER_JIT:                        Compiling Scripts.   (line  18)
 * PURE_FAUST <1>:                        Interfacing to Faust.
                                                               (line  62)
-* PURE_FAUST:                            Inline Code.         (line  94)
-* PURE_FC:                               Inline Code.         (line  94)
+* PURE_FAUST:                            Inline Code.         (line  82)
+* PURE_FC:                               Inline Code.         (line  82)
 * PURE_HELP <1>:                         Online Help.         (line  13)
 * PURE_HELP:                             Environment.         (line  16)
 * PURE_INCLUDE <1>:                      Importing Dynamic Libraries.
@@ -11053,883 +11044,883 @@ Ref: 1326
 Ref: gpl326
 Ref: 2326
 Ref: lgpl326
-Ref: 51201
-Ref: installation1201
-Node: Introduction3585
-Ref: introduction3669
-Ref: 63669
-Ref: the-pure-manual3669
-Ref: 73669
-Node: Further Reading7473
-Ref: further reading7569
-Ref: e7569
-Ref: further-reading7569
-Ref: f8164
-Ref: functional-programming8164
-Node: Typographical Conventions8762
-Ref: typographical conventions8858
-Ref: 128858
-Ref: typographical-conventions8858
-Node: Invoking Pure10727
-Ref: invoking pure10821
-Ref: 910821
-Ref: invoking-pure10821
-Node: Options12835
-Ref: options12920
-Ref: 1612920
-Ref: 1713028
-Ref: cmdoption-pure-c13028
-Ref: 1813068
-Ref: cmdoption-pure--ctags13068
-Ref: 1913088
-Ref: cmdoption-pure--etags13088
-Ref: 1a13172
-Ref: cmdoption-pure--disable13172
-Ref: 1b13257
-Ref: cmdoption-pure--eager-jit13257
-Ref: 1c13392
-Ref: cmdoption-pure--enable13392
-Ref: 1d13475
-Ref: cmdoption-pure-fpic13475
-Ref: 1413571
-Ref: cmdoption-pure-g13571
-Ref: 1e13619
-Ref: cmdoption-pure-h13619
-Ref: 1f13634
-Ref: cmdoption-pure--help13634
-Ref: 2013688
-Ref: cmdoption-pure-i13688
-Ref: 2113851
-Ref: cmdoption-pure-l13851
-Ref: 2214008
-Ref: cmdoption-pure--main14008
-Ref: 2314085
-Ref: cmdoption-pure--noediting14085
-Ref: 2414145
-Ref: cmdoption-pure-n14145
-Ref: 2514160
-Ref: cmdoption-pure--noprelude14160
-Ref: 2614215
-Ref: cmdoption-pure--norc14215
-Ref: 2714282
-Ref: cmdoption-pure-o14282
-Ref: 1514351
-Ref: cmdoption-pure-q14351
-Ref: 2814436
-Ref: cmdoption-pure-t14436
-Ref: 2914534
-Ref: cmdoption-pure-u14534
-Ref: 2a14607
-Ref: cmdoption-pure-v14607
-Ref: 2b14656
-Ref: cmdoption-pure--version14656
-Ref: 2c14720
-Ref: cmdoption-pure-w14720
-Ref: 2d14767
-Ref: cmdoption-pure-x14767
-Ref: 2e14838
-Ref: cmdoption-pure--14838
-Node: Overview of Operation16166
-Ref: overview of operation16277
-Ref: 3016277
-Ref: overview-of-operation16277
-Ref: 3117709
-Ref: argc17709
-Ref: 3217728
-Ref: argv17728
-Ref: 3317978
-Ref: compiling17978
-Ref: 3518155
-Ref: version18155
-Ref: 3618177
-Ref: sysinfo18177
-Ref: 3818820
-Ref: index-018820
-Ref: 3a18868
-Ref: index-118868
-Node: Compiling Scripts19411
-Ref: compiling scripts19530
-Ref: 3419530
-Ref: compiling-scripts19530
-Ref: 3e20356
-Ref: index-220356
-Ref: 4022355
-Ref: index-322355
-Ref: 4222373
-Ref: index-422373
-Node: Tagging Scripts23813
-Ref: tagging scripts23932
-Ref: 4523932
-Ref: tagging-scripts23932
-Ref: 4624328
-Ref: tags24328
-Node: Running Interactively25621
-Ref: running interactively25754
-Ref: 1325754
-Ref: running-interactively25754
-Node: Verbosity and Debugging Options27639
-Ref: verbosity and debugging options27776
-Ref: 4427776
-Ref: verbosity-and-debugging-options27776
-Node: Compilation Options30337
-Ref: compilation options30466
-Ref: 2f30466
-Ref: compilation-options30466
-Node: Code Generation Options30787
-Ref: code generation options30896
-Ref: 4830896
-Ref: code-generation-options30896
-Ref: 4932189
-Ref: cmdoption-pure--checks32189
-Ref: 4a32210
-Ref: cmdoption-pure--nochecks32210
-Ref: 4b32363
-Ref: index-532363
-Ref: 4f33000
-Ref: cmdoption-pure--const33000
-Ref: 5033020
-Ref: cmdoption-pure--noconst33020
-Ref: 5233635
-Ref: cmdoption-pure--fold33635
-Ref: 5333654
-Ref: cmdoption-pure--nofold33654
-Ref: 5534458
-Ref: cmdoption-pure--tc34458
-Ref: 5634475
-Ref: cmdoption-pure--notc34475
-Ref: 5936055
-Ref: cmdoption-pure-pragma--eager36055
-Ref: 5a36763
-Ref: cmdoption-pure-pragma--required36763
-Ref: 5b37246
-Ref: cmdoption-pure-pragma--defined37246
-Ref: 5c37272
-Ref: cmdoption-pure-pragma--nodefined37272
-Ref: 5f38776
-Ref: cmdoption-pure-pragma--quoteargs38776
-Node: Conditional Compilation39073
-Ref: conditional compilation39206
-Ref: 3739206
-Ref: conditional-compilation39206
-Ref: 6240493
-Ref: cmdoption-pure-pragma--enable40493
-Ref: 6340521
-Ref: cmdoption-pure-pragma--disable40521
-Ref: 6441039
-Ref: cmdoption-pure-pragma--ifdef41039
-Ref: 6541066
-Ref: cmdoption-pure-pragma--ifndef41066
-Ref: 6641226
-Ref: cmdoption-pure-pragma--if41226
-Ref: 6741250
-Ref: cmdoption-pure-pragma--ifnot41250
-Ref: 6841408
-Ref: cmdoption-pure-pragma--else41408
-Ref: 6941652
-Ref: cmdoption-pure-pragma--endif41652
-Node: Warning Options46570
-Ref: warning options46671
-Ref: 6a46671
-Ref: warning-options46671
-Ref: 6c47152
-Ref: cmdoption-pure-pragma--warn47152
-Ref: 6d47171
-Ref: cmdoption-pure-pragma--nowarn47171
-Ref: 6e47299
-Ref: cmdoption-pure-pragma--rewarn47299
-Node: Startup Files47824
-Ref: startup files47933
-Ref: 6f47933
-Ref: startup-files47933
-Node: Environment48419
-Ref: environment48500
-Ref: 7048500
-Ref: 4148638
-Ref: envvar-cc48638
-Ref: 4348653
-Ref: envvar-cxx48653
-Ref: 7148831
-Ref: envvar-browser48831
-Ref: 7248863
-Ref: index-648863
-Ref: 3949060
-Ref: envvar-purelib49060
-Ref: 7449152
-Ref: index-749152
-Ref: 3f49255
-Ref: envvar-pure_eager_jit49255
-Ref: 7349402
-Ref: envvar-pure_help49402
-Ref: 7549550
-Ref: envvar-pure_include49550
-Ref: 7649674
-Ref: envvar-pure_library49674
-Ref: 7749799
-Ref: envvar-pure_more49799
-Ref: 7849953
-Ref: index-849953
-Ref: 7950036
-Ref: envvar-pure_ps50036
-Ref: 4c50138
-Ref: envvar-pure_stack50138
-Node: Pure Overview50493
-Ref: pure overview50586
-Ref: a50586
-Ref: pure-overview50586
-Node: Lexical Matters52528
-Ref: lexical matters52637
-Ref: 5752637
-Ref: lexical-matters52637
-Ref: 7d56425
-Ref: code-charts56425
-Ref: 7e56425
-Ref: unicode-consortium56425
-Ref: 7f59257
-Ref: id159257
-Node: Definitions and Expression Evaluation59258
-Ref: definitions and expression evaluation59393
-Ref: 5d59393
-Ref: definitions-and-expression-evaluation59393
-Node: Variables in Equations65978
-Ref: variables in equations66072
-Ref: 8766072
-Ref: variables-in-equations66072
-Node: Expression Syntax68266
-Ref: expression syntax68399
-Ref: 8968399
-Ref: expression-syntax68399
-Node: Primary Expressions72119
-Ref: primary expressions72217
-Ref: 9372217
-Ref: primary-expressions72217
-Ref: 9472217
-Ref: id272217
-Node: Simple Expressions84469
-Ref: simple expressions84595
-Ref: 9b84595
-Ref: simple-expressions84595
-Node: Special Expressions87709
-Ref: special expressions87807
-Ref: 9087807
-Ref: if87807
-Ref: 9187807
-Ref: then87807
-Ref: 9287807
-Ref: else87807
-Ref: 8d87807
-Ref: case87807
-Ref: 8e87807
-Ref: when87807
-Ref: 8f87807
-Ref: with87807
-Ref: 7c87807
-Ref: end87807
-Ref: 9c87807
-Ref: special-expressions87807
-Node: Special Forms90319
-Ref: special forms90423
-Ref: 9790423
-Ref: special-forms90423
-Ref: 9e90423
-Ref: id390423
-Ref: 8290823
-Ref: &&/special90823
-Ref: 8390844
-Ref: ||/special90844
-Ref: 8492562
-Ref: $$92562
-Ref: 8593366
-Ref: &93366
-Ref: 8694379
-Ref: quote94379
-Ref: 9f94401
-Ref: '94401
-Node: Toplevel95075
-Ref: toplevel95175
-Ref: a195175
-Ref: def95175
-Ref: a295175
-Ref: let95175
-Ref: 5195175
-Ref: const95175
-Ref: a395175
-Ref: otherwise95175
-Ref: a495175
-Node: Scoping Rules99141
-Ref: scoping rules99219
-Ref: a799219
-Ref: scoping-rules99219
-Node: Rule Syntax102246
-Ref: rule syntax102334
-Ref: 8c102334
-Ref: rule-syntax102334
-Node: Patterns103700
-Ref: patterns103772
-Ref: a8103772
-Node: Type Tags112283
-Ref: type tags112377
-Ref: ab112377
-Ref: type-tags112377
-Ref: ac112377
-Ref: id5112377
-Ref: ae113948
-Ref: int/type113948
-Ref: af113998
-Ref: bigint/type113998
-Ref: b0114077
-Ref: double/type114077
-Ref: b1114153
-Ref: string/type114153
-Ref: a9114207
-Ref: matrix/type114207
-Ref: ad114282
-Ref: pointer/type114282
-Node: General Rules119603
-Ref: general rules119701
-Ref: b2119701
-Ref: general-rules119701
-Node: Simple Rules122933
-Ref: simple rules123032
-Ref: b3123032
-Ref: simple-rules123032
-Node: Type Rules124562
-Ref: type rules124663
-Ref: a5124663
-Ref: type124663
-Ref: 54124663
-Ref: type-rules124663
-Ref: b4124663
-Ref: id6124663
-Node: Interface Types137434
-Ref: interface types137514
-Ref: b6137514
-Ref: interface137514
-Ref: a6137514
-Ref: interface-types137514
-Ref: b7137514
-Ref: id7137514
-Ref: ba144349
-Ref: go-faq144349
-Node: Examples150425
-Ref: examples150512
-Ref: 9a150512
-Node: List Comprehensions152241
-Ref: list comprehensions152339
-Ref: bd152339
-Ref: list-comprehensions152339
-Node: Lazy Evaluation and Streams153977
-Ref: lazy evaluation and streams154103
-Ref: 98154103
-Ref: lazy-evaluation-and-streams154103
-Ref: be154103
-Ref: id9154103
-Node: Matrix Computations158648
-Ref: matrix computations158772
-Ref: aa158772
-Ref: matrix-computations158772
-Ref: bf158772
-Ref: id10158772
-Node: Symbolic Matrices167000
-Ref: symbolic matrices167108
-Ref: c3167108
-Ref: symbolic-matrices167108
-Node: Record Data169555
-Ref: record data169653
-Ref: c5169653
-Ref: record-data169653
-Ref: c6169653
-Ref: id11169653
-Node: The Quote175177
-Ref: the quote175249
-Ref: a0175249
-Ref: the-quote175249
-Node: Declarations178832
-Ref: declarations178914
-Ref: 3c178914
-Node: Symbol Declarations179975
-Ref: symbol declarations180069
-Ref: ca180069
-Ref: public180069
-Ref: cb180069
-Ref: private180069
-Ref: cc180069
-Ref: infix180069
-Ref: cd180069
-Ref: infixl180069
-Ref: ce180069
-Ref: infixr180069
-Ref: cf180069
-Ref: prefix180069
-Ref: d0180069
-Ref: postfix180069
-Ref: c4180069
-Ref: outfix180069
-Ref: 88180069
-Ref: nonfix180069
-Ref: 58180069
-Ref: symbol-declarations180069
-Node: Modules and Imports187818
-Ref: modules and imports187931
-Ref: 3b187931
-Ref: using187931
-Ref: d3187931
-Ref: modules-and-imports187931
-Ref: d4191289
-Ref: index-9191289
-Ref: d5191403
-Ref: index-10191403
-Ref: d6191701
-Ref: index-11191701
-Ref: d7191988
-Ref: index-12191988
-Ref: d8192016
-Ref: index-13192016
-Ref: d9193603
-Ref: index-14193603
-Node: Namespaces193907
-Ref: namespaces193992
-Ref: c9193992
-Ref: namespace193992
-Ref: 96193992
-Node: Using Namespaces197578
-Ref: using namespaces197674
-Ref: db197674
-Ref: using-namespace197674
-Ref: dc197674
-Ref: using-namespaces197674
-Node: Symbol Lookup and Creation200113
-Ref: symbol lookup and creation200233
-Ref: 6b200233
-Ref: symbol-lookup-and-creation200233
-Ref: dd200233
-Ref: id13200233
-Node: Private Symbols207756
-Ref: private symbols207883
-Ref: d1207883
-Ref: private-symbols207883
-Node: Hierarchical Namespaces209057
-Ref: hierarchical namespaces209175
-Ref: de209175
-Ref: hierarchical-namespaces209175
-Ref: df210317
-Ref: index-15210317
-Node: Scoped Namespaces211345
-Ref: scoped namespaces211439
-Ref: da211439
-Ref: scoped-namespaces211439
-Node: Macros214688
-Ref: macros214780
-Ref: 60214780
-Ref: e0214780
-Ref: id14214780
-Node: Optimization Rules216706
-Ref: optimization rules216790
-Ref: e1216790
-Ref: optimization-rules216790
-Ref: e2216790
-Ref: id15216790
-Node: Recursive Macros220036
-Ref: recursive macros220155
-Ref: c7220155
-Ref: recursive-macros220155
-Ref: e6222689
-Ref: index-16222689
-Node: User-Defined Special Forms222735
-Ref: user-defined special forms222849
-Ref: e7222849
-Ref: user-defined-special-forms222849
-Node: Macro Hygiene224245
-Ref: macro hygiene224382
-Ref: e8224382
-Ref: macro-hygiene224382
-Node: Built-in Macros and Special Expressions226847
-Ref: built-in macros and special expressions226979
-Ref: 61226979
-Ref: built-in-macros-and-special-expressions226979
-Ref: ea227457
-Ref: __ifelse__227457
-Ref: eb227591
-Ref: __lambda__227591
-Ref: ec227685
-Ref: __case__227685
-Ref: ee227962
-Ref: __when__227962
-Ref: ef228268
-Ref: __with__228268
-Ref: ed228572
-Ref: -->228572
-Ref: f0228631
-Ref: __if__228631
-Ref: f1229128
-Ref: __as__229128
-Ref: f2229195
-Ref: __type__229195
-Ref: f3235510
-Ref: __eval__235510
-Node: Advanced Optimization237139
-Ref: advanced optimization237268
-Ref: e4237268
-Ref: advanced-optimization237268
-Node: Reflection242850
-Ref: reflection242931
-Ref: f4242931
-Node: Exception Handling247550
-Ref: exception handling247646
-Ref: f5247646
-Ref: exception-handling247646
-Ref: f6247646
-Ref: id16247646
-Ref: f7247958
-Ref: catch247958
-Ref: f8249124
-Ref: index-17249124
-Node: Standard Library252294
-Ref: standard library252395
-Ref: 7b252395
-Ref: standard-library252395
-Node: C Interface256656
-Ref: c interface256756
-Ref: 3d256756
-Ref: c-interface256756
-Node: Extern Declarations258284
-Ref: extern declarations258378
-Ref: c8258378
-Ref: extern258378
-Ref: fa258378
-Ref: extern-declarations258378
-Node: Variadic C Functions263435
-Ref: variadic c functions263545
-Ref: fc263545
-Ref: variadic-c-functions263545
-Node: C Types264796
-Ref: c types264914
-Ref: fb264914
-Ref: c-types264914
-Ref: fd264914
-Ref: id17264914
-Node: Basic C Types266156
-Ref: basic c types266233
-Ref: fe266233
-Ref: basic-c-types266233
-Node: Pointer Types268403
-Ref: pointer types268510
-Ref: ff268510
-Ref: pointer-types268510
-Node: Pointers and Matrices271705
-Ref: pointers and matrices271815
-Ref: 100271815
-Ref: pointers-and-matrices271815
-Node: Pointer Examples274993
-Ref: pointer examples275081
-Ref: 101275081
-Ref: pointer-examples275081
-Node: Importing Dynamic Libraries279307
-Ref: importing dynamic libraries279427
-Ref: 102279427
-Ref: importing-dynamic-libraries279427
-Ref: 103280550
-Ref: index-18280550
-Ref: 104280625
-Ref: index-19280625
-Ref: 105280836
-Ref: index-20280836
-Node: Importing LLVM Bitcode281228
-Ref: importing llvm bitcode281352
-Ref: 106281352
-Ref: importing-llvm-bitcode281352
-Node: Inline Code288820
-Ref: inline code288935
-Ref: 7a288935
-Ref: inline-code288935
-Ref: 10c292818
-Ref: index-21292818
-Ref: 10d292932
-Ref: index-22292932
-Ref: 10e293133
-Ref: index-23293133
-Ref: 10f293145
-Ref: index-24293145
-Ref: 110293159
-Ref: index-25293159
-Ref: 111293391
-Ref: index-26293391
-Node: Interfacing to C++294216
-Ref: interfacing to c++294329
-Ref: 112294329
-Ref: interfacing-to-c294329
-Node: Interfacing to Faust296812
-Ref: interfacing to faust296905
-Ref: 10b296905
-Ref: interfacing-to-faust296905
-Ref: 113296905
-Ref: id18296905
-Ref: 114298043
-Ref: llvm-backend-for-faust298043
-Ref: 115300085
-Ref: index-27300085
-Ref: 116300481
-Ref: index-28300481
-Node: Interactive Usage313580
-Ref: interactive usage313681
-Ref: b313681
-Ref: interactive-usage313681
-Node: Online Help317111
-Ref: online help317203
-Ref: 4317203
-Ref: online-help317203
-Ref: 118317672
-Ref: index-29317672
-Ref: 119317700
-Ref: index-30317700
-Ref: 11a319203
-Ref: docutils319203
-Node: Interactive Commands320144
-Ref: interactive commands320273
-Ref: e3320273
-Ref: interactive-commands320273
-Ref: 11b320526
-Ref: index-31320526
-Ref: 11c320573
-Ref: index-32320573
-Ref: 11d321000
-Ref: index-33321000
-Ref: 11e321326
-Ref: index-34321326
-Ref: 11f321388
-Ref: index-35321388
-Ref: 123322377
-Ref: index-36322377
-Ref: 124323154
-Ref: index-37323154
-Ref: 126324674
-Ref: index-38324674
-Ref: 127325002
-Ref: index-39325002
-Ref: 128325068
-Ref: index-40325068
-Ref: 129325619
-Ref: index-41325619
-Ref: 12a325866
-Ref: index-42325866
-Ref: 12b325946
-Ref: index-43325946
-Ref: 12c325997
-Ref: index-44325997
-Ref: 12d327682
-Ref: index-45327682
-Ref: 12e327933
-Ref: index-46327933
-Ref: 12f328346
-Ref: index-47328346
-Ref: 130328963
-Ref: index-48328963
-Ref: 131330732
-Ref: index-49330732
-Node: Specifying Symbol Selections331717
-Ref: specifying symbol selections331851
-Ref: 122331851
-Ref: specifying-symbol-selections331851
-Node: The show Command335258
-Ref: the show command335389
-Ref: b9335389
-Ref: the-show-command335389
-Ref: 132336491
-Ref: index-50336491
-Node: Definition Levels340086
-Ref: definition levels340198
-Ref: 121340198
-Ref: definition-levels340198
-Node: Debugging345448
-Ref: debugging345555
-Ref: 47345555
-Ref: 133347246
-Ref: index-51347246
-Node: Last Result358140
-Ref: last result358245
-Ref: 120358245
-Ref: last-result358245
-Node: Pretty-Printing358955
-Ref: pretty-printing359072
-Ref: c2359072
-Ref: c1359278
-Ref: __show__359278
-Node: User-Defined Commands362869
-Ref: user-defined commands362994
-Ref: 117362994
-Ref: user-defined-commands362994
-Node: Interactive Startup368932
-Ref: interactive startup369033
-Ref: 125369033
-Ref: interactive-startup369033
-Ref: 134369398
-Ref: index-52369398
-Node: Batch Compilation370356
-Ref: batch compilation370463
-Ref: c370463
-Ref: batch-compilation370463
-Ref: 135370463
-Ref: id19370463
-Ref: 137375563
-Ref: partial-evaluation375563
-Node: Example375681
-Ref: example375776
-Ref: 138375776
-Node: Options Affecting Code Size380268
-Ref: options affecting code size380397
-Ref: 136380397
-Ref: options-affecting-code-size380397
-Node: Other Output Code Formats383885
-Ref: other output code formats384036
-Ref: 139384036
-Ref: other-output-code-formats384036
-Ref: 13a389924
-Ref: llvm-documentation389924
-Node: Calling Pure Functions From C389924
-Ref: calling pure functions from c390039
-Ref: 13b390039
-Ref: calling-pure-functions-from-c390039
-Node: Caveats and Notes391532
-Ref: caveats and notes391628
-Ref: d391628
-Ref: caveats-and-notes391628
-Node: Etymology392278
-Ref: etymology392370
-Ref: 13c392370
-Node: Backward Compatibility393261
-Ref: backward compatibility393376
-Ref: 13d393376
-Ref: backward-compatibility393376
-Node: Error Recovery401909
-Ref: error recovery402028
-Ref: 140402028
-Ref: error-recovery402028
-Node: With and when402684
-Ref: with and when402800
-Ref: 141402800
-Ref: with-and-when402800
-Node: Non-Linear Patterns406491
-Ref: non-linear patterns406606
-Ref: 142406606
-Ref: non-linear-patterns406606
-Node: "As" Patterns408006
-Ref: "as" patterns408134
-Ref: e5408134
-Ref: as-patterns408134
-Node: "Head = Function" Pitfalls408890
-Ref: "head = function" pitfalls409016
-Ref: 143409016
-Ref: head-function-pitfalls409016
-Node: Defined Functions412609
-Ref: defined functions412751
-Ref: 5e412751
-Ref: defined-functions412751
-Node: Stack Size and Tail Recursion416079
-Ref: stack size and tail recursion416227
-Ref: 4d416227
-Ref: stack-size-and-tail-recursion416227
-Ref: 144416613
-Ref: index-53416613
-Ref: 145416825
-Ref: index-54416825
-Ref: 146417113
-Ref: index-55417113
-Node: Handling of Asynchronous Signals418477
-Ref: handling of asynchronous signals418623
-Ref: 4e418623
-Ref: handling-of-asynchronous-signals418623
-Node: Recursive Types420644
-Ref: recursive types420771
-Ref: b5420771
-Ref: recursive-types420771
-Ref: 147423728
-Ref: continuation-passing423728
-Node: Interfaces425951
-Ref: interfaces426066
-Ref: bb426066
-Node: Numeric Calculations429693
-Ref: numeric calculations429813
-Ref: 148429813
-Ref: numeric-calculations429813
-Node: Constant Definitions431724
-Ref: constant definitions431854
-Ref: bc431854
-Ref: constant-definitions431854
-Node: External C Functions437599
-Ref: external c functions437730
-Ref: f9437730
-Ref: external-c-functions437730
-Ref: 149439011
-Ref: libffi439011
-Node: Calling Special Forms439396
-Ref: calling special forms439515
-Ref: 14a439515
-Ref: calling-special-forms439515
-Node: Laziness440002
-Ref: laziness440113
-Ref: 14b440113
-Node: Name Capture444611
-Ref: name capture444692
-Ref: e9444692
-Ref: name-capture444692
-Node: Author448072
-Ref: author448167
-Ref: 14d448167
-Node: Acknowledgements448302
-Ref: acknowledgements448387
-Ref: 14e448387
-Node: Copying449586
-Ref: copying449685
-Ref: 3449685
-Node: References and Links452047
-Ref: references and links452135
-Ref: 14f452135
-Ref: references-and-links452135
-Ref: 9d452184
-Ref: aardappel452184
-Ref: 14c452325
-Ref: alice-ml452325
-Ref: 11452460
-Ref: baader-and-nipkow452460
-Ref: d2452578
-Ref: bertrand452578
-Ref: 107452838
-Ref: clang452838
-Ref: 109453127
-Ref: dragonegg453127
-Ref: 10a453338
-Ref: faust453338
-Ref: 150453425
-Ref: gnu-multiprecision-library453425
-Ref: 95453425
-Ref: gmp453425
-Ref: 151453533
-Ref: gnu-octave453533
-Ref: c0453533
-Ref: octave453533
-Ref: 99453677
-Ref: gnu-scientific-library453677
-Ref: 152453677
-Ref: gsl453677
-Ref: b8453838
-Ref: go453838
-Ref: 80453902
-Ref: haskell453902
-Ref: 8453968
-Ref: llvm453968
-Ref: 108454033
-Ref: llvm-gcc454033
-Ref: 13f454249
-Ref: miranda454249
-Ref: 81454420
-Ref: ml454420
-Ref: 10454579
-Ref: michael-o-donnell454579
-Ref: 13e454729
-Ref: q454729
-Node: Index454814
-Ref: index454886
-Ref: 8b472363
-Ref: 8a472394
+Ref: 51202
+Ref: installation1202
+Node: Introduction3586
+Ref: introduction3670
+Ref: 63670
+Ref: the-pure-manual3670
+Ref: 73670
+Node: Further Reading7474
+Ref: further reading7570
+Ref: e7570
+Ref: further-reading7570
+Ref: f8165
+Ref: functional-programming8165
+Node: Typographical Conventions8763
+Ref: typographical conventions8859
+Ref: 128859
+Ref: typographical-conventions8859
+Node: Invoking Pure10728
+Ref: invoking pure10822
+Ref: 910822
+Ref: invoking-pure10822
+Node: Options12836
+Ref: options12921
+Ref: 1612921
+Ref: 1713029
+Ref: cmdoption-pure-c13029
+Ref: 1813069
+Ref: cmdoption-pure--ctags13069
+Ref: 1913089
+Ref: cmdoption-pure--etags13089
+Ref: 1a13173
+Ref: cmdoption-pure--disable13173
+Ref: 1b13258
+Ref: cmdoption-pure--eager-jit13258
+Ref: 1c13393
+Ref: cmdoption-pure--enable13393
+Ref: 1d13476
+Ref: cmdoption-pure-fpic13476
+Ref: 1413572
+Ref: cmdoption-pure-g13572
+Ref: 1e13620
+Ref: cmdoption-pure-h13620
+Ref: 1f13635
+Ref: cmdoption-pure--help13635
+Ref: 2013689
+Ref: cmdoption-pure-i13689
+Ref: 2113852
+Ref: cmdoption-pure-l13852
+Ref: 2214009
+Ref: cmdoption-pure--main14009
+Ref: 2314086
+Ref: cmdoption-pure--noediting14086
+Ref: 2414146
+Ref: cmdoption-pure-n14146
+Ref: 2514161
+Ref: cmdoption-pure--noprelude14161
+Ref: 2614216
+Ref: cmdoption-pure--norc14216
+Ref: 2714283
+Ref: cmdoption-pure-o14283
+Ref: 1514352
+Ref: cmdoption-pure-q14352
+Ref: 2814437
+Ref: cmdoption-pure-t14437
+Ref: 2914535
+Ref: cmdoption-pure-u14535
+Ref: 2a14608
+Ref: cmdoption-pure-v14608
+Ref: 2b14657
+Ref: cmdoption-pure--version14657
+Ref: 2c14721
+Ref: cmdoption-pure-w14721
+Ref: 2d14768
+Ref: cmdoption-pure-x14768
+Ref: 2e14839
+Ref: cmdoption-pure--14839
+Node: Overview of Operation16167
+Ref: overview of operation16278
+Ref: 3016278
+Ref: overview-of-operation16278
+Ref: 3117710
+Ref: argc17710
+Ref: 3217729
+Ref: argv17729
+Ref: 3317979
+Ref: compiling17979
+Ref: 3518156
+Ref: version18156
+Ref: 3618178
+Ref: sysinfo18178
+Ref: 3818821
+Ref: index-018821
+Ref: 3a18869
+Ref: index-118869
+Node: Compiling Scripts19412
+Ref: compiling scripts19531
+Ref: 3419531
+Ref: compiling-scripts19531
+Ref: 3e20357
+Ref: index-220357
+Ref: 4022356
+Ref: index-322356
+Ref: 4222374
+Ref: index-422374
+Node: Tagging Scripts23814
+Ref: tagging scripts23933
+Ref: 4523933
+Ref: tagging-scripts23933
+Ref: 4624329
+Ref: tags24329
+Node: Running Interactively25622
+Ref: running interactively25755
+Ref: 1325755
+Ref: running-interactively25755
+Node: Verbosity and Debugging Options27640
+Ref: verbosity and debugging options27777
+Ref: 4427777
+Ref: verbosity-and-debugging-options27777
+Node: Compilation Options30338
+Ref: compilation options30467
+Ref: 2f30467
+Ref: compilation-options30467
+Node: Code Generation Options30788
+Ref: code generation options30897
+Ref: 4830897
+Ref: code-generation-options30897
+Ref: 4932190
+Ref: cmdoption-pure--checks32190
+Ref: 4a32211
+Ref: cmdoption-pure--nochecks32211
+Ref: 4b32364
+Ref: index-532364
+Ref: 4f33001
+Ref: cmdoption-pure--const33001
+Ref: 5033021
+Ref: cmdoption-pure--noconst33021
+Ref: 5233636
+Ref: cmdoption-pure--fold33636
+Ref: 5333655
+Ref: cmdoption-pure--nofold33655
+Ref: 5534459
+Ref: cmdoption-pure--tc34459
+Ref: 5634476
+Ref: cmdoption-pure--notc34476
+Ref: 5936056
+Ref: cmdoption-pure-pragma--eager36056
+Ref: 5a36764
+Ref: cmdoption-pure-pragma--required36764
+Ref: 5b37247
+Ref: cmdoption-pure-pragma--defined37247
+Ref: 5c37273
+Ref: cmdoption-pure-pragma--nodefined37273
+Ref: 5f38777
+Ref: cmdoption-pure-pragma--quoteargs38777
+Node: Conditional Compilation39074
+Ref: conditional compilation39207
+Ref: 3739207
+Ref: conditional-compilation39207
+Ref: 6240494
+Ref: cmdoption-pure-pragma--enable40494
+Ref: 6340522
+Ref: cmdoption-pure-pragma--disable40522
+Ref: 6441040
+Ref: cmdoption-pure-pragma--ifdef41040
+Ref: 6541067
+Ref: cmdoption-pure-pragma--ifndef41067
+Ref: 6641227
+Ref: cmdoption-pure-pragma--if41227
+Ref: 6741251
+Ref: cmdoption-pure-pragma--ifnot41251
+Ref: 6841409
+Ref: cmdoption-pure-pragma--else41409
+Ref: 6941653
+Ref: cmdoption-pure-pragma--endif41653
+Node: Warning Options46571
+Ref: warning options46672
+Ref: 6a46672
+Ref: warning-options46672
+Ref: 6c47153
+Ref: cmdoption-pure-pragma--warn47153
+Ref: 6d47172
+Ref: cmdoption-pure-pragma--nowarn47172
+Ref: 6e47300
+Ref: cmdoption-pure-pragma--rewarn47300
+Node: Startup Files47825
+Ref: startup files47934
+Ref: 6f47934
+Ref: startup-files47934
+Node: Environment48420
+Ref: environment48501
+Ref: 7048501
+Ref: 4148639
+Ref: envvar-cc48639
+Ref: 4348654
+Ref: envvar-cxx48654
+Ref: 7148832
+Ref: envvar-browser48832
+Ref: 7248864
+Ref: index-648864
+Ref: 3949061
+Ref: envvar-purelib49061
+Ref: 7449153
+Ref: index-749153
+Ref: 3f49256
+Ref: envvar-pure_eager_jit49256
+Ref: 7349403
+Ref: envvar-pure_help49403
+Ref: 7549551
+Ref: envvar-pure_include49551
+Ref: 7649675
+Ref: envvar-pure_library49675
+Ref: 7749800
+Ref: envvar-pure_more49800
+Ref: 7849954
+Ref: index-849954
+Ref: 7950037
+Ref: envvar-pure_ps50037
+Ref: 4c50139
+Ref: envvar-pure_stack50139
+Node: Pure Overview50494
+Ref: pure overview50587
+Ref: a50587
+Ref: pure-overview50587
+Node: Lexical Matters52529
+Ref: lexical matters52638
+Ref: 5752638
+Ref: lexical-matters52638
+Ref: 7d56426
+Ref: code-charts56426
+Ref: 7e56426
+Ref: unicode-consortium56426
+Ref: 7f59258
+Ref: id159258
+Node: Definitions and Expression Evaluation59259
+Ref: definitions and expression evaluation59394
+Ref: 5d59394
+Ref: definitions-and-expression-evaluation59394
+Node: Variables in Equations65979
+Ref: variables in equations66073
+Ref: 8766073
+Ref: variables-in-equations66073
+Node: Expression Syntax68267
+Ref: expression syntax68400
+Ref: 8968400
+Ref: expression-syntax68400
+Node: Primary Expressions72120
+Ref: primary expressions72218
+Ref: 9372218
+Ref: primary-expressions72218
+Ref: 9472218
+Ref: id272218
+Node: Simple Expressions84470
+Ref: simple expressions84596
+Ref: 9b84596
+Ref: simple-expressions84596
+Node: Special Expressions87710
+Ref: special expressions87808
+Ref: 9087808
+Ref: if87808
+Ref: 9187808
+Ref: then87808
+Ref: 9287808
+Ref: else87808
+Ref: 8d87808
+Ref: case87808
+Ref: 8e87808
+Ref: when87808
+Ref: 8f87808
+Ref: with87808
+Ref: 7c87808
+Ref: end87808
+Ref: 9c87808
+Ref: special-expressions87808
+Node: Special Forms90320
+Ref: special forms90424
+Ref: 9790424
+Ref: special-forms90424
+Ref: 9e90424
+Ref: id390424
+Ref: 8290824
+Ref: &&/special90824
+Ref: 8390845
+Ref: ||/special90845
+Ref: 8492563
+Ref: $$92563
+Ref: 8593367
+Ref: &93367
+Ref: 8694380
+Ref: quote94380
+Ref: 9f94402
+Ref: '94402
+Node: Toplevel95076
+Ref: toplevel95176
+Ref: a195176
+Ref: def95176
+Ref: a295176
+Ref: let95176
+Ref: 5195176
+Ref: const95176
+Ref: a395176
+Ref: otherwise95176
+Ref: a495176
+Node: Scoping Rules99142
+Ref: scoping rules99220
+Ref: a799220
+Ref: scoping-rules99220
+Node: Rule Syntax102247
+Ref: rule syntax102335
+Ref: 8c102335
+Ref: rule-syntax102335
+Node: Patterns103701
+Ref: patterns103773
+Ref: a8103773
+Node: Type Tags112284
+Ref: type tags112378
+Ref: ab112378
+Ref: type-tags112378
+Ref: ac112378
+Ref: id5112378
+Ref: ae113949
+Ref: int/type113949
+Ref: af113999
+Ref: bigint/type113999
+Ref: b0114078
+Ref: double/type114078
+Ref: b1114154
+Ref: string/type114154
+Ref: a9114208
+Ref: matrix/type114208
+Ref: ad114283
+Ref: pointer/type114283
+Node: General Rules119604
+Ref: general rules119702
+Ref: b2119702
+Ref: general-rules119702
+Node: Simple Rules122934
+Ref: simple rules123033
+Ref: b3123033
+Ref: simple-rules123033
+Node: Type Rules124563
+Ref: type rules124664
+Ref: a5124664
+Ref: type124664
+Ref: 54124664
+Ref: type-rules124664
+Ref: b4124664
+Ref: id6124664
+Node: Interface Types137435
+Ref: interface types137515
+Ref: b6137515
+Ref: interface137515
+Ref: a6137515
+Ref: interface-types137515
+Ref: b7137515
+Ref: id7137515
+Ref: ba144350
+Ref: go-faq144350
+Node: Examples150426
+Ref: examples150513
+Ref: 9a150513
+Node: List Comprehensions152242
+Ref: list comprehensions152340
+Ref: bd152340
+Ref: list-comprehensions152340
+Node: Lazy Evaluation and Streams153978
+Ref: lazy evaluation and streams154104
+Ref: 98154104
+Ref: lazy-evaluation-and-streams154104
+Ref: be154104
+Ref: id9154104
+Node: Matrix Computations158649
+Ref: matrix computations158773
+Ref: aa158773
+Ref: matrix-computations158773
+Ref: bf158773
+Ref: id10158773
+Node: Symbolic Matrices167001
+Ref: symbolic matrices167109
+Ref: c3167109
+Ref: symbolic-matrices167109
+Node: Record Data169556
+Ref: record data169654
+Ref: c5169654
+Ref: record-data169654
+Ref: c6169654
+Ref: id11169654
+Node: The Quote175178
+Ref: the quote175250
+Ref: a0175250
+Ref: the-quote175250
+Node: Declarations178833
+Ref: declarations178915
+Ref: 3c178915
+Node: Symbol Declarations179976
+Ref: symbol declarations180070
+Ref: ca180070
+Ref: public180070
+Ref: cb180070
+Ref: private180070
+Ref: cc180070
+Ref: infix180070
+Ref: cd180070
+Ref: infixl180070
+Ref: ce180070
+Ref: infixr180070
+Ref: cf180070
+Ref: prefix180070
+Ref: d0180070
+Ref: postfix180070
+Ref: c4180070
+Ref: outfix180070
+Ref: 88180070
+Ref: nonfix180070
+Ref: 58180070
+Ref: symbol-declarations180070
+Node: Modules and Imports187819
+Ref: modules and imports187932
+Ref: 3b187932
+Ref: using187932
+Ref: d3187932
+Ref: modules-and-imports187932
+Ref: d4191290
+Ref: index-9191290
+Ref: d5191404
+Ref: index-10191404
+Ref: d6191702
+Ref: index-11191702
+Ref: d7191989
+Ref: index-12191989
+Ref: d8192017
+Ref: index-13192017
+Ref: d9193604
+Ref: index-14193604
+Node: Namespaces193908
+Ref: namespaces193993
+Ref: c9193993
+Ref: namespace193993
+Ref: 96193993
+Node: Using Namespaces197579
+Ref: using namespaces197675
+Ref: db197675
+Ref: using-namespace197675
+Ref: dc197675
+Ref: using-namespaces197675
+Node: Symbol Lookup and Creation200114
+Ref: symbol lookup and creation200234
+Ref: 6b200234
+Ref: symbol-lookup-and-creation200234
+Ref: dd200234
+Ref: id13200234
+Node: Private Symbols207757
+Ref: private symbols207884
+Ref: d1207884
+Ref: private-symbols207884
+Node: Hierarchical Namespaces209058
+Ref: hierarchical namespaces209176
+Ref: de209176
+Ref: hierarchical-namespaces209176
+Ref: df210318
+Ref: index-15210318
+Node: Scoped Namespaces211346
+Ref: scoped namespaces211440
+Ref: da211440
+Ref: scoped-namespaces211440
+Node: Macros214689
+Ref: macros214781
+Ref: 60214781
+Ref: e0214781
+Ref: id14214781
+Node: Optimization Rules216707
+Ref: optimization rules216791
+Ref: e1216791
+Ref: optimization-rules216791
+Ref: e2216791
+Ref: id15216791
+Node: Recursive Macros220037
+Ref: recursive macros220156
+Ref: c7220156
+Ref: recursive-macros220156
+Ref: e6222690
+Ref: index-16222690
+Node: User-Defined Special Forms222736
+Ref: user-defined special forms222850
+Ref: e7222850
+Ref: user-defined-special-forms222850
+Node: Macro Hygiene224246
+Ref: macro hygiene224383
+Ref: e8224383
+Ref: macro-hygiene224383
+Node: Built-in Macros and Special Expressions226848
+Ref: built-in macros and special expressions226980
+Ref: 61226980
+Ref: built-in-macros-and-special-expressions226980
+Ref: ea227458
+Ref: __ifelse__227458
+Ref: eb227592
+Ref: __lambda__227592
+Ref: ec227686
+Ref: __case__227686
+Ref: ee227963
+Ref: __when__227963
+Ref: ef228269
+Ref: __with__228269
+Ref: ed228573
+Ref: -->228573
+Ref: f0228632
+Ref: __if__228632
+Ref: f1229129
+Ref: __as__229129
+Ref: f2229196
+Ref: __type__229196
+Ref: f3235511
+Ref: __eval__235511
+Node: Advanced Optimization237140
+Ref: advanced optimization237269
+Ref: e4237269
+Ref: advanced-optimization237269
+Node: Reflection242851
+Ref: reflection242932
+Ref: f4242932
+Node: Exception Handling247551
+Ref: exception handling247647
+Ref: f5247647
+Ref: exception-handling247647
+Ref: f6247647
+Ref: id16247647
+Ref: f7247959
+Ref: catch247959
+Ref: f8249125
+Ref: index-17249125
+Node: Standard Library252295
+Ref: standard library252396
+Ref: 7b252396
+Ref: standard-library252396
+Node: C Interface256657
+Ref: c interface256757
+Ref: 3d256757
+Ref: c-interface256757
+Node: Extern Declarations258285
+Ref: extern declarations258379
+Ref: c8258379
+Ref: extern258379
+Ref: fa258379
+Ref: extern-declarations258379
+Node: Variadic C Functions263436
+Ref: variadic c functions263546
+Ref: fc263546
+Ref: variadic-c-functions263546
+Node: C Types264797
+Ref: c types264915
+Ref: fb264915
+Ref: c-types264915
+Ref: fd264915
+Ref: id17264915
+Node: Basic C Types266157
+Ref: basic c types266234
+Ref: fe266234
+Ref: basic-c-types266234
+Node: Pointer Types268404
+Ref: pointer types268511
+Ref: ff268511
+Ref: pointer-types268511
+Node: Pointers and Matrices271706
+Ref: pointers and matrices271816
+Ref: 100271816
+Ref: pointers-and-matrices271816
+Node: Pointer Examples274994
+Ref: pointer examples275082
+Ref: 101275082
+Ref: pointer-examples275082
+Node: Importing Dynamic Libraries279308
+Ref: importing dynamic libraries279428
+Ref: 102279428
+Ref: importing-dynamic-libraries279428
+Ref: 103280551
+Ref: index-18280551
+Ref: 104280626
+Ref: index-19280626
+Ref: 105280837
+Ref: index-20280837
+Node: Importing LLVM Bitcode281229
+Ref: importing llvm bitcode281353
+Ref: 106281353
+Ref: importing-llvm-bitcode281353
+Node: Inline Code288753
+Ref: inline code288868
+Ref: 7a288868
+Ref: inline-code288868
+Ref: 10c292028
+Ref: index-21292028
+Ref: 10d292142
+Ref: index-22292142
+Ref: 10e292343
+Ref: index-23292343
+Ref: 10f292355
+Ref: index-24292355
+Ref: 110292369
+Ref: index-25292369
+Ref: 111292604
+Ref: index-26292604
+Node: Interfacing to C++293432
+Ref: interfacing to c++293545
+Ref: 112293545
+Ref: interfacing-to-c293545
+Node: Interfacing to Faust296028
+Ref: interfacing to faust296121
+Ref: 10b296121
+Ref: interfacing-to-faust296121
+Ref: 113296121
+Ref: id18296121
+Ref: 114297259
+Ref: llvm-backend-for-faust297259
+Ref: 115299301
+Ref: index-27299301
+Ref: 116299697
+Ref: index-28299697
+Node: Interactive Usage312796
+Ref: interactive usage312897
+Ref: b312897
+Ref: interactive-usage312897
+Node: Online Help316327
+Ref: online help316419
+Ref: 4316419
+Ref: online-help316419
+Ref: 118316888
+Ref: index-29316888
+Ref: 119316916
+Ref: index-30316916
+Ref: 11a318419
+Ref: docutils318419
+Node: Interactive Commands319360
+Ref: interactive commands319489
+Ref: e3319489
+Ref: interactive-commands319489
+Ref: 11b319742
+Ref: index-31319742
+Ref: 11c319789
+Ref: index-32319789
+Ref: 11d320216
+Ref: index-33320216
+Ref: 11e320542
+Ref: index-34320542
+Ref: 11f320604
+Ref: index-35320604
+Ref: 123321593
+Ref: index-36321593
+Ref: 124322370
+Ref: index-37322370
+Ref: 126323890
+Ref: index-38323890
+Ref: 127324218
+Ref: index-39324218
+Ref: 128324284
+Ref: index-40324284
+Ref: 129324835
+Ref: index-41324835
+Ref: 12a325082
+Ref: index-42325082
+Ref: 12b325162
+Ref: index-43325162
+Ref: 12c325213
+Ref: index-44325213
+Ref: 12d326898
+Ref: index-45326898
+Ref: 12e327149
+Ref: index-46327149
+Ref: 12f327562
+Ref: index-47327562
+Ref: 130328179
+Ref: index-48328179
+Ref: 131329948
+Ref: index-49329948
+Node: Specifying Symbol Selections330933
+Ref: specifying symbol selections331067
+Ref: 122331067
+Ref: specifying-symbol-selections331067
+Node: The show Command334474
+Ref: the show command334605
+Ref: b9334605
+Ref: the-show-command334605
+Ref: 132335707
+Ref: index-50335707
+Node: Definition Levels339302
+Ref: definition levels339414
+Ref: 121339414
+Ref: definition-levels339414
+Node: Debugging344664
+Ref: debugging344771
+Ref: 47344771
+Ref: 133346462
+Ref: index-51346462
+Node: Last Result357356
+Ref: last result357461
+Ref: 120357461
+Ref: last-result357461
+Node: Pretty-Printing358171
+Ref: pretty-printing358288
+Ref: c2358288
+Ref: c1358494
+Ref: __show__358494
+Node: User-Defined Commands362085
+Ref: user-defined commands362210
+Ref: 117362210
+Ref: user-defined-commands362210
+Node: Interactive Startup368148
+Ref: interactive startup368249
+Ref: 125368249
+Ref: interactive-startup368249
+Ref: 134368614
+Ref: index-52368614
+Node: Batch Compilation369572
+Ref: batch compilation369679
+Ref: c369679
+Ref: batch-compilation369679
+Ref: 135369679
+Ref: id19369679
+Ref: 137374779
+Ref: partial-evaluation374779
+Node: Example374897
+Ref: example374992
+Ref: 138374992
+Node: Options Affecting Code Size379484
+Ref: options affecting code size379613
+Ref: 136379613
+Ref: options-affecting-code-size379613
+Node: Other Output Code Formats383101
+Ref: other output code formats383252
+Ref: 139383252
+Ref: other-output-code-formats383252
+Ref: 13a389140
+Ref: llvm-documentation389140
+Node: Calling Pure Functions From C389140
+Ref: calling pure functions from c389255
+Ref: 13b389255
+Ref: calling-pure-functions-from-c389255
+Node: Caveats and Notes390748
+Ref: caveats and notes390844
+Ref: d390844
+Ref: caveats-and-notes390844
+Node: Etymology391494
+Ref: etymology391586
+Ref: 13c391586
+Node: Backward Compatibility392477
+Ref: backward compatibility392592
+Ref: 13d392592
+Ref: backward-compatibility392592
+Node: Error Recovery401572
+Ref: error recovery401691
+Ref: 140401691
+Ref: error-recovery401691
+Node: With and when402347
+Ref: with and when402463
+Ref: 141402463
+Ref: with-and-when402463
+Node: Non-Linear Patterns406154
+Ref: non-linear patterns406269
+Ref: 142406269
+Ref: non-linear-patterns406269
+Node: "As" Patterns407669
+Ref: "as" patterns407797
+Ref: e5407797
+Ref: as-patterns407797
+Node: "Head = Function" Pitfalls408553
+Ref: "head = function" pitfalls408679
+Ref: 143408679
+Ref: head-function-pitfalls408679
+Node: Defined Functions412272
+Ref: defined functions412414
+Ref: 5e412414
+Ref: defined-functions412414
+Node: Stack Size and Tail Recursion415742
+Ref: stack size and tail recursion415890
+Ref: 4d415890
+Ref: stack-size-and-tail-recursion415890
+Ref: 144416276
+Ref: index-53416276
+Ref: 145416488
+Ref: index-54416488
+Ref: 146416776
+Ref: index-55416776
+Node: Handling of Asynchronous Signals418140
+Ref: handling of asynchronous signals418286
+Ref: 4e418286
+Ref: handling-of-asynchronous-signals418286
+Node: Recursive Types420307
+Ref: recursive types420434
+Ref: b5420434
+Ref: recursive-types420434
+Ref: 147423391
+Ref: continuation-passing423391
+Node: Interfaces425614
+Ref: interfaces425729
+Ref: bb425729
+Node: Numeric Calculations429356
+Ref: numeric calculations429476
+Ref: 148429476
+Ref: numeric-calculations429476
+Node: Constant Definitions431387
+Ref: constant definitions431517
+Ref: bc431517
+Ref: constant-definitions431517
+Node: External C Functions437262
+Ref: external c functions437393
+Ref: f9437393
+Ref: external-c-functions437393
+Ref: 149438674
+Ref: libffi438674
+Node: Calling Special Forms439059
+Ref: calling special forms439178
+Ref: 14a439178
+Ref: calling-special-forms439178
+Node: Laziness439665
+Ref: laziness439776
+Ref: 14b439776
+Node: Name Capture444274
+Ref: name capture444355
+Ref: e9444355
+Ref: name-capture444355
+Node: Author447735
+Ref: author447830
+Ref: 14d447830
+Node: Acknowledgements447965
+Ref: acknowledgements448050
+Ref: 14e448050
+Node: Copying449249
+Ref: copying449348
+Ref: 3449348
+Node: References and Links451710
+Ref: references and links451798
+Ref: 14f451798
+Ref: references-and-links451798
+Ref: 9d451847
+Ref: aardappel451847
+Ref: 14c451988
+Ref: alice-ml451988
+Ref: 11452123
+Ref: baader-and-nipkow452123
+Ref: d2452241
+Ref: bertrand452241
+Ref: 107452501
+Ref: clang452501
+Ref: 109452759
+Ref: dragonegg452759
+Ref: 10a452970
+Ref: faust452970
+Ref: 150453057
+Ref: gnu-multiprecision-library453057
+Ref: 95453057
+Ref: gmp453057
+Ref: 151453165
+Ref: gnu-octave453165
+Ref: c0453165
+Ref: octave453165
+Ref: 99453309
+Ref: gnu-scientific-library453309
+Ref: 152453309
+Ref: gsl453309
+Ref: b8453470
+Ref: go453470
+Ref: 80453534
+Ref: haskell453534
+Ref: 8453600
+Ref: llvm453600
+Ref: 108453665
+Ref: llvm-gcc453665
+Ref: 13f453883
+Ref: miranda453883
+Ref: 81454054
+Ref: ml454054
+Ref: 10454213
+Ref: michael-o-donnell454213
+Ref: 13e454363
+Ref: q454363
+Node: Index454448
+Ref: index454520
+Ref: 8b471997
+Ref: 8a472028
 
 End Tag Table
 

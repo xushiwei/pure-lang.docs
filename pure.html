@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.54',
+        VERSION:     '0.55',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.54, May 09, 2012</p>
+<p>Version 0.55, June 04, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2011 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -249,7 +249,7 @@ the benefit that the compiled code runs much faster than the usual kinds of
 <p>You can use the interpreter as a sophisticated kind of &#8220;desktop calculator&#8221;
 program. Simply run the program from the shell as follows:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure
-<span class="go">Pure 0.54 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef</span>
+<span class="go">Pure 0.55 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2011 by Albert Graef</span>
 <span class="go">(Type &#39;help&#39; for help, &#39;help copying&#39; for license information.)</span>
 <span class="go">Loaded prelude from /usr/local/lib/pure/prelude.pure.</span>
 
@@ -5641,7 +5641,7 @@ Types</a>):</p>
 <p>Or let&#8217;s lists all global variables along with their values:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>catmap get_vardef (globsym <span class="s">&quot;*&quot;</span> <span class="mi">0</span>)<span class="p">;</span>
 [(argc--&gt;<span class="mi">0</span>),(argv--&gt;[]),(compiling--&gt;<span class="mi">0</span>),
-(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.54&quot;</span>)]
+(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.55&quot;</span>)]
 </pre></div>
 </div>
 <p>The counterparts of <a class="reference internal" href="purelib.html#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> and <a class="reference internal" href="purelib.html#del_fundef" title="del_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">del_fundef</span></tt></a> are provided as
@@ -6359,7 +6359,8 @@ to compile C/C++ source to LLVM assembler or bitcode. The clang compiler is
 recommended for C/C++ development, as it offers faster compilation times
 and has much better diagnostics than gcc. On the other hand, llvm-gcc and
 dragonegg have the advantage that they also support alternative frontends
-so that you can compile Fortran and Ada code as well.</p>
+so that you can compile Fortran and Ada code as well. (But note that, as of
+LLVM 3.x, llvm-gcc is not supported any more.)</p>
 </div>
 <p>LLVM bitcode is loaded in a Pure script using the following special format of
 the <a class="reference internal" href="#using"><tt class="xref std std-keyword docutils literal"><span class="pre">using</span></tt></a> clause:</p>
@@ -6413,17 +6414,13 @@ compute the greatest common divisor of two (machine) integers:</p>
 </pre></div>
 </div>
 <p>Let&#8217;s say that this code is in the file <tt class="docutils literal"><span class="pre">mygcd.c</span></tt>, then you&#8217;d compile it to
-a bitcode module using <a class="reference internal" href="#llvm-gcc">llvm-gcc</a> as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre>llvm-gcc -emit-llvm -c mygcd.c -o mygcd.bc
-</pre></div>
-</div>
-<p>Or, if you prefer to use <a class="reference internal" href="#clang">clang</a>, the new LLVM-based C/C++ compiler:</p>
+a bitcode module using <a class="reference internal" href="#clang">clang</a> as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre>clang -emit-llvm -c mygcd.c -o mygcd.bc
 </pre></div>
 </div>
-<p>Note that the <tt class="docutils literal"><span class="pre">-emit-llvm</span> <span class="pre">-c</span></tt> options instruct llvm-gcc or clang to build an
-LLVM bitcode module. Of course, you can also add optimizations and other
-options to the compile command as desired.</p>
+<p>Note that the <tt class="docutils literal"><span class="pre">-emit-llvm</span> <span class="pre">-c</span></tt> options instruct clang to build an LLVM
+bitcode module. Of course, you can also add optimizations and other options to
+the compile command as desired.</p>
 <p>Using <a class="reference internal" href="#dragonegg">dragonegg</a> is somewhat more involved, as it doesn&#8217;t provide a direct way
 to produce a bitcode file yet.  However, you can create an LLVM assembler file
 which can then be translated to bitcode using the llvm-as program as follows:</p>
@@ -6519,25 +6516,12 @@ script with the interpreter which may considerably increase startup times. If
 this is a problem then it&#8217;s usually better to import a separate bitcode module
 instead (see <a class="reference internal" href="#importing-llvm-bitcode">Importing LLVM Bitcode</a>), or batch-compile your script to an
 executable (see <a class="reference internal" href="#batch-compilation">Batch Compilation</a>).</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">At present, the default LLVM compiler used by the Pure interpreter is
-llvm-gcc, unless you compiled Pure itself using clang, in which case clang
-is used as the default for C/C++ compilation. You can easily change the
-default with the corresponding environment variables, see below. In the
-future dragonegg might be used as the new default instead, as soon as it is
-widely supported. Note that llvm-gcc is currently being phased out in
-favour of dragonegg, and will not be supported in the LLVM 3.x series any
-more. Thus with LLVM 3.0 or later we recommend using dragonegg or clang
-instead, although recent llvm-gcc versions should continue to work as well,
-at least with LLVM 3.0.</p>
-</div>
-<p>Currently, C, C++, Fortran and Faust are supported as foreign source
-languages, with llvm-gcc, llvm-g++, llvm-gfortran and faust as the
-corresponding (default) compilers. C is the default language. The desired
-source language can be selected by placing an appropriate tag into the inline
-code section, immediately after the opening brace. (The tag is removed before
-the code is submitted to compilation.) For instance:</p>
+<p>At present, C, C++, Fortran and Faust are supported as foreign source
+languages, with clang, clang++, gfortran (with the dragonegg plugin) and faust
+as the corresponding (default) compilers. C is the default language. The
+desired source language can be selected by placing an appropriate tag into the
+inline code section, immediately after the opening brace. (The tag is removed
+before the code is submitted to compilation.) For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre>%&lt; -*- Fortran90 -*-
 function fact(n) result(p)
   integer n, p
@@ -6573,9 +6557,9 @@ variable lets you specify the exact name of the executable along with any
 debugging and optimization options that you may want to add. Likewise,
 <span class="target" id="index-23"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_CXX</span></tt>, <span class="target" id="index-24"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_FC</span></tt> and <span class="target" id="index-25"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_FAUST</span></tt> are used for
 the C++, Fortran and Faust compilers, respectively.</p>
-<p>For instance, if you prefer to use <a class="reference internal" href="#clang">clang</a> as your C compiler, and you&#8217;d like
-to invoke it with the <tt class="docutils literal"><span class="pre">-O3</span></tt> optimization option, you would set
-<span class="target" id="index-26"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_CC</span></tt> to <tt class="docutils literal"><span class="pre">&quot;clang</span> <span class="pre">-O3&quot;</span></tt>. (To verify the settings you made, you
+<p>For instance, if you prefer to use <a class="reference internal" href="#llvm-gcc">llvm-gcc</a> as your C compiler, and you&#8217;d
+like to invoke it with the <tt class="docutils literal"><span class="pre">-O3</span></tt> optimization option, you would set
+<span class="target" id="index-26"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_CC</span></tt> to <tt class="docutils literal"><span class="pre">&quot;llvm-gcc</span> <span class="pre">-O3&quot;</span></tt>. (To verify the settings you made, you
 can have the interpreter echo the compilation commands which are actually
 executed, by running Pure with the <tt class="docutils literal"><span class="pre">-v0100</span></tt> option, see <a class="reference internal" href="#verbosity-and-debugging-options">Verbosity and
 Debugging Options</a>. Also note that the options necessary to produce LLVM
@@ -7522,7 +7506,7 @@ argc       var  argc = <span class="mi">0</span><span class="p">;</span>
 argv       var  argv = []<span class="p">;</span>
 compiling  var  compiling = <span class="mi">0</span><span class="p">;</span>
 sysinfo    var  sysinfo = <span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span><span class="p">;</span>
-version    var  version = <span class="s">&quot;0.54&quot;</span><span class="p">;</span>
+version    var  version = <span class="s">&quot;0.55&quot;</span><span class="p">;</span>
 <span class="mi">5</span> variables
 </pre></div>
 </div>
@@ -8863,6 +8847,13 @@ version and system dependencies can now be handled in a more convenient way.</p>
 possible to create the definition of a type from a description of its
 operations. To these ends, a new keyword <a class="reference internal" href="#interface"><tt class="xref std std-keyword docutils literal"><span class="pre">interface</span></tt></a> was added to the
 language.</p>
+<p>Pure 0.55 changed the default compilers for inline C, C++ and Fortran code to
+clang, clang++ and gfortran (with the dragonegg plugin), respectively. This
+was done in order to support LLVM 3.x which does not have llvm-gcc (the
+previous default) any more. If you&#8217;re still running an older LLVM version and
+would like to keep using llvm-gcc, you will have to set some environment
+variables; please see the <a class="reference internal" href="install.html"><em>installation instructions</em></a> for
+details.</p>
 </div>
 <div class="section" id="error-recovery">
 <h3><a class="toc-backref" href="#id112">Error Recovery</a><a class="headerlink" href="#error-recovery" title="Permalink to this headline">¶</a></h3>
@@ -9829,8 +9820,8 @@ Addison-Wesley, 1988.</dd>
 <dt>Clang</dt>
 <dd>The new C/C++/Objective C compiler designed specifically to work on top of
 LLVM, <a class="reference external" href="http://clang.llvm.org">http://clang.llvm.org</a>. Clang provides a comparatively light-weight
-alternative to <a class="reference internal" href="#llvm-gcc">llvm-gcc</a> which is faster and has better and more friendly
-diagnostics than gcc.</dd>
+alternative to gcc which is faster and has better and more friendly
+diagnostics.</dd>
 </dl>
 <dl class="docutils" id="dragonegg">
 <dt>DragonEgg</dt>
@@ -9871,8 +9862,8 @@ numeric matrices, <a class="reference external" href="http://www.gnu.org/softwar
 <dl class="docutils" id="llvm-gcc">
 <dt>LLVM-GCC</dt>
 <dd>An LLVM-capable compiler based on gcc, see <a class="reference external" href="http://llvm.org">http://llvm.org</a>. This is based
-on a fairly old gcc version (4.2) and is currently being phased out in
-favour of the <a class="reference internal" href="#dragonegg">DragonEgg</a> plugin.</dd>
+on a fairly old gcc version (4.2) and has been replaced by the <a class="reference internal" href="#dragonegg">DragonEgg</a>
+plugin in the LLVM 3.x series.</dd>
 </dl>
 <dl class="docutils" id="miranda">
 <dt>Miranda</dt>

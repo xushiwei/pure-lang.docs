@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.54',
+        VERSION:     '0.55',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -57,7 +57,7 @@
             
   <div class="section" id="pd-faust">
 <h1>pd-faust<a class="headerlink" href="#pd-faust" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.4, May 16, 2012</p>
+<p>Version 0.4, June 03, 2012</p>
 <p>Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>pd-faust is a dynamic environment for running Faust dsps in Pd. It is based on
 the author&#8217;s <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a> script, but offers many small
@@ -113,7 +113,7 @@ with <tt class="docutils literal"><span class="pre">make</span> <span class="pre
 <tt class="docutils literal"><span class="pre">$(prefix)/lib/pd</span></tt>.</p>
 <p>It is also possible to specify an alternative flavour of Pd when building and
 installing the module, by adding a definition like <tt class="docutils literal"><span class="pre">PD=pd-extended</span></tt> to the
-<tt class="docutils literal"><span class="pre">make</span></tt> command line. This is known to work with <a href="#id2"><span class="problematic" id="id3">pd-extended_</span></a> and <a class="reference external" href="http://l2ork.music.vt.edu/main/?page_id=56">pd-l2ork</a>,
+<tt class="docutils literal"><span class="pre">make</span></tt> command line. This is known to work with <a class="reference external" href="http://puredata.info/downloads/pd-extended">pd-extended</a> and <a class="reference external" href="http://l2ork.music.vt.edu/main/?page_id=56">pd-l2ork</a>,
 two popular alternative Pd distributions available on the web.</p>
 <p>The pd-faust objects are installed both in source form (so you can customize
 them for your own purposes) and in binary form as a Pd object library which
@@ -204,15 +204,19 @@ in Pure syntax, which is pretty much like Pd syntax but also allows the
 integer to be specified in hexadecimal, octal or binary.</p>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">fdsp~</span></tt> object requires a Faust dsp which can work as an effect unit,
-processing audio input and producing audio output.</p>
+processing audio input and producing audio output. The unit can have as many
+audio input and output channels as you like (including zero).</p>
 <p>The <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object works in a similar fashion, but has an additional
 creation argument specifying the desired number of voices:</p>
 <div class="highlight-pure"><div class="highlight"><pre>fsynth~ dspname instname channel numvoices
 </pre></div>
 </div>
 <p>The <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object requires a Faust dsp which can work as a monophonic
-synthesizer (having zero audio inputs and a nonzero number of audio outputs).
-To these ends, pd-faust assumes that the Faust unit provides three so-called
+synthesizer. This typically means that the unit has zero audio inputs and a
+nonzero number of audio outputs, although it is possible to have synths
+processing any number of audio input channels as well. (You can even have
+synths producing zero audio outputs, but this is generally not very useful.)
+In addition, pd-faust assumes that the Faust unit provides three so-called
 &#8220;voice controls&#8221; which indicate which note to play:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">freq</span></tt> is the fundamental frequency of the note in Hz.</li>
@@ -224,7 +228,8 @@ function (ADSR or similar).</li>
 </ul>
 <p>pd-faust doesn&#8217;t care at which path inside the Faust dsp these controls are
 located, but they must all be there, and the basenames of the controls must be
-unique throughout the entire dsp.</p>
+unique throughout the entire dsp. Otherwise the synth will not work as
+expected.</p>
 <p>Like <a class="reference internal" href="faust2pd.html"><em>faust2pd</em></a>, pd-faust implements the necessary logic to
 drive the given number of voices of an <tt class="docutils literal"><span class="pre">fsynth~</span></tt> object. That is, it will
 actually create a separate instance of the Faust dsp for each voice and handle
@@ -490,7 +495,7 @@ themselves which are needed to make this actually work are not implemented in
 the default version of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction distributed with pd-faust.
 That&#8217;s because Pd doesn&#8217;t provide any built-in objects for OSC input and
 output, although a few different solutions exist and are included in
-Hans-Christoph Steiner&#8217;s <a href="#id4"><span class="problematic" id="id5">Pd-extended_</span></a> distribution, such as Martin Peach&#8217;s
+Hans-Christoph Steiner&#8217;s <a class="reference external" href="http://puredata.info/downloads/pd-extended">Pd-extended</a> distribution, such as Martin Peach&#8217;s
 <a class="reference external" href="http://puredata.info/Members/martinrp/OSCobjects">OSC externals</a>.</p>
 <p>The distribution includes a version of the <tt class="docutils literal"><span class="pre">midiosc</span></tt> abstraction which
 implements OSC input and output using Martin Peach&#8217;s objects in the

@@ -14,7 +14,7 @@ File: gnumeric-pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 gnumeric-pure
 *************
 
-  Version 0.11, June 03, 2012
+  Version 0.12, June 11, 2012
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -29,6 +29,7 @@ rendering in Gnumeric frame widgets via Pure's OpenGL module.
 * Menu:
 
 * Introduction::
+* Copying::
 * Installation::
 * Setup::
 * Basic Usage::
@@ -36,10 +37,16 @@ rendering in Gnumeric frame widgets via Pure's OpenGL module.
 * Defining Your Own Functions::
 * Gnumeric/Pure Interface::
 * Advanced Features::
-* Copying::
 * Index::
 
  --- The Detailed Node Listing ---
+
+Defining Your Own Functions
+
+* Creating a Simple Plugin::
+* The plugin xml File::
+* Loading the Plugin::
+* Spicing It Up::
 
 Gnumeric/Pure Interface
 
@@ -56,7 +63,7 @@ Advanced Features
 * OpenGL Interface::
 
 
-File: gnumeric-pure.info,  Node: Introduction,  Next: Installation,  Prev: Top,  Up: Top
+File: gnumeric-pure.info,  Node: Introduction,  Next: Copying,  Prev: Top,  Up: Top
 
 1 Introduction
 **************
@@ -109,14 +116,40 @@ such as modifying entire ranges of cells with one Pure call, calling
 Gnumeric functions from Pure, and setting up asynchronous data sources
 and OpenGL frames. This is all explained in detail below.
 
-
-File: gnumeric-pure.info,  Node: Installation,  Next: Setup,  Prev: Introduction,  Up: Top
+     Note: This manual assumes that you're already familiar with
+     Gnumeric as well as the Pure language and its programming
+     environment. If not then you should consult the corresponding
+     documentation to learn more about these.
 
-2 Installation
+
+File: gnumeric-pure.info,  Node: Copying,  Next: Installation,  Prev: Introduction,  Up: Top
+
+2 Copying
+*********
+
+Copyright (c) 2009-2012 by Albert Graef.
+
+  Gnumeric/Pure is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or (at
+your option) any later version.
+
+  Gnumeric/Pure is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+along with this program.  If not, see <<http://www.gnu.org/licenses/>>.
+
+
+File: gnumeric-pure.info,  Node: Installation,  Next: Setup,  Prev: Copying,  Up: Top
+
+3 Installation
 **************
 
 Get the latest source from
-<http://pure-lang.googlecode.com/files/gnumeric-pure-0.11.tar.gz>.
+<http://pure-lang.googlecode.com/files/gnumeric-pure-0.12.tar.gz>.
 
   Obviously, you need to have both Pure and Gnumeric installed. Pure
 0.36 and Gnumeric 1.9.13 are known to work. We recommend Gnumeric
@@ -132,23 +165,20 @@ installed. These should be readily available on most systems, but you
 can also disable this feature by invoking `make' as `make GLDEPS='.
 
   Run `make' to compile the software. You might have to adjust the
-settings at the beginning of the Makefile to make this work. If you're
-lucky and the compile goes through, you should now have a
-`pure_loader.so' file in the `pure-loader' subdirectory. You can
-install the plugin and related stuff with `sudo make install' in the
-global Gnumeric plugin directory, or if you prefer to install it into
-your personal plugin directory then run `make install-local' instead.
-(We recommend the latter since it lets you adjust `pure_func.pure' for
-your purposes more easily.) Optionally, you might also want to copy the
-`gnumeric-pure.html' file to your Pure library directory so that you
-can read it with the `help' command of the Pure interpreter or in Emacs
-Pure mode.
+settings at the beginning of the Makefile to make this work. Once the
+compile goes through, you should now have a `pure_loader.so' file in
+the `pure-loader' subdirectory. You can install the plugin and related
+stuff with `sudo make install' in the global Gnumeric plugin directory,
+or if you prefer to install it into your personal plugin directory then
+run `make install-local' instead. (The latter is recommended if you
+plan to customize any of the sample plugin scripts included in the
+distribution for your purposes.)
 
   Typically, `make install' and `make install-local' will install the
 plugins into the following directories by default:
 
    * System-wide installations go into
-     `/usr/local/gnumeric/1.9.13/plugins' or similar, depending on
+     `/usr/local/lib/gnumeric/1.9.13/plugins' or similar, depending on
      where Gnumeric is installed.
 
    * User-specific installations go into `~/.gnumeric/1.9.13/plugins'.
@@ -160,14 +190,22 @@ instance:
 
     $ make prefix=/usr gnmversion=1.9.13
 
-If `make install' doesn't work for some reason, you can also just copy
-the `pure-func', `pure-glfunc' and `pure-loader' directories manually to
-your Gnumeric plugin directory.
+In either case, `make install' also installs the `pure-gnm' helper
+script under the Pure installation prefix. (This is a little
+convenience script to generate the `plugin.xml' files used by Gnumeric
+to load a plugin; see *note Defining Your Own Functions: a. for
+details.)
+
+  If `make install' doesn't work for some reason, you can also just
+copy the `pure-func', `pure-glfunc' and `pure-loader' directories
+manually to your Gnumeric plugin directory. You can still run `make
+install' in the `pure-gnm' subdirectory to get the `pure-gnm' script
+installed in this case.
 
 
 File: gnumeric-pure.info,  Node: Setup,  Next: Basic Usage,  Prev: Installation,  Up: Top
 
-3 Setup
+4 Setup
 *******
 
 Once Gnumeric/Pure has been properly installed, you should see it in
@@ -178,7 +216,7 @@ functions in your Gnumeric spreadsheets. There's also a third entry
 labelled "Pure OpenGL functions" which you might want to enable if you
 want to try the OpenGL capabilities (this will only work if you built
 Gnumeric/Pure with OpenGL support and have Pure's OpenGL module
-installed; see *note OpenGL Interface: a. for details).
+installed; see *note OpenGL Interface: c. for details).
 
   Gnumeric doesn't provide much in the way of GUI customization options
 right now, but at least it's possible for plugins to install and
@@ -214,16 +252,17 @@ these options, then your `pure-ui.xml' file should look as follows:
 
 File: gnumeric-pure.info,  Node: Basic Usage,  Next: Interactive Pure Shell,  Prev: Setup,  Up: Top
 
-4 Basic Usage
+5 Basic Usage
 *************
 
 With Pure/Gnumeric installed and enabled, you should be ready to join
 the fun now. Start up Gnumeric, click on a cell and invoke the "f(x)"
 dialog. The Pure functions available for use are shown in the "Pure"
 category. E.g., click on `pure_hello'. Now the Pure interpreter will be
-loaded and the function description displayed. Click "Insert" and then
-"Ok". You should now be able to read the friendly greeting returned by
-the `pure_hello' function.
+loaded and the function description displayed. Click "Ok" to select the
+`pure_hello' function and then "Ok" again to actually insert the
+function call (without arguments) into the current cell. You should now
+be able to read the friendly greeting returned by the function.
 
   Of course, you can also enter the function call directly as a formula
 into a cell as usual. Click on a cell, then enter the following:
@@ -236,7 +275,7 @@ The greeting should now be displayed with your login name in it.
 nothing special; they are just ordinary Pure functions which are
 defined by the `pure_func.pure' script in the `pure-func' subdirectory
 of your Gnumeric plugin directory. You can have a look at them by
-invoking the "Edit Pure Script" option which gets added to the
+invoking the "Edit Pure Scripts" option which gets added to the
 Tools/Pure menu once the Pure plugin loader is enabled. (This will
 invoke the emacs editor by default, or the editor named by the `EDITOR'
 environment variable. You can set this environment variable in your
@@ -274,7 +313,7 @@ Gnumeric/Pure.
 
 File: gnumeric-pure.info,  Node: Interactive Pure Shell,  Next: Defining Your Own Functions,  Prev: Basic Usage,  Up: Top
 
-5 Interactive Pure Shell
+6 Interactive Pure Shell
 ************************
 
 The `pure-examples.gnumeric' spreadsheet also includes an instance of
@@ -321,13 +360,13 @@ declaring it as a Pure `extern' function:
 All functions in the Pure prelude are readily available in the Gnumeric
 Pure shell, as well as the functions defined in `pure_func.pure' and
 its imports, including the programming interface described in *note
-Advanced Features: d. For instance, here's how you can retrieve a cell
+Advanced Features: f. For instance, here's how you can retrieve a cell
 value from the current sheet:
 
     > get_cell "A1"
       "Gnumeric/Pure Examples"
 
-Using `call' (see *note Calling Gnumeric from Pure: e.), you can also
+Using `call' (see *note Calling Gnumeric from Pure: 10.), you can also
 invoke any Gnumeric function:
 
     > call "product" (1..10)
@@ -337,93 +376,298 @@ invoke any Gnumeric function:
 
 File: gnumeric-pure.info,  Node: Defining Your Own Functions,  Next: Gnumeric/Pure Interface,  Prev: Interactive Pure Shell,  Up: Top
 
-6 Defining Your Own Functions
+7 Defining Your Own Functions
 *****************************
 
 After playing around with `pure_func.pure' and the interactive Pure
 shell for a while, of course you will want to write your own functions,
-that's what this plugin is about after all! For the beginning, you can
-just add your definitions to the existing `pure_func.pure' script. Use
-the "Edit Pure Script" option to edit the script in your favourite
-editor, and see the comments and the examples in the script for
-guidance. (This document assumes that you're already familiar with
-Pure, if not then you should consult the available Pure documentation.)
+that's what this extension is about after all! This section shows you
+how to do this.
 
-  Note that if you delete or rename any functions in this file, or add
-new ones to it, then you also have to change the list of function names
-in the plugin.xml file in the same directory accordingly. This file
-tells Gnumeric which functions are provided by the script.
-Unfortunately, you'll have to restart Gnumeric to make changes in this
-file take effect. If you only change the definition of an existing
-function then it's usually sufficient to just invoke "Reload Pure
-Scripts" afterwards, and maybe run "Recalculate" (`F9') to recompute
-the spreadsheet. However, if you also made changes to the function
-descriptions provided via `gnm_info' (see the following section for
-explanation), then you'll also have to restart Gnumeric so that it
-picks up the changes.
+* Menu:
 
-  Once you understand how this works, you can also create your own
-plugin directories with your personal collections of Gnumeric/Pure
-functions, using the `pure-func' directory as a template. For instance,
-let's assume that your Gnumeric/Pure stuff is in a script named
-`gnumeric.pure' under `/some/path/pure/gnumeric'. The plugin.xml file
-in that directory might look as follows:
+* Creating a Simple Plugin::
+* The plugin xml File::
+* Loading the Plugin::
+* Spicing It Up::
+
+
+File: gnumeric-pure.info,  Node: Creating a Simple Plugin,  Next: The plugin xml File,  Up: Defining Your Own Functions
+
+7.1 Creating a Simple Plugin
+============================
+
+Let's consider a simple example: the factorial function. In Pure this
+function can be implemented as follows:
+
+    factorial [x] = foldl (*) 1 (1..x);
+
+Note the list bracket around the argument `x'. You wouldn't normally
+pass a single numeric argument that way in Pure, but this is needed
+since by default Gnumeric passes arguments as a list to a Pure
+function. There are other ways to configure the call interface to Pure
+functions, but these require that we tell Gnumeric about the number and
+types of arguments, see *note Gnumeric/Pure Interface: 12. below. For
+the moment let's stick to the default scheme, however, in order to keep
+things simple.
+
+  Put the above definition into a script file, say, `myplugin.pure'.
+Next we need to create a `plugin.xml' file to tell Gnumeric about our
+plugin and which functions it provides. While these files can be
+written by hand, this is tedious and error-prone. Fortunately, recent
+Gnumeric/Pure versions provide the `pure-gnm' helper script which makes
+this quite easy. To use `pure-gnm' with our plugin script, we have to
+add a special "hashbang" comment block to our script which supplies the
+needed information. In our case, this might look as follows:
+
+    #! N: My Pure functions
+    #! C: Pure
+    #! D: My Pure functions.
+    #! F: factorial
+
+You can add this comment block anywhere in your plugin script, but
+usually it is placed near the beginning. The meaning of the fields are:
+
+   * `N': the name of the plugin
+
+   * `C': the category under which the functions provided by the plugin
+     will show in the "f(x)" dialog in Gnumeric
+
+   * `D': (optionally) a more detailed description of the plugin
+
+   * `F': a whitespace-delimited list of the names of the functions
+     provided by the plugin
+
+  The `D' and `F' fields can also be split into multiple lines (each
+prefixed with the "hashbang" comment marker and the corresponding field
+identifier) if necessary.
+
+  So our `myplugin.pure' script now looks like this:
+
+    #! N: My Pure functions
+    #! C: Pure
+    #! D: My Pure functions.
+    #! F: factorial
+
+    factorial [x] = foldl (*) 1 (1..x);
+
+You can now generate the `plugin.xml' file for the plugin simply as
+follows:
+
+    $ pure-gnm myplugin.pure > plugin.xml
+
+Note that by default `pure-gnm' writes the `plugin.xml' file to standard
+output which is useful if you want to check the generated file first. To
+actually create the file, we simply redirect the output to `plugin.xml'.
+
+  You'll have to redo this every time your plugin changes (i.e., you've
+added new functions or deleted or renamed old ones, or changed the name
+or description of the plugin). It's easy to automate this step using
+`make'. E.g., the following Makefile will do the trick:
+
+    myplugin = myplugin.pure
+
+    all: plugin.xml
+
+    plugin.xml: $(myplugin)
+            pure-gnm $< > $@
+
+    clean:
+            rm -f plugin.xml
+
+Now you can just run `make' in the plugin directory and it will rebuild
+the `plugin.xml' file as needed.
+
+
+File: gnumeric-pure.info,  Node: The plugin xml File,  Next: Loading the Plugin,  Prev: Creating a Simple Plugin,  Up: Defining Your Own Functions
+
+7.2 The plugin.xml File
+=======================
+
+The `plugin.xml' file resulting from the previous step looks like this:
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <plugin id="Gnumeric_MyPureFunc">
+    <plugin id="Gnumeric_myplugin">
       <information>
         <name>My Pure functions</name>
-        <description>My Pure functions for use in Gnumeric.</description>
+        <description>My Pure functions.</description>
         <require_explicit_enabling/>
       </information>
       <loader type="Gnumeric_PureLoader:pure">
-        <attribute value="gnumeric" name="module_name"/>
+        <attribute name="module_name" value="myplugin.pure"/>
       </loader>
       <services>
-        <service type="function_group" id="my_pure_func">
+        <service type="function_group" id="myplugin">
           <category>Pure</category>
           <functions>
-            <!-- My Pure functions go here, e.g.: -->
-            <function name="my_pure_func"/>
+            <function name="factorial"/>
           </functions>
         </service>
       </services>
     </plugin>
 
-The following steps are needed to tell Gnumeric about your new Pure
-plugin:
+You can also edit this file by hand if you know what you're doing; in
+that case, please check the Gnumeric documentation for details about
+the format of these files. The template used by `pure-gnm' to generate
+these files can be found in the source distribution (see `plugin.xml'
+in the `pure-gnm' folder) or under `/usr/local/lib/pure-gnm' after
+installation. You can edit this file (carefully!) in order to implement
+global changes that you want to be in every `plugin.xml' file generated
+by `pure-gnm'.
 
-   * Open the Directories tab in the Tools/Plug-ins dialog and check
-     that the `/some/path/pure' directory is in your plugin search
-     path. Add it if necessary, and restart Gnumeric after that. (Note
-     that you really have to add the _parent_ directory
-     `/some/path/pure', not `/some/path/pure/gnumeric' itself.)
+  Note that the only really Pure-specific part in the xml file is the
+loader description which also names the Pure script implementing the
+plugin in the value of the `module_name' attribute. In this case this
+is just `"myplugin.pure"'. This path is taken relative to the directory
+containing the `plugin.xml' file, but you can also specify an absolute
+path there if you want to keep the plugin script elsewhere. To achieve
+this with `pure-gnm', you can just invoke it with an absolute path
+name, e.g.:
 
-   * The new plugin should now be listed as "My Pure functions" on the
-     Plugin List tab in the Tools/Plug-ins dialog. Check it to enable
-     it.
+    $ pure-gnm $PWD/myplugin.pure > plugin.xml
 
-  The Pure loader can load multiple Pure plugins. You only need to tell
-Gnumeric about them after creating the scripts and plugin.xml files and
-placing them into corresponding plugin directories. Just enable the
-ones that you want in Tools/Plug-ins. All scripts are loaded in the
-same Pure interpreter (and thus are treated like one big script) so
-that functions in one script can use the function and variable
+Now you can move the `plugin.xml' file whereever you like and still have
+Gnumeric find the script file.
+
+  Another detail worth mentioning here is the
+`<require_explicit_enabling/>' tag in the xml file. This means that
+Gnumeric won't enable the new plugin until you explicitly tell it to.
+You can also remove that line if you want Gnumeric to automatically
+enable new plugins as they are added to the system.
+
+
+File: gnumeric-pure.info,  Node: Loading the Plugin,  Next: Spicing It Up,  Prev: The plugin xml File,  Up: Defining Your Own Functions
+
+7.3 Loading the Plugin
+======================
+
+We now have the plugin script `myplugin.pure' and the `plugin.xml' file
+in the same directory, say, `/some/path/myplugin'. We still need to tell
+Gnumeric about the new plugin, though, so that it can find it. There are
+basically two ways of doing this:
+
+   * Copy the entire `/some/path/myplugin' directory to your personal
+     Gnumeric plugin folder (usually something like
+     `~/.gnumeric/1.9.13/plugins', depending on which Gnumeric version
+     you have installed). This is the easiest way to go, since Gnumeric
+     will always search this directory for new plugins by default.
+
+   * Keep the plugin directory where it is and add the _parent_ of this
+     directory to Gnumeric's plugin path. To these ends, fire up
+     Gnumeric and enter the directory under the Directories tab in the
+     Tools/Plug-ins dialog (if it's not already there). Note that you
+     really have to add the _parent_ directory `/some/path', not
+     `/some/path/myplugin' itself, because each Gnumeric plugin
+     directory may in fact contain as many subdirectories with plugins
+     as you like.
+
+  Once you fire up Gnumeric again, the new plugin should now be listed
+as "My Pure functions" on the Plugin List tab in the Tools/Plug-ins
+dialog. Check it to enable it. The `factorial' function defined in the
+plugin should now be available, and you can create a new worksheet (or
+load an existing one) which calls this function. For instance, type
+this into a cell to have the factorial of 10 computed:
+
+    =factorial(10)
+
+
+     Note: One little quirk here is that changes in the plugin
+     configuration generally require a restart of Gnumeric to take
+     effect. Another common mishap is that you open an existing
+     workbook without having enabled the plugins it uses. An easily
+     visible symptom of that is that you'll see lots of cells showing
+     the `#NAME' error. You will then have to enable those plugins
+     _and_ reload the workbook afterwards, so that everything is
+     recalculated properly.
+
+     In contrast, just changing the definition of a function in a
+     plugin usually needs neither a restart of Gnumeric nor a reloading
+     of the workbook. In this case it's often sufficient to reload all
+     scripts with the "Reload Pure Scripts" option in the Tools/Pure
+     menu, after which you can use “Recalculate” (F9) to recompute the
+     spreadsheet.
+
+  The Pure loader can load multiple Pure plugins (and of course each
+plugin can provide as many functions as you want). You only need to
+tell Gnumeric about them after creating the scripts and `plugin.xml'
+files and placing them into corresponding plugin directories. Just
+enable the ones that you want in Tools/Plug-ins. All scripts are loaded
+in the same Pure interpreter (and thus are treated like one big script)
+so that functions in one script can use the function and variable
 definitions in another. If you need to access the definitions in the
 `pure_func.pure' "mother script", you can also just import it into your
 scripts with a `using' clause, i.e.: `using pure_func;'
 
+  Another thing worth mentioning here is that a Pure plugin script is
+always executed in the directory where it is located (even if it is
+different from the directory with the `plugin.xml' file) so that it can
+easily find imported scripts and other files that it may need.
+
+
+File: gnumeric-pure.info,  Node: Spicing It Up,  Prev: Loading the Plugin,  Up: Defining Your Own Functions
+
+7.4 Spicing It Up
+=================
+
+Our plugin example is now essentially complete, but in order to make it
+really convenient to use, we may want to add some information about how
+the `factorial' function is to be called in Gnumeric. Gnumeric doesn't
+keep this kind of information in the `plugin.xml' file, but expects it
+to be provided by the plugin itself. In the Gnumeric/Pure interface
+this can be done by adding a rule for the `gnm_info' function. In our
+example we tell Gnumeric that `factorial' expects a single numeric
+argument. While we're at it, we might as well add some helpful
+documentation to be displayed in Gnumeric's "f(x)" dialog. The details
+of this are described in the following section, but to give you a
+preview of upcoming attractions, here's a beefed-up version of our
+script which implements all this (you can also find this version of the
+example in the Gnumeric/Pure distribution):
+
+    #! N: My Pure functions
+    #! C: Pure
+    #! D: My Pure functions.
+    #! F: factorial
+
+    factorial x = foldl (*) 1 (1..x);
+
+    using pure_func; // for the gnm_help function
+    gnm_info "factorial" = "f", gnm_help "factorial:factorial of a number"
+     ["x:number"] "Computes the factorial of @{x}." [] ["=factorial(10)"] [];
+
+Fire up Gnumeric again, press the "f(x)" button and select `factorial'
+under the `Pure' category. The "f(x)" dialog should now display the
+additional information we added above. Also note that Gnumeric now
+knows that this function is supposed to be called with exactly one `f'
+(numeric) argument.  Therefore the list brackets around the argument of
+`factorial' aren't needed any more, so don't forget to remove them, as
+shown in the above code sample.
+
+  This completes our little example. As an exercise, you're invited to
+add more functions on your own. Don't forget to change the `#! F' line
+accordingly and rerun `pure-gnm' when you do this, so that Gnumeric
+knows about the new functions.
+
 
 File: gnumeric-pure.info,  Node: Gnumeric/Pure Interface,  Next: Advanced Features,  Prev: Defining Your Own Functions,  Up: Top
 
-7 Gnumeric/Pure Interface
+8 Gnumeric/Pure Interface
 *************************
 
-By default, when a Pure function is called from Gnumeric, it receives
-its arguments in a list. However, it is possible to tell Gnumeric about
-the expected arguments of the function and also specify a help text to
-be displayed in the "f(x)" dialog, by giving a definition of the special
-`gnm_info' function as explained below.
+We already explained in the previous section that, when a Pure function
+is called from Gnumeric, it receives its arguments in a list by
+default. However, it is possible to tell Gnumeric about the expected
+arguments of the function and also specify a help text to be displayed
+in the "f(x)" dialog, by giving a definition of the `gnm_info' function
+as explained below.
+
+  Note that `gnm_info' is really an ordinary Pure function. Thus,
+rather than hardcoding this information as static text (such as the
+"docstrings" used in Gnumeric's Python extension), the function
+descriptions can also be constructed dynamically in corresponding Pure
+code. This offers an opportunity for programmatic customizations. But
+note that the `gnm_info' function will only be invoked when the plugin
+script is loaded, so once that is done the function description remains
+the same for the entire Gnumeric session.
 
 * Menu:
 
@@ -433,7 +677,7 @@ be displayed in the "f(x)" dialog, by giving a definition of the special
 
 File: gnumeric-pure.info,  Node: Function Descriptions,  Next: Conversions Between Pure and Gnumeric Values,  Up: Gnumeric/Pure Interface
 
-7.1 Function Descriptions
+8.1 Function Descriptions
 =========================
 
 To describe a given function to Gnumeric, define `gnm_info "<name>"'
@@ -576,7 +820,7 @@ on whether it is invoked with two, three or four arguments.
 
 File: gnumeric-pure.info,  Node: Conversions Between Pure and Gnumeric Values,  Prev: Function Descriptions,  Up: Gnumeric/Pure Interface
 
-7.2 Conversions Between Pure and Gnumeric Values
+8.2 Conversions Between Pure and Gnumeric Values
 ================================================
 
 The marshalling of types between Gnumeric and Pure is pretty
@@ -601,7 +845,7 @@ passed "by value"), unless the function signature specifies a `"r"'
 conversion in which case the cell ranges themselves are passed to the
 function in string form.  (Such values can also be passed on to
 Gnumeric functions which expect a cell range (`"r"' ) parameter, see
-*note Calling Gnumeric from Pure: e. below.)
+*note Calling Gnumeric from Pure: 10. below.)
 
   Conversely, matrices, lists and tuples all become Gnumeric arrays on
 output, so usually you'll want to enter these as array functions
@@ -621,14 +865,14 @@ conveniently using Pure's `eval' function, see the Pure documentation
 for details.
 
 
-File: gnumeric-pure.info,  Node: Advanced Features,  Next: Copying,  Prev: Gnumeric/Pure Interface,  Up: Top
+File: gnumeric-pure.info,  Node: Advanced Features,  Next: Index,  Prev: Gnumeric/Pure Interface,  Up: Top
 
-8 Advanced Features
+9 Advanced Features
 *******************
 
 This section explains various additional features provided by the
 Gnumeric/Pure interface that should be useful for writing your own
-functions.  Note that, for your convenience all functions discussed in
+functions.  Note that for your convenience all functions discussed in
 this section are declared in `pure_func.pure'.
 
 * Menu:
@@ -643,7 +887,7 @@ this section are declared in `pure_func.pure'.
 
 File: gnumeric-pure.info,  Node: Calling Gnumeric from Pure,  Next: Accessing Spreadsheet Cells,  Up: Advanced Features
 
-8.1 Calling Gnumeric from Pure
+9.1 Calling Gnumeric from Pure
 ==============================
 
 It is possible to call Gnumeric functions from Pure using the `call'
@@ -669,7 +913,7 @@ arguments as required by the function.
 
 File: gnumeric-pure.info,  Node: Accessing Spreadsheet Cells,  Next: Asynchronous Data Sources,  Prev: Calling Gnumeric from Pure,  Up: Advanced Features
 
-8.2 Accessing Spreadsheet Cells
+9.2 Accessing Spreadsheet Cells
 ===============================
 
 Gnumeric/Pure provides the following functions to retrieve and modify
@@ -689,7 +933,7 @@ the contents of spreadsheet cells and ranges of such cells:
     extern expr* pure_set_range_format(char* s, expr *x) = set_range_format;
 
 For instance, here's how you use these functions to write and then read
-some cell values (try this in the interactive Pure shell):
+some cell values (try this in the *note interactive Pure shell: e.):
 
     > set_cell "A14" 42
       ()
@@ -751,7 +995,7 @@ Examples:
 
 File: gnumeric-pure.info,  Node: Asynchronous Data Sources,  Next: Triggers,  Prev: Accessing Spreadsheet Cells,  Up: Advanced Features
 
-8.3 Asynchronous Data Sources
+9.3 Asynchronous Data Sources
 =============================
 
 Gnumeric/Pure makes it easy to set up asynchronous data sources which
@@ -841,7 +1085,7 @@ leave this as an exercise to the interested reader.
 
 File: gnumeric-pure.info,  Node: Triggers,  Next: Sheet Objects,  Prev: Asynchronous Data Sources,  Up: Advanced Features
 
-8.4 Triggers
+9.4 Triggers
 ============
 
 In addition to asynchronous data sources, the `trigger' function is
@@ -892,7 +1136,7 @@ more useful example will be discussed in the following section.
 
 File: gnumeric-pure.info,  Node: Sheet Objects,  Next: OpenGL Interface,  Prev: Triggers,  Up: Advanced Features
 
-8.5 Sheet Objects
+9.5 Sheet Objects
 =================
 
 Gnumeric offers some kinds of special objects which can be placed on a
@@ -959,7 +1203,7 @@ Gnumeric frame widget, see below.
 
 File: gnumeric-pure.info,  Node: OpenGL Interface,  Prev: Sheet Objects,  Up: Advanced Features
 
-8.6 OpenGL Interface
+9.6 OpenGL Interface
 ====================
 
 Gnumeric/Pure provides special support for rendering OpenGL scenes into
@@ -999,7 +1243,7 @@ The meaning of the parameters is as follows:
      used to set the initial projection and modelview matrices, enable
      lighting, etc.
 
-   * `config_cb' is called when width or height of the frame widget
+   * `config_cb' is called when the width or height of the frame widget
      changes so that the rendering parameters (typically the viewport)
      can be adjusted accordingly. It is invoked with a pair of integers
      `(w,h)' as the second argument, which denotes the new dimension
@@ -1095,28 +1339,7 @@ The screenshot below shows how the example looks like in Gnumeric.
 Figure: Gnumeric/Pure OpenGL example.
 
 
-File: gnumeric-pure.info,  Node: Copying,  Next: Index,  Prev: Advanced Features,  Up: Top
-
-9 Copying
-*********
-
-Copyright (c) 2009 by Albert Graef.
-
-  Gnumeric/Pure is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at
-your option) any later version.
-
-  Gnumeric/Pure is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-along with this program.  If not, see <<http://www.gnu.org/licenses/>>.
-
-
-File: gnumeric-pure.info,  Node: Index,  Prev: Copying,  Up: Top
+File: gnumeric-pure.info,  Node: Index,  Prev: Advanced Features,  Up: Top
 
 Index
 *****
@@ -1137,75 +1360,91 @@ Ref: 3930
 Ref: octave930
 Ref: 4930
 Ref: opengl930
-Node: Introduction1433
-Ref: introduction1525
-Ref: 51525
-Ref: gnumeric-pure-a-pure-plugin-for-gnumeric1525
-Ref: 61525
-Node: Installation4004
-Ref: installation4098
-Ref: 74098
-Ref: 84947
-Ref: gtkglext4947
-Node: Setup6489
-Ref: setup6582
-Ref: 96582
-Node: Basic Usage8413
-Ref: basic usage8516
-Ref: b8516
-Ref: basic-usage8516
-Node: Interactive Pure Shell11313
-Ref: interactive pure shell11438
-Ref: c11438
-Ref: interactive-pure-shell11438
-Node: Defining Your Own Functions13826
-Ref: defining your own functions13963
-Ref: f13963
-Ref: defining-your-own-functions13963
-Node: Gnumeric/Pure Interface17590
-Ref: gnumeric/pure interface17722
-Ref: 1017722
-Ref: gnumeric-pure-interface17722
-Node: Function Descriptions18187
-Ref: function descriptions18328
-Ref: 1118328
-Ref: function-descriptions18328
-Node: Conversions Between Pure and Gnumeric Values24668
-Ref: conversions between pure and gnumeric values24809
-Ref: 1224809
-Ref: conversions-between-pure-and-gnumeric-values24809
-Node: Advanced Features27029
-Ref: advanced features27141
-Ref: d27141
-Ref: advanced-features27141
-Node: Calling Gnumeric from Pure27589
-Ref: calling gnumeric from pure27712
-Ref: e27712
-Ref: calling-gnumeric-from-pure27712
-Node: Accessing Spreadsheet Cells28593
-Ref: accessing spreadsheet cells28750
-Ref: 1328750
-Ref: accessing-spreadsheet-cells28750
-Node: Asynchronous Data Sources31805
-Ref: asynchronous data sources31944
-Ref: 1431944
-Ref: asynchronous-data-sources31944
-Node: Triggers35802
-Ref: triggers35927
-Ref: 1535927
-Node: Sheet Objects38303
-Ref: sheet objects38419
-Ref: 1638419
-Ref: sheet-objects38419
-Node: OpenGL Interface41286
-Ref: opengl interface41385
-Ref: a41385
-Ref: opengl-interface41385
-Node: Copying46964
-Ref: copying47058
-Ref: 1747058
-Node: Index47739
-Ref: index47807
+Node: Introduction1557
+Ref: introduction1644
+Ref: 51644
+Ref: gnumeric-pure-a-pure-plugin-for-gnumeric1644
+Ref: 61644
+Node: Copying4365
+Ref: copying4461
+Ref: 74461
+Node: Installation5147
+Ref: installation5236
+Ref: 85236
+Ref: 96085
+Ref: gtkglext6085
+Node: Setup7848
+Ref: setup7941
+Ref: b7941
+Node: Basic Usage9772
+Ref: basic usage9875
+Ref: d9875
+Ref: basic-usage9875
+Node: Interactive Pure Shell12777
+Ref: interactive pure shell12902
+Ref: e12902
+Ref: interactive-pure-shell12902
+Node: Defining Your Own Functions15291
+Ref: defining your own functions15428
+Ref: a15428
+Ref: defining-your-own-functions15428
+Node: Creating a Simple Plugin15820
+Ref: creating a simple plugin15943
+Ref: 1115943
+Ref: creating-a-simple-plugin15943
+Node: The plugin xml File18979
+Ref: the plugin xml file19129
+Ref: 1319129
+Ref: the-plugin-xml-file19129
+Node: Loading the Plugin21339
+Ref: loading the plugin21478
+Ref: 1421478
+Ref: loading-the-plugin21478
+Node: Spicing It Up24854
+Ref: spicing it up24965
+Ref: 1524965
+Ref: spicing-it-up24965
+Node: Gnumeric/Pure Interface26908
+Ref: gnumeric/pure interface27040
+Ref: 1227040
+Ref: gnumeric-pure-interface27040
+Node: Function Descriptions28072
+Ref: function descriptions28213
+Ref: 1628213
+Ref: function-descriptions28213
+Node: Conversions Between Pure and Gnumeric Values34553
+Ref: conversions between pure and gnumeric values34694
+Ref: 1734694
+Ref: conversions-between-pure-and-gnumeric-values34694
+Node: Advanced Features36915
+Ref: advanced features37025
+Ref: f37025
+Ref: advanced-features37025
+Node: Calling Gnumeric from Pure37472
+Ref: calling gnumeric from pure37595
+Ref: 1037595
+Ref: calling-gnumeric-from-pure37595
+Node: Accessing Spreadsheet Cells38476
+Ref: accessing spreadsheet cells38633
+Ref: 1838633
+Ref: accessing-spreadsheet-cells38633
+Node: Asynchronous Data Sources41698
+Ref: asynchronous data sources41837
+Ref: 1941837
+Ref: asynchronous-data-sources41837
+Node: Triggers45695
+Ref: triggers45820
+Ref: 1a45820
+Node: Sheet Objects48196
+Ref: sheet objects48312
+Ref: 1b48312
+Ref: sheet-objects48312
+Node: OpenGL Interface51179
+Ref: opengl interface51278
+Ref: c51278
+Ref: opengl-interface51278
+Node: Index56861
+Ref: index56939
 
 End Tag Table
 

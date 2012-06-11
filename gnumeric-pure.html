@@ -57,7 +57,7 @@
             
   <div class="section" id="gnumeric-pure-a-pure-plugin-for-gnumeric">
 <h1>Gnumeric/Pure: A Pure Plugin for Gnumeric<a class="headerlink" href="#gnumeric-pure-a-pure-plugin-for-gnumeric" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.12, June 11, 2012</p>
+<p>Version 0.12, June 12, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Gnumeric/Pure is a <a class="reference external" href="http://www.gnumeric.org/">Gnumeric</a> extension which lets you use <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> functions in
 Gnumeric, the Gnome spreadsheet. It offers better execution speed than the
@@ -125,14 +125,18 @@ kicking in (you&#8217;ll notice this if you open a spreadsheet with Pure
 functions), the resulting compiled code then typically executes <em>much</em>
 faster than equivalent interpreted Perl and Python code.</li>
 </ul>
-<p>Adding Pure functions to Gnumeric is quite easy. Once the plugin is installed
-and enabled, you can simply start adding Pure functions to the provided
-<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> script, or you can create your own Pure plugin folders.
-Gnumeric/Pure also provides a programming interface for use in Pure which
-gives you access to various advanced features, such as modifying entire ranges
-of cells with one Pure call, calling Gnumeric functions from Pure, and setting
-up asynchronous data sources and OpenGL frames. This is all explained in
-detail below.</p>
+<p>Once the plugin loader is installed and enabled, you can start using the Pure
+functions in the provided sample <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> and <tt class="docutils literal"><span class="pre">pure-glfunc.pure</span></tt>
+scripts right away. Adding your own Pure functions to Gnumeric is now a piece
+of cake, too. As of version 0.12, there&#8217;s a new helper script <tt class="docutils literal"><span class="pre">pure-gnm</span></tt>
+which generates the required plugin.xml files for you. Various examples can be
+found in the examples folder in the distribution, which should help you to get
+started with Gnumeric/Pure fairly quickly.</p>
+<p>For more advanced uses, Gnumeric/Pure also provides a programming interface
+for use in Pure which lets you do various special tasks such as modifying
+entire ranges of cells with one Pure call, calling Gnumeric functions from
+Pure, and setting up asynchronous data sources and OpenGL frames. The manual
+explains all this in detail.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This manual assumes that you&#8217;re already familiar with Gnumeric as
@@ -159,10 +163,18 @@ this program.  If not, see &lt;<a class="reference external" href="http://www.gn
 <p>Get the latest source from
 <a class="reference external" href="http://pure-lang.googlecode.com/files/gnumeric-pure-0.12.tar.gz">http://pure-lang.googlecode.com/files/gnumeric-pure-0.12.tar.gz</a>.</p>
 <p>Obviously, you need to have both Pure and Gnumeric installed. Pure 0.36 and
-Gnumeric 1.9.13 are known to work. We recommend Gnumeric 1.9.14 or later since
-it has improved support for GUI widgets. (Older Gnumeric versions probably
-work as well if you&#8217;re willing to fiddle with the Makefile and/or the
+Gnumeric 1.9.13 or later are known to work. We recommend Gnumeric 1.9.14 or
+later since it has improved support for GUI widgets. (Older Gnumeric versions
+probably work as well if you&#8217;re willing to fiddle with the Makefile and/or the
 sources. See the beginning of the Makefile for related information.)</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">At present, Gnumeric/Pure will <em>not</em> work with the current Gnumeric
+1.11 development series which is based on GTK3 and reportedly has a
+different plugin interface. (At least nobody has tried porting
+Gnumeric/Pure to it yet.) So you&#8217;ll have to stick to the stable Gnumeric
+series for the time being.</p>
+</div>
 <p>As shipped, the Makefile is set up to build Gnumeric/Pure with OpenGL support,
 which requires that you have the OpenGL libraries as well as <a class="reference external" href="http://gtkglext.sourceforge.net">GtkGLExt</a> (the
 Gtk OpenGL extension) installed. These should be readily available on most
@@ -177,16 +189,18 @@ it into your personal plugin directory then run <tt class="docutils literal"><sp
 instead. (The latter is recommended if you plan to customize any of the sample
 plugin scripts included in the distribution for your purposes.)</p>
 <p>Typically, <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> and <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install-local</span></tt> will install the
-plugins into the following directories by default:</p>
+plugins into the following directories by default (here and in the following
+<tt class="docutils literal"><span class="pre">&lt;version&gt;</span></tt> denotes the version of Gnumeric you have installed):</p>
 <ul class="simple">
-<li>System-wide installations go into <tt class="docutils literal"><span class="pre">/usr/local/lib/gnumeric/1.9.13/plugins</span></tt>
-or similar, depending on where Gnumeric is installed.</li>
-<li>User-specific installations go into <tt class="docutils literal"><span class="pre">~/.gnumeric/1.9.13/plugins</span></tt>.</li>
+<li>System-wide installations go into
+<tt class="docutils literal"><span class="pre">/usr/local/lib/gnumeric/&lt;version&gt;/plugins</span></tt> or similar, depending on
+Gnumeric&#8217;s installation prefix (usually either <tt class="docutils literal"><span class="pre">/usr/local</span></tt> or <tt class="docutils literal"><span class="pre">/usr</span></tt>).</li>
+<li>User-specific installations go into <tt class="docutils literal"><span class="pre">~/.gnumeric/&lt;version&gt;/plugins</span></tt>.</li>
 </ul>
 <p>The Makefile tries to guess the installation path and version number of
 Gnumeric on its own. If it guesses wrong, you can change these using the
 Makefile variables <tt class="docutils literal"><span class="pre">prefix</span></tt> and <tt class="docutils literal"><span class="pre">gnmversion</span></tt>, respectively. For instance:</p>
-<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>make <span class="nv">prefix</span><span class="o">=</span>/usr <span class="nv">gnmversion</span><span class="o">=</span>1.9.13
+<div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>make <span class="nv">prefix</span><span class="o">=</span>/usr <span class="nv">gnmversion</span><span class="o">=</span>1.10.13
 </pre></div>
 </div>
 <p>In either case, <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> also installs the <tt class="docutils literal"><span class="pre">pure-gnm</span></tt> helper script
@@ -454,6 +468,21 @@ found in the source distribution (see <tt class="docutils literal"><span class="
 folder) or under <tt class="docutils literal"><span class="pre">/usr/local/lib/pure-gnm</span></tt> after installation. You can edit
 this file (carefully!) in order to implement global changes that you want to
 be in every <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file generated by <tt class="docutils literal"><span class="pre">pure-gnm</span></tt>.</p>
+<p>Two specific items that you might want to edit by hand are the
+<tt class="docutils literal"><span class="pre">&lt;require_explicit_enabling/&gt;</span></tt> tag and the <tt class="docutils literal"><span class="pre">id</span></tt> properties of the
+<tt class="docutils literal"><span class="pre">&lt;plugin&gt;</span></tt> and <tt class="docutils literal"><span class="pre">&lt;service&gt;</span></tt> tags:</p>
+<ul class="simple">
+<li>The <tt class="docutils literal"><span class="pre">&lt;require_explicit_enabling/&gt;</span></tt> tag indicates that Gnumeric shouldn&#8217;t
+enable the new plugin until you explicitly tell it to. You can remove that
+line if you want Gnumeric to automatically enable new plugins as they are
+added to the system.</li>
+<li>The <tt class="docutils literal"><span class="pre">pure-gnm</span></tt> script automatically derives the <tt class="docutils literal"><span class="pre">id</span></tt> properties of the
+<tt class="docutils literal"><span class="pre">&lt;plugin&gt;</span></tt> and <tt class="docutils literal"><span class="pre">&lt;service&gt;</span></tt> tags from the name of the plugin script,
+which is a sensible default in most cases. However, you might have to change
+these identifiers if they happen to collide with other Gnumeric plugins and
+services. This can be done by either editing the generated <tt class="docutils literal"><span class="pre">plugin.xml</span></tt>
+file or by renaming the plugin script accordingly.</li>
+</ul>
 <p>Note that the only really Pure-specific part in the xml file is the loader
 description which also names the Pure script implementing the plugin in the
 value of the <tt class="docutils literal"><span class="pre">module_name</span></tt> attribute. In this case this is just
@@ -465,70 +494,104 @@ you want to keep the plugin script elsewhere. To achieve this with
 </pre></div>
 </div>
 <p>Now you can move the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file whereever you like and still have
-Gnumeric find the script file.</p>
-<p>Another detail worth mentioning here is the <tt class="docutils literal"><span class="pre">&lt;require_explicit_enabling/&gt;</span></tt>
-tag in the xml file. This means that Gnumeric won&#8217;t enable the new plugin
-until you explicitly tell it to. You can also remove that line if you want
-Gnumeric to automatically enable new plugins as they are added to the system.</p>
+Gnumeric find the script file in its prescribed location. Again, this can be
+automatized using <tt class="docutils literal"><span class="pre">make</span></tt> fairly easily; we&#8217;ll return to that in the
+following section.</p>
 </div>
 <div class="section" id="loading-the-plugin">
 <h3><a class="toc-backref" href="#id10">Loading the Plugin</a><a class="headerlink" href="#loading-the-plugin" title="Permalink to this headline">¶</a></h3>
 <p>We now have the plugin script <tt class="docutils literal"><span class="pre">myplugin.pure</span></tt> and the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file in
 the same directory, say, <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>. We still need to tell
-Gnumeric about the new plugin, though, so that it can find it. There are
-basically two ways of doing this:</p>
+Gnumeric about the new plugin, though, so that it can find it. Unfortunately,
+the mechanics of making a plugin known to Gnumeric are somewhat involved, so
+we discuss the necessary steps in detail below. There are basically three ways
+you can go about this:</p>
 <ul class="simple">
-<li>Copy the entire <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt> directory to your personal Gnumeric
-plugin folder (usually something like <tt class="docutils literal"><span class="pre">~/.gnumeric/1.9.13/plugins</span></tt>,
-depending on which Gnumeric version you have installed). This is the easiest
-way to go, since Gnumeric will always search this directory for new plugins
-by default.</li>
-<li>Keep the plugin directory where it is and add the <em>parent</em> of this directory
-to Gnumeric&#8217;s plugin path. To these ends, fire up Gnumeric and enter the
-directory under the Directories tab in the Tools/Plug-ins dialog (if it&#8217;s
-not already there). Note that you really have to add the <em>parent</em> directory
-<tt class="docutils literal"><span class="pre">/some/path</span></tt>, not <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt> itself, because each Gnumeric
-plugin directory may in fact contain as many subdirectories with plugins as
-you like.</li>
+<li>If you want to keep plugin script and the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file where they
+are, you&#8217;ll have to change Gnumeric&#8217;s plugin path so that it includes the
+<em>parent</em> directory <tt class="docutils literal"><span class="pre">/some/path</span></tt> (not <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>). This is the
+least convenient method. It requires you to add the directory under the
+Directories tab in Gnumeric&#8217;s Tools/Plug-ins dialog, after which you&#8217;ll have
+to restart Gnumeric so that it picks up the changes in the plugin search
+path.</li>
+<li>Second, you can also move or copy the entire <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>
+directory to your personal Gnumeric plugin folder (usually something like
+<tt class="docutils literal"><span class="pre">~/.gnumeric/&lt;version&gt;/plugins</span></tt>). This is somewhat more convenient, since
+Gnumeric will always search this directory for new plugins by default, so
+modifying the plugin search path is not necessary. However, it will move the
+plugin to a hidden location in your home directory, which may not be very
+convenient if you want to modify the plugin script later.</li>
+<li>Third, you can get the best features of both previous methods by keeping the
+plugin script where it is and copying just the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file to your
+personal Gnumeric plugin folder.</li>
 </ul>
-<p>Once you fire up Gnumeric again, the new plugin should now be listed as &#8220;My
-Pure functions&#8221; on the Plugin List tab in the Tools/Plug-ins dialog. Check it
-to enable it. The <tt class="docutils literal"><span class="pre">factorial</span></tt> function defined in the plugin should now be
-available, and you can create a new worksheet (or load an existing one) which
-calls this function. For instance, type this into a cell to have the factorial
+<p>The third method tends to be the easiest, but note that it requires that the
+plugin script needs to be specified as an absolute path (as sketched out
+previously). Fortunately, it&#8217;s fairly easy to automatize this with <tt class="docutils literal"><span class="pre">make</span></tt>.
+The following requires GNU make to work, and you&#8217;ll also need to have the
+Gnumeric development files installed, so that the Gnumeric version can be
+determined easily with a shell command. These rules are to be added to the end
+of the Makefile described previously under <a class="reference internal" href="#creating-a-simple-plugin">Creating a Simple Plugin</a>.</p>
+<div class="highlight-make"><div class="highlight"><pre><span class="nv">gnmversion</span><span class="o">=</span><span class="k">$(</span>shell pkg-config --modversion libspreadsheet-1.10<span class="k">)</span>
+<span class="nv">plugindir</span><span class="o">=</span><span class="k">$(</span>HOME<span class="k">)</span>/.gnumeric/<span class="k">$(</span>gnmversion<span class="k">)</span>/plugins/myplugin
+
+install: <span class="k">$(</span>myplugin<span class="k">)</span>
+        <span class="nb">test</span> -d <span class="k">$(</span>plugindir<span class="k">)</span> <span class="o">||</span> mkdir -p <span class="k">$(</span>plugindir<span class="k">)</span>
+        pure-gnm <span class="k">$(</span>CURDIR<span class="k">)</span>/<span class="nv">$&lt;</span> &gt; <span class="k">$(</span>plugindir<span class="k">)</span>/plugin.xml
+
+uninstall:
+        rm -rf <span class="k">$(</span>plugindir<span class="k">)</span>
+</pre></div>
+</div>
+<p>Now you can just run <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> to make the plugin known to Gnumeric.
+Note that we also added a rule that allows you to uninstall the plugin if it
+isn&#8217;t needed any more.</p>
+<p>In any case, once you fire up Gnumeric again, the new plugin should now be
+listed as &#8220;My Pure functions&#8221; on the Plugin List tab in the Tools/Plug-ins
+dialog. Check it to enable it. The <tt class="docutils literal"><span class="pre">factorial</span></tt> function defined in the
+plugin should now be available, and is ready to be called just like any other
+Gnumeric function. For instance, type this into a cell to have the factorial
 of 10 computed:</p>
 <div class="highlight-pure"><div class="highlight"><pre>=factorial(<span class="mi">10</span>)
 </pre></div>
 </div>
+<p>Also try saving the spreadsheet and loading it again after restarting
+Gnumeric. The plugin will now be loaded automatically and the spreadsheet
+should display the proper value of the factorial.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>One little quirk here is that changes in the plugin configuration
-generally require a restart of Gnumeric to take effect. Another common
-mishap is that you open an existing workbook without having enabled the
-plugins it uses. An easily visible symptom of that is that you&#8217;ll see lots
-of cells showing the <tt class="docutils literal"><span class="pre">#NAME</span></tt> error. You will then have to enable those
-plugins <em>and</em> reload the workbook afterwards, so that everything is
-recalculated properly.</p>
+<p>Once you start playing around with your own Pure plugins, you may
+run into one common mishap: You open an existing spreadsheet without having
+enabled the plugins it uses. An easily visible symptom of that is that
+you&#8217;ll see cells showing the <tt class="docutils literal"><span class="pre">#NAME</span></tt> error. You will then have to enable
+those plugins again <em>and</em> reload the spreadsheet afterwards, so that
+everything is recalculated properly.</p>
 <p class="last">In contrast, just changing the definition of a function in a plugin usually
-needs neither a restart of Gnumeric nor a reloading of the workbook. In
+needs neither a restart of Gnumeric nor a reloading of the spreadsheet. In
 this case it&#8217;s often sufficient to reload all scripts with the &#8220;Reload Pure
 Scripts&#8221; option in the Tools/Pure menu, after which you can use
 “Recalculate” (F9) to recompute the spreadsheet.</p>
 </div>
-<p>The Pure loader can load multiple Pure plugins (and of course each plugin can
-provide as many functions as you want). You only need to tell Gnumeric about
-them after creating the scripts and <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> files and placing them into
-corresponding plugin directories. Just enable the ones that you want in
-Tools/Plug-ins. All scripts are loaded in the same Pure interpreter (and thus
-are treated like one big script) so that functions in one script can use the
-function and variable definitions in another. If you need to access the
-definitions in the <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> &#8220;mother script&#8221;, you can also just
-import it into your scripts with a <tt class="docutils literal"><span class="pre">using</span></tt> clause, i.e.: <tt class="docutils literal"><span class="pre">using</span>
-<span class="pre">pure_func;</span></tt></p>
-<p>Another thing worth mentioning here is that a Pure plugin script is always
-executed in the directory where it is located (even if it is different from
-the directory with the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file) so that it can easily find
-imported scripts and other files that it may need.</p>
+<p>It is also worth mentioning here that the Pure loader can load multiple Pure
+plugins (and of course each plugin can provide as many functions as you
+want). You only need to tell Gnumeric about them after creating the scripts
+and <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> files and placing them into corresponding plugin
+directories. Just enable the ones that you want in Tools/Plug-ins. All scripts
+are loaded in the same Pure interpreter (and thus are treated like one big
+script) so that functions in one script can use the function and variable
+definitions in another. If you need to access the definitions in the
+<tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> &#8220;mother script&#8221;, you can also just import it into your
+scripts with a <tt class="docutils literal"><span class="pre">using</span></tt> clause, i.e.: <tt class="docutils literal"><span class="pre">using</span> <span class="pre">pure_func;</span></tt></p>
+<p>Another important point is that a Pure plugin script is always loaded in the
+directory where it is located, as indicated by the corresponding
+<tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file, even if it is different from the plugin directory. That
+is, the current working directory (which is normally the directory that
+Gnumeric was started in) is temporarily set to the directory holding the
+plugin script while the script is being loaded. This enables the script to
+find imported scripts and other files (such as media files or scripts written
+in other languages) that it may need at load time. This wasn&#8217;t needed in this
+simple example, but you can find other examples in the Gnumeric/Pure
+distribution which make good use of this feature.</p>
 </div>
 <div class="section" id="spicing-it-up">
 <h3><a class="toc-backref" href="#id11">Spicing It Up</a><a class="headerlink" href="#spicing-it-up" title="Permalink to this headline">¶</a></h3>
@@ -541,9 +604,9 @@ adding a rule for the <tt class="docutils literal"><span class="pre">gnm_info</s
 that <tt class="docutils literal"><span class="pre">factorial</span></tt> expects a single numeric argument. While we&#8217;re at it, we
 might as well add some helpful documentation to be displayed in Gnumeric&#8217;s
 &#8220;f(x)&#8221; dialog. The details of this are described in the following section, but
-to give you a preview of upcoming attractions, here&#8217;s a beefed-up version of
-our script which implements all this (you can also find this version of the
-example in the Gnumeric/Pure distribution):</p>
+to give you a sneak preview, here&#8217;s a beefed-up version of our script which
+implements all this (you can also find this version of the example along with
+a GNU Makefile in the Gnumeric/Pure distribution):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! N: My Pure functions</span>
 <span class="cp">#! C: Pure</span>
 <span class="cp">#! D: My Pure functions.</span>
@@ -563,9 +626,11 @@ function is supposed to be called with exactly one <tt class="docutils literal">
 Therefore the list brackets around the argument of <tt class="docutils literal"><span class="pre">factorial</span></tt> aren&#8217;t needed
 any more, so don&#8217;t forget to remove them, as shown in the above code sample.</p>
 <p>This completes our little example. As an exercise, you&#8217;re invited to add more
-functions on your own. Don&#8217;t forget to change the <tt class="docutils literal"><span class="pre">#!</span> <span class="pre">F</span></tt> line accordingly
+functions on your own. (Don&#8217;t forget to change the <tt class="docutils literal"><span class="pre">#!</span> <span class="pre">F</span></tt> line accordingly
 and rerun <tt class="docutils literal"><span class="pre">pure-gnm</span></tt> when you do this, so that Gnumeric knows about the new
-functions.</p>
+functions.) It also pays off to take a look at some of the other included
+examples, you can find these in the <tt class="docutils literal"><span class="pre">examples</span></tt> folder of the distribution
+tarball.</p>
 </div>
 </div>
 <div class="section" id="gnumeric-pure-interface">

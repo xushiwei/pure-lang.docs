@@ -57,7 +57,7 @@
             
   <div class="section" id="gnumeric-pure-a-pure-plugin-for-gnumeric">
 <h1>Gnumeric/Pure: A Pure Plugin for Gnumeric<a class="headerlink" href="#gnumeric-pure-a-pure-plugin-for-gnumeric" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.12, June 12, 2012</p>
+<p>Version 0.12, June 13, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Gnumeric/Pure is a <a class="reference external" href="http://www.gnumeric.org/">Gnumeric</a> extension which lets you use <a class="reference external" href="http://pure-lang.googlecode.com/">Pure</a> functions in
 Gnumeric, the Gnome spreadsheet. It offers better execution speed than the
@@ -125,18 +125,17 @@ kicking in (you&#8217;ll notice this if you open a spreadsheet with Pure
 functions), the resulting compiled code then typically executes <em>much</em>
 faster than equivalent interpreted Perl and Python code.</li>
 </ul>
-<p>Once the plugin loader is installed and enabled, you can start using the Pure
-functions in the provided sample <tt class="docutils literal"><span class="pre">pure_func.pure</span></tt> and <tt class="docutils literal"><span class="pre">pure-glfunc.pure</span></tt>
-scripts right away. Adding your own Pure functions to Gnumeric is now a piece
-of cake, too. As of version 0.12, there&#8217;s a new helper script <tt class="docutils literal"><span class="pre">pure-gnm</span></tt>
-which generates the required plugin.xml files for you. Various examples can be
-found in the examples folder in the distribution, which should help you to get
+<p>Once the plugin loader is installed and enabled, you can try the Pure
+functions in the provided examples and start adding your own plugin scripts.
+As of version 0.12, there&#8217;s a new helper script <tt class="docutils literal"><span class="pre">pure-gnm</span></tt> which generates
+the required plugin.xml files to make this easy. Various examples can be found
+in the examples folder in the distribution, which should help you to get
 started with Gnumeric/Pure fairly quickly.</p>
 <p>For more advanced uses, Gnumeric/Pure also provides a programming interface
-for use in Pure which lets you do various special tasks such as modifying
-entire ranges of cells with one Pure call, calling Gnumeric functions from
-Pure, and setting up asynchronous data sources and OpenGL frames. The manual
-explains all this in detail.</p>
+which lets you do various special tasks such as modifying entire ranges of
+cells with one Pure call, calling Gnumeric functions from Pure, and setting up
+asynchronous data sources and OpenGL frames. The manual explains all this in
+detail.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This manual assumes that you&#8217;re already familiar with Gnumeric as
@@ -369,12 +368,12 @@ can be implemented as follows:</p>
 </pre></div>
 </div>
 <p>Note the list bracket around the argument <tt class="docutils literal"><span class="pre">x</span></tt>. You wouldn&#8217;t normally pass a
-single numeric argument that way in Pure, but this is needed since by default
-Gnumeric passes arguments as a list to a Pure function. There are other ways
-to configure the call interface to Pure functions, but these require that we
-tell Gnumeric about the number and types of arguments, see <a class="reference internal" href="#gnumeric-pure-interface">Gnumeric/Pure
-Interface</a> below. For the moment let&#8217;s stick to the default scheme, however,
-in order to keep things simple.</p>
+single numeric argument that way in Pure, but this is needed here since by
+default Gnumeric passes arguments as a list to a Pure function. There are
+other ways to configure the call interface to Pure functions, but these
+require that we tell Gnumeric about the number and types of arguments, see
+<a class="reference internal" href="#gnumeric-pure-interface">Gnumeric/Pure Interface</a> below. For the moment let&#8217;s stick to the default
+scheme, however, in order to keep things simple.</p>
 <p>Put the above definition into a script file, say, <tt class="docutils literal"><span class="pre">myplugin.pure</span></tt>. Next we
 need to create a <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file to tell Gnumeric about our plugin and
 which functions it provides. While these files can be written by hand, this is
@@ -390,15 +389,25 @@ case, this might look as follows:</p>
 </pre></div>
 </div>
 <p>You can add this comment block anywhere in your plugin script, but usually it
-is placed near the beginning. The meaning of the fields are:</p>
+is placed near the beginning. The different fields have the following meaning:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">N</span></tt>: the name of the plugin</li>
-<li><tt class="docutils literal"><span class="pre">C</span></tt>: the category under which the functions provided by the plugin will
-show in the &#8220;f(x)&#8221; dialog in Gnumeric</li>
-<li><tt class="docutils literal"><span class="pre">D</span></tt>: (optionally) a more detailed description of the plugin</li>
-<li><tt class="docutils literal"><span class="pre">F</span></tt>: a whitespace-delimited list of the names of the functions provided by
-the plugin</li>
+<li><tt class="docutils literal"><span class="pre">C</span></tt>: the function category</li>
+<li><tt class="docutils literal"><span class="pre">D</span></tt>: a more detailed description of the plugin</li>
+<li><tt class="docutils literal"><span class="pre">F</span></tt>: a whitespace-delimited list of Pure function names</li>
 </ul>
+<p>The contents of the <tt class="docutils literal"><span class="pre">N</span></tt> and <tt class="docutils literal"><span class="pre">D</span></tt> fields (name and description) are visible
+in Gnumeric&#8217;s &#8220;Plugin Manager&#8221; dialog. You should specify at least the name
+field (otherwise the plugin will be displayed as &#8220;Unnamed&#8221; in the dialog),
+while the description is optional (if you don&#8217;t specify one, the description
+of the plugin will be empty). The <tt class="docutils literal"><span class="pre">C</span></tt> field denotes the category under which
+the functions listed in the <tt class="docutils literal"><span class="pre">F</span></tt> field will be shown in Gnumeric&#8217;s &#8220;f(x)&#8221;
+dialog; if you don&#8217;t specify this, the functions will be in the &#8220;Unknown&#8221;
+category. The <tt class="docutils literal"><span class="pre">F</span></tt> field is the most crucial part. It must contain all Pure
+functions defined in the plugin script or its imports that you want to be
+visible in Gnumeric, so you have to keep this in sync with the actual function
+definitions in the script; if you don&#8217;t specify this, the plugin will provide
+no functions at all.</p>
 <p>The <tt class="docutils literal"><span class="pre">D</span></tt> and <tt class="docutils literal"><span class="pre">F</span></tt> fields can also be split into multiple lines (each
 prefixed with the &#8220;hashbang&#8221; comment marker and the corresponding field
 identifier) if necessary.</p>
@@ -411,8 +420,8 @@ identifier) if necessary.</p>
 factorial [x] = foldl (*) <span class="mi">1</span> (<span class="mi">1</span>..x)<span class="p">;</span>
 </pre></div>
 </div>
-<p>You can now generate the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file for the plugin simply as
-follows:</p>
+<p>Once you&#8217;ve added the comment block, you can generate the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file
+for the plugin simply as follows:</p>
 <div class="highlight-sh"><div class="highlight"><pre><span class="nv">$ </span>pure-gnm myplugin.pure &gt; plugin.xml
 </pre></div>
 </div>
@@ -509,25 +518,24 @@ you can go about this:</p>
 <ul class="simple">
 <li>If you want to keep plugin script and the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file where they
 are, you&#8217;ll have to change Gnumeric&#8217;s plugin path so that it includes the
-<em>parent</em> directory <tt class="docutils literal"><span class="pre">/some/path</span></tt> (not <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>). This is the
-least convenient method. It requires you to add the directory under the
-Directories tab in Gnumeric&#8217;s Tools/Plug-ins dialog, after which you&#8217;ll have
-to restart Gnumeric so that it picks up the changes in the plugin search
-path.</li>
+<em>parent</em> directory <tt class="docutils literal"><span class="pre">/some/path</span></tt> (not <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>). This is
+done by adding the directory under the Directories tab in Gnumeric&#8217;s
+Tools/Plug-ins dialog, after which you&#8217;ll have to restart Gnumeric so that
+it picks up the changes in the plugin search path.</li>
 <li>Second, you can also move or copy the entire <tt class="docutils literal"><span class="pre">/some/path/myplugin</span></tt>
-directory to your personal Gnumeric plugin folder (usually something like
-<tt class="docutils literal"><span class="pre">~/.gnumeric/&lt;version&gt;/plugins</span></tt>). This is somewhat more convenient, since
-Gnumeric will always search this directory for new plugins by default, so
-modifying the plugin search path is not necessary. However, it will move the
-plugin to a hidden location in your home directory, which may not be very
-convenient if you want to modify the plugin script later.</li>
-<li>Third, you can get the best features of both previous methods by keeping the
-plugin script where it is and copying just the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file to your
-personal Gnumeric plugin folder.</li>
+directory to your personal Gnumeric plugin folder (usually
+<tt class="docutils literal"><span class="pre">~/.gnumeric/&lt;version&gt;/plugins</span></tt>). Gnumeric will always search this
+directory for new plugins by default, so modifying the plugin search path is
+not necessary. However, keeping the plugin script in a hidden location in
+your home directory may not be very convenient if you want to modify the
+script later.</li>
+<li>Third, you can get the best of both previous methods by keeping the plugin
+script where it is and copying just the <tt class="docutils literal"><span class="pre">plugin.xml</span></tt> file to your personal
+Gnumeric plugin folder.</li>
 </ul>
 <p>The third method tends to be the easiest, but note that it requires that the
 plugin script needs to be specified as an absolute path (as sketched out
-previously). Fortunately, it&#8217;s fairly easy to automatize this with <tt class="docutils literal"><span class="pre">make</span></tt>.
+previously). Fortunately, it&#8217;s fairly easy to automate this with <tt class="docutils literal"><span class="pre">make</span></tt>.
 The following requires GNU make to work, and you&#8217;ll also need to have the
 Gnumeric development files installed, so that the Gnumeric version can be
 determined easily with a shell command. These rules are to be added to the end
@@ -546,10 +554,10 @@ uninstall:
 <p>Now you can just run <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> to make the plugin known to Gnumeric.
 Note that we also added a rule that allows you to uninstall the plugin if it
 isn&#8217;t needed any more.</p>
-<p>In any case, once you fire up Gnumeric again, the new plugin should now be
-listed as &#8220;My Pure functions&#8221; on the Plugin List tab in the Tools/Plug-ins
+<p>In any case, once you fire up Gnumeric again, the new plugin should be listed
+as &#8220;My Pure functions&#8221; on the Plugin List tab in the Tools/Plug-ins
 dialog. Check it to enable it. The <tt class="docutils literal"><span class="pre">factorial</span></tt> function defined in the
-plugin should now be available, and is ready to be called just like any other
+plugin should now be available and ready to be called just like any other
 Gnumeric function. For instance, type this into a cell to have the factorial
 of 10 computed:</p>
 <div class="highlight-pure"><div class="highlight"><pre>=factorial(<span class="mi">10</span>)
@@ -563,12 +571,12 @@ should display the proper value of the factorial.</p>
 <p>Once you start playing around with your own Pure plugins, you may
 run into one common mishap: You open an existing spreadsheet without having
 enabled the plugins it uses. An easily visible symptom of that is that
-you&#8217;ll see cells showing the <tt class="docutils literal"><span class="pre">#NAME</span></tt> error. You will then have to enable
+you&#8217;ll see cells showing the <tt class="docutils literal"><span class="pre">#NAME?</span></tt> error. You will then have to enable
 those plugins again <em>and</em> reload the spreadsheet afterwards, so that
 everything is recalculated properly.</p>
-<p class="last">In contrast, just changing the definition of a function in a plugin usually
-needs neither a restart of Gnumeric nor a reloading of the spreadsheet. In
-this case it&#8217;s often sufficient to reload all scripts with the &#8220;Reload Pure
+<p class="last">In contrast, just changing the body of a function in a plugin usually needs
+neither a restart of Gnumeric nor a reloading of the spreadsheet. In this
+case it&#8217;s often sufficient to reload all scripts with the &#8220;Reload Pure
 Scripts&#8221; option in the Tools/Pure menu, after which you can use
 “Recalculate” (F9) to recompute the spreadsheet.</p>
 </div>
@@ -831,6 +839,10 @@ so usually you&#8217;ll want to enter these as array functions (<tt class="docut
 in Gnumeric). As a special case, the empty tuple can be used to denote empty
 cell values (but note that empty Gnumeric values may become zeros when passed
 as float or array arguments to Pure functions).</p>
+<p>Another special case is a term of the form <tt class="docutils literal"><span class="pre">gnm_error</span> <span class="pre">msg</span></tt>, where <tt class="docutils literal"><span class="pre">msg</span></tt> is
+a string value indicating a Gnumeric error value such as <tt class="docutils literal"><span class="pre">&quot;#N/A&quot;</span></tt>,
+<tt class="docutils literal"><span class="pre">&quot;#NAME?&quot;</span></tt>, <tt class="docutils literal"><span class="pre">&quot;#NULL!&quot;</span></tt>, etc. When returned by a plugin function, the error
+text will be displayed in the corresponding Gnumeric cell.</p>
 <p>If a Pure function returns a value that doesn&#8217;t match any of the above then it
 is converted to a string in Pure expression syntax and that string is returned
 as the result of the function invocation in Gnumeric. This makes it possible

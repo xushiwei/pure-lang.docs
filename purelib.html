@@ -57,7 +57,7 @@
             
   <div class="section" id="pure-library-manual">
 <h1>Pure Library Manual<a class="headerlink" href="#pure-library-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.55, June 03, 2012</p>
+<p>Version 0.55, June 15, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under
 the <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>.</p>
@@ -3907,9 +3907,37 @@ normally be called directly.)</p>
 <dd><p>Predicate to check for reference values.</p>
 </dd></dl>
 
-<p>Note that manually removing the <a class="reference internal" href="#unref" title="unref"><tt class="xref pure pure-func docutils literal"><span class="pre">unref</span></tt></a> sentry of a reference turns
-the reference into just a normal pointer object and renders it unusable as
-a reference. Doing this will also leak memory, so don&#8217;t!</p>
+<p>Note that manually changing or removing the <a class="reference internal" href="#unref" title="unref"><tt class="xref pure pure-func docutils literal"><span class="pre">unref</span></tt></a> sentry of a
+reference turns the reference into just a normal pointer object and renders
+it unusable as a reference. Doing this will also leak memory, so don&#8217;t!</p>
+<p>There is another pitfall with expression references, namely that they can
+be used to create cyclic chains which currently can&#8217;t be reclaimed by
+Pure&#8217;s reference-counting garbage collector. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> system<span class="p">;</span>
+<span class="gp">&gt; </span>done r = printf <span class="s">&quot;done %s</span><span class="se">\n</span><span class="s">&quot;</span> (str r)<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> x = ref ()<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">let</span> y = ref (sentry done <span class="mi">2</span>,x)<span class="p">;</span>
+<span class="gp">&gt; </span>put x (sentry done <span class="mi">1</span>,y)<span class="p">;</span>
+<span class="mi">1</span>,<span class="kt">#&lt;pointer 0x3036400&gt;</span>
+</pre></div>
+</div>
+<p>At this point <tt class="docutils literal"><span class="pre">x</span></tt> points to <tt class="docutils literal"><span class="pre">y</span></tt> and vice versa. If you now purge the
+<tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> variables then Pure won&#8217;t be able to reclaim the cycle,
+resulting in a memory leak (you can verify this by noting that the sentries
+are not being called). To prevent this, you&#8217;ll have to break the cycle
+first:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>put y <span class="mi">3</span><span class="p">;</span>
+done <span class="mi">2</span>
+<span class="mi">3</span>
+<span class="gp">&gt; </span>clear x y
+done <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Note that, in a way, sentries work similar to expression references and
+thus the same caveats apply there. Having a limited amount of cyclic
+references won&#8217;t do any harm. But if they can grow indefinitely then they
+may cause problems with long-running programs due to memory leakage, so
+it&#8217;s a good idea to avoid such cycles if possible.</p>
 <span class="target" id="module-pointers"></span></div>
 <div class="section" id="pointer-arithmetic">
 <h4><a class="toc-backref" href="#id51">Pointer Arithmetic</a><a class="headerlink" href="#pointer-arithmetic" title="Permalink to this headline">¶</a></h4>

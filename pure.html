@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.55, June 23, 2012</p>
+<p>Version 0.55, June 24, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -5236,10 +5236,9 @@ rules and make use of pattern-matching just like ordinary function definitions.<
 <p class="last">Pure macros are just as powerful as (unconditional) term rewriting
 systems and thus they are Turing-complete. This implies that a badly
 written macro may well send the Pure compiler into an infinite recursion,
-which usually results in a stack overflow at compile time. See <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size
-and Tail Recursion</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section for information on
-how to deal with these by setting the <span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment
-variable.</p>
+which results in a stack overflow at compile time. See <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail
+Recursion</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section for information on how to
+deal with these by setting the <span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment variable.</p>
 </div>
 <p>As a simple example, let&#8217;s see how we can inline invocations of the <a class="reference internal" href="purelib.html##" title="#"><tt class="xref pure pure-func docutils literal"><span class="pre">#</span></tt></a>
 size operator on list constants:</p>
@@ -5304,7 +5303,7 @@ foo <span class="mi">1</span> <span class="mi">2</span> (<span class="mi">2</spa
 of how you can use macros to define your own special forms. This works because
 the actual evaluation of macro arguments is put off until runtime, and thus we
 can safely pass them to built-in special forms and other constructs which
-defer their evaluation at <em>runtime</em>. In fact, the right-hand side of a macro
+defer their evaluation <em>at runtime</em>. In fact, the right-hand side of a macro
 rule may be an arbitrary Pure expression involving conditional expressions,
 lambdas, binding clauses, etc. These are never evaluated during macro
 substitution, they just become part of the macro expansion (after substituting
@@ -5377,12 +5376,11 @@ with C macros:</p>
 <p>Here <tt class="docutils literal"><span class="pre">F(y)</span></tt> expands to <tt class="docutils literal"><span class="pre">{</span> <span class="pre">int</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">y+1;</span> <span class="pre">return</span> <span class="pre">y+y;</span> <span class="pre">}</span></tt> which is usually
 <em>not</em> what you want.</p>
 <p>This completes our little introduction to Pure&#8217;s macro facilities. The above
-material should in fact cover all the common uses of Pure macros that most
-Pure programmers will ever need. However, if you want to become a real Pure
-macro wizard then read on. In the following subsections we&#8217;re going to
-discover some more advanced features of Pure&#8217;s macro system which let you
-write macros for manipulating special forms and give you access to Pure&#8217;s
-reflection capabilities.</p>
+material should in fact cover all the common uses of macros in Pure. However,
+if you want to become a real Pure macro wizard then read on. In the following
+subsections we&#8217;re going to discover some more advanced features of Pure&#8217;s
+macro system which let you write macros for manipulating special forms and
+give you access to Pure&#8217;s reflection capabilities.</p>
 </div>
 <div class="section" id="built-in-macros-and-special-expressions">
 <h3><a class="toc-backref" href="#id79">Built-in Macros and Special Expressions</a><a class="headerlink" href="#built-in-macros-and-special-expressions" title="Permalink to this headline">¶</a></h3>
@@ -5646,13 +5644,21 @@ attention (cf. <a class="reference internal" href="#name-capture">Name Capture</
 <div class="section" id="advanced-optimization">
 <h3><a class="toc-backref" href="#id80">Advanced Optimization</a><a class="headerlink" href="#advanced-optimization" title="Permalink to this headline">¶</a></h3>
 <p>We are now in a position to have a look at some of the trickier optimization
-macros defined in the prelude. Most of the following macros can be found near
-the end of the prelude.pure module; they are used to optimize the case of
+macros defined in the prelude. The following <tt class="docutils literal"><span class="pre">__do__</span></tt> macro can be found
+near the end of the prelude.pure module; it is used to optimize the case of
 &#8220;throwaway&#8221; list and matrix comprehensions. This is useful if a comprehension
 is evaluated solely for its side effects. To keep things simple, we discuss a
-slightly abridged version here which only deals with list comprehensions.
-Please check the actual prelude code for the full version.</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="cp">#! --quoteargs __std__::__do__</span>
+slightly abridged version of the <tt class="docutils literal"><span class="pre">__do__</span></tt> macro which only deals with list
+comprehensions and ignores some obscure corner cases. You can find this
+version in the examples/do.pure script. Please also check the prelude for the
+full version of this macro.</p>
+<p>Note that we define our own versions of <tt class="docutils literal"><span class="pre">void</span></tt> and <tt class="docutils literal"><span class="pre">__do__</span></tt> here which are
+placed into the <tt class="docutils literal"><span class="pre">my</span></tt> namespace to avoid conflicts with the prelude.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">namespace</span> my<span class="p">;</span>
+
+<span class="kt">void</span> _ = ()<span class="p">;</span>
+
+<span class="cp">#! --quoteargs my::__do__</span>
 
 <span class="kr">def</span> <span class="kt">void</span> [x] = <span class="kt">void</span> x<span class="p">;</span>
 <span class="kr">def</span> <span class="kt">void</span> (catmap f x) | <span class="kt">void</span> (listmap f x) = __do__ f x<span class="p">;</span>
@@ -5681,15 +5687,15 @@ Please check the actual prelude code for the full version.</p>
 returns <a class="reference internal" href="purelib.html#()" title="()"><tt class="xref pure pure-cons docutils literal"><span class="pre">()</span></tt></a> instead. The <a class="reference internal" href="purelib.html#do" title="do"><tt class="xref pure pure-func docutils literal"><span class="pre">do</span></tt></a> function applies a function to
 every member of a list (like <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a>), but throws away all intermediate
 results and just returns <a class="reference internal" href="purelib.html#()" title="()"><tt class="xref pure pure-cons docutils literal"><span class="pre">()</span></tt></a>, which is much more efficient if you don&#8217;t
-need those results anyway. These are both defined in the prelude. The
-<tt class="docutils literal"><span class="pre">__do__</span></tt> macro eventually reduces to just a plain <tt class="docutils literal"><span class="pre">do</span></tt> call, but applies
-some optimizations along the way. (While the above rules for <tt class="docutils literal"><span class="pre">__do__</span></tt> are
-always valid optimizations for <tt class="docutils literal"><span class="pre">do</span></tt>, the prelude uses a separate macro here
-instead of clobbering <tt class="docutils literal"><span class="pre">do</span></tt> itself, so that these optimizations do not
-interfere with calls to <tt class="docutils literal"><span class="pre">do</span></tt> in ordinary user code. Also note that the
-<tt class="docutils literal"><span class="pre">__do__</span></tt> macro is not intended to be invoked directly by the programmer, so
-the prelude puts it into the <tt class="docutils literal"><span class="pre">__std__</span></tt> namespace, to keep the default
-namespace clean.)</p>
+need those results anyway. These are both defined in the prelude, but we
+define our own version of <tt class="docutils literal"><span class="pre">void</span></tt> here so that we can hook it up to our
+simplified version of the <tt class="docutils literal"><span class="pre">__do__</span></tt> macro.</p>
+<p>The <tt class="docutils literal"><span class="pre">__do__</span></tt> macro eventually reduces to just a plain <tt class="docutils literal"><span class="pre">do</span></tt> call, but
+applies some optimizations along the way. While the above rules for <tt class="docutils literal"><span class="pre">__do__</span></tt>
+are always valid optimizations for <tt class="docutils literal"><span class="pre">do</span></tt>, it&#8217;s a good idea to use a separate
+macro here instead of clobbering <tt class="docutils literal"><span class="pre">do</span></tt> itself, so that these optimizations do
+not interfere with calls to <tt class="docutils literal"><span class="pre">do</span></tt> in ordinary user code. The prelude handles
+this in an analogous fashion.</p>
 <p>Before we further delve into this example, a few remarks are in order about
 the way list comprehensions are implemented in Pure. As already mentioned,
 list comprehensions are just syntactic sugar; the compiler immediately
@@ -5706,8 +5712,10 @@ efficiency simple generators like <tt class="docutils literal"><span class="pre"
 different aggregate types, so that list comprehensions can draw values from
 aggregates other than lists, such as matrices).</p>
 <p>Now let&#8217;s see how the rules above transform a list comprehension if we &#8220;void&#8221;
-it:</p>
+it. (Remember to switch to the <tt class="docutils literal"><span class="pre">my</span></tt> namespace when trying the following
+examples.)</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> system<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">using</span> <span class="kr">namespace</span> my<span class="p">;</span>
 <span class="gp">&gt; </span>f = [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 <span class="gp">&gt; </span>g = <span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 <span class="gp">&gt; </span>show f g
@@ -5731,7 +5739,7 @@ course). Here&#8217;s how it looks like when we run the <tt class="docutils lite
 concert to rewrite a &#8220;voided&#8221; comprehension. To these ends, you can rerun the
 right-hand side of <tt class="docutils literal"><span class="pre">g</span></tt> with some tracing enabled, as follows (we omit the
 tracing output here for brevity):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m void
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>trace -m my::void
 <span class="gp">&gt; </span><span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | x=<span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> x mod <span class="mi">2</span>]<span class="p">;</span>
 </pre></div>
 </div>
@@ -5750,14 +5758,34 @@ comprehension. Here&#8217;s the rule which actually does this:</p>
     __do__ $ (__lambda__ [x] (<span class="kt">void</span> y))<span class="p">;</span>
 </pre></div>
 </div>
-<p>Note that <tt class="docutils literal"><span class="pre">__do__</span></tt> is actually implemented as a
+<p>Note that in order to make this work, <tt class="docutils literal"><span class="pre">__do__</span></tt> is implemented as a
 &#8220;<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">quoteargs</em></a>&#8221; macro so that it can inspect
 and recurse into the lambda terms in its argument. Also note the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> on
 the right-hand side of this rule; this is also implemented as a macro in the
 prelude. Here the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> operator is used to forcibly evaluate the macro
 argument <tt class="docutils literal"><span class="pre">__lambda__</span> <span class="pre">[x]</span> <span class="pre">(void</span> <span class="pre">y)</span></tt>, so that the embedded call to the
 <tt class="docutils literal"><span class="pre">void</span></tt> macro gets expanded. (Without the <a class="reference internal" href="purelib.html#$" title="$"><tt class="xref pure pure-func docutils literal"><span class="pre">$</span></tt></a> the argument to
-<tt class="docutils literal"><span class="pre">__do__</span></tt> would be quoted and thus not be evaluated.)</p>
+<tt class="docutils literal"><span class="pre">__do__</span></tt> would be quoted and thus not be evaluated.) A similar rule is used
+to recurse into embedded filter clauses, as in the example of the function
+<tt class="docutils literal"><span class="pre">g</span></tt> above.</p>
+<p>It should be mentioned that, while our version of the <tt class="docutils literal"><span class="pre">__do__</span></tt> macro will
+properly handle most list comprehensions, there is a rather obscure corner
+case which it still refuses to optimize: outermost filter clauses. For
+instance, consider:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> c = <span class="mi">2</span><span class="p">;</span>
+<span class="gp">&gt; </span>k = <span class="kt">void</span> [printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>) | c&gt;<span class="mi">0</span><span class="p">;</span> x=<span class="mi">1</span>..<span class="mi">3</span>]<span class="p">;</span>
+<span class="gp">&gt; </span>show k
+k = my<span class="p">::</span><span class="kt">void</span> (<span class="kr">if</span> c&gt;<span class="mi">0</span> <span class="kr">then</span> listmap (\x -&gt; printf <span class="s">&quot;%g</span><span class="se">\n</span><span class="s">&quot;</span> (<span class="mi">2</span>^x+<span class="mi">1</span>)) (<span class="mi">1</span>..<span class="mi">3</span>) <span class="kr">else</span> [])<span class="p">;</span>
+</pre></div>
+</div>
+<p>It&#8217;s possible to handle this case as well, but we have to go to some lengths
+to achieve that. The complication here is that we don&#8217;t want to mess with
+calls to <tt class="docutils literal"><span class="pre">void</span></tt> in ordinary user code, so <tt class="docutils literal"><span class="pre">void</span></tt> itself cannot be a
+&#8220;<a class="reference internal" href="#cmdoption-pure-pragma--quoteargs"><em class="xref std std-option">quoteargs</em></a>&#8221; macro. But the quoted form of
+<tt class="docutils literal"><span class="pre">void</span></tt>&#8216;s argument is needed to detect the &#8220;outermost filter clause&#8221;
+situation. The interested reader may refer to the prelude code to see how the
+prelude implementation of <tt class="docutils literal"><span class="pre">__do__</span></tt> uses some helper macros to make this
+work.</p>
 </div>
 <div class="section" id="reflection">
 <h3><a class="toc-backref" href="#id81">Reflection</a><a class="headerlink" href="#reflection" title="Permalink to this headline">¶</a></h3>

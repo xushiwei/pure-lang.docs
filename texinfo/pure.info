@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.55, June 23, 2012
+  Version 0.55, June 24, 2012
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -5530,11 +5530,10 @@ function definitions.
      Note: Pure macros are just as powerful as (unconditional) term
      rewriting systems and thus they are Turing-complete. This implies
      that a badly written macro may well send the Pure compiler into an
-     infinite recursion, which usually results in a stack overflow at
-     compile time. See *note Stack Size and Tail Recursion: 4d. in the
-     *note Caveats and Notes: d. section for information on how to deal
-     with these by setting the *note PURE_STACK: 4c. environment
-     variable.
+     infinite recursion, which results in a stack overflow at compile
+     time. See *note Stack Size and Tail Recursion: 4d. in the *note
+     Caveats and Notes: d. section for information on how to deal with
+     these by setting the *note PURE_STACK: 4c. environment variable.
 
   As a simple example, let's see how we can inline invocations of the
 `#' size operator on list constants:
@@ -5609,7 +5608,7 @@ The `quasiquote' macro in the preceding subsection also provides an
 example of how you can use macros to define your own special forms.
 This works because the actual evaluation of macro arguments is put off
 until runtime, and thus we can safely pass them to built-in special
-forms and other constructs which defer their evaluation at _runtime_.
+forms and other constructs which defer their evaluation _at runtime_.
 In fact, the right-hand side of a macro rule may be an arbitrary Pure
 expression involving conditional expressions, lambdas, binding clauses,
 etc. These are never evaluated during macro substitution, they just
@@ -5695,12 +5694,12 @@ Here `F(y)' expands to `{ int y = y+1; return y+y; }' which is usually
 _not_ what you want.
 
   This completes our little introduction to Pure's macro facilities.
-The above material should in fact cover all the common uses of Pure
-macros that most Pure programmers will ever need. However, if you want
-to become a real Pure macro wizard then read on. In the following
-subsections we're going to discover some more advanced features of
-Pure's macro system which let you write macros for manipulating special
-forms and give you access to Pure's reflection capabilities.
+The above material should in fact cover all the common uses of macros
+in Pure. However, if you want to become a real Pure macro wizard then
+read on. In the following subsections we're going to discover some more
+advanced features of Pure's macro system which let you write macros for
+manipulating special forms and give you access to Pure's reflection
+capabilities.
 
 
 File: pure.info,  Node: Built-in Macros and Special Expressions,  Next: Advanced Optimization,  Prev: Macro Hygiene,  Up: Macros
@@ -5960,15 +5959,25 @@ File: pure.info,  Node: Advanced Optimization,  Next: Reflection,  Prev: Built-i
 =========================
 
 We are now in a position to have a look at some of the trickier
-optimization macros defined in the prelude. Most of the following
-macros can be found near the end of the prelude.pure module; they are
-used to optimize the case of "throwaway" list and matrix
-comprehensions. This is useful if a comprehension is evaluated solely
-for its side effects. To keep things simple, we discuss a slightly
-abridged version here which only deals with list comprehensions.
-Please check the actual prelude code for the full version.
+optimization macros defined in the prelude. The following `__do__'
+macro can be found near the end of the prelude.pure module; it is used
+to optimize the case of "throwaway" list and matrix comprehensions.
+This is useful if a comprehension is evaluated solely for its side
+effects. To keep things simple, we discuss a slightly abridged version
+of the `__do__' macro which only deals with list comprehensions and
+ignores some obscure corner cases. You can find this version in the
+examples/do.pure script. Please also check the prelude for the full
+version of this macro.
 
-    #! --quoteargs __std__::__do__
+  Note that we define our own versions of `void' and `__do__' here
+which are placed into the `my' namespace to avoid conflicts with the
+prelude.
+
+    namespace my;
+
+    void _ = ();
+
+    #! --quoteargs my::__do__
 
     def void [x] = void x;
     def void (catmap f x) | void (listmap f x) = __do__ f x;
@@ -5996,15 +6005,16 @@ First, note that the `void' function simply throws away its argument and
 returns `()' instead. The `do' function applies a function to every
 member of a list (like `map'), but throws away all intermediate results
 and just returns `()', which is much more efficient if you don't need
-those results anyway. These are both defined in the prelude. The
-`__do__' macro eventually reduces to just a plain `do' call, but applies
-some optimizations along the way. (While the above rules for `__do__'
-are always valid optimizations for `do', the prelude uses a separate
-macro here instead of clobbering `do' itself, so that these
-optimizations do not interfere with calls to `do' in ordinary user
-code. Also note that the `__do__' macro is not intended to be invoked
-directly by the programmer, so the prelude puts it into the `__std__'
-namespace, to keep the default namespace clean.)
+those results anyway. These are both defined in the prelude, but we
+define our own version of `void' here so that we can hook it up to our
+simplified version of the `__do__' macro.
+
+  The `__do__' macro eventually reduces to just a plain `do' call, but
+applies some optimizations along the way. While the above rules for
+`__do__' are always valid optimizations for `do', it's a good idea to
+use a separate macro here instead of clobbering `do' itself, so that
+these optimizations do not interfere with calls to `do' in ordinary
+user code. The prelude handles this in an analogous fashion.
 
   Before we further delve into this example, a few remarks are in order
 about the way list comprehensions are implemented in Pure. As already
@@ -6025,9 +6035,11 @@ works with different aggregate types, so that list comprehensions can
 draw values from aggregates other than lists, such as matrices).
 
   Now let's see how the rules above transform a list comprehension if
-we "void" it:
+we "void" it. (Remember to switch to the `my' namespace when trying the
+following examples.)
 
     > using system;
+    > using namespace my;
     > f = [printf "%g\n" (2^x+1) | x=1..5; x mod 2];
     > g = void [printf "%g\n" (2^x+1) | x=1..5; x mod 2];
     > show f g
@@ -6052,7 +6064,7 @@ in concert to rewrite a "voided" comprehension. To these ends, you can
 rerun the right-hand side of `g' with some tracing enabled, as follows
 (we omit the tracing output here for brevity):
 
-    > trace -m void
+    > trace -m my::void
     > void [printf "%g\n" (2^x+1) | x=1..5; x mod 2];
 
 The above optimization rules also take care of nested list
@@ -6070,14 +6082,35 @@ comprehension. Here's the rule which actually does this:
     def __do__ (__lambda__ [x] y@(catmap _ _)) =
         __do__ $ (__lambda__ [x] (void y));
 
-Note that `__do__' is actually implemented as a "*note quoteargs: 5f."
-macro so that it can inspect and recurse into the lambda terms in its
-argument. Also note the `$' on the right-hand side of this rule; this
-is also implemented as a macro in the prelude. Here the `$' operator is
-used to forcibly evaluate the macro argument `__lambda__ [x] (void y)',
-so that the embedded call to the `void' macro gets expanded. (Without
-the `$' the argument to `__do__' would be quoted and thus not be
-evaluated.)
+Note that in order to make this work, `__do__' is implemented as a
+"*note quoteargs: 5f." macro so that it can inspect and recurse into
+the lambda terms in its argument. Also note the `$' on the right-hand
+side of this rule; this is also implemented as a macro in the prelude.
+Here the `$' operator is used to forcibly evaluate the macro argument
+`__lambda__ [x] (void y)', so that the embedded call to the `void'
+macro gets expanded. (Without the `$' the argument to `__do__' would be
+quoted and thus not be evaluated.) A similar rule is used to recurse
+into embedded filter clauses, as in the example of the function `g'
+above.
+
+  It should be mentioned that, while our version of the `__do__' macro
+will properly handle most list comprehensions, there is a rather
+obscure corner case which it still refuses to optimize: outermost
+filter clauses. For instance, consider:
+
+    > let c = 2;
+    > k = void [printf "%g\n" (2^x+1) | c>0; x=1..3];
+    > show k
+    k = my::void (if c>0 then listmap (\x -> printf "%g\n" (2^x+1)) (1..3) else []);
+
+It's possible to handle this case as well, but we have to go to some
+lengths to achieve that. The complication here is that we don't want to
+mess with calls to `void' in ordinary user code, so `void' itself
+cannot be a "*note quoteargs: 5f." macro. But the quoted form of
+`void''s argument is needed to detect the "outermost filter clause"
+situation. The interested reader may refer to the prelude code to see
+how the prelude implementation of `__do__' uses some helper macros to
+make this work.
 
 
 File: pure.info,  Node: Reflection,  Prev: Advanced Optimization,  Up: Macros
@@ -11735,404 +11768,404 @@ Node: Recursive Macros227752
 Ref: recursive macros227871
 Ref: cc227871
 Ref: recursive-macros227871
-Ref: ea228527
-Ref: index-16228527
-Node: User-Defined Special Forms231032
-Ref: user-defined special forms231146
-Ref: ec231146
-Ref: user-defined-special-forms231146
-Node: Macro Hygiene232542
-Ref: macro hygiene232679
-Ref: ed232679
-Ref: macro-hygiene232679
-Node: Built-in Macros and Special Expressions235619
-Ref: built-in macros and special expressions235751
-Ref: 61235751
-Ref: built-in-macros-and-special-expressions235751
-Ref: ef236229
-Ref: __ifelse__236229
-Ref: f0236363
-Ref: __lambda__236363
-Ref: f1236457
-Ref: __case__236457
-Ref: f3236734
-Ref: __when__236734
-Ref: f4237040
-Ref: __with__237040
-Ref: f2237344
-Ref: -->237344
-Ref: f5237403
-Ref: __if__237403
-Ref: f6237900
-Ref: __as__237900
-Ref: f7237967
-Ref: __type__237967
-Ref: f8244282
-Ref: __eval__244282
-Node: Advanced Optimization245911
-Ref: advanced optimization246040
-Ref: e9246040
-Ref: advanced-optimization246040
-Node: Reflection251622
-Ref: reflection251703
-Ref: f9251703
-Node: Exception Handling256322
-Ref: exception handling256418
-Ref: a9256418
-Ref: exception-handling256418
-Ref: fa256418
-Ref: id16256418
-Ref: fb256730
-Ref: catch256730
-Ref: fc257896
-Ref: index-17257896
-Node: Standard Library261133
-Ref: standard library261234
-Ref: 7b261234
-Ref: standard-library261234
-Node: C Interface265509
-Ref: c interface265609
-Ref: 3d265609
-Ref: c-interface265609
-Node: Extern Declarations267137
-Ref: extern declarations267231
-Ref: cd267231
-Ref: extern267231
-Ref: fe267231
-Ref: extern-declarations267231
-Node: Variadic C Functions272288
-Ref: variadic c functions272398
-Ref: 100272398
-Ref: variadic-c-functions272398
-Node: C Types273649
-Ref: c types273767
-Ref: ff273767
-Ref: c-types273767
-Ref: 101273767
-Ref: id17273767
-Node: Basic C Types275009
-Ref: basic c types275086
-Ref: 102275086
-Ref: basic-c-types275086
-Node: Pointer Types277256
-Ref: pointer types277363
-Ref: 103277363
-Ref: pointer-types277363
-Node: Pointers and Matrices280558
-Ref: pointers and matrices280668
-Ref: 104280668
-Ref: pointers-and-matrices280668
-Node: Pointer Examples283846
-Ref: pointer examples283934
-Ref: 105283934
-Ref: pointer-examples283934
-Node: Importing Dynamic Libraries288160
-Ref: importing dynamic libraries288280
-Ref: 106288280
-Ref: importing-dynamic-libraries288280
-Ref: 107289403
-Ref: index-18289403
-Ref: 108289478
-Ref: index-19289478
-Ref: 109289689
-Ref: index-20289689
-Node: Importing LLVM Bitcode290081
-Ref: importing llvm bitcode290205
-Ref: 10a290205
-Ref: importing-llvm-bitcode290205
-Node: Inline Code297605
-Ref: inline code297720
-Ref: 7a297720
-Ref: inline-code297720
-Ref: 110300880
-Ref: index-21300880
-Ref: 111300994
-Ref: index-22300994
-Ref: 112301195
-Ref: index-23301195
-Ref: 113301207
-Ref: index-24301207
-Ref: 114301221
-Ref: index-25301221
-Ref: 115301456
-Ref: index-26301456
-Node: Interfacing to C++302284
-Ref: interfacing to c++302397
-Ref: 116302397
-Ref: interfacing-to-c302397
-Node: Interfacing to Faust304880
-Ref: interfacing to faust304973
-Ref: 10f304973
-Ref: interfacing-to-faust304973
-Ref: 117304973
-Ref: id18304973
-Ref: 118306111
-Ref: llvm-backend-for-faust306111
-Ref: 119308153
-Ref: index-27308153
-Ref: 11a308549
-Ref: index-28308549
-Node: Interactive Usage321648
-Ref: interactive usage321749
-Ref: b321749
-Ref: interactive-usage321749
-Node: Online Help325179
-Ref: online help325271
-Ref: 4325271
-Ref: online-help325271
-Ref: 11c325740
-Ref: index-29325740
-Ref: 11d325768
-Ref: index-30325768
-Ref: 11e327271
-Ref: docutils327271
-Node: Interactive Commands328212
-Ref: interactive commands328341
-Ref: e8328341
-Ref: interactive-commands328341
-Ref: 11f328594
-Ref: index-31328594
-Ref: 120328641
-Ref: index-32328641
-Ref: 121329068
-Ref: index-33329068
-Ref: 122329394
-Ref: index-34329394
-Ref: 123329456
-Ref: index-35329456
-Ref: 127330445
-Ref: index-36330445
-Ref: 128331222
-Ref: index-37331222
-Ref: 12a332742
-Ref: index-38332742
-Ref: 12b333070
-Ref: index-39333070
-Ref: 12c333136
-Ref: index-40333136
-Ref: 12d333687
-Ref: index-41333687
-Ref: 12e333934
-Ref: index-42333934
-Ref: 12f334014
-Ref: index-43334014
-Ref: 130334065
-Ref: index-44334065
-Ref: 131335750
-Ref: index-45335750
-Ref: 132336001
-Ref: index-46336001
-Ref: 133336414
-Ref: index-47336414
-Ref: 134337031
-Ref: index-48337031
-Ref: 135338800
-Ref: index-49338800
-Node: Specifying Symbol Selections339785
-Ref: specifying symbol selections339919
-Ref: 126339919
-Ref: specifying-symbol-selections339919
-Node: The show Command343326
-Ref: the show command343457
-Ref: bd343457
-Ref: the-show-command343457
-Ref: 136344559
-Ref: index-50344559
-Node: Definition Levels348154
-Ref: definition levels348266
-Ref: 125348266
-Ref: definition-levels348266
-Node: Debugging353516
-Ref: debugging353623
-Ref: 47353623
-Ref: 137355314
-Ref: index-51355314
-Node: Last Result366208
-Ref: last result366313
-Ref: 124366313
-Ref: last-result366313
-Node: Pretty-Printing367023
-Ref: pretty-printing367140
-Ref: c7367140
-Ref: c6367346
-Ref: __show__367346
-Node: User-Defined Commands370937
-Ref: user-defined commands371062
-Ref: 11b371062
-Ref: user-defined-commands371062
-Node: Interactive Startup377000
-Ref: interactive startup377101
-Ref: 129377101
-Ref: interactive-startup377101
-Ref: 138377466
-Ref: index-52377466
-Node: Batch Compilation378424
-Ref: batch compilation378531
-Ref: c378531
-Ref: batch-compilation378531
-Ref: 139378531
-Ref: id19378531
-Ref: 13b383631
-Ref: partial-evaluation383631
-Node: Example383749
-Ref: example383844
-Ref: 13c383844
-Node: Options Affecting Code Size388336
-Ref: options affecting code size388465
-Ref: 13a388465
-Ref: options-affecting-code-size388465
-Node: Other Output Code Formats391953
-Ref: other output code formats392104
-Ref: 13d392104
-Ref: other-output-code-formats392104
-Ref: 13e397992
-Ref: llvm-documentation397992
-Node: Calling Pure Functions From C397992
-Ref: calling pure functions from c398107
-Ref: 13f398107
-Ref: calling-pure-functions-from-c398107
-Node: Caveats and Notes399600
-Ref: caveats and notes399696
-Ref: d399696
-Ref: caveats-and-notes399696
-Node: Etymology400346
-Ref: etymology400438
-Ref: 140400438
-Node: Backward Compatibility401329
-Ref: backward compatibility401444
-Ref: 141401444
-Ref: backward-compatibility401444
-Node: Error Recovery410425
-Ref: error recovery410544
-Ref: 144410544
-Ref: error-recovery410544
-Node: With and when411200
-Ref: with and when411316
-Ref: 145411316
-Ref: with-and-when411316
-Node: Non-Linear Patterns415007
-Ref: non-linear patterns415122
-Ref: 146415122
-Ref: non-linear-patterns415122
-Node: "As" Patterns416522
-Ref: "as" patterns416650
-Ref: eb416650
-Ref: as-patterns416650
-Node: "Head = Function" Pitfalls417406
-Ref: "head = function" pitfalls417532
-Ref: 147417532
-Ref: head-function-pitfalls417532
-Node: Defined Functions421125
-Ref: defined functions421267
-Ref: 5e421267
-Ref: defined-functions421267
-Node: Stack Size and Tail Recursion424595
-Ref: stack size and tail recursion424743
-Ref: 4d424743
-Ref: stack-size-and-tail-recursion424743
-Ref: 148425129
-Ref: index-53425129
-Ref: 149425341
-Ref: index-54425341
-Ref: 14a425629
-Ref: index-55425629
-Node: Handling of Asynchronous Signals426993
-Ref: handling of asynchronous signals427139
-Ref: 4e427139
-Ref: handling-of-asynchronous-signals427139
-Node: Recursive Types429160
-Ref: recursive types429287
-Ref: b9429287
-Ref: recursive-types429287
-Ref: 14b432244
-Ref: continuation-passing432244
-Node: Interfaces434467
-Ref: interfaces434582
-Ref: bf434582
-Node: Numeric Calculations438209
-Ref: numeric calculations438329
-Ref: 14c438329
-Ref: numeric-calculations438329
-Node: Constant Definitions440240
-Ref: constant definitions440370
-Ref: c0440370
-Ref: constant-definitions440370
-Node: External C Functions446115
-Ref: external c functions446246
-Ref: fd446246
-Ref: external-c-functions446246
-Ref: 14d447528
-Ref: libffi447528
-Node: Calling Special Forms447913
-Ref: calling special forms448032
-Ref: 14e448032
-Ref: calling-special-forms448032
-Node: Laziness448519
-Ref: laziness448630
-Ref: 14f448630
-Node: Name Capture453210
-Ref: name capture453291
-Ref: ee453291
-Ref: name-capture453291
-Node: Author456671
-Ref: author456766
-Ref: 151456766
-Node: Acknowledgements456901
-Ref: acknowledgements456986
-Ref: 152456986
-Node: Copying458185
-Ref: copying458284
-Ref: 3458284
-Node: References and Links460646
-Ref: references and links460734
-Ref: 153460734
-Ref: references-and-links460734
-Ref: 9d460783
-Ref: aardappel460783
-Ref: 150460924
-Ref: alice-ml460924
-Ref: 11461059
-Ref: baader-and-nipkow461059
-Ref: d7461177
-Ref: bertrand461177
-Ref: 10b461437
-Ref: clang461437
-Ref: 10d461695
-Ref: dragonegg461695
-Ref: 10e461906
-Ref: faust461906
-Ref: 154461993
-Ref: gnu-multiprecision-library461993
-Ref: 95461993
-Ref: gmp461993
-Ref: 155462101
-Ref: gnu-octave462101
-Ref: c5462101
-Ref: octave462101
-Ref: 99462245
-Ref: gnu-scientific-library462245
-Ref: 156462245
-Ref: gsl462245
-Ref: bc462406
-Ref: go462406
-Ref: 80462470
-Ref: haskell462470
-Ref: 8462536
-Ref: llvm462536
-Ref: 10c462601
-Ref: llvm-gcc462601
-Ref: 143462819
-Ref: miranda462819
-Ref: 81462990
-Ref: ml462990
-Ref: 10463149
-Ref: michael-o-donnell463149
-Ref: 142463299
-Ref: q463299
-Node: Index463384
-Ref: index463456
-Ref: 8b480933
-Ref: 8a480964
+Ref: ea228519
+Ref: index-16228519
+Node: User-Defined Special Forms231019
+Ref: user-defined special forms231133
+Ref: ec231133
+Ref: user-defined-special-forms231133
+Node: Macro Hygiene232529
+Ref: macro hygiene232666
+Ref: ed232666
+Ref: macro-hygiene232666
+Node: Built-in Macros and Special Expressions235567
+Ref: built-in macros and special expressions235699
+Ref: 61235699
+Ref: built-in-macros-and-special-expressions235699
+Ref: ef236177
+Ref: __ifelse__236177
+Ref: f0236311
+Ref: __lambda__236311
+Ref: f1236405
+Ref: __case__236405
+Ref: f3236682
+Ref: __when__236682
+Ref: f4236988
+Ref: __with__236988
+Ref: f2237292
+Ref: -->237292
+Ref: f5237351
+Ref: __if__237351
+Ref: f6237848
+Ref: __as__237848
+Ref: f7237915
+Ref: __type__237915
+Ref: f8244230
+Ref: __eval__244230
+Node: Advanced Optimization245859
+Ref: advanced optimization245988
+Ref: e9245988
+Ref: advanced-optimization245988
+Node: Reflection253008
+Ref: reflection253089
+Ref: f9253089
+Node: Exception Handling257708
+Ref: exception handling257804
+Ref: a9257804
+Ref: exception-handling257804
+Ref: fa257804
+Ref: id16257804
+Ref: fb258116
+Ref: catch258116
+Ref: fc259282
+Ref: index-17259282
+Node: Standard Library262519
+Ref: standard library262620
+Ref: 7b262620
+Ref: standard-library262620
+Node: C Interface266895
+Ref: c interface266995
+Ref: 3d266995
+Ref: c-interface266995
+Node: Extern Declarations268523
+Ref: extern declarations268617
+Ref: cd268617
+Ref: extern268617
+Ref: fe268617
+Ref: extern-declarations268617
+Node: Variadic C Functions273674
+Ref: variadic c functions273784
+Ref: 100273784
+Ref: variadic-c-functions273784
+Node: C Types275035
+Ref: c types275153
+Ref: ff275153
+Ref: c-types275153
+Ref: 101275153
+Ref: id17275153
+Node: Basic C Types276395
+Ref: basic c types276472
+Ref: 102276472
+Ref: basic-c-types276472
+Node: Pointer Types278642
+Ref: pointer types278749
+Ref: 103278749
+Ref: pointer-types278749
+Node: Pointers and Matrices281944
+Ref: pointers and matrices282054
+Ref: 104282054
+Ref: pointers-and-matrices282054
+Node: Pointer Examples285232
+Ref: pointer examples285320
+Ref: 105285320
+Ref: pointer-examples285320
+Node: Importing Dynamic Libraries289546
+Ref: importing dynamic libraries289666
+Ref: 106289666
+Ref: importing-dynamic-libraries289666
+Ref: 107290789
+Ref: index-18290789
+Ref: 108290864
+Ref: index-19290864
+Ref: 109291075
+Ref: index-20291075
+Node: Importing LLVM Bitcode291467
+Ref: importing llvm bitcode291591
+Ref: 10a291591
+Ref: importing-llvm-bitcode291591
+Node: Inline Code298991
+Ref: inline code299106
+Ref: 7a299106
+Ref: inline-code299106
+Ref: 110302266
+Ref: index-21302266
+Ref: 111302380
+Ref: index-22302380
+Ref: 112302581
+Ref: index-23302581
+Ref: 113302593
+Ref: index-24302593
+Ref: 114302607
+Ref: index-25302607
+Ref: 115302842
+Ref: index-26302842
+Node: Interfacing to C++303670
+Ref: interfacing to c++303783
+Ref: 116303783
+Ref: interfacing-to-c303783
+Node: Interfacing to Faust306266
+Ref: interfacing to faust306359
+Ref: 10f306359
+Ref: interfacing-to-faust306359
+Ref: 117306359
+Ref: id18306359
+Ref: 118307497
+Ref: llvm-backend-for-faust307497
+Ref: 119309539
+Ref: index-27309539
+Ref: 11a309935
+Ref: index-28309935
+Node: Interactive Usage323034
+Ref: interactive usage323135
+Ref: b323135
+Ref: interactive-usage323135
+Node: Online Help326565
+Ref: online help326657
+Ref: 4326657
+Ref: online-help326657
+Ref: 11c327126
+Ref: index-29327126
+Ref: 11d327154
+Ref: index-30327154
+Ref: 11e328657
+Ref: docutils328657
+Node: Interactive Commands329598
+Ref: interactive commands329727
+Ref: e8329727
+Ref: interactive-commands329727
+Ref: 11f329980
+Ref: index-31329980
+Ref: 120330027
+Ref: index-32330027
+Ref: 121330454
+Ref: index-33330454
+Ref: 122330780
+Ref: index-34330780
+Ref: 123330842
+Ref: index-35330842
+Ref: 127331831
+Ref: index-36331831
+Ref: 128332608
+Ref: index-37332608
+Ref: 12a334128
+Ref: index-38334128
+Ref: 12b334456
+Ref: index-39334456
+Ref: 12c334522
+Ref: index-40334522
+Ref: 12d335073
+Ref: index-41335073
+Ref: 12e335320
+Ref: index-42335320
+Ref: 12f335400
+Ref: index-43335400
+Ref: 130335451
+Ref: index-44335451
+Ref: 131337136
+Ref: index-45337136
+Ref: 132337387
+Ref: index-46337387
+Ref: 133337800
+Ref: index-47337800
+Ref: 134338417
+Ref: index-48338417
+Ref: 135340186
+Ref: index-49340186
+Node: Specifying Symbol Selections341171
+Ref: specifying symbol selections341305
+Ref: 126341305
+Ref: specifying-symbol-selections341305
+Node: The show Command344712
+Ref: the show command344843
+Ref: bd344843
+Ref: the-show-command344843
+Ref: 136345945
+Ref: index-50345945
+Node: Definition Levels349540
+Ref: definition levels349652
+Ref: 125349652
+Ref: definition-levels349652
+Node: Debugging354902
+Ref: debugging355009
+Ref: 47355009
+Ref: 137356700
+Ref: index-51356700
+Node: Last Result367594
+Ref: last result367699
+Ref: 124367699
+Ref: last-result367699
+Node: Pretty-Printing368409
+Ref: pretty-printing368526
+Ref: c7368526
+Ref: c6368732
+Ref: __show__368732
+Node: User-Defined Commands372323
+Ref: user-defined commands372448
+Ref: 11b372448
+Ref: user-defined-commands372448
+Node: Interactive Startup378386
+Ref: interactive startup378487
+Ref: 129378487
+Ref: interactive-startup378487
+Ref: 138378852
+Ref: index-52378852
+Node: Batch Compilation379810
+Ref: batch compilation379917
+Ref: c379917
+Ref: batch-compilation379917
+Ref: 139379917
+Ref: id19379917
+Ref: 13b385017
+Ref: partial-evaluation385017
+Node: Example385135
+Ref: example385230
+Ref: 13c385230
+Node: Options Affecting Code Size389722
+Ref: options affecting code size389851
+Ref: 13a389851
+Ref: options-affecting-code-size389851
+Node: Other Output Code Formats393339
+Ref: other output code formats393490
+Ref: 13d393490
+Ref: other-output-code-formats393490
+Ref: 13e399378
+Ref: llvm-documentation399378
+Node: Calling Pure Functions From C399378
+Ref: calling pure functions from c399493
+Ref: 13f399493
+Ref: calling-pure-functions-from-c399493
+Node: Caveats and Notes400986
+Ref: caveats and notes401082
+Ref: d401082
+Ref: caveats-and-notes401082
+Node: Etymology401732
+Ref: etymology401824
+Ref: 140401824
+Node: Backward Compatibility402715
+Ref: backward compatibility402830
+Ref: 141402830
+Ref: backward-compatibility402830
+Node: Error Recovery411811
+Ref: error recovery411930
+Ref: 144411930
+Ref: error-recovery411930
+Node: With and when412586
+Ref: with and when412702
+Ref: 145412702
+Ref: with-and-when412702
+Node: Non-Linear Patterns416393
+Ref: non-linear patterns416508
+Ref: 146416508
+Ref: non-linear-patterns416508
+Node: "As" Patterns417908
+Ref: "as" patterns418036
+Ref: eb418036
+Ref: as-patterns418036
+Node: "Head = Function" Pitfalls418792
+Ref: "head = function" pitfalls418918
+Ref: 147418918
+Ref: head-function-pitfalls418918
+Node: Defined Functions422511
+Ref: defined functions422653
+Ref: 5e422653
+Ref: defined-functions422653
+Node: Stack Size and Tail Recursion425981
+Ref: stack size and tail recursion426129
+Ref: 4d426129
+Ref: stack-size-and-tail-recursion426129
+Ref: 148426515
+Ref: index-53426515
+Ref: 149426727
+Ref: index-54426727
+Ref: 14a427015
+Ref: index-55427015
+Node: Handling of Asynchronous Signals428379
+Ref: handling of asynchronous signals428525
+Ref: 4e428525
+Ref: handling-of-asynchronous-signals428525
+Node: Recursive Types430546
+Ref: recursive types430673
+Ref: b9430673
+Ref: recursive-types430673
+Ref: 14b433630
+Ref: continuation-passing433630
+Node: Interfaces435853
+Ref: interfaces435968
+Ref: bf435968
+Node: Numeric Calculations439595
+Ref: numeric calculations439715
+Ref: 14c439715
+Ref: numeric-calculations439715
+Node: Constant Definitions441626
+Ref: constant definitions441756
+Ref: c0441756
+Ref: constant-definitions441756
+Node: External C Functions447501
+Ref: external c functions447632
+Ref: fd447632
+Ref: external-c-functions447632
+Ref: 14d448914
+Ref: libffi448914
+Node: Calling Special Forms449299
+Ref: calling special forms449418
+Ref: 14e449418
+Ref: calling-special-forms449418
+Node: Laziness449905
+Ref: laziness450016
+Ref: 14f450016
+Node: Name Capture454596
+Ref: name capture454677
+Ref: ee454677
+Ref: name-capture454677
+Node: Author458057
+Ref: author458152
+Ref: 151458152
+Node: Acknowledgements458287
+Ref: acknowledgements458372
+Ref: 152458372
+Node: Copying459571
+Ref: copying459670
+Ref: 3459670
+Node: References and Links462032
+Ref: references and links462120
+Ref: 153462120
+Ref: references-and-links462120
+Ref: 9d462169
+Ref: aardappel462169
+Ref: 150462310
+Ref: alice-ml462310
+Ref: 11462445
+Ref: baader-and-nipkow462445
+Ref: d7462563
+Ref: bertrand462563
+Ref: 10b462823
+Ref: clang462823
+Ref: 10d463081
+Ref: dragonegg463081
+Ref: 10e463292
+Ref: faust463292
+Ref: 154463379
+Ref: gnu-multiprecision-library463379
+Ref: 95463379
+Ref: gmp463379
+Ref: 155463487
+Ref: gnu-octave463487
+Ref: c5463487
+Ref: octave463487
+Ref: 99463631
+Ref: gnu-scientific-library463631
+Ref: 156463631
+Ref: gsl463631
+Ref: bc463792
+Ref: go463792
+Ref: 80463856
+Ref: haskell463856
+Ref: 8463922
+Ref: llvm463922
+Ref: 10c463987
+Ref: llvm-gcc463987
+Ref: 143464205
+Ref: miranda464205
+Ref: 81464376
+Ref: ml464376
+Ref: 10464535
+Ref: michael-o-donnell464535
+Ref: 142464685
+Ref: q464685
+Node: Index464770
+Ref: index464842
+Ref: 8b482319
+Ref: 8a482350
 
 End Tag Table
 

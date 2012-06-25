@@ -1318,6 +1318,10 @@ in the `System Interface`_ section.
 Matrix Functions
 ----------------
 
+Matrices are provided as an alternative to the list and tuple aggregates
+which provide contant time access to their members and are tailored for use
+in numeric computations.
+
 .. index:: matrix; size
 .. index:: matrix; dimensions
 
@@ -1388,6 +1392,52 @@ Matrix Functions
      > x == transpose x;
      0
 
+.. _non-splicing:
+
+The following special syntax is provided as a shorthand notation for nested
+vector structures:
+
+.. macro:: outfix {| |} x, y, z, ...
+
+   Non-splicing vector brackets. These work like ``{x,y,z,...}``, but
+   unlike these they will *not* splice submatrices in the arguments
+   ``x,y,z,...`` So they work a bit like quoted vectors ``'{x,y,z,...}``,
+   but the arguments ``x,y,z,...`` will be evaluated as usual.
+
+   The non-splicing vector brackets provide a convenient shorthand to enter
+   symbolic vector values which may contain other vectors or matrices as
+   components. For instance, note how the ordinary matrix brackets combine
+   the column subvectors in the first example below to a 3x2 matrix, while
+   the non-splicing brackets in the second example create a 1x2 row vector
+   with the column vectors as members instead::
+
+     > {{1;2;3},{4;5;6}};
+     {1,4;2,5;3,6}
+     > {|{1;2;3},{4;5;6}|};
+     {{1;2;3},{4;5;6}}
+
+   The second example works like a quoted matrix expression such as
+   ``'{{1;2;3},{4;5;6}}``, but the non-splicing brackets also evaluate
+   their arguments::
+
+     > '{vector (1..3),vector (4..6)};
+     {vector (1..3),vector (4..6)}
+     > {|vector (1..3),vector (4..6)|};
+     {{1,2,3},{4,5,6}}
+
+   The ``{| |}`` brackets can also be nested. Examples::
+
+     > {|1,{|vector (1..5),2*3|},{}|};
+     {1,{{1,2,3,4,5},6},{}}
+     > {|{|{1,2}|},{|{3,4}|}|};
+     {{{1,2}},{{3,4}}}
+
+   Finally, note that the ``{| |}`` brackets only produce row vectors, but
+   you can just transpose the result if you need a column vector instead::
+
+     > transpose ({|{1;2;3},{4;5;6}|});
+     {{1;2;3};{4;5;6}}
+
 Most of the generic list operations are implemented on matrices, see
 `Common List Functions`_. Hence operations like :func:`map` and
 :func:`zipwith` work as expected::
@@ -1441,6 +1491,10 @@ Matrix Construction and Conversions
      {1;2;3}
      > vector [rowvector [1,2,3],colvector [4,5,6]];
      {{1,2,3},{4;5;6}}
+
+   Note that for convenience, there's also an alternative syntax for
+   entering nested vectors more easily, see the description of the
+   :ref:`non-splicing vector brackets<non-splicing>` above for details.
 
 .. function:: rowvectorseq x y step
               colvectorseq x y step

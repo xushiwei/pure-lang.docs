@@ -14,7 +14,7 @@ File: purelib.info,  Node: Top,  Next: Prelude,  Up: (dir)
 Pure Library Manual
 *******************
 
-  Version 0.55, June 25, 2012
+  Version 0.56, June 26, 2012
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -1354,47 +1354,6 @@ use in numeric computations.
      Check for empty matrices. Note that there are various kinds of
      these, as a matrix may have zero rows or columns, or both.
 
- -- Function: x ! i
- -- Function: x !! is
-     Indexing and slicing works pretty much like in MATLAB and Octave,
-     except that the Pure operators '*note !: 4c.' and '*note !!: 4f.'
-     are used and indices are zero-based. It is possible to access
-     elements with a one-dimensional index (in row-major oder):
-
-         > x!3;
-         4
-
-     Or you can specify a pair of row and column index:
-
-         > x!(1,0);
-         4
-
-     Slicing works accordingly. You can either specify a list of (one-
-     or two-dimensional) indices, in which case the result is always a
-     row vector:
-
-         > x!!(2..5);
-         {3,4,5,6}
-
-     Or you can specify a pair of row and column index lists:
-
-         > x!!(0..1,1..2);
-         {2,3;5,6}
-
-     The following abbreviations are provided to grab a slice from a
-     row or column:
-
-         > x!!(1,1..2);
-         {5,6}
-         > x!!(0..1,1);
-         {2;5}
-
-     As in the case of lists, matrix slices are optimized to handle
-     cases with contiguous index ranges in an efficient manner, see
-     *note Slicing: 50. for details. To these ends, the helper
-     functions *note subseq: c8. and *note subseq2: c9. are defined to
-     handle the necessary compile time optimizations.
-
  -- Function: x == y
  -- Function: x ~= y
      Matrix equality and inequality. These check the dimensions and the
@@ -1405,56 +1364,53 @@ use in numeric computations.
 
 
 
-  The following special syntax is provided as a shorthand notation for
-nested vector structures:
+ -- Function: x ! i
+ -- Function: x !! is
+     Indexing and slicing.
 
- -- macro: {| x, y, z, ... |}
-     Non-splicing vector brackets. These work like `{x,y,z,...}', but
-     unlike these they will _not_ splice submatrices in the arguments
-     `x,y,z,...' So they work a bit like quoted vectors `'{x,y,z,...}',
-     but the arguments `x,y,z,...' will be evaluated as usual.
+  Indexing and slicing employ the standard Pure operators '*note !: 4c.'
+and '*note !!: 4f.'. They work pretty much like in MATLAB and Octave,
+but note that Pure matrices are in row-major order and the indices are
+zero-based. It is possible to access elements with a one-dimensional
+index (in row-major oder):
 
-     The non-splicing vector brackets provide a convenient shorthand to
-     enter symbolic vector values which may contain other vectors or
-     matrices as components. For instance, note how the ordinary matrix
-     brackets combine the column subvectors in the first example below
-     to a 3x2 matrix, while the non-splicing brackets in the second
-     example create a 1x2 row vector with the column vectors as members
-     instead:
+    > x!3;
+    4
 
-         > {{1;2;3},{4;5;6}};
-         {1,4;2,5;3,6}
-         > {|{1;2;3},{4;5;6}|};
-         {{1;2;3},{4;5;6}}
+Or you can specify a pair of row and column index:
 
-     The second example works like a quoted matrix expression such as
-     `'{{1;2;3},{4;5;6}}', but the non-splicing brackets also evaluate
-     their arguments:
+    > x!(1,0);
+    4
 
-         > '{vector (1..3),vector (4..6)};
-         {vector (1..3),vector (4..6)}
-         > {|vector (1..3),vector (4..6)|};
-         {{1,2,3},{4,5,6}}
+Slicing works accordingly. You can either specify a list of (one- or
+two-dimensional) indices, in which case the result is always a row
+vector:
 
-     The `{| |}' brackets can also be nested. Examples:
+    > x!!(2..5);
+    {3,4,5,6}
 
-         > {|1,{|vector (1..5),2*3|},{}|};
-         {1,{{1,2,3,4,5},6},{}}
-         > {|{|{1,2}|},{|{3,4}|}|};
-         {{{1,2}},{{3,4}}}
+Or you can specify a pair of row and column index lists:
 
-     Finally, note that the `{| |}' brackets only produce row vectors,
-     but you can just transpose the result if you need a column vector
-     instead:
+    > x!!(0..1,1..2);
+    {2,3;5,6}
 
-         > transpose ({|{1;2;3},{4;5;6}|});
-         {{1;2;3};{4;5;6}}
+The following abbreviations are provided to grab a slice from a row or
+column:
 
+    > x!!(1,1..2);
+    {5,6}
+    > x!!(0..1,1);
+    {2;5}
 
+As in the case of lists, matrix slices are optimized to handle cases
+with contiguous index ranges in an efficient manner, see *note Slicing:
+50. for details. To these ends, the helper functions *note subseq: ca.
+and *note subseq2: cb. are defined to handle the necessary compile time
+optimizations.
 
-  Most of the generic list operations are implemented on matrices, see
-*note Common List Functions: 64. Hence operations like *note map: 34.
-and *note zipwith: 89. work as expected:
+  Most of the generic list operations are implemented on matrices as
+well, see *note Common List Functions: 64. Hence operations like *note
+map: 34. and *note zipwith: 89. work as expected:
 
     > map succ {1,2,3;4,5,6};
     {2,3,4;5,6,7}
@@ -1483,10 +1439,10 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
 
  -- Function: matrix xs
      This function converts a list or tuple to a corresponding matrix.
-     *note matrix: cf. also turns a list of lists or matrices
+     *note matrix: cd. also turns a list of lists or matrices
      specifying the rows of the matrix to the corresponding rectangular
      matrix; otherwise, the result is a row vector. (In the former
-     case, *note matrix: cf. may throw a *note bad_matrix_value: f.
+     case, *note matrix: cd. may throw a *note bad_matrix_value: f.
      exception in case of dimension mismatch, with the offending
      submatrix as argument.)
 
@@ -1500,12 +1456,12 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
  -- Function: rowvector xs
  -- Function: colvector xs
  -- Function: vector xs
-     The *note rowvector: d0. and *note colvector: d1. functions work
+     The *note rowvector: ce. and *note colvector: cf. functions work
      in a similar fashion, but expect a list, tuple or matrix of
      elements and always return a row or column vector, respectively
      (i.e., a 1\times n or n\times 1 matrix, where n is the size of the
-     converted aggregate). Also, the *note vector: d2. function is a
-     synonym for *note rowvector: d0. These functions can also be used
+     converted aggregate). Also, the *note vector: d0. function is a
+     synonym for *note rowvector: ce. These functions can also be used
      to create recursive (symbolic) matrix structures of arbitrary
      depth, which provide a nested array data structure with efficient
      (constant time) element access.
@@ -1519,14 +1475,14 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
 
      Note that for convenience, there's also an alternative syntax for
      entering nested vectors more easily, see the description of the
-     *note non-splicing vector brackets: cc. above for details.
+     *note non-splicing vector brackets: d1. below for details.
 
  -- Function: rowvectorseq x y step
  -- Function: colvectorseq x y step
  -- Function: vectorseq x y step
      With these functions you can create a row or column vector from an
-     arithmetic sequence. Again, *note vectorseq: d5. is provided as a
-     synonym for *note rowvectorseq: d3. These operations are optimized
+     arithmetic sequence. Again, *note vectorseq: d4. is provided as a
+     synonym for *note rowvectorseq: d2. These operations are optimized
      for the case of int and double ranges.
 
          > rowvectorseq 0 10 1;
@@ -1537,8 +1493,8 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
          {0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9}
 
      The prelude also contains some optimization rules which translate
-     calls to *note vector: d2. et al on arithmetic sequences to the
-     corresponding calls to *note vectorseq: d5. et al, such as:
+     calls to *note vector: d0. et al on arithmetic sequences to the
+     corresponding calls to *note vectorseq: d4. et al, such as:
 
          def vector (n1:n2..m) = vectorseq n1 m (n2-n1);
          def vector (n..m) = vectorseq n m 1;
@@ -1556,7 +1512,7 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
 
      Please note that these optimization rules assume that basic
      arithmetic works with the involved elements, which may give you
-     trouble if you try to use *note vector: d2. et al with exotic
+     trouble if you try to use *note vector: d0. et al with exotic
      kinds of user-defined arithmetic sequences. To disable them,
      simply run the interpreter with the option `--disable
      vectorseq-opt'.
@@ -1568,7 +1524,7 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
      These functions convert a list or matrix to a matrix of the
      corresponding type (integer, double, complex or symbolic). If the
      input is a list, the result is always a row vector; this is
-     usually faster than the *note matrix: cf. and *note vector: d2.
+     usually faster than the *note matrix: cd. and *note vector: d0.
      operations, but requires that the elements already are of the
      appropriate type.
 
@@ -1577,7 +1533,7 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
          > dmatrix {1,2,3;4,5,6};
          {1.0,2.0,3.0;4.0,5.0,6.0}
 
-     The *note dmatrix: d6, *note cmatrix: d7. and *note imatrix: d8.
+     The *note dmatrix: d5, *note cmatrix: d6. and *note imatrix: d7.
      functions can also be invoked with either an int `n' or a pair
      `(n,m)' of ints as argument, in which case they construct a zero
      rowvector or matrix with the corresponding dimensions.
@@ -1606,6 +1562,52 @@ File: purelib.info,  Node: Matrix Construction and Conversions,  Next: Matrix In
          [[1,2,3]]
 
 
+
+  In addition, the following special syntax is provided as a shorthand
+notation for nested vector structures:
+
+ -- macro: {` x, y, z, ... `}
+     Non-splicing vector brackets. These work like `{x,y,z,...}', but
+     unlike these they will _not_ splice submatrices in the arguments
+     `x,y,z,...' So they work a bit like quoted vectors `'{x,y,z,...}',
+     but the arguments `x,y,z,...' will be evaluated as usual.
+
+  The non-splicing vector brackets provide a convenient shorthand to
+enter symbolic vector values which may contain other vectors or
+matrices as components. For instance, note how the ordinary matrix
+brackets combine the column subvectors in the first example below to a
+3x2 matrix, while the non-splicing brackets in the second example
+create a 1x2 row vector with the column vectors as members instead:
+
+    > {{1;2;3},{4;5;6}};
+    {1,4;2,5;3,6}
+    > {`{1;2;3},{4;5;6}`};
+    {{1;2;3},{4;5;6}}
+
+The second example works like a quoted matrix expression such as
+`'{{1;2;3},{4;5;6}}', but the non-splicing brackets also evaluate their
+arguments:
+
+    > '{vector (1..3),vector (4..6)};
+    {vector (1..3),vector (4..6)}
+    > {`vector (1..3),vector (4..6)`};
+    {{1,2,3},{4,5,6}}
+
+The `{` `}' brackets can be nested. Examples:
+
+    > {`1,{`vector (1..5),2*3`},{}`};
+    {1,{{1,2,3,4,5},6},{}}
+    > {`{`{1,2}`},{`{3,4}`}`};
+    {{{1,2}},{{3,4}}}
+
+Also note that the `{` `}' brackets only produce row vectors, but you
+can just transpose the result if you need a column vector instead:
+
+    > transpose {`{1;2;3},{4;5;6}`};
+    {{1;2;3};{4;5;6}}
+
+Finally, note that the notation `{` `}' without any arguments is not
+supported, simply write `{}' for the empty vector instead.
 
 
 File: purelib.info,  Node: Matrix Inspection and Manipulation,  Next: Pointers and Matrices,  Prev: Matrix Construction and Conversions,  Up: Matrix Functions
@@ -1645,8 +1647,8 @@ File: purelib.info,  Node: Matrix Inspection and Manipulation,  Next: Pointers a
  -- Function: subseq x i j
  -- Function: subseq2 x i j k l
      Helper functions to optimize matrix slices, see *note Slicing: 50.
-     for details.  *note subseq2: c9. is a special version of *note
-     subseq: c8.  which is used to optimize the case of 2-dimensional
+     for details.  *note subseq2: cb. is a special version of *note
+     subseq: ca.  which is used to optimize the case of 2-dimensional
      matrix slices `xs!!(i..j,k..l)'.
 
  -- Function: row x i
@@ -5764,7 +5766,7 @@ Index
                                                               (line  36)
 * == infix function <1>:                 Pointer Arithmetic.  (line  39)
 * == infix function <2>:                 Arithmetic.          (line  73)
-* == infix function <3>:                 Matrix Functions.    (line  67)
+* == infix function <3>:                 Matrix Functions.    (line  26)
 * == infix function <4>:                 Basic String Functions.
                                                               (line  36)
 * == infix function <5>:                 Hash Pairs.          (line  16)
@@ -5787,6 +5789,8 @@ Index
 * __locals__ macro:                      Inspection.          (line  87)
 * __namespace__ macro:                   Inspection.          (line  54)
 * __str__ function:                      Eval and Friends.    (line 119)
+* ` ` outfix macro:                      Matrix Construction and Conversions.
+                                                              (line 135)
 * abs function <1>:                      Complex Numbers.     (line  55)
 * abs function:                          Arithmetic.          (line 113)
 * acos function:                         Basic Math Functions.
@@ -6158,7 +6162,7 @@ Index
 * infix function <1>:                    Operations<3>.       (line  45)
 * infix function <2>:                    Operations.          (line  27)
 * infix function <3>:                    Record Functions.    (line  57)
-* infix function <4>:                    Matrix Functions.    (line  26)
+* infix function <4>:                    Matrix Functions.    (line  36)
 * infix function <5>:                    Basic String Functions.
                                                               (line   6)
 * infix function <6>:                    Lists and Tuples.    (line 144)
@@ -6614,12 +6618,11 @@ Index
 * zip3 function:                         Zip and Friends.     (line  17)
 * zipwith function:                      Zip and Friends.     (line  20)
 * zipwith3 function:                     Zip and Friends.     (line  24)
-* | | outfix macro:                      Matrix Functions.    (line  80)
 * || infix function:                     Arithmetic.          (line  83)
 * ~ prefix function:                     Arithmetic.          (line  83)
 * ~= infix function <1>:                 Pointer Arithmetic.  (line  39)
 * ~= infix function <2>:                 Arithmetic.          (line  73)
-* ~= infix function <3>:                 Matrix Functions.    (line  67)
+* ~= infix function <3>:                 Matrix Functions.    (line  26)
 * ~= infix function <4>:                 Basic String Functions.
                                                               (line  36)
 * ~= infix function <5>:                 Hash Pairs.          (line  16)
@@ -7028,1293 +7031,1293 @@ Ref: dim45038
 Ref: c545253
 Ref: null/matrix45253
 Ref: c645405
-Ref: !/matrix45405
-Ref: c745425
-Ref: !!/matrix45425
-Ref: ca46644
-Ref: ==/matrix46644
-Ref: cb46665
-Ref: ~=/matrix46665
-Ref: cc46837
-Ref: non-splicing46837
-Ref: cd46935
-Ref: |46935
-Node: Matrix Construction and Conversions49402
-Ref: matrix construction and conversions49534
-Ref: ce49534
-Ref: matrix-construction-and-conversions49534
-Ref: cf49619
-Ref: matrix49619
-Ref: d050185
-Ref: rowvector50185
-Ref: d150212
-Ref: colvector50212
-Ref: d250239
-Ref: vector50239
-Ref: d351239
-Ref: rowvectorseq51239
-Ref: d451275
-Ref: colvectorseq51275
-Ref: d551311
-Ref: vectorseq51311
-Ref: d652768
-Ref: dmatrix52768
-Ref: d752793
-Ref: cmatrix52793
-Ref: d852818
-Ref: imatrix52818
-Ref: d952843
-Ref: smatrix52843
-Ref: da53704
-Ref: list/matrix53704
-Ref: db53725
-Ref: list2/matrix53725
-Ref: dc53747
-Ref: tuple/matrix53747
-Node: Matrix Inspection and Manipulation54152
-Ref: matrix inspection and manipulation54314
-Ref: 2a54314
-Ref: matrix-inspection-and-manipulation54314
-Ref: dd54469
-Ref: nmatrix54469
-Ref: de54734
-Ref: dmatrixp54734
-Ref: df54759
-Ref: cmatrixp54759
-Ref: e054784
-Ref: imatrixp54784
-Ref: e154809
-Ref: smatrixp54809
-Ref: e254834
-Ref: nmatrixp54834
-Ref: e354932
-Ref: vectorp54932
-Ref: e454956
-Ref: rowvectorp54956
-Ref: e554983
-Ref: colvectorp54983
-Ref: e655108
-Ref: stride55108
-Ref: c855394
-Ref: subseq/matrix55394
-Ref: c955421
-Ref: subseq2/matrix55421
-Ref: e855702
-Ref: row55702
-Ref: e955724
-Ref: col55724
-Ref: ea55797
-Ref: rows55797
-Ref: eb55818
-Ref: cols55818
-Ref: ec55897
-Ref: diag55897
-Ref: ed55918
-Ref: subdiag55918
-Ref: ee55944
-Ref: supdiag55944
-Ref: ef56280
-Ref: submat56280
-Ref: f056543
-Ref: rowcat56543
-Ref: f156567
-Ref: colcat56567
-Ref: f257033
-Ref: matcat57033
-Ref: f357518
-Ref: rowcatmap57518
-Ref: f457547
-Ref: colcatmap57547
-Ref: f557576
-Ref: rowmap57576
-Ref: f657602
-Ref: colmap57602
-Ref: f757795
-Ref: diagmat57795
-Ref: f857819
-Ref: subdiagmat57819
-Ref: f957848
-Ref: supdiagmat57848
-Ref: fa58316
-Ref: re/matrix58316
-Ref: fb58335
-Ref: im/matrix58335
-Ref: fc58354
-Ref: conj/matrix58354
-Ref: e758470
-Ref: pack58470
-Ref: fd58491
-Ref: packed58491
-Ref: fe59133
-Ref: redim59133
-Ref: ff59570
-Ref: sort/matrix59570
-Ref: 10060955
-Ref: transpose/matrix60955
-Ref: 10161078
-Ref: rowrev61078
-Ref: 10261101
-Ref: colrev61101
-Ref: 10361124
-Ref: reverse/matrix61124
-Node: Pointers and Matrices61283
-Ref: pointers and matrices61401
-Ref: 10461401
-Ref: pointers-and-matrices61401
-Ref: 10561878
-Ref: pointer/matrix61878
-Ref: 10662281
-Ref: double_pointer62281
-Ref: 10762314
-Ref: float_pointer62314
-Ref: 10862346
-Ref: complex_pointer62346
-Ref: 10962380
-Ref: complex_float_pointer62380
-Ref: 10a62420
-Ref: int_pointer62420
-Ref: 10b62450
-Ref: short_pointer62450
-Ref: 10c62482
-Ref: byte_pointer62482
-Ref: 10d62916
-Ref: double_matrix62916
-Ref: 10e62952
-Ref: float_matrix62952
-Ref: 10f62987
-Ref: complex_matrix62987
-Ref: 11063024
-Ref: complex_float_matrix63024
-Ref: 11163067
-Ref: int_matrix63067
-Ref: 11263100
-Ref: short_matrix63100
-Ref: 11363135
-Ref: byte_matrix63135
-Ref: 11463686
-Ref: double_matrix_view63686
-Ref: 11563727
-Ref: complex_matrix_view63727
-Ref: 11663769
-Ref: int_matrix_view63769
-Node: Record Functions64219
-Ref: record functions64324
-Ref: 2b64324
-Ref: record-functions64324
-Ref: 11764324
-Ref: id564324
-Ref: 11c65839
-Ref: record/type65839
-Ref: 11d66010
-Ref: recordp66010
-Ref: 11e66065
-Ref: record66065
-Ref: 12066529
-Ref: #/record66529
-Ref: 11866707
-Ref: member/record66707
-Ref: 12166778
-Ref: !/record66778
-Ref: 12266926
-Ref: !!/record66926
-Ref: 11967077
-Ref: insert/record67077
-Ref: 12367107
-Ref: update/record67107
-Ref: 12467414
-Ref: delete/record67414
-Ref: 12567592
-Ref: keys/record67592
-Ref: 12667613
-Ref: vals/record67613
-Node: Primitives68860
-Ref: primitives68940
-Ref: 12768940
-Node: Special Constants69800
-Ref: special constants69884
-Ref: 12869884
-Ref: special-constants69884
-Ref: 12969935
-Ref: inf69935
-Ref: 12a69953
-Ref: nan69953
-Node: Arithmetic70353
-Ref: arithmetic70457
-Ref: 12e70457
-Ref: 4173165
-Ref: +73165
-Ref: 13273185
-Ref: -73185
-Ref: 13373205
-Ref: *73205
-Ref: 13473225
-Ref: /73225
-Ref: 13573245
-Ref: ^73245
-Ref: 13673407
-Ref: -/unary73407
-Ref: 13773511
-Ref: div73511
-Ref: 13873533
-Ref: mod73533
-Ref: 4673604
-Ref: ==73604
-Ref: 13973625
-Ref: ~=73625
-Ref: 13a73677
-Ref: <=73677
-Ref: 13b73698
-Ref: >=73698
-Ref: 13c73719
-Ref: >73719
-Ref: 13d73739
-Ref: <73739
-Ref: 13e73778
-Ref: ~73778
-Ref: 13f73796
-Ref: &&73796
-Ref: 14073817
-Ref: ||73817
-Ref: 14173971
-Ref: not73971
-Ref: 14273991
-Ref: and73991
-Ref: 14374013
-Ref: or74013
-Ref: 14474139
-Ref: <<74139
-Ref: 14574160
-Ref: >>74160
-Ref: 14674958
-Ref: abs74958
-Ref: 14774978
-Ref: sgn74978
-Ref: 14875041
-Ref: min75041
-Ref: 14975063
-Ref: max75063
-Ref: 14a75217
-Ref: succ75217
-Ref: 14b75238
-Ref: pred75238
-Ref: 14c75316
-Ref: gcd75316
-Ref: 14d75338
-Ref: lcd75338
-Ref: 14e75555
-Ref: pow75555
-Node: Conversions75836
-Ref: conversions75933
-Ref: 14f75933
-Ref: 15076036
-Ref: hash76036
-Ref: 15176112
-Ref: int76112
-Ref: 15276132
-Ref: bigint76132
-Ref: 15376155
-Ref: double76155
-Ref: 15476233
-Ref: pointer76233
-Ref: 15576638
-Ref: ubyte76638
-Ref: 15676660
-Ref: ushort76660
-Ref: 15776683
-Ref: uint76683
-Ref: 15876704
-Ref: uint6476704
-Ref: 15976727
-Ref: ulong76727
-Ref: 15a77607
-Ref: rounding-functions77607
-Ref: 15b77659
-Ref: floor77659
-Ref: 15c77681
-Ref: ceil77681
-Ref: 15d77724
-Ref: round77724
-Ref: 15e77746
-Ref: trunc77746
-Ref: 15f77807
-Ref: frac77807
-Node: Predicates78046
-Ref: predicates78143
-Ref: 2978143
-Ref: 16078424
-Ref: same78424
-Ref: 11f78447
-Ref: ===78447
-Ref: 16178469
-Ref: ~==78469
-Ref: 16278918
-Ref: typep78918
-Ref: 16379276
-Ref: intp79276
-Ref: 16479297
-Ref: bigintp79297
-Ref: 16579321
-Ref: doublep79321
-Ref: 16679345
-Ref: stringp79345
-Ref: 16779369
-Ref: pointerp79369
-Ref: 16879394
-Ref: matrixp79394
-Ref: 16979468
-Ref: charp79468
-Ref: 16a79531
-Ref: numberp79531
-Ref: 16b79555
-Ref: complexp79555
-Ref: 16c79580
-Ref: realp79580
-Ref: 16d79602
-Ref: rationalp79602
-Ref: 16e79628
-Ref: integerp79628
-Ref: 16f79841
-Ref: exactp79841
-Ref: 17079864
-Ref: inexactp79864
-Ref: 12b79979
-Ref: infp79979
-Ref: 12c80000
-Ref: nanp80000
-Ref: 12d80081
-Ref: null/pointer80081
-Ref: 17180133
-Ref: applp80133
-Ref: 17280155
-Ref: listp80155
-Ref: 17380177
-Ref: rlistp80177
-Ref: 17480200
-Ref: tuplep80200
-Ref: 17580712
-Ref: funp80712
-Ref: 17680733
-Ref: lambdap80733
-Ref: 17780757
-Ref: thunkp80757
-Ref: 17880780
-Ref: closurep80780
-Ref: 17981027
-Ref: functionp81027
-Ref: 17a81245
-Ref: symbolp81245
-Ref: 17b81269
-Ref: varp81269
-Node: Inspection81727
-Ref: inspection81829
-Ref: 17c81829
-Ref: 17d82140
-Ref: ans82140
-Ref: 17e82639
-Ref: __func__82639
-Ref: 18083891
-Ref: __namespace__83891
-Ref: 18184290
-Ref: __list__84290
-Ref: 18285030
-Ref: __locals__85030
-Ref: 18687562
-Ref: get_fundef87562
-Ref: 18787591
-Ref: get_typedef87591
-Ref: 18887621
-Ref: get_macdef87621
-Ref: 18987810
-Ref: get_interface87810
-Ref: 18a87842
-Ref: get_interface_typedef87842
-Ref: 18b88649
-Ref: get_vardef88649
-Ref: 18c88678
-Ref: get_constdef88678
-Ref: 18e89051
-Ref: add_fundef89051
-Ref: 18f89082
-Ref: add_typedef89082
-Ref: 19089114
-Ref: add_macdef89114
-Ref: 19189352
-Ref: add_fundef_at89352
-Ref: 19289388
-Ref: add_typedef_at89388
-Ref: 19389425
-Ref: add_macdef_at89425
-Ref: 19489768
-Ref: add_interface89768
-Ref: 19589958
-Ref: add_interface_at89958
-Ref: 19690205
-Ref: add_vardef90205
-Ref: 19790236
-Ref: add_constdef90236
-Ref: 19890588
-Ref: del_fundef90588
-Ref: 19990618
-Ref: del_typedef90618
-Ref: 19a90649
-Ref: del_macdef90649
-Ref: 19b90934
-Ref: del_interface90934
-Ref: 19c91086
-Ref: del_vardef91086
-Ref: 19d91115
-Ref: del_constdef91115
-Ref: 19e91627
-Ref: nargs91627
-Ref: 19f91855
-Ref: arity91855
-Ref: 1a092092
-Ref: fixity92092
-Node: Eval and Friends94468
-Ref: eval and friends94584
-Ref: 9094584
-Ref: eval-and-friends94584
-Ref: 17f95316
-Ref: str95316
-Ref: 1a295425
-Ref: val/string95425
-Ref: 18495819
-Ref: eval95819
-Ref: 18596991
-Ref: evalcmd96991
-Ref: 18d97481
-Ref: lasterr97481
-Ref: 1a397916
-Ref: lasterrpos97916
-Ref: 1a4100186
-Ref: __str__100186
-Ref: 1a5100541
-Ref: globsym100541
-Ref: 1a6100997
-Ref: clearsym100997
-Ref: 183101586
-Ref: reduce101586
-Ref: 1a7102099
-Ref: reduce_with102099
-Node: Expression Serialization104204
-Ref: expression serialization104334
-Ref: 1a1104334
-Ref: expression-serialization104334
-Ref: 1a8105080
-Ref: blob105080
-Ref: 1a9105261
-Ref: val/blob105261
-Ref: 1aa105404
-Ref: blobp105404
-Ref: 1ab105783
-Ref: #/blob105783
-Ref: 1ac105801
-Ref: blob_size105801
-Ref: 1ad105827
-Ref: blob_crc105827
-Node: Other Special Primitives107479
-Ref: other special primitives107611
-Ref: 1ae107611
-Ref: other-special-primitives107611
-Ref: 1af107676
-Ref: exit107676
-Ref: 1b0107758
-Ref: throw107758
-Ref: 1b1107832
-Ref: force107832
-Node: Pointer Operations107980
-Ref: pointer operations108096
-Ref: 1b2108096
-Ref: pointer-operations108096
-Ref: 1b4108431
-Ref: addr108431
-Ref: 1b5108828
-Ref: calloc108828
-Ref: 1b6108863
-Ref: malloc108863
-Ref: 1b7108889
-Ref: realloc108889
-Ref: 1b8108920
-Ref: free108920
-Ref: 1b9109525
-Ref: get_byte109525
-Ref: 1ba109552
-Ref: get_short109552
-Ref: 1bb109580
-Ref: get_int109580
-Ref: 1bc109606
-Ref: get_int64109606
-Ref: 1bd109634
-Ref: get_long109634
-Ref: 1be109661
-Ref: get_float109661
-Ref: 1bf109689
-Ref: get_double109689
-Ref: 1c0109718
-Ref: get_string109718
-Ref: 1c1109747
-Ref: get_pointer109747
-Ref: 1c2109899
-Ref: put_byte109899
-Ref: 1c3109928
-Ref: put_short109928
-Ref: 1c4109958
-Ref: put_int109958
-Ref: 1c5109986
-Ref: put_int64109986
-Ref: 1c6110016
-Ref: put_long110016
-Ref: 1c7110045
-Ref: put_float110045
-Ref: 1c8110075
-Ref: put_double110075
-Ref: 1c9110106
-Ref: put_string110106
-Ref: 1ca110137
-Ref: put_pointer110137
-Node: Sentries110319
-Ref: sentries110426
-Ref: 1cb110426
-Ref: 1cc110944
-Ref: sentry110944
-Ref: 1cd111058
-Ref: clear_sentry111058
-Ref: 1ce111136
-Ref: get_sentry111136
-Ref: 1cf112068
-Ref: cookedp112068
-Ref: 1d0112151
-Ref: cooked112151
-Node: Tagged Pointers115215
-Ref: tagged pointers115325
-Ref: 1d1115325
-Ref: tagged-pointers115325
-Ref: 1d2115325
-Ref: id6115325
-Ref: 1d3115981
-Ref: ptrtag115981
-Ref: 1d4116130
-Ref: get_ptrtag116130
-Ref: 1d5116202
-Ref: check_ptrtag116202
-Ref: 1d6116432
-Ref: make_ptrtag116432
-Ref: 1d7117538
-Ref: pointer_tag117538
-Ref: 1d8118000
-Ref: pointer_type118000
-Ref: 1d9118384
-Ref: pointer_cast118384
-Node: Expression References120420
-Ref: expression references120540
-Ref: 11b120540
-Ref: expression-references120540
-Ref: 1da120540
-Ref: id7120540
-Ref: 1db121080
-Ref: ref121080
-Ref: 1dc121152
-Ref: put121152
-Ref: 1dd121224
-Ref: get121224
-Ref: 1de121292
-Ref: unref121292
-Ref: 1df121497
-Ref: refp121497
-Ref: 1b3122868
-Ref: module-pointers122868
-Node: Pointer Arithmetic122868
-Ref: pointer arithmetic122964
-Ref: 130122964
-Ref: pointer-arithmetic122964
-Ref: 1e0123571
-Ref: int/pointer123571
-Ref: 1e1123591
-Ref: bigint/pointer123591
-Ref: 1e2124070
-Ref: +/pointer124070
-Ref: 1e3124090
-Ref: -/pointer124090
-Ref: 1e4124110
-Ref: -/pointerdiff124110
-Ref: 1e5124600
-Ref: ==/pointer124600
-Ref: 1e6124621
-Ref: ~=/pointer124621
-Ref: 1e7124746
-Ref: <=/pointer124746
-Ref: 1e8124767
-Ref: >=/pointer124767
-Ref: 1e9124788
-Ref: >/pointer124788
-Ref: 1ea124808
-Ref: </pointer124808
-Node: Mathematical Functions125023
-Ref: mathematical functions125126
-Ref: 1a125126
-Ref: module-math125126
-Ref: 131125126
-Ref: mathematical-functions125126
-Node: Imports125411
-Ref: imports125507
-Ref: 1eb125507
-Node: Basic Math Functions125643
-Ref: basic math functions125763
-Ref: 1ec125763
-Ref: basic-math-functions125763
-Ref: 1ed125871
-Ref: 1ee125922
-Ref: pi125922
-Ref: 1f2126649
-Ref: mersenne-twister126649
-Ref: 1f3126649
-Ref: random126649
-Ref: 1ef126754
-Ref: random31126754
-Ref: 1f0126846
-Ref: random53126846
-Ref: 1f1126955
-Ref: srandom126955
-Ref: 1f4127382
-Ref: sqrt127382
-Ref: 1f5127435
-Ref: exp127435
-Ref: 1f6127455
-Ref: ln127455
-Ref: 1f7127474
-Ref: log127474
-Ref: 1f8127554
-Ref: sin127554
-Ref: 1f9127574
-Ref: cos127574
-Ref: 1fa127594
-Ref: tan127594
-Ref: 1fb127645
-Ref: asin127645
-Ref: 1fc127666
-Ref: acos127666
-Ref: 1fd127687
-Ref: atan127687
-Ref: 1fe127747
-Ref: atan2127747
-Ref: 1ff127897
-Ref: sinh127897
-Ref: 200127918
-Ref: cosh127918
-Ref: 201127939
-Ref: tanh127939
-Ref: 202128002
-Ref: asinh128002
-Ref: 203128024
-Ref: acosh128024
-Ref: 204128046
-Ref: atanh128046
-Node: Complex Numbers128118
-Ref: complex numbers128247
-Ref: 205128247
-Ref: complex-numbers128247
-Ref: 206128365
-Ref: i128365
-Ref: 207130025
-Ref: complex130025
-Ref: 208130102
-Ref: polar130102
-Ref: 209130124
-Ref: rect130124
-Ref: 20a130206
-Ref: cis130206
-Ref: 20b130350
-Ref: abs/complex130350
-Ref: 20c130370
-Ref: arg130370
-Ref: 20d130548
-Ref: re130548
-Ref: 20e130567
-Ref: im130567
-Ref: 20f130617
-Ref: conj130617
-Node: Rational Numbers131103
-Ref: rational numbers131248
-Ref: 12f131248
-Ref: rational-numbers131248
-Ref: 210131291
-Ref: %131291
-Ref: 211132696
-Ref: rational132696
-Ref: 212133260
-Ref: num133260
-Ref: 213133280
-Ref: den133280
-Node: Semantic Number Predicates and Types133945
-Ref: semantic number predicates and types134066
-Ref: 1b134066
-Ref: semantic-number-predicates-and-types134066
-Ref: 214134511
-Ref: compvalp134511
-Ref: 215134610
-Ref: realvalp134610
-Ref: 216134676
-Ref: ratvalp134676
-Ref: 217134823
-Ref: bigintvalp134823
-Ref: 218134930
-Ref: intvalp134930
-Ref: 219135041
-Ref: compval135041
-Ref: 21a135059
-Ref: realval135059
-Ref: 21b135077
-Ref: ratval135077
-Ref: 21c135094
-Ref: bigintval135094
-Ref: 21d135114
-Ref: intval135114
-Node: Container Types135343
-Ref: container types135455
-Ref: 21e135455
-Ref: container-types135455
-Ref: 57136673
-Ref: module-array136673
-Node: Arrays136739
-Ref: arrays136812
-Ref: 21f136812
-Ref: 220137108
-Ref: array/type137108
-Node: Imports<2>137212
-Ref: imports<2>137285
-Ref: 221137285
-Ref: id8137285
-Node: Operations137426
-Ref: operations137516
-Ref: 222137516
-Ref: 223137551
-Ref: emptyarray137551
-Ref: 224137605
-Ref: array137605
-Ref: 225137667
-Ref: array2137667
-Ref: 226137749
-Ref: mkarray137749
-Ref: 227137821
-Ref: mkarray2137821
-Ref: 228137904
-Ref: arrayp137904
-Ref: 229137963
-Ref: #/array137963
-Ref: 22a137999
-Ref: !/array137999
-Ref: 22b138112
-Ref: null/array138112
-Ref: 22c138175
-Ref: members/array138175
-Ref: 22d138199
-Ref: list/array138199
-Ref: 22e138255
-Ref: members2/array138255
-Ref: 22f138280
-Ref: list2/array138280
-Ref: 230138351
-Ref: first/array138351
-Ref: 231138373
-Ref: last/array138373
-Ref: 232138429
-Ref: rmfirst/array138429
-Ref: 233138453
-Ref: rmlast/array138453
-Ref: 234138520
-Ref: insert/array138520
-Ref: 235138586
-Ref: append/array138586
-Ref: 236138646
-Ref: update/array138646
-Ref: 237138718
-Ref: update2/array138718
-Node: Examples138785
-Ref: examples138856
-Ref: 238138856
-Ref: 239140182
-Ref: module-heap140182
-Node: Heaps140183
-Ref: heaps140277
-Ref: 23a140277
-Ref: 23c140867
-Ref: heap/type140867
-Node: Imports<3>140995
-Ref: imports<3>141070
-Ref: 23d141070
-Ref: id9141070
-Node: Operations<2>141210
-Ref: operations<2>141305
-Ref: 23e141305
-Ref: id10141305
-Ref: 23f141340
-Ref: emptyheap141340
-Ref: 240141392
-Ref: heap141392
-Ref: 241141451
-Ref: heapp141451
-Ref: 242141507
-Ref: #/heap141507
-Ref: 243141546
-Ref: null/heap141546
-Ref: 244141608
-Ref: members/heap141608
-Ref: 245141632
-Ref: list/heap141632
-Ref: 246141702
-Ref: first/heap141702
-Ref: 247141771
-Ref: rmfirst/heap141771
-Ref: 248141851
-Ref: insert/heap141851
-Node: Examples<2>141902
-Ref: examples<2>141978
-Ref: 249141978
-Ref: id11141978
-Ref: 58142146
-Ref: module-dict142146
-Node: Dictionaries142147
-Ref: dictionaries142248
-Ref: 11a142248
-Ref: 24a142551
-Ref: dict/type142551
-Ref: 24b142697
-Ref: hdict/type142697
-Ref: 24c142838
-Ref: mdict/type142838
-Ref: 24d142975
-Ref: hmdict/type142975
-Ref: 24e143097
-Ref: xdict/type143097
-Node: Imports<4>145177
-Ref: imports<4>145259
-Ref: 255145259
-Ref: id12145259
-Node: Operations<3>145399
-Ref: operations<3>145501
-Ref: 256145501
-Ref: id13145501
-Ref: 257145536
-Ref: emptydict145536
-Ref: 258145560
-Ref: emptyhdict145560
-Ref: 259145585
-Ref: emptymdict145585
-Ref: 25a145610
-Ref: emptyhmdict145610
-Ref: 25b145669
-Ref: dict145669
-Ref: 25c145691
-Ref: hdict145691
-Ref: 25d145714
-Ref: mdict145714
-Ref: 25e145737
-Ref: hmdict145737
-Ref: 25f146013
-Ref: dictp146013
-Ref: 260146035
-Ref: hdictp146035
-Ref: 261146058
-Ref: mdictp146058
-Ref: 262146081
-Ref: hmdictp146081
-Ref: 263146171
-Ref: mkdict146171
-Ref: 264146197
-Ref: mkhdict146197
-Ref: 265146224
-Ref: mkmdict146224
-Ref: 266146251
-Ref: mkhmdict146251
-Ref: 267146346
-Ref: +/dict146346
-Ref: 268146420
-Ref: -/dict146420
-Ref: 269146506
-Ref: */dict146506
-Ref: 26a146600
-Ref: #/dict146600
-Ref: 26b146681
-Ref: !/dict146681
-Ref: 26c146866
-Ref: null/dict146866
-Ref: 26d146933
-Ref: member/dict146933
-Ref: 24f147012
-Ref: members/dict147012
-Ref: 26e147036
-Ref: list/dict147036
-Ref: 250147138
-Ref: keys/dict147138
-Ref: 251147232
-Ref: vals/dict147232
-Ref: 26f147282
-Ref: first/dict147282
-Ref: 270147304
-Ref: last/dict147304
-Ref: 252147389
-Ref: rmfirst/dict147389
-Ref: 253147413
-Ref: rmlast/dict147413
-Ref: 271147502
-Ref: insert/dict147502
-Ref: 272147532
-Ref: update/dict147532
-Ref: 254147853
-Ref: delete/dict147853
-Ref: 273148001
-Ref: delete_val/dict148001
-Ref: 274148239
-Ref: delete_all/dict148239
-Node: Examples<3>149946
-Ref: examples<3>150029
-Ref: 275150029
-Ref: id14150029
-Ref: 276152804
-Ref: module-set152804
-Node: Sets and Bags152805
-Ref: sets and bags152892
-Ref: 23b152892
-Ref: sets-and-bags152892
-Ref: 277153510
-Ref: set/type153510
-Ref: 278153524
-Ref: bag/type153524
-Ref: 279153675
-Ref: hset/type153675
-Ref: 27a153690
-Ref: hbag/type153690
-Ref: 27b153862
-Ref: xset/type153862
-Node: Imports<5>155024
-Ref: imports<5>155107
-Ref: 27c155107
-Ref: id15155107
-Node: Operations<4>155246
-Ref: operations<4>155349
-Ref: 27d155349
-Ref: id16155349
-Ref: 27e155384
-Ref: emptyset155384
-Ref: 27f155407
-Ref: emptybag155407
-Ref: 280155430
-Ref: emptyhset155430
-Ref: 281155454
-Ref: emptyhbag155454
-Ref: 282155511
-Ref: set155511
-Ref: 283155532
-Ref: bag155532
-Ref: 284155553
-Ref: hset155553
-Ref: 285155575
-Ref: hbag155575
-Ref: 286155787
-Ref: setp155787
-Ref: 287155808
-Ref: bagp155808
-Ref: 288155829
-Ref: hsetp155829
-Ref: 289155851
-Ref: hbagp155851
-Ref: 28a155939
-Ref: +/set155939
-Ref: 28b156019
-Ref: -/set156019
-Ref: 28c156105
-Ref: */set156105
-Ref: 28d156199
-Ref: #/set156199
-Ref: 28e156248
-Ref: null/set156248
-Ref: 28f156315
-Ref: member/set156315
-Ref: 290156376
-Ref: members/set156376
-Ref: 291156400
-Ref: list/set156400
-Ref: 292156503
-Ref: first/set156503
-Ref: 293156525
-Ref: last/set156525
-Ref: 294156610
-Ref: rmfirst/set156610
-Ref: 295156634
-Ref: rmlast/set156634
-Ref: 296156723
-Ref: insert/set156723
-Ref: 297156831
-Ref: delete/set156831
-Ref: 298156948
-Ref: delete_all/set156948
-Node: Examples<4>158194
-Ref: examples<4>158278
-Ref: 299158278
-Ref: id17158278
-Ref: 29a160104
-Ref: module-system160104
-Node: System Interface160105
-Ref: system interface160200
-Ref: be160200
-Ref: system-interface160200
-Node: Imports<6>161073
-Ref: imports<6>161163
-Ref: 29b161163
-Ref: id18161163
-Node: Errno and Friends161473
-Ref: errno and friends161584
-Ref: 29d161584
-Ref: errno-and-friends161584
-Ref: 29e161629
-Ref: errno161629
-Ref: 29f161649
-Ref: set_errno161649
-Ref: 2a0161675
-Ref: perror161675
-Ref: 2a1161700
-Ref: strerror161700
-Node: POSIX Locale162160
-Ref: posix locale162276
-Ref: 2a2162276
-Ref: posix-locale162276
-Ref: 2a3162311
-Ref: setlocale162311
-Node: Signal Handling163705
-Ref: signal handling163818
-Ref: 2a4163818
-Ref: signal-handling163818
-Ref: 2a5163859
-Ref: trap163859
-Node: Time Functions164687
-Ref: time functions164805
-Ref: 2a6164805
-Ref: time-functions164805
-Ref: 2a7165065
-Ref: time165065
-Ref: 2a8165290
-Ref: gettimeofday165290
-Ref: 2a9165764
-Ref: clock165764
-Ref: 2aa166052
-Ref: sleep166052
-Ref: 2ab166074
-Ref: nanosleep166074
-Ref: 2ac167087
-Ref: tzset167087
-Ref: 2ad167147
-Ref: tzname167147
-Ref: 2ae167168
-Ref: timezone167168
-Ref: 2af167191
-Ref: daylight167191
-Ref: 2b0168008
-Ref: ctime168008
-Ref: 2b1168134
-Ref: gmtime168134
-Ref: 2b2168157
-Ref: localtime168157
-Ref: 2b5168530
-Ref: mktime168530
-Ref: 2b3168690
-Ref: asctime168690
-Ref: 2b4168715
-Ref: strftime168715
-Ref: 2b6168936
-Ref: strptime168936
-Node: Process Functions173277
-Ref: process functions173399
-Ref: 2b7173399
-Ref: process-functions173399
-Ref: 2bd173724
-Ref: system173724
-Ref: 2be173780
-Ref: execv173780
-Ref: 2bf173810
-Ref: execvp173810
-Ref: 2c0173841
-Ref: execve173841
-Ref: 2c1174726
-Ref: spawnv174726
-Ref: 2c2174762
-Ref: spawnvp174762
-Ref: 2c3174799
-Ref: spawnve174799
-Node: Basic I/O Interface176162
-Ref: basic i/o interface176286
-Ref: 2c4176286
-Ref: basic-i-o-interface176286
-Ref: 2c5176690
-Ref: stdin176690
-Ref: 2c6176710
-Ref: stdout176710
-Ref: 2c7176731
-Ref: stderr176731
-Ref: 2c8176784
-Ref: fopen176784
-Ref: 2c9176814
-Ref: popen176814
-Ref: 2ca177129
-Ref: fdopen177129
-Ref: 2cb177352
-Ref: freopen177352
-Ref: 2cc177576
-Ref: fclose177576
-Ref: 2cd177600
-Ref: pclose177600
-Ref: 2ce177654
-Ref: tmpfile177654
-Ref: 2cf177843
-Ref: feof177843
-Ref: 2d0177865
-Ref: ferror177865
-Ref: 2d1177889
-Ref: clearerr177889
-Ref: 2d2178007
-Ref: fileno178007
-Ref: 2d3178097
-Ref: fflush178097
-Ref: 2d4178203
-Ref: fgets178203
-Ref: 2d5178226
-Ref: gets178226
-Ref: 2d6178361
-Ref: fget178361
-Ref: 2d7178472
-Ref: fputs178472
-Ref: 2d8178497
-Ref: puts178497
-Ref: 2d9178742
-Ref: fread178742
-Ref: 2da178780
-Ref: fwrite178780
-Ref: 2db178948
-Ref: fseek178948
-Ref: 2dc178985
-Ref: ftell178985
-Ref: 2dd179008
-Ref: rewind179008
-Ref: 2de179395
-Ref: setbuf179395
-Ref: 2df179423
-Ref: setvbuf179423
-Ref: 2e0181777
-Ref: gmp181777
-Ref: 2e1181777
-Ref: mpfr181777
-Ref: 2e2181777
-Ref: printf181777
-Ref: 2e3181810
-Ref: fprintf181810
-Ref: 2e4182352
-Ref: sprintf182352
-Ref: 2e5182819
-Ref: scanf182819
-Ref: 2e6182846
-Ref: fscanf182846
-Ref: 2e7183742
-Ref: sscanf183742
-Node: Stat and Friends185142
-Ref: stat and friends185268
-Ref: 2e8185268
-Ref: stat-and-friends185268
-Ref: 2e9185311
-Ref: stat185311
-Ref: 2ea185895
-Ref: lstat185895
-Ref: 2eb186137
-Ref: fstat186137
-Node: Reading Directories187960
-Ref: reading directories188081
-Ref: 2ec188081
-Ref: reading-directories188081
-Ref: 2ed188130
-Ref: readdir188130
-Node: Shell Globbing188317
-Ref: shell globbing188436
-Ref: 2ee188436
-Ref: shell-globbing188436
-Ref: 2ef188477
-Ref: fnmatch188477
-Ref: 2f0188640
-Ref: glob188640
-Node: Regex Matching189254
-Ref: regex matching189380
-Ref: 2f1189380
-Ref: module-regex189380
-Ref: af189380
-Ref: regex-matching189380
-Ref: 2f2190312
-Ref: regex190312
-Ref: 2f3193696
-Ref: reg_result193696
-Ref: 2f4193900
-Ref: reg_info193900
-Ref: 2f5193994
-Ref: reg193994
-Ref: 2f6194144
-Ref: regs194144
-Ref: 2f7194477
-Ref: regexg194477
-Ref: 2f8194869
-Ref: regexgg194869
-Ref: 2f9194986
-Ref: regsub194986
-Ref: 2fa195514
-Ref: regsplit195514
-Ref: 2fb195909
-Ref: regexgs195909
-Ref: 2fc195953
-Ref: regexggs195953
-Ref: 2fd195998
-Ref: regsplits195998
-Node: Basic Examples196364
-Ref: basic examples196472
-Ref: 2fe196472
-Ref: basic-examples196472
-Node: Regex Substitutions and Splitting198384
-Ref: regex substitutions and splitting198514
-Ref: 2ff198514
-Ref: regex-substitutions-and-splitting198514
-Node: Empty Matches199210
-Ref: empty matches199336
-Ref: 300199336
-Ref: empty-matches199336
-Node: Submatches200244
-Ref: submatches200328
-Ref: 301200328
-Node: Additional POSIX Functions201704
-Ref: additional posix functions201830
-Ref: 2bc201830
-Ref: module-posix201830
-Ref: 29c201830
-Ref: additional-posix-functions201830
-Ref: 2b8202430
-Ref: fork202430
-Ref: 302202475
-Ref: getpid202475
-Ref: 303202496
-Ref: getppid202496
-Ref: 2ba202609
-Ref: wait202609
-Ref: 2bb202635
-Ref: waitpid202635
-Ref: 2b9202854
-Ref: kill202854
-Ref: 304202931
-Ref: raise202931
-Ref: 305203008
-Ref: pause203008
-Ref: 306203066
-Ref: module-getopt203066
-Node: Option Parsing203066
-Ref: option parsing203169
-Ref: bd203169
-Ref: option-parsing203169
-Ref: 307203455
-Ref: getopt203455
-Node: Index206593
-Ref: index206664
+Ref: ==/matrix45405
+Ref: c745426
+Ref: ~=/matrix45426
+Ref: c845598
+Ref: !/matrix45598
+Ref: c945618
+Ref: !!/matrix45618
+Node: Matrix Construction and Conversions47654
+Ref: matrix construction and conversions47786
+Ref: cc47786
+Ref: matrix-construction-and-conversions47786
+Ref: cd47871
+Ref: matrix47871
+Ref: ce48437
+Ref: rowvector48437
+Ref: cf48464
+Ref: colvector48464
+Ref: d048491
+Ref: vector48491
+Ref: d249491
+Ref: rowvectorseq49491
+Ref: d349527
+Ref: colvectorseq49527
+Ref: d449563
+Ref: vectorseq49563
+Ref: d551020
+Ref: dmatrix51020
+Ref: d651045
+Ref: cmatrix51045
+Ref: d751070
+Ref: imatrix51070
+Ref: d851095
+Ref: smatrix51095
+Ref: d951956
+Ref: list/matrix51956
+Ref: da51977
+Ref: list2/matrix51977
+Ref: db51999
+Ref: tuple/matrix51999
+Ref: d152404
+Ref: non-splicing52404
+Ref: dc52515
+Ref: `52515
+Node: Matrix Inspection and Manipulation54096
+Ref: matrix inspection and manipulation54258
+Ref: 2a54258
+Ref: matrix-inspection-and-manipulation54258
+Ref: dd54413
+Ref: nmatrix54413
+Ref: de54678
+Ref: dmatrixp54678
+Ref: df54703
+Ref: cmatrixp54703
+Ref: e054728
+Ref: imatrixp54728
+Ref: e154753
+Ref: smatrixp54753
+Ref: e254778
+Ref: nmatrixp54778
+Ref: e354876
+Ref: vectorp54876
+Ref: e454900
+Ref: rowvectorp54900
+Ref: e554927
+Ref: colvectorp54927
+Ref: e655052
+Ref: stride55052
+Ref: ca55338
+Ref: subseq/matrix55338
+Ref: cb55365
+Ref: subseq2/matrix55365
+Ref: e855646
+Ref: row55646
+Ref: e955668
+Ref: col55668
+Ref: ea55741
+Ref: rows55741
+Ref: eb55762
+Ref: cols55762
+Ref: ec55841
+Ref: diag55841
+Ref: ed55862
+Ref: subdiag55862
+Ref: ee55888
+Ref: supdiag55888
+Ref: ef56224
+Ref: submat56224
+Ref: f056487
+Ref: rowcat56487
+Ref: f156511
+Ref: colcat56511
+Ref: f256977
+Ref: matcat56977
+Ref: f357462
+Ref: rowcatmap57462
+Ref: f457491
+Ref: colcatmap57491
+Ref: f557520
+Ref: rowmap57520
+Ref: f657546
+Ref: colmap57546
+Ref: f757739
+Ref: diagmat57739
+Ref: f857763
+Ref: subdiagmat57763
+Ref: f957792
+Ref: supdiagmat57792
+Ref: fa58260
+Ref: re/matrix58260
+Ref: fb58279
+Ref: im/matrix58279
+Ref: fc58298
+Ref: conj/matrix58298
+Ref: e758414
+Ref: pack58414
+Ref: fd58435
+Ref: packed58435
+Ref: fe59077
+Ref: redim59077
+Ref: ff59514
+Ref: sort/matrix59514
+Ref: 10060899
+Ref: transpose/matrix60899
+Ref: 10161022
+Ref: rowrev61022
+Ref: 10261045
+Ref: colrev61045
+Ref: 10361068
+Ref: reverse/matrix61068
+Node: Pointers and Matrices61227
+Ref: pointers and matrices61345
+Ref: 10461345
+Ref: pointers-and-matrices61345
+Ref: 10561822
+Ref: pointer/matrix61822
+Ref: 10662225
+Ref: double_pointer62225
+Ref: 10762258
+Ref: float_pointer62258
+Ref: 10862290
+Ref: complex_pointer62290
+Ref: 10962324
+Ref: complex_float_pointer62324
+Ref: 10a62364
+Ref: int_pointer62364
+Ref: 10b62394
+Ref: short_pointer62394
+Ref: 10c62426
+Ref: byte_pointer62426
+Ref: 10d62860
+Ref: double_matrix62860
+Ref: 10e62896
+Ref: float_matrix62896
+Ref: 10f62931
+Ref: complex_matrix62931
+Ref: 11062968
+Ref: complex_float_matrix62968
+Ref: 11163011
+Ref: int_matrix63011
+Ref: 11263044
+Ref: short_matrix63044
+Ref: 11363079
+Ref: byte_matrix63079
+Ref: 11463630
+Ref: double_matrix_view63630
+Ref: 11563671
+Ref: complex_matrix_view63671
+Ref: 11663713
+Ref: int_matrix_view63713
+Node: Record Functions64163
+Ref: record functions64268
+Ref: 2b64268
+Ref: record-functions64268
+Ref: 11764268
+Ref: id564268
+Ref: 11c65783
+Ref: record/type65783
+Ref: 11d65954
+Ref: recordp65954
+Ref: 11e66009
+Ref: record66009
+Ref: 12066473
+Ref: #/record66473
+Ref: 11866651
+Ref: member/record66651
+Ref: 12166722
+Ref: !/record66722
+Ref: 12266870
+Ref: !!/record66870
+Ref: 11967021
+Ref: insert/record67021
+Ref: 12367051
+Ref: update/record67051
+Ref: 12467358
+Ref: delete/record67358
+Ref: 12567536
+Ref: keys/record67536
+Ref: 12667557
+Ref: vals/record67557
+Node: Primitives68804
+Ref: primitives68884
+Ref: 12768884
+Node: Special Constants69744
+Ref: special constants69828
+Ref: 12869828
+Ref: special-constants69828
+Ref: 12969879
+Ref: inf69879
+Ref: 12a69897
+Ref: nan69897
+Node: Arithmetic70297
+Ref: arithmetic70401
+Ref: 12e70401
+Ref: 4173109
+Ref: +73109
+Ref: 13273129
+Ref: -73129
+Ref: 13373149
+Ref: *73149
+Ref: 13473169
+Ref: /73169
+Ref: 13573189
+Ref: ^73189
+Ref: 13673351
+Ref: -/unary73351
+Ref: 13773455
+Ref: div73455
+Ref: 13873477
+Ref: mod73477
+Ref: 4673548
+Ref: ==73548
+Ref: 13973569
+Ref: ~=73569
+Ref: 13a73621
+Ref: <=73621
+Ref: 13b73642
+Ref: >=73642
+Ref: 13c73663
+Ref: >73663
+Ref: 13d73683
+Ref: <73683
+Ref: 13e73722
+Ref: ~73722
+Ref: 13f73740
+Ref: &&73740
+Ref: 14073761
+Ref: ||73761
+Ref: 14173915
+Ref: not73915
+Ref: 14273935
+Ref: and73935
+Ref: 14373957
+Ref: or73957
+Ref: 14474083
+Ref: <<74083
+Ref: 14574104
+Ref: >>74104
+Ref: 14674902
+Ref: abs74902
+Ref: 14774922
+Ref: sgn74922
+Ref: 14874985
+Ref: min74985
+Ref: 14975007
+Ref: max75007
+Ref: 14a75161
+Ref: succ75161
+Ref: 14b75182
+Ref: pred75182
+Ref: 14c75260
+Ref: gcd75260
+Ref: 14d75282
+Ref: lcd75282
+Ref: 14e75499
+Ref: pow75499
+Node: Conversions75780
+Ref: conversions75877
+Ref: 14f75877
+Ref: 15075980
+Ref: hash75980
+Ref: 15176056
+Ref: int76056
+Ref: 15276076
+Ref: bigint76076
+Ref: 15376099
+Ref: double76099
+Ref: 15476177
+Ref: pointer76177
+Ref: 15576582
+Ref: ubyte76582
+Ref: 15676604
+Ref: ushort76604
+Ref: 15776627
+Ref: uint76627
+Ref: 15876648
+Ref: uint6476648
+Ref: 15976671
+Ref: ulong76671
+Ref: 15a77551
+Ref: rounding-functions77551
+Ref: 15b77603
+Ref: floor77603
+Ref: 15c77625
+Ref: ceil77625
+Ref: 15d77668
+Ref: round77668
+Ref: 15e77690
+Ref: trunc77690
+Ref: 15f77751
+Ref: frac77751
+Node: Predicates77990
+Ref: predicates78087
+Ref: 2978087
+Ref: 16078368
+Ref: same78368
+Ref: 11f78391
+Ref: ===78391
+Ref: 16178413
+Ref: ~==78413
+Ref: 16278862
+Ref: typep78862
+Ref: 16379220
+Ref: intp79220
+Ref: 16479241
+Ref: bigintp79241
+Ref: 16579265
+Ref: doublep79265
+Ref: 16679289
+Ref: stringp79289
+Ref: 16779313
+Ref: pointerp79313
+Ref: 16879338
+Ref: matrixp79338
+Ref: 16979412
+Ref: charp79412
+Ref: 16a79475
+Ref: numberp79475
+Ref: 16b79499
+Ref: complexp79499
+Ref: 16c79524
+Ref: realp79524
+Ref: 16d79546
+Ref: rationalp79546
+Ref: 16e79572
+Ref: integerp79572
+Ref: 16f79785
+Ref: exactp79785
+Ref: 17079808
+Ref: inexactp79808
+Ref: 12b79923
+Ref: infp79923
+Ref: 12c79944
+Ref: nanp79944
+Ref: 12d80025
+Ref: null/pointer80025
+Ref: 17180077
+Ref: applp80077
+Ref: 17280099
+Ref: listp80099
+Ref: 17380121
+Ref: rlistp80121
+Ref: 17480144
+Ref: tuplep80144
+Ref: 17580656
+Ref: funp80656
+Ref: 17680677
+Ref: lambdap80677
+Ref: 17780701
+Ref: thunkp80701
+Ref: 17880724
+Ref: closurep80724
+Ref: 17980971
+Ref: functionp80971
+Ref: 17a81189
+Ref: symbolp81189
+Ref: 17b81213
+Ref: varp81213
+Node: Inspection81671
+Ref: inspection81773
+Ref: 17c81773
+Ref: 17d82084
+Ref: ans82084
+Ref: 17e82583
+Ref: __func__82583
+Ref: 18083835
+Ref: __namespace__83835
+Ref: 18184234
+Ref: __list__84234
+Ref: 18284974
+Ref: __locals__84974
+Ref: 18687506
+Ref: get_fundef87506
+Ref: 18787535
+Ref: get_typedef87535
+Ref: 18887565
+Ref: get_macdef87565
+Ref: 18987754
+Ref: get_interface87754
+Ref: 18a87786
+Ref: get_interface_typedef87786
+Ref: 18b88593
+Ref: get_vardef88593
+Ref: 18c88622
+Ref: get_constdef88622
+Ref: 18e88995
+Ref: add_fundef88995
+Ref: 18f89026
+Ref: add_typedef89026
+Ref: 19089058
+Ref: add_macdef89058
+Ref: 19189296
+Ref: add_fundef_at89296
+Ref: 19289332
+Ref: add_typedef_at89332
+Ref: 19389369
+Ref: add_macdef_at89369
+Ref: 19489712
+Ref: add_interface89712
+Ref: 19589902
+Ref: add_interface_at89902
+Ref: 19690149
+Ref: add_vardef90149
+Ref: 19790180
+Ref: add_constdef90180
+Ref: 19890532
+Ref: del_fundef90532
+Ref: 19990562
+Ref: del_typedef90562
+Ref: 19a90593
+Ref: del_macdef90593
+Ref: 19b90878
+Ref: del_interface90878
+Ref: 19c91030
+Ref: del_vardef91030
+Ref: 19d91059
+Ref: del_constdef91059
+Ref: 19e91571
+Ref: nargs91571
+Ref: 19f91799
+Ref: arity91799
+Ref: 1a092036
+Ref: fixity92036
+Node: Eval and Friends94412
+Ref: eval and friends94528
+Ref: 9094528
+Ref: eval-and-friends94528
+Ref: 17f95260
+Ref: str95260
+Ref: 1a295369
+Ref: val/string95369
+Ref: 18495763
+Ref: eval95763
+Ref: 18596935
+Ref: evalcmd96935
+Ref: 18d97425
+Ref: lasterr97425
+Ref: 1a397860
+Ref: lasterrpos97860
+Ref: 1a4100130
+Ref: __str__100130
+Ref: 1a5100485
+Ref: globsym100485
+Ref: 1a6100941
+Ref: clearsym100941
+Ref: 183101530
+Ref: reduce101530
+Ref: 1a7102043
+Ref: reduce_with102043
+Node: Expression Serialization104148
+Ref: expression serialization104278
+Ref: 1a1104278
+Ref: expression-serialization104278
+Ref: 1a8105024
+Ref: blob105024
+Ref: 1a9105205
+Ref: val/blob105205
+Ref: 1aa105348
+Ref: blobp105348
+Ref: 1ab105727
+Ref: #/blob105727
+Ref: 1ac105745
+Ref: blob_size105745
+Ref: 1ad105771
+Ref: blob_crc105771
+Node: Other Special Primitives107423
+Ref: other special primitives107555
+Ref: 1ae107555
+Ref: other-special-primitives107555
+Ref: 1af107620
+Ref: exit107620
+Ref: 1b0107702
+Ref: throw107702
+Ref: 1b1107776
+Ref: force107776
+Node: Pointer Operations107924
+Ref: pointer operations108040
+Ref: 1b2108040
+Ref: pointer-operations108040
+Ref: 1b4108375
+Ref: addr108375
+Ref: 1b5108772
+Ref: calloc108772
+Ref: 1b6108807
+Ref: malloc108807
+Ref: 1b7108833
+Ref: realloc108833
+Ref: 1b8108864
+Ref: free108864
+Ref: 1b9109469
+Ref: get_byte109469
+Ref: 1ba109496
+Ref: get_short109496
+Ref: 1bb109524
+Ref: get_int109524
+Ref: 1bc109550
+Ref: get_int64109550
+Ref: 1bd109578
+Ref: get_long109578
+Ref: 1be109605
+Ref: get_float109605
+Ref: 1bf109633
+Ref: get_double109633
+Ref: 1c0109662
+Ref: get_string109662
+Ref: 1c1109691
+Ref: get_pointer109691
+Ref: 1c2109843
+Ref: put_byte109843
+Ref: 1c3109872
+Ref: put_short109872
+Ref: 1c4109902
+Ref: put_int109902
+Ref: 1c5109930
+Ref: put_int64109930
+Ref: 1c6109960
+Ref: put_long109960
+Ref: 1c7109989
+Ref: put_float109989
+Ref: 1c8110019
+Ref: put_double110019
+Ref: 1c9110050
+Ref: put_string110050
+Ref: 1ca110081
+Ref: put_pointer110081
+Node: Sentries110263
+Ref: sentries110370
+Ref: 1cb110370
+Ref: 1cc110888
+Ref: sentry110888
+Ref: 1cd111002
+Ref: clear_sentry111002
+Ref: 1ce111080
+Ref: get_sentry111080
+Ref: 1cf112012
+Ref: cookedp112012
+Ref: 1d0112095
+Ref: cooked112095
+Node: Tagged Pointers115159
+Ref: tagged pointers115269
+Ref: 1d1115269
+Ref: tagged-pointers115269
+Ref: 1d2115269
+Ref: id6115269
+Ref: 1d3115925
+Ref: ptrtag115925
+Ref: 1d4116074
+Ref: get_ptrtag116074
+Ref: 1d5116146
+Ref: check_ptrtag116146
+Ref: 1d6116376
+Ref: make_ptrtag116376
+Ref: 1d7117482
+Ref: pointer_tag117482
+Ref: 1d8117944
+Ref: pointer_type117944
+Ref: 1d9118328
+Ref: pointer_cast118328
+Node: Expression References120364
+Ref: expression references120484
+Ref: 11b120484
+Ref: expression-references120484
+Ref: 1da120484
+Ref: id7120484
+Ref: 1db121024
+Ref: ref121024
+Ref: 1dc121096
+Ref: put121096
+Ref: 1dd121168
+Ref: get121168
+Ref: 1de121236
+Ref: unref121236
+Ref: 1df121441
+Ref: refp121441
+Ref: 1b3122812
+Ref: module-pointers122812
+Node: Pointer Arithmetic122812
+Ref: pointer arithmetic122908
+Ref: 130122908
+Ref: pointer-arithmetic122908
+Ref: 1e0123515
+Ref: int/pointer123515
+Ref: 1e1123535
+Ref: bigint/pointer123535
+Ref: 1e2124014
+Ref: +/pointer124014
+Ref: 1e3124034
+Ref: -/pointer124034
+Ref: 1e4124054
+Ref: -/pointerdiff124054
+Ref: 1e5124544
+Ref: ==/pointer124544
+Ref: 1e6124565
+Ref: ~=/pointer124565
+Ref: 1e7124690
+Ref: <=/pointer124690
+Ref: 1e8124711
+Ref: >=/pointer124711
+Ref: 1e9124732
+Ref: >/pointer124732
+Ref: 1ea124752
+Ref: </pointer124752
+Node: Mathematical Functions124967
+Ref: mathematical functions125070
+Ref: 1a125070
+Ref: module-math125070
+Ref: 131125070
+Ref: mathematical-functions125070
+Node: Imports125355
+Ref: imports125451
+Ref: 1eb125451
+Node: Basic Math Functions125587
+Ref: basic math functions125707
+Ref: 1ec125707
+Ref: basic-math-functions125707
+Ref: 1ed125815
+Ref: 1ee125866
+Ref: pi125866
+Ref: 1f2126593
+Ref: mersenne-twister126593
+Ref: 1f3126593
+Ref: random126593
+Ref: 1ef126698
+Ref: random31126698
+Ref: 1f0126790
+Ref: random53126790
+Ref: 1f1126899
+Ref: srandom126899
+Ref: 1f4127326
+Ref: sqrt127326
+Ref: 1f5127379
+Ref: exp127379
+Ref: 1f6127399
+Ref: ln127399
+Ref: 1f7127418
+Ref: log127418
+Ref: 1f8127498
+Ref: sin127498
+Ref: 1f9127518
+Ref: cos127518
+Ref: 1fa127538
+Ref: tan127538
+Ref: 1fb127589
+Ref: asin127589
+Ref: 1fc127610
+Ref: acos127610
+Ref: 1fd127631
+Ref: atan127631
+Ref: 1fe127691
+Ref: atan2127691
+Ref: 1ff127841
+Ref: sinh127841
+Ref: 200127862
+Ref: cosh127862
+Ref: 201127883
+Ref: tanh127883
+Ref: 202127946
+Ref: asinh127946
+Ref: 203127968
+Ref: acosh127968
+Ref: 204127990
+Ref: atanh127990
+Node: Complex Numbers128062
+Ref: complex numbers128191
+Ref: 205128191
+Ref: complex-numbers128191
+Ref: 206128309
+Ref: i128309
+Ref: 207129969
+Ref: complex129969
+Ref: 208130046
+Ref: polar130046
+Ref: 209130068
+Ref: rect130068
+Ref: 20a130150
+Ref: cis130150
+Ref: 20b130294
+Ref: abs/complex130294
+Ref: 20c130314
+Ref: arg130314
+Ref: 20d130492
+Ref: re130492
+Ref: 20e130511
+Ref: im130511
+Ref: 20f130561
+Ref: conj130561
+Node: Rational Numbers131047
+Ref: rational numbers131192
+Ref: 12f131192
+Ref: rational-numbers131192
+Ref: 210131235
+Ref: %131235
+Ref: 211132640
+Ref: rational132640
+Ref: 212133204
+Ref: num133204
+Ref: 213133224
+Ref: den133224
+Node: Semantic Number Predicates and Types133889
+Ref: semantic number predicates and types134010
+Ref: 1b134010
+Ref: semantic-number-predicates-and-types134010
+Ref: 214134455
+Ref: compvalp134455
+Ref: 215134554
+Ref: realvalp134554
+Ref: 216134620
+Ref: ratvalp134620
+Ref: 217134767
+Ref: bigintvalp134767
+Ref: 218134874
+Ref: intvalp134874
+Ref: 219134985
+Ref: compval134985
+Ref: 21a135003
+Ref: realval135003
+Ref: 21b135021
+Ref: ratval135021
+Ref: 21c135038
+Ref: bigintval135038
+Ref: 21d135058
+Ref: intval135058
+Node: Container Types135287
+Ref: container types135399
+Ref: 21e135399
+Ref: container-types135399
+Ref: 57136617
+Ref: module-array136617
+Node: Arrays136683
+Ref: arrays136756
+Ref: 21f136756
+Ref: 220137052
+Ref: array/type137052
+Node: Imports<2>137156
+Ref: imports<2>137229
+Ref: 221137229
+Ref: id8137229
+Node: Operations137370
+Ref: operations137460
+Ref: 222137460
+Ref: 223137495
+Ref: emptyarray137495
+Ref: 224137549
+Ref: array137549
+Ref: 225137611
+Ref: array2137611
+Ref: 226137693
+Ref: mkarray137693
+Ref: 227137765
+Ref: mkarray2137765
+Ref: 228137848
+Ref: arrayp137848
+Ref: 229137907
+Ref: #/array137907
+Ref: 22a137943
+Ref: !/array137943
+Ref: 22b138056
+Ref: null/array138056
+Ref: 22c138119
+Ref: members/array138119
+Ref: 22d138143
+Ref: list/array138143
+Ref: 22e138199
+Ref: members2/array138199
+Ref: 22f138224
+Ref: list2/array138224
+Ref: 230138295
+Ref: first/array138295
+Ref: 231138317
+Ref: last/array138317
+Ref: 232138373
+Ref: rmfirst/array138373
+Ref: 233138397
+Ref: rmlast/array138397
+Ref: 234138464
+Ref: insert/array138464
+Ref: 235138530
+Ref: append/array138530
+Ref: 236138590
+Ref: update/array138590
+Ref: 237138662
+Ref: update2/array138662
+Node: Examples138729
+Ref: examples138800
+Ref: 238138800
+Ref: 239140126
+Ref: module-heap140126
+Node: Heaps140127
+Ref: heaps140221
+Ref: 23a140221
+Ref: 23c140811
+Ref: heap/type140811
+Node: Imports<3>140939
+Ref: imports<3>141014
+Ref: 23d141014
+Ref: id9141014
+Node: Operations<2>141154
+Ref: operations<2>141249
+Ref: 23e141249
+Ref: id10141249
+Ref: 23f141284
+Ref: emptyheap141284
+Ref: 240141336
+Ref: heap141336
+Ref: 241141395
+Ref: heapp141395
+Ref: 242141451
+Ref: #/heap141451
+Ref: 243141490
+Ref: null/heap141490
+Ref: 244141552
+Ref: members/heap141552
+Ref: 245141576
+Ref: list/heap141576
+Ref: 246141646
+Ref: first/heap141646
+Ref: 247141715
+Ref: rmfirst/heap141715
+Ref: 248141795
+Ref: insert/heap141795
+Node: Examples<2>141846
+Ref: examples<2>141922
+Ref: 249141922
+Ref: id11141922
+Ref: 58142090
+Ref: module-dict142090
+Node: Dictionaries142091
+Ref: dictionaries142192
+Ref: 11a142192
+Ref: 24a142495
+Ref: dict/type142495
+Ref: 24b142641
+Ref: hdict/type142641
+Ref: 24c142782
+Ref: mdict/type142782
+Ref: 24d142919
+Ref: hmdict/type142919
+Ref: 24e143041
+Ref: xdict/type143041
+Node: Imports<4>145121
+Ref: imports<4>145203
+Ref: 255145203
+Ref: id12145203
+Node: Operations<3>145343
+Ref: operations<3>145445
+Ref: 256145445
+Ref: id13145445
+Ref: 257145480
+Ref: emptydict145480
+Ref: 258145504
+Ref: emptyhdict145504
+Ref: 259145529
+Ref: emptymdict145529
+Ref: 25a145554
+Ref: emptyhmdict145554
+Ref: 25b145613
+Ref: dict145613
+Ref: 25c145635
+Ref: hdict145635
+Ref: 25d145658
+Ref: mdict145658
+Ref: 25e145681
+Ref: hmdict145681
+Ref: 25f145957
+Ref: dictp145957
+Ref: 260145979
+Ref: hdictp145979
+Ref: 261146002
+Ref: mdictp146002
+Ref: 262146025
+Ref: hmdictp146025
+Ref: 263146115
+Ref: mkdict146115
+Ref: 264146141
+Ref: mkhdict146141
+Ref: 265146168
+Ref: mkmdict146168
+Ref: 266146195
+Ref: mkhmdict146195
+Ref: 267146290
+Ref: +/dict146290
+Ref: 268146364
+Ref: -/dict146364
+Ref: 269146450
+Ref: */dict146450
+Ref: 26a146544
+Ref: #/dict146544
+Ref: 26b146625
+Ref: !/dict146625
+Ref: 26c146810
+Ref: null/dict146810
+Ref: 26d146877
+Ref: member/dict146877
+Ref: 24f146956
+Ref: members/dict146956
+Ref: 26e146980
+Ref: list/dict146980
+Ref: 250147082
+Ref: keys/dict147082
+Ref: 251147176
+Ref: vals/dict147176
+Ref: 26f147226
+Ref: first/dict147226
+Ref: 270147248
+Ref: last/dict147248
+Ref: 252147333
+Ref: rmfirst/dict147333
+Ref: 253147357
+Ref: rmlast/dict147357
+Ref: 271147446
+Ref: insert/dict147446
+Ref: 272147476
+Ref: update/dict147476
+Ref: 254147797
+Ref: delete/dict147797
+Ref: 273147945
+Ref: delete_val/dict147945
+Ref: 274148183
+Ref: delete_all/dict148183
+Node: Examples<3>149890
+Ref: examples<3>149973
+Ref: 275149973
+Ref: id14149973
+Ref: 276152748
+Ref: module-set152748
+Node: Sets and Bags152749
+Ref: sets and bags152836
+Ref: 23b152836
+Ref: sets-and-bags152836
+Ref: 277153454
+Ref: set/type153454
+Ref: 278153468
+Ref: bag/type153468
+Ref: 279153619
+Ref: hset/type153619
+Ref: 27a153634
+Ref: hbag/type153634
+Ref: 27b153806
+Ref: xset/type153806
+Node: Imports<5>154968
+Ref: imports<5>155051
+Ref: 27c155051
+Ref: id15155051
+Node: Operations<4>155190
+Ref: operations<4>155293
+Ref: 27d155293
+Ref: id16155293
+Ref: 27e155328
+Ref: emptyset155328
+Ref: 27f155351
+Ref: emptybag155351
+Ref: 280155374
+Ref: emptyhset155374
+Ref: 281155398
+Ref: emptyhbag155398
+Ref: 282155455
+Ref: set155455
+Ref: 283155476
+Ref: bag155476
+Ref: 284155497
+Ref: hset155497
+Ref: 285155519
+Ref: hbag155519
+Ref: 286155731
+Ref: setp155731
+Ref: 287155752
+Ref: bagp155752
+Ref: 288155773
+Ref: hsetp155773
+Ref: 289155795
+Ref: hbagp155795
+Ref: 28a155883
+Ref: +/set155883
+Ref: 28b155963
+Ref: -/set155963
+Ref: 28c156049
+Ref: */set156049
+Ref: 28d156143
+Ref: #/set156143
+Ref: 28e156192
+Ref: null/set156192
+Ref: 28f156259
+Ref: member/set156259
+Ref: 290156320
+Ref: members/set156320
+Ref: 291156344
+Ref: list/set156344
+Ref: 292156447
+Ref: first/set156447
+Ref: 293156469
+Ref: last/set156469
+Ref: 294156554
+Ref: rmfirst/set156554
+Ref: 295156578
+Ref: rmlast/set156578
+Ref: 296156667
+Ref: insert/set156667
+Ref: 297156775
+Ref: delete/set156775
+Ref: 298156892
+Ref: delete_all/set156892
+Node: Examples<4>158138
+Ref: examples<4>158222
+Ref: 299158222
+Ref: id17158222
+Ref: 29a160048
+Ref: module-system160048
+Node: System Interface160049
+Ref: system interface160144
+Ref: be160144
+Ref: system-interface160144
+Node: Imports<6>161017
+Ref: imports<6>161107
+Ref: 29b161107
+Ref: id18161107
+Node: Errno and Friends161417
+Ref: errno and friends161528
+Ref: 29d161528
+Ref: errno-and-friends161528
+Ref: 29e161573
+Ref: errno161573
+Ref: 29f161593
+Ref: set_errno161593
+Ref: 2a0161619
+Ref: perror161619
+Ref: 2a1161644
+Ref: strerror161644
+Node: POSIX Locale162104
+Ref: posix locale162220
+Ref: 2a2162220
+Ref: posix-locale162220
+Ref: 2a3162255
+Ref: setlocale162255
+Node: Signal Handling163649
+Ref: signal handling163762
+Ref: 2a4163762
+Ref: signal-handling163762
+Ref: 2a5163803
+Ref: trap163803
+Node: Time Functions164631
+Ref: time functions164749
+Ref: 2a6164749
+Ref: time-functions164749
+Ref: 2a7165009
+Ref: time165009
+Ref: 2a8165234
+Ref: gettimeofday165234
+Ref: 2a9165708
+Ref: clock165708
+Ref: 2aa165996
+Ref: sleep165996
+Ref: 2ab166018
+Ref: nanosleep166018
+Ref: 2ac167031
+Ref: tzset167031
+Ref: 2ad167091
+Ref: tzname167091
+Ref: 2ae167112
+Ref: timezone167112
+Ref: 2af167135
+Ref: daylight167135
+Ref: 2b0167952
+Ref: ctime167952
+Ref: 2b1168078
+Ref: gmtime168078
+Ref: 2b2168101
+Ref: localtime168101
+Ref: 2b5168474
+Ref: mktime168474
+Ref: 2b3168634
+Ref: asctime168634
+Ref: 2b4168659
+Ref: strftime168659
+Ref: 2b6168880
+Ref: strptime168880
+Node: Process Functions173221
+Ref: process functions173343
+Ref: 2b7173343
+Ref: process-functions173343
+Ref: 2bd173668
+Ref: system173668
+Ref: 2be173724
+Ref: execv173724
+Ref: 2bf173754
+Ref: execvp173754
+Ref: 2c0173785
+Ref: execve173785
+Ref: 2c1174670
+Ref: spawnv174670
+Ref: 2c2174706
+Ref: spawnvp174706
+Ref: 2c3174743
+Ref: spawnve174743
+Node: Basic I/O Interface176106
+Ref: basic i/o interface176230
+Ref: 2c4176230
+Ref: basic-i-o-interface176230
+Ref: 2c5176634
+Ref: stdin176634
+Ref: 2c6176654
+Ref: stdout176654
+Ref: 2c7176675
+Ref: stderr176675
+Ref: 2c8176728
+Ref: fopen176728
+Ref: 2c9176758
+Ref: popen176758
+Ref: 2ca177073
+Ref: fdopen177073
+Ref: 2cb177296
+Ref: freopen177296
+Ref: 2cc177520
+Ref: fclose177520
+Ref: 2cd177544
+Ref: pclose177544
+Ref: 2ce177598
+Ref: tmpfile177598
+Ref: 2cf177787
+Ref: feof177787
+Ref: 2d0177809
+Ref: ferror177809
+Ref: 2d1177833
+Ref: clearerr177833
+Ref: 2d2177951
+Ref: fileno177951
+Ref: 2d3178041
+Ref: fflush178041
+Ref: 2d4178147
+Ref: fgets178147
+Ref: 2d5178170
+Ref: gets178170
+Ref: 2d6178305
+Ref: fget178305
+Ref: 2d7178416
+Ref: fputs178416
+Ref: 2d8178441
+Ref: puts178441
+Ref: 2d9178686
+Ref: fread178686
+Ref: 2da178724
+Ref: fwrite178724
+Ref: 2db178892
+Ref: fseek178892
+Ref: 2dc178929
+Ref: ftell178929
+Ref: 2dd178952
+Ref: rewind178952
+Ref: 2de179339
+Ref: setbuf179339
+Ref: 2df179367
+Ref: setvbuf179367
+Ref: 2e0181721
+Ref: gmp181721
+Ref: 2e1181721
+Ref: mpfr181721
+Ref: 2e2181721
+Ref: printf181721
+Ref: 2e3181754
+Ref: fprintf181754
+Ref: 2e4182296
+Ref: sprintf182296
+Ref: 2e5182763
+Ref: scanf182763
+Ref: 2e6182790
+Ref: fscanf182790
+Ref: 2e7183686
+Ref: sscanf183686
+Node: Stat and Friends185086
+Ref: stat and friends185212
+Ref: 2e8185212
+Ref: stat-and-friends185212
+Ref: 2e9185255
+Ref: stat185255
+Ref: 2ea185839
+Ref: lstat185839
+Ref: 2eb186081
+Ref: fstat186081
+Node: Reading Directories187904
+Ref: reading directories188025
+Ref: 2ec188025
+Ref: reading-directories188025
+Ref: 2ed188074
+Ref: readdir188074
+Node: Shell Globbing188261
+Ref: shell globbing188380
+Ref: 2ee188380
+Ref: shell-globbing188380
+Ref: 2ef188421
+Ref: fnmatch188421
+Ref: 2f0188584
+Ref: glob188584
+Node: Regex Matching189198
+Ref: regex matching189324
+Ref: 2f1189324
+Ref: module-regex189324
+Ref: af189324
+Ref: regex-matching189324
+Ref: 2f2190256
+Ref: regex190256
+Ref: 2f3193640
+Ref: reg_result193640
+Ref: 2f4193844
+Ref: reg_info193844
+Ref: 2f5193938
+Ref: reg193938
+Ref: 2f6194088
+Ref: regs194088
+Ref: 2f7194421
+Ref: regexg194421
+Ref: 2f8194813
+Ref: regexgg194813
+Ref: 2f9194930
+Ref: regsub194930
+Ref: 2fa195458
+Ref: regsplit195458
+Ref: 2fb195853
+Ref: regexgs195853
+Ref: 2fc195897
+Ref: regexggs195897
+Ref: 2fd195942
+Ref: regsplits195942
+Node: Basic Examples196308
+Ref: basic examples196416
+Ref: 2fe196416
+Ref: basic-examples196416
+Node: Regex Substitutions and Splitting198328
+Ref: regex substitutions and splitting198458
+Ref: 2ff198458
+Ref: regex-substitutions-and-splitting198458
+Node: Empty Matches199154
+Ref: empty matches199280
+Ref: 300199280
+Ref: empty-matches199280
+Node: Submatches200188
+Ref: submatches200272
+Ref: 301200272
+Node: Additional POSIX Functions201648
+Ref: additional posix functions201774
+Ref: 2bc201774
+Ref: module-posix201774
+Ref: 29c201774
+Ref: additional-posix-functions201774
+Ref: 2b8202374
+Ref: fork202374
+Ref: 302202419
+Ref: getpid202419
+Ref: 303202440
+Ref: getppid202440
+Ref: 2ba202553
+Ref: wait202553
+Ref: 2bb202579
+Ref: waitpid202579
+Ref: 2b9202798
+Ref: kill202798
+Ref: 304202875
+Ref: raise202875
+Ref: 305202952
+Ref: pause202952
+Ref: 306203010
+Ref: module-getopt203010
+Node: Option Parsing203010
+Ref: option parsing203113
+Ref: bd203113
+Ref: option-parsing203113
+Ref: 307203399
+Ref: getopt203399
+Node: Index206537
+Ref: index206608
 
 End Tag Table
 

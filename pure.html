@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.55',
+        VERSION:     '0.56',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.55, June 25, 2012</p>
+<p>Version 0.56, June 26, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -255,7 +255,7 @@ the benefit that the compiled code runs much faster than the usual kinds of
 <p>You can use the interpreter as a sophisticated kind of &#8220;desktop calculator&#8221;
 program. Simply run the program from the shell as follows:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure
-<span class="go">Pure 0.55 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef</span>
+<span class="go">Pure 0.56 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef</span>
 <span class="go">(Type &#39;help&#39; for help, &#39;help copying&#39; for license information.)</span>
 <span class="go">Loaded prelude from /usr/local/lib/pure/prelude.pure.</span>
 
@@ -4024,7 +4024,7 @@ obtain higher-dimensional &#8220;arrays&#8221;:</p>
 Pure 0.56 and later provide the following shorthand notation (please check the
 description of the <a class="reference internal" href="purelib.html#non-splicing"><em>non-splicing vector brackets</em></a> in the
 <a class="reference internal" href="purelib.html"><em>Pure Library Manual</em></a> for details):</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>{|{|{<span class="mi">1</span>,<span class="mi">2</span>}|},{|{<span class="mi">3</span>,<span class="mi">4</span>}|}|}<span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>{`{`{<span class="mi">1</span>,<span class="mi">2</span>}`},{`{<span class="mi">3</span>,<span class="mi">4</span>}`}`}<span class="p">;</span>
 {{{<span class="mi">1</span>,<span class="mi">2</span>}},{{<span class="mi">3</span>,<span class="mi">4</span>}}}
 </pre></div>
 </div>
@@ -5231,7 +5231,7 @@ systems and thus they are Turing-complete. This implies that a badly
 written macro may well send the Pure compiler into an infinite recursion,
 which results in a stack overflow at compile time. See <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail
 Recursion</a> in the <a class="reference internal" href="#caveats-and-notes">Caveats and Notes</a> section for information on how to
-deal with these by setting the <span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment variable.</p>
+deal with this by setting the <span class="target" id="index-16"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment variable.</p>
 </div>
 <p>As a simple example, let&#8217;s see how we can inline invocations of the <a class="reference internal" href="purelib.html##" title="#"><tt class="xref pure pure-func docutils literal"><span class="pre">#</span></tt></a>
 size operator on list constants:</p>
@@ -5240,14 +5240,18 @@ size operator on list constants:</p>
 </pre></div>
 </div>
 <p>As you can see, the definition is pretty straightforward; exactly the same
-rules might also be used for an ordinary function definition (although the
+rules might also be used for an ordinary function definition, although the
 standard library actually implements <a class="reference internal" href="purelib.html##" title="#"><tt class="xref pure pure-func docutils literal"><span class="pre">#</span></tt></a> a bit differently to make good
-use of tail recursion). Let&#8217;s check that this actually works:</p>
+use of tail recursion. Let&#8217;s check that this actually works:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo = #[<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span>,<span class="mi">4</span>]<span class="p">;</span>
 <span class="gp">&gt; </span>show foo
 foo = <span class="mi">4</span><span class="p">;</span>
 </pre></div>
 </div>
+<p>Note that the result of macro expansion is actually <tt class="docutils literal"><span class="pre">0+1+1+1+1</span></tt> here, you
+can check that by running the macro with <tt class="docutils literal"><span class="pre">trace</span> <span class="pre">-m</span> <span class="pre">#</span></tt>. Constant folding
+contracts this to <tt class="docutils literal"><span class="pre">4</span></tt> after macro expansion, as explained in the previous
+subsection.</p>
 <p>This was rather easy. So let&#8217;s implement a more elaborate example: a basic
 Pure version of Lisp&#8217;s quasiquote which allows you to create a quoted
 expression from a &#8220;template&#8221; while substituting variable parts of the
@@ -5633,6 +5637,52 @@ it is the programmer&#8217;s responsibility to avoid accidental name capture whe
 using these facilities. Most macro code will work all right when written in a
 straightforward way, but there are some corner cases which need special
 attention (cf. <a class="reference internal" href="#name-capture">Name Capture</a>).</p>
+<p>Sometimes the only convenient way to avoid name capture is to create new
+symbols on the fly. This will often be necessary if a macro generates an
+entire block construct (<a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a>, <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> or
+lambda) from scratch. The following built-in macro is provided for this
+purpose:</p>
+<dl class="macro">
+<dt id="__gensym__">
+<em class="property">macro </em><tt class="descname">__gensym__</tt><a class="headerlink" href="#__gensym__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new unqualified symbol which is guaranteed to not exist at the
+time of the macro call. These symbols typically look like <tt class="docutils literal"><span class="pre">__x123__</span></tt> and
+can be used for any purpose (i.e., as global or local as well as function
+or variable symbols).</p>
+</dd></dl>
+
+<p>For instance, here&#8217;s how we can implement a macro <tt class="docutils literal"><span class="pre">foo</span></tt> which creates a
+lambda from a given argument, using <a class="reference internal" href="#__gensym__" title="__gensym__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__gensym__</span></tt></a> to generate a fresh
+local variable for the lambda argument. This guarantees that variables in the
+argument expression don&#8217;t get captured by the lambda variable when the closure
+is created with a call to the built-in <a class="reference internal" href="#__lambda__" title="__lambda__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__lambda__</span></tt></a> macro.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">def</span> foo x = bar __gensym__ x<span class="p">;</span>
+<span class="gp">&gt; </span><span class="kr">def</span> bar x y = __lambda__ [x] (x+y)<span class="p">;</span>
+<span class="gp">&gt; </span>trace -m foo
+<span class="gp">&gt; </span>foo (a*b)<span class="p">;</span>
+-- macro foo: foo (a*b) --&gt; bar __gensym__ (a*b)
+-- macro __gensym__: __gensym__ --&gt; __x1__
+-- macro bar: bar __x1__ (a*b) --&gt; __lambda__ [__x1__] (__x1__+a*b)
+-- macro __lambda__: __lambda__ [__x1__] (__x1__+a*b) --&gt; \__x1__ -&gt; __x1__+a*b
+<span class="kt">#&lt;closure 0x7f66f6c88db0&gt;</span>
+<span class="gp">&gt; </span>ans <span class="mi">77</span><span class="p">;</span>
+<span class="mi">77</span>+a*b
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#__gensym__" title="__gensym__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__gensym__</span></tt></a> macro returns a new variable for each invocation, and
+always ensures that it doesn&#8217;t accidentally reuse a symbol already introduced
+by the user (even if it looks like a symbol that <a class="reference internal" href="#__gensym__" title="__gensym__"><tt class="xref pure pure-macro docutils literal"><span class="pre">__gensym__</span></tt></a> might
+itself create):</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo (a*__x2__)<span class="p">;</span>
+-- macro foo: foo (a*__x2__) --&gt; bar __gensym__ (a*__x2__)
+-- macro __gensym__: __gensym__ --&gt; __x3__
+-- macro bar: bar __x3__ (a*__x2__) --&gt; __lambda__ [__x3__] (__x3__+a*__x2__)
+-- macro __lambda__: __lambda__ [__x3__] (__x3__+a*__x2__) --&gt; \__x3__ -&gt; __x3__+a*__x2__
+<span class="kt">#&lt;closure 0x7f66f6c887e8&gt;</span>
+<span class="gp">&gt; </span>ans <span class="mi">77</span><span class="p">;</span>
+<span class="mi">77</span>+a*__x2__
+</pre></div>
+</div>
 </div>
 <div class="section" id="advanced-optimization">
 <h3><a class="toc-backref" href="#id80">Advanced Optimization</a><a class="headerlink" href="#advanced-optimization" title="Permalink to this headline">¶</a></h3>
@@ -5869,7 +5919,7 @@ Types</a>):</p>
 <p>Or let&#8217;s lists all global variables along with their values:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>catmap get_vardef (globsym <span class="s">&quot;*&quot;</span> <span class="mi">0</span>)<span class="p">;</span>
 [(argc--&gt;<span class="mi">0</span>),(argv--&gt;[]),(compiling--&gt;<span class="mi">0</span>),
-(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.55&quot;</span>)]
+(sysinfo--&gt;<span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span>),(version--&gt;<span class="s">&quot;0.56&quot;</span>)]
 </pre></div>
 </div>
 <p>The counterparts of <a class="reference internal" href="purelib.html#add_fundef" title="add_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">add_fundef</span></tt></a> and <a class="reference internal" href="purelib.html#del_fundef" title="del_fundef"><tt class="xref pure pure-func docutils literal"><span class="pre">del_fundef</span></tt></a> are provided as
@@ -7735,7 +7785,7 @@ argc       var  argc = <span class="mi">0</span><span class="p">;</span>
 argv       var  argv = []<span class="p">;</span>
 compiling  var  compiling = <span class="mi">0</span><span class="p">;</span>
 sysinfo    var  sysinfo = <span class="s">&quot;x86_64-unknown-linux-gnu&quot;</span><span class="p">;</span>
-version    var  version = <span class="s">&quot;0.55&quot;</span><span class="p">;</span>
+version    var  version = <span class="s">&quot;0.56&quot;</span><span class="p">;</span>
 <span class="mi">5</span> variables
 </pre></div>
 </div>
@@ -9083,8 +9133,8 @@ previous default) any more. If you&#8217;re still running an older LLVM version 
 would like to keep using llvm-gcc, you will have to set some environment
 variables; please see the <a class="reference internal" href="install.html"><em>installation instructions</em></a> for
 details.</p>
-<p>Pure 0.56 introduced the <a class="reference internal" href="purelib.html#non-splicing"><em>non-splicing vector brackets</em></a>
-<tt class="docutils literal"><span class="pre">{|</span> <span class="pre">|}</span></tt> as an alternative notation for nested vector structures.</p>
+<p>Pure 0.56 introduced the <a class="reference internal" href="purelib.html#non-splicing"><em>non-splicing vector brackets</em></a> as
+an alternative notation for nested vector structures.</p>
 </div>
 <div class="section" id="error-recovery">
 <h3><a class="toc-backref" href="#id116">Error Recovery</a><a class="headerlink" href="#error-recovery" title="Permalink to this headline">¶</a></h3>

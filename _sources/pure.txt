@@ -22,7 +22,7 @@ The Pure Manual
    \hyphenation{name-spaces}
    \hyphenation{white-space}
 
-Version 0.55, |today|
+Version 0.56, |today|
 
 Albert Gräf <Dr.Graef@t-online.de>
 
@@ -84,7 +84,7 @@ program. Simply run the program from the shell as follows:
 .. code-block:: console
 
    $ pure
-   Pure 0.55 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef
+   Pure 0.56 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef
    (Type 'help' for help, 'help copying' for license information.)
    Loaded prelude from /usr/local/lib/pure/prelude.pure.
 
@@ -3836,7 +3836,7 @@ Pure 0.56 and later provide the following shorthand notation (please check the
 description of the :ref:`non-splicing vector brackets<non-splicing>` in the
 :doc:`purelib` for details)::
 
-  > {|{|{1,2}|},{|{3,4}|}|};
+  > {`{`{1,2}`},{`{3,4}`}`};
   {{{1,2}},{{3,4}}}
 
 .. _Record Data:
@@ -5089,7 +5089,7 @@ rules and make use of pattern-matching just like ordinary function definitions.
    written macro may well send the Pure compiler into an infinite recursion,
    which results in a stack overflow at compile time. See `Stack Size and Tail
    Recursion`_ in the `Caveats and Notes`_ section for information on how to
-   deal with these by setting the :envvar:`PURE_STACK` environment variable.
+   deal with this by setting the :envvar:`PURE_STACK` environment variable.
 
 As a simple example, let's see how we can inline invocations of the :func:`#`
 size operator on list constants::
@@ -5098,13 +5098,18 @@ size operator on list constants::
   def #(x:xs) = #xs+1;
 
 As you can see, the definition is pretty straightforward; exactly the same
-rules might also be used for an ordinary function definition (although the
+rules might also be used for an ordinary function definition, although the
 standard library actually implements :func:`#` a bit differently to make good
-use of tail recursion). Let's check that this actually works::
+use of tail recursion. Let's check that this actually works::
 
   > foo = #[1,2,3,4];
   > show foo
   foo = 4;
+
+Note that the result of macro expansion is actually ``0+1+1+1+1`` here, you
+can check that by running the macro with ``trace -m #``. Constant folding
+contracts this to ``4`` after macro expansion, as explained in the previous
+subsection.
 
 This was rather easy. So let's implement a more elaborate example: a basic
 Pure version of Lisp's quasiquote which allows you to create a quoted
@@ -5496,6 +5501,51 @@ using these facilities. Most macro code will work all right when written in a
 straightforward way, but there are some corner cases which need special
 attention (cf. `Name Capture`_).
 
+Sometimes the only convenient way to avoid name capture is to create new
+symbols on the fly. This will often be necessary if a macro generates an
+entire block construct (:keyword:`case`, :keyword:`when`, :keyword:`with` or
+lambda) from scratch. The following built-in macro is provided for this
+purpose:
+
+.. macro:: __gensym__
+
+   Create a new unqualified symbol which is guaranteed to not exist at the
+   time of the macro call. These symbols typically look like ``__x123__`` and
+   can be used for any purpose (i.e., as global or local as well as function
+   or variable symbols).
+
+For instance, here's how we can implement a macro ``foo`` which creates a
+lambda from a given argument, using :macro:`__gensym__` to generate a fresh
+local variable for the lambda argument. This guarantees that variables in the
+argument expression don't get captured by the lambda variable when the closure
+is created with a call to the built-in :macro:`__lambda__` macro. ::
+
+  > def foo x = bar __gensym__ x;
+  > def bar x y = __lambda__ [x] (x+y);
+  > trace -m foo
+  > foo (a*b);
+  -- macro foo: foo (a*b) --> bar __gensym__ (a*b)
+  -- macro __gensym__: __gensym__ --> __x1__
+  -- macro bar: bar __x1__ (a*b) --> __lambda__ [__x1__] (__x1__+a*b)
+  -- macro __lambda__: __lambda__ [__x1__] (__x1__+a*b) --> \__x1__ -> __x1__+a*b
+  #<closure 0x7f66f6c88db0>
+  > ans 77;
+  77+a*b
+
+The :macro:`__gensym__` macro returns a new variable for each invocation, and
+always ensures that it doesn't accidentally reuse a symbol already introduced
+by the user (even if it looks like a symbol that :macro:`__gensym__` might
+itself create)::
+
+  > foo (a*__x2__);
+  -- macro foo: foo (a*__x2__) --> bar __gensym__ (a*__x2__)
+  -- macro __gensym__: __gensym__ --> __x3__
+  -- macro bar: bar __x3__ (a*__x2__) --> __lambda__ [__x3__] (__x3__+a*__x2__)
+  -- macro __lambda__: __lambda__ [__x3__] (__x3__+a*__x2__) --> \__x3__ -> __x3__+a*__x2__
+  #<closure 0x7f66f6c887e8>
+  > ans 77;
+  77+a*__x2__
+
 Advanced Optimization
 ---------------------
 
@@ -5743,7 +5793,7 @@ Or let's lists all global variables along with their values::
 
   > catmap get_vardef (globsym "*" 0);
   [(argc-->0),(argv-->[]),(compiling-->0),
-  (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.55")]
+  (sysinfo-->"x86_64-unknown-linux-gnu"),(version-->"0.56")]
 
 The counterparts of :func:`add_fundef` and :func:`del_fundef` are provided as
 well. Not very surprisingly, they are named :func:`add_typedef`,
@@ -7679,7 +7729,7 @@ values (using the "long" format)::
   argv       var  argv = [];
   compiling  var  compiling = 0;
   sysinfo    var  sysinfo = "x86_64-unknown-linux-gnu";
-  version    var  version = "0.55";
+  version    var  version = "0.56";
   5 variables
 
 Or you can list just private symbols of the namespace ``foo``, as follows::
@@ -9119,8 +9169,8 @@ would like to keep using llvm-gcc, you will have to set some environment
 variables; please see the :doc:`installation instructions<install>` for
 details.
 
-Pure 0.56 introduced the :ref:`non-splicing vector brackets<non-splicing>`
-``{| |}`` as an alternative notation for nested vector structures.
+Pure 0.56 introduced the :ref:`non-splicing vector brackets<non-splicing>` as
+an alternative notation for nested vector structures.
 
 Error Recovery
 --------------

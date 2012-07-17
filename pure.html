@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.56, July 06, 2012</p>
+<p>Version 0.56, July 17, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -429,11 +429,10 @@ this flag will be ignored.</p>
 </dd></dl>
 
 <dl class="option">
-<dt id="cmdoption-pure-e">
-<tt class="descname">-e</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-pure-e" title="Permalink to this definition">¶</a></dt>
 <dt id="cmdoption-pure--escape">
-<tt class="descname">--escape</tt><tt class="descclassname"></tt><a class="headerlink" href="#cmdoption-pure--escape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Interactive commands are prefixed with &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216;.</p>
+<tt class="descname">--escape</tt><tt class="descclassname"> char</tt><a class="headerlink" href="#cmdoption-pure--escape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interactive commands are prefixed with the specified character.
+Permitted prefixes are: <tt class="docutils literal"><span class="pre">!$%&amp;*,:&lt;&gt;&#64;\|</span></tt>.</p>
 </dd></dl>
 
 <dl class="option">
@@ -1304,8 +1303,9 @@ installation time.</p>
 <dl class="envvar">
 <dt id="envvar-PURE_ESCAPE">
 <tt class="descname">PURE_ESCAPE</tt><a class="headerlink" href="#envvar-PURE_ESCAPE" title="Permalink to this definition">¶</a></dt>
-<dd><p>If set, interactive commands are prefixed with &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; (same as
-<a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a>), see <a class="reference internal" href="#interactive-usage">Interactive Usage</a> for details.</p>
+<dd><p>If set, interactive commands are prefixed with the first character in the
+value of this variable (same as <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a>), see <a class="reference internal" href="#interactive-usage">Interactive
+Usage</a> for details.</p>
 </dd></dl>
 
 <dl class="envvar">
@@ -7445,40 +7445,62 @@ beginning of the line. However, this mode has its pitfalls, especially for
 beginners. As most of the commands look just like ordinary identifiers, you
 may run into situations where the beginning of an expression or definition to
 be typed at the prompt can be mistaken for a command word. In such cases the
-default mode requires that you &#8220;escape&#8221; the input by inserting one or more
-spaces at the beginning of the line, so that the interpreter reads the line as
-normal Pure code. Unfortunately, it&#8217;s much too easy to forget this if you&#8217;re
-not familiar with the command language.</p>
+default mode requires that you insert one or more spaces at the beginning of
+the line, so that the interpreter reads the line as normal Pure code.
+Unfortunately, it&#8217;s much too easy to forget this if you&#8217;re not familiar with
+the command language.</p>
 <p>Therefore there is an alternative <strong class="dfn">escape mode</strong> available which handles
 special command input more like some other popular programming language
 interpreters. In escape mode <em>all</em> interactive commands have to be escaped by
-prefixing them with an additional &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; character at the very beginning
-of the line. The command itself must follow the &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; prefix, without
-any intervening whitespace. Any line not prefixed with &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; will then
-be considered normal Pure code. This mode can be enabled with the <a class="reference internal" href="#cmdoption-pure-e"><em class="xref std std-option">-e</em></a>
-(or <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a>) option, or you can just set the <span class="target" id="index-29"></span><a class="reference internal" href="#envvar-PURE_ESCAPE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_ESCAPE</span></tt></a>
-variable in your environment to enable escape mode by default. (Setting this
-variable to any value will do, the interpreter only checks whether the
-variable exists in the environment.)</p>
+prefixing them with a special character at the very beginning of the line.
+The command itself must follow the prefix character, without any intervening
+whitespace. Any line not prefixed with the prefix character will then be
+considered normal Pure code. This mode can be enabled with the
+<a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> option, which takes the desired prefix character as an
+argument, or you can just set the <span class="target" id="index-29"></span><a class="reference internal" href="#envvar-PURE_ESCAPE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_ESCAPE</span></tt></a> variable in your
+environment to enable escape mode by default.</p>
+<p>For example, to set the escape character to &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; you&#8217;ll invoke the
+interpreter as follows:</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure --escape<span class="o">=</span><span class="s1">&#39;:&#39;</span>
+</pre></div>
+</div>
+<p>Alternatively, you could also set the <span class="target" id="index-30"></span><a class="reference internal" href="#envvar-PURE_ESCAPE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_ESCAPE</span></tt></a> environment
+variable like this (using Bourne shell syntax):</p>
+<div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">export </span><span class="nv">PURE_ESCAPE</span><span class="o">=</span><span class="s1">&#39;:&#39;</span>
+</pre></div>
+</div>
+<p>Note that specifying the prefix character with the <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> option
+overrides the value of the environment variable, and only the initial
+character in the value of <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> or <span class="target" id="index-31"></span><a class="reference internal" href="#envvar-PURE_ESCAPE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_ESCAPE</span></tt></a> will be
+used. If the specified value is empty, the interpreter reverts to the default
+mode. The following prefix characters can be used: <tt class="docutils literal"><span class="pre">!$%&amp;*,:&lt;&gt;&#64;\|</span></tt>. Note that
+these all belong to 7 bit ASCII, and only some of the ASCII punctuation
+characters are permitted in order to prevent conflicts with ordinary Pure
+code. In any case, all of these characters <em>can</em> also occur in ordinary Pure
+code, so you should use a prefix that you aren&#8217;t likely to type at the
+beginning of a line in your usual coding style.</p>
 <p>Many Pure programmers prefer escape mode, and in fact we recommend it for Pure
 novices even though it&#8217;s not the default (yet). Others may prefer default mode
-because it&#8217;s less effort to type. In any case, for the manual we decided to
-stick to the default mode syntax. This means that if you&#8217;re running the
-interpreter in escape mode then you&#8217;ll have to do the necessary translation of
-the command syntax yourself. For instance, if the manual tells you to type
-the following command,</p>
+because it&#8217;s less effort to type. For the manual we stick to the default mode
+syntax. This means that if you&#8217;re running the interpreter in escape mode then
+you&#8217;ll have to do the necessary translation of the command syntax yourself.
+For instance, if the manual tells you to type the following command,</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show foldl
 </pre></div>
 </div>
-<p>you will have to type this in escape mode instead:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>!show foldl
+<p>and you are using &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; as the command prefix, then you will have to
+type this in escape mode instead:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>:show foldl
 </pre></div>
 </div>
-<p>Similarly, to type a shell escape,</p>
+<p>Note that in this case &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; continues to serve as a shell escape:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>! find . &#39;*.pure&#39;
 </pre></div>
 </div>
-<p>in escape mode you actually have to type two exclamation marks:</p>
+<p>This will not work, however, if you use &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; as your command prefix. In
+this case you will have to type <em>two</em> exclamation marks instead (the same
+caveat applies if you escape a shell command in the debugger,
+cf. <a class="reference internal" href="#debugging">Debugging</a>):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>!! find . &#39;*.pure&#39;
 </pre></div>
 </div>
@@ -7489,8 +7511,7 @@ default mode command syntax throughout without further notice.</p>
 <p class="last">Escape mode only applies to the interactive command line. It doesn&#8217;t
 affect the <a class="reference internal" href="purelib.html#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> function in any way, so interactive commands in
 the string argument of <a class="reference internal" href="purelib.html#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> are always specified without the
-extra &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; escape character no matter which mode the interpreter is
-running in.</p>
+escape character prefix no matter which mode the interpreter is running in.</p>
 </div>
 </div>
 <div class="section" id="online-help">
@@ -7501,7 +7522,7 @@ format; this includes the present manual, the <a class="reference internal" href
 manuals of the addon modules available from the Pure website.</p>
 <p>You need to have a html browser installed to make this work. By default, the
 <tt class="docutils literal"><span class="pre">help</span></tt> command uses <strong class="program">w3m</strong>, but you can change this by setting
-either the <span class="target" id="index-30"></span><a class="reference internal" href="#envvar-PURE_HELP"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_HELP</span></tt></a> or the <span class="target" id="index-31"></span><a class="reference internal" href="#envvar-BROWSER"><tt class="xref std std-envvar docutils literal"><span class="pre">BROWSER</span></tt></a> environment variable
+either the <span class="target" id="index-32"></span><a class="reference internal" href="#envvar-PURE_HELP"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_HELP</span></tt></a> or the <span class="target" id="index-33"></span><a class="reference internal" href="#envvar-BROWSER"><tt class="xref std std-envvar docutils literal"><span class="pre">BROWSER</span></tt></a> environment variable
 accordingly.</p>
 <p>When invoked without arguments, the <tt class="docutils literal"><span class="pre">help</span></tt> command displays an overview of
 the available documentation, from which you can follow the links to the
@@ -7565,13 +7586,13 @@ your browser program can handle these. For instance:</p>
 <p>The following built-in commands are always understood by the interpreter. (In
 addition, you can define your own commands for frequently-used operations; see
 <a class="reference internal" href="#user-defined-commands">User-Defined Commands</a> below.)</p>
-<span class="target" id="index-32"></span><dl class="describe">
+<span class="target" id="index-34"></span><dl class="describe">
 <dt>
 <tt class="descname">! command</tt></dt>
 <dd><p>Shell escape.</p>
 </dd></dl>
 
-<span class="target" id="index-33"></span><dl class="describe">
+<span class="target" id="index-35"></span><dl class="describe">
 <dt>
 <tt class="descname">break [symbol ...]</tt></dt>
 <dd><p>Sets breakpoints on the given function or operator symbols. All symbols
@@ -7581,7 +7602,7 @@ requires that the interpreter was invoked with the <a class="reference internal"
 enable debugging support. See <a class="reference internal" href="#debugging">Debugging</a> below for details.</p>
 </dd></dl>
 
-<span class="target" id="index-34"></span><dl class="describe">
+<span class="target" id="index-36"></span><dl class="describe">
 <dt>
 <tt class="descname">bt</tt></dt>
 <dd><p>Prints a full backtrace of the call sequence of the most recent evaluation,
@@ -7590,13 +7611,13 @@ the interpreter was invoked with the <a class="reference internal" href="#cmdopt
 debugging support. See <a class="reference internal" href="#debugging">Debugging</a> below for details.</p>
 </dd></dl>
 
-<span class="target" id="index-35"></span><dl class="describe">
+<span class="target" id="index-37"></span><dl class="describe">
 <dt>
 <tt class="descname">cd dir</tt></dt>
 <dd><p>Change the current working dir.</p>
 </dd></dl>
 
-<span class="target" id="index-36"></span><dl class="describe">
+<span class="target" id="index-38"></span><dl class="describe">
 <dt>
 <tt class="descname">clear [option ...] [symbol ...]</tt></dt>
 <dd><p>Purge the definitions of the given symbols (functions, macros, constants or
@@ -7613,7 +7634,7 @@ of the common options accepted by the <tt class="docutils literal"><span class="
 commands can be found in <a class="reference internal" href="#specifying-symbol-selections">Specifying Symbol Selections</a> below.</p>
 </dd></dl>
 
-<span class="target" id="index-37"></span><dl class="describe">
+<span class="target" id="index-39"></span><dl class="describe">
 <dt>
 <tt class="descname">del [-b|-m|-t] [symbol ...]</tt></dt>
 <dd><p>Deletes breakpoints and tracepoints on the given function or operator
@@ -7628,7 +7649,7 @@ currently defined breakpoints and/or tracepoints (after confirmation); see
 function tracepoints, see the description of the <tt class="docutils literal"><span class="pre">trace</span></tt> command below.</p>
 </dd></dl>
 
-<span class="target" id="index-38"></span><dl class="describe">
+<span class="target" id="index-40"></span><dl class="describe">
 <dt>
 <tt class="descname">dump [-n filename] [option ...] [symbol ...]</tt></dt>
 <dd><p>Dump a snapshot of the current function, macro, constant and variable
@@ -7653,7 +7674,7 @@ the <tt class="docutils literal"><span class="pre">run</span></tt> command (see 
 interpreter session.</p>
 </dd></dl>
 
-<span class="target" id="index-39"></span><dl class="describe">
+<span class="target" id="index-41"></span><dl class="describe">
 <dt>
 <tt class="descname">help [topic]</tt></dt>
 <dd><p>Display online documentation. If a topic is given, it is looked up in the
@@ -7662,13 +7683,13 @@ installed help files, or any other html document denoted by a proper URL.
 Please see <a class="reference internal" href="#online-help">Online Help</a> above for details.</p>
 </dd></dl>
 
-<span class="target" id="index-40"></span><dl class="describe">
+<span class="target" id="index-42"></span><dl class="describe">
 <dt>
 <tt class="descname">ls [args]</tt></dt>
 <dd><p>List files (shell <strong class="command">ls</strong> command).</p>
 </dd></dl>
 
-<span class="target" id="index-41"></span><dl class="describe">
+<span class="target" id="index-43"></span><dl class="describe">
 <dt>
 <tt class="descname">mem</tt></dt>
 <dd><p>Print current memory usage. This reports the number of expression cells
@@ -7680,7 +7701,7 @@ Also, this figure does not reflect other heap-allocated memory in use by
 the program, such as strings or malloc&#8217;ed pointers.</p>
 </dd></dl>
 
-<span class="target" id="index-42"></span><dl class="describe">
+<span class="target" id="index-44"></span><dl class="describe">
 <dt>
 <tt class="descname">override</tt></dt>
 <dd><p>Enter &#8220;override&#8221; mode. This allows you to add equations &#8220;above&#8221; existing
@@ -7688,19 +7709,19 @@ definitions in the source script, possibly overriding existing
 equations. See <a class="reference internal" href="#definition-levels">Definition Levels</a> below for details.</p>
 </dd></dl>
 
-<span class="target" id="index-43"></span><dl class="describe">
+<span class="target" id="index-45"></span><dl class="describe">
 <dt>
 <tt class="descname">pwd</tt></dt>
 <dd><p>Print the current working dir (shell <strong class="command">pwd</strong> command).</p>
 </dd></dl>
 
-<span class="target" id="index-44"></span><dl class="describe">
+<span class="target" id="index-46"></span><dl class="describe">
 <dt>
 <tt class="descname">quit</tt></dt>
 <dd><p>Exits the interpreter.</p>
 </dd></dl>
 
-<span class="target" id="index-45"></span><dl class="describe">
+<span class="target" id="index-47"></span><dl class="describe">
 <dt>
 <tt class="descname">run [-g|script]</tt></dt>
 <dd><p>When invoked without arguments or with the <tt class="docutils literal"><span class="pre">-g</span></tt> option, <tt class="docutils literal"><span class="pre">run</span></tt> does a
@@ -7727,7 +7748,7 @@ also use the interpreter&#8217;s startup files for that purpose, see <a class="r
 Startup</a> below.)</p>
 </dd></dl>
 
-<span class="target" id="index-46"></span><dl class="describe">
+<span class="target" id="index-48"></span><dl class="describe">
 <dt>
 <tt class="descname">save</tt></dt>
 <dd><p>Begin a new level of temporary definitions. A subsequent <tt class="docutils literal"><span class="pre">clear</span></tt> command
@@ -7735,7 +7756,7 @@ Startup</a> below.)</p>
 command. See <a class="reference internal" href="#definition-levels">Definition Levels</a> below for details.</p>
 </dd></dl>
 
-<span class="target" id="index-47"></span><dl class="describe">
+<span class="target" id="index-49"></span><dl class="describe">
 <dt>
 <tt class="descname">show [option ...] [symbol ...]</tt></dt>
 <dd><p>Show the definitions of symbols in various formats. See <a class="reference internal" href="#the-show-command">The show Command</a>
@@ -7745,7 +7766,7 @@ see the remarks below. A description of the common options accepted by the
 Symbol Selections</a> below.</p>
 </dd></dl>
 
-<span class="target" id="index-48"></span><dl class="describe">
+<span class="target" id="index-50"></span><dl class="describe">
 <dt>
 <tt class="descname">stats [-m] [on|off]</tt></dt>
 <dd><p>Enables (default) or disables &#8220;stats&#8221; mode, in which some statistics are
@@ -7758,7 +7779,7 @@ disables stats mode, while <tt class="docutils literal"><span class="pre">stats<
 the memory usage statistics.</p>
 </dd></dl>
 
-<span class="target" id="index-49"></span><dl class="describe">
+<span class="target" id="index-51"></span><dl class="describe">
 <dt>
 <tt class="descname">trace [-a] [-m] [-r] [-s] [symbol ...]</tt></dt>
 <dd><p>Sets tracepoints on the given function or operator symbols. Without the
@@ -7786,7 +7807,7 @@ Note that, as with the <tt class="docutils literal"><span class="pre">break</spa
 deleted with the <tt class="docutils literal"><span class="pre">del</span></tt> command (see above).</p>
 </dd></dl>
 
-<span class="target" id="index-50"></span><dl class="describe">
+<span class="target" id="index-52"></span><dl class="describe">
 <dt>
 <tt class="descname">underride</tt></dt>
 <dd><p>Exits &#8220;override&#8221; mode. This returns you to the normal mode of operation,
@@ -7916,7 +7937,7 @@ information. This implies <tt class="docutils literal"><span class="pre">-s</spa
 </table>
 <p>Symbols are always listed in lexicographic order. Note that some of the
 options (in particular, <tt class="docutils literal"><span class="pre">-a</span></tt> and <tt class="docutils literal"><span class="pre">-d</span></tt>) may produce excessive amounts of
-information. By setting the <span class="target" id="index-51"></span><a class="reference internal" href="#envvar-PURE_MORE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_MORE</span></tt></a> environment variable, you can
+information. By setting the <span class="target" id="index-53"></span><a class="reference internal" href="#envvar-PURE_MORE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_MORE</span></tt></a> environment variable, you can
 specify a shell command to be used for paging, usually <strong class="command">more</strong> or
 <strong class="command">less</strong>.</p>
 <p>For instance, to list all temporary definitions made in an interactive
@@ -8186,7 +8207,7 @@ instance:</p>
 <p>The last call, which is also marked with the <tt class="docutils literal"><span class="pre">&gt;&gt;</span></tt> symbol, is the call that
 raised the exception. The format is similar to the <tt class="docutils literal"><span class="pre">p</span></tt> command of the
 debugger, see below, but <tt class="docutils literal"><span class="pre">bt</span></tt> always prints a full backtrace. (As with the
-<tt class="docutils literal"><span class="pre">show</span></tt> command of the interpreter, you can set the <span class="target" id="index-52"></span><a class="reference internal" href="#envvar-PURE_MORE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_MORE</span></tt></a>
+<tt class="docutils literal"><span class="pre">show</span></tt> command of the interpreter, you can set the <span class="target" id="index-54"></span><a class="reference internal" href="#envvar-PURE_MORE"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_MORE</span></tt></a>
 environment variable to pipe the output through the corresponding command, or
 use <a class="reference internal" href="purelib.html#evalcmd" title="evalcmd"><tt class="xref pure pure-func docutils literal"><span class="pre">evalcmd</span></tt></a> to capture the output of <tt class="docutils literal"><span class="pre">bt</span></tt> in a string.)</p>
 <p>The debugger can also be used interactively. To these ends, you can set
@@ -8259,6 +8280,13 @@ x       exit the interpreter (after confirmation)
 &lt;eof&gt;   step through program, run unattended (same as &#39;a&#39;)
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you specified an <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> prefix other than &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216;
+(cf. <a class="reference internal" href="#command-syntax">Command Syntax</a>), that prefix will be used to execute interpreter
+commands instead, see below. The help message will tell you which command
+prefix is in effect.</p>
+</div>
 <p>The command syntax is very simple. Besides the commands listed above you can
 also enter comment lines (<tt class="docutils literal"><span class="pre">//</span> <span class="pre">comment</span> <span class="pre">text</span></tt>) which will just be
 ignored. Extra arguments on commands which don&#8217;t expect any will generally be
@@ -8280,12 +8308,21 @@ end-of-file key (<tt class="kbd docutils literal"><span class="pre">Ctrl-d</span
 <li>You can also type <tt class="docutils literal"><span class="pre">x</span></tt> to exit from the debugger <em>and</em> the interpreter
 immediately (after confirmation).</li>
 </ul>
-<p>In addition, you can use the <tt class="docutils literal"><span class="pre">!</span></tt> command to run any interpreter command
-while in the debugger. This is particularly useful to invoke the <tt class="docutils literal"><span class="pre">break</span></tt> and
-<tt class="docutils literal"><span class="pre">del</span></tt> commands to change breakpoints, or you can use <tt class="docutils literal"><span class="pre">!!</span></tt> to escape a
-shell command. (However, you shouldn&#8217;t try to modify the program while you&#8217;re
-debugging it. This may work in some cases, but will have nasty consequences if
-you happen to change a function which is currently being executed.)</p>
+<p>In addition, you can use the <tt class="docutils literal"><span class="pre">!</span></tt> command (or whatever command prefix has
+been set with the <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> option) to run any interpreter command
+while in the debugger. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre>: !ls
+</pre></div>
+</div>
+<p>This is particularly useful to invoke the <tt class="docutils literal"><span class="pre">break</span></tt> and <tt class="docutils literal"><span class="pre">del</span></tt> commands to
+change breakpoints. Note that you can actually escape any valid input to the
+interpreter that way, not just the special interactive commands. However, you
+shouldn&#8217;t try to modify the program while you&#8217;re debugging it. This may work
+in some cases, but will have nasty consequences if you happen to change a
+function which is currently being executed.</p>
+<p>The interpreter&#8217;s shell escape can also be used from the debugger. In default
+mode or when using <tt class="docutils literal"><span class="pre">!</span></tt> as the <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> prefix, you&#8217;ll have to
+escape shell commands with <tt class="docutils literal"><span class="pre">!!</span></tt>, otherwise a single <tt class="docutils literal"><span class="pre">!</span></tt> suffices.</p>
 <p>At the debugger prompt, you can use the <tt class="docutils literal"><span class="pre">u</span></tt> (&#8220;up&#8221;), <tt class="docutils literal"><span class="pre">d</span></tt> (&#8220;down&#8221;), <tt class="docutils literal"><span class="pre">t</span></tt>
 (&#8220;top&#8221;) and <tt class="docutils literal"><span class="pre">b</span></tt> (&#8220;bottom&#8221;) commands to move around on the current call
 stack. The <tt class="docutils literal"><span class="pre">p</span></tt> command prints a range of the call stack centered around the
@@ -8429,7 +8466,8 @@ fashion with macro calls, see the <a class="reference internal" href="#macros">M
 or <tt class="docutils literal"><span class="pre">trace</span></tt> without any arguments lists the currently defined breakpoints or
 tracepoints, respectively. Please see <a class="reference internal" href="#interactive-commands">Interactive Commands</a> above for
 details. Also note that these are really interpreter commands, so to invoke
-them in the debugger you have to escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command.</p>
+them in the debugger you have to escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command
+(or whatever other <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> prefix you specified).</p>
 </div>
 <div class="section" id="last-result">
 <h3><a class="toc-backref" href="#id106">Last Result</a><a class="headerlink" href="#last-result" title="Permalink to this headline">¶</a></h3>
@@ -8705,7 +8743,7 @@ interpreter.</p>
 after loading the prelude and the scripts specified on the command line. This
 lets you tailor the interactive environment to your liking.</p>
 <p>The interpreter first looks for a .purerc file in the user&#8217;s home directory
-(as given by the <span class="target" id="index-53"></span><tt class="xref std std-envvar docutils literal"><span class="pre">HOME</span></tt> environment variable) and then for a .purerc
+(as given by the <span class="target" id="index-55"></span><tt class="xref std std-envvar docutils literal"><span class="pre">HOME</span></tt> environment variable) and then for a .purerc
 file in the current working directory. These are just ordinary Pure scripts
 which may contain any additional definitions (including command definitions,
 as described in the previous section) that you need. The .purerc file in the
@@ -9313,7 +9351,7 @@ details.</p>
 <tt class="docutils literal"><span class="pre">{|</span> <span class="pre">|}</span></tt> as an alternative notation for nested vector structures, as well as
 the <a class="reference internal" href="#namespace-brackets">namespace brackets</a> to quickly switch namespaces inside an
 expression. Moreover, interactive commands can now optionally be escaped by
-prefixing them with &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; (see <a class="reference internal" href="#interactive-usage">Interactive Usage</a> for details).</p>
+prefixing them with a special character (see <a class="reference internal" href="#interactive-usage">Interactive Usage</a> for details).</p>
 </div>
 <div class="section" id="error-recovery">
 <h3><a class="toc-backref" href="#id118">Error Recovery</a><a class="headerlink" href="#error-recovery" title="Permalink to this headline">¶</a></h3>
@@ -9590,14 +9628,14 @@ also make good use of this pragma for static checks and optimization purposes.</
 recursive function and macro calls, and the interpreter itself also takes its
 toll. So you should configure your system accordingly (8 MB of stack space is
 recommended for 32 bit systems, systems with 64 bit pointers probably need
-more). If the <span class="target" id="index-54"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment variable is defined, the
+more). If the <span class="target" id="index-56"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> environment variable is defined, the
 interpreter performs advisory stack checks on function entry and raises a Pure
 exception if the current stack size exceeds the given limit. The value of
-<span class="target" id="index-55"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> should be the maximum stack size in kilobytes. Please
+<span class="target" id="index-57"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> should be the maximum stack size in kilobytes. Please
 note that this is only an advisory limit which does not change the program&#8217;s
 physical stack size.  Your operating system should supply you with a command
 such as ulimit(1) to set the real process stack size. (The
-<span class="target" id="index-56"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> limit should be a little less than that, to account for
+<span class="target" id="index-58"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a> limit should be a little less than that, to account for
 temporary stack usage by the interpreter itself.)</p>
 <p>Like Scheme, Pure does proper tail calls (if LLVM provides that feature on the
 platform at hand), so tail-recursive definitions should work fine in limited

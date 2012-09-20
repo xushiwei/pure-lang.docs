@@ -65,11 +65,7 @@ operator symbols. This includes the truth values ``true`` and ``false``.
               false = 0
 
    These are actually just integers in Pure, but sometimes it's convenient
-   to refer to them using these symbolic constants. Note that if you also
-   want to use these on the left-hand side of equations, you still have to
-   declare them as ``nonfix`` symbols yourself, using a declaration like::
-
-     nonfix false true;
+   to refer to them using these symbolic constants.
 
 In addition, the following special exception symbols are provided:
 
@@ -144,6 +140,7 @@ the left-hand side of equations, see :ref:`Type Tags` in the Pure Manual.
           real /type
           rational /type
           integer /type
+          bool /type
 
    Additional number types.
 
@@ -153,8 +150,12 @@ types can be found in the :mod:`math` module, see `Semantic Number
 Predicates and Types`_.
 
 :type:`integer/type` is the union of Pure's built-in integer types, i.e.,
-it comprises all :type:`int/type` and :type:`bigint/type`
-values. :type:`rational/type` and :type:`complex/type` are the rational and
+it comprises all :type:`int/type` and :type:`bigint/type` values.
+:type:`bool/type` is a subtype of :type:`int/type` which denotes just the
+normalized truth values ``0`` and ``1`` (a.k.a. :const:`false` and
+:const:`true`).
+
+:type:`rational/type` and :type:`complex/type` are the rational and
 complex types, while :type:`real/type` is the union of the
 :type:`double/type`, :type:`integer/type` and :type:`rational/type` types
 (i.e., anything that can represent a real number and be used for the real
@@ -2138,6 +2139,10 @@ These operations convert between various types of Pure values.
 
    Compute a 32 bit hash code of a Pure expression.
 
+.. function:: bool x
+
+   Convert a machine integer to a normalized truth value (``0`` or ``1``).
+
 .. function:: int x
               bigint x
               double x
@@ -2226,9 +2231,13 @@ for details.
 
    Predicates to check for the built-in types.
 
+.. function:: boolp x
+
+   Predicate to check for normalized truth values (``0`` and ``1``).
+
 .. function:: charp x
 
-   Single character string predicate.
+   Predicate to check for single character strings.
 
 .. function:: numberp x
               complexp x
@@ -3734,6 +3743,135 @@ bigintvalp x => ratvalp x => realvalp x => compvalp x <=> numberp x``.
    Convenience types for the above predicates. These can be used as type
    tags on the left-hand side of an equation to match numeric values for
    which the corresponding predicate yields :const:`true`.
+
+.. module:: enum
+
+Enumerated Types
+================
+
+`Enumerated types`, or `enumerations` for short, are algebraic types
+consisting only of nullary constructor symbols. The operations of this
+module equip such types with the necessary function definitions so that the
+members of the type can be employed in arithmetic operations, comparisons,
+etc. in the same way as the predefined enumerated types such as integers
+and characters. This also includes support for arithmetic sequences.
+
+Please note that this module is not included in the prelude by default, so
+you have to use the following import declaration to get access to its
+operations::
+
+  using enum;
+
+The following operations are provided:
+
+.. function:: enum sym
+
+   The given symbol must denote an algebraic type consisting only of nonfix
+   symbols. :func:`enum` adds the necessary rules for making members of the
+   type work with enumerated type operations such as :func:`ord`,
+   :func:`succ`, :func:`pred`, comparisons, basic arithmetic and arithmetic
+   sequences. It also defines ``sym`` as an ordinary function, called the
+   `enumeration function` of the type, which maps ordinal numbers to the
+   corresponding members of the type (``sym 0`` yields the first member of
+   the type, ``sym 1`` the second, etc.). The members of the type are in
+   the same order as given in the definition of the type.
+
+.. function:: defenum sym [symbols,...]
+
+   A convenience function which declares a type ``sym`` with the given
+   elements and invokes :func:`enum` on it to make it enumerable in one go.
+
+.. function:: enumof sym
+
+   Given a member of an enumerated type as defined with :func:`enum`, this
+   returns the enumeration function of the type. Rules for this function
+   are generated automatically by :func:`enum`.
+
+.. type:: enum /type
+
+   The type of all enumerated type members. This is actually implemented
+   as an interface type. It matches members of all enumerated types
+   constructed with :func:`enum`.
+
+.. function:: enump x
+
+   Predicate to check for enumerated type members.
+
+For instance, consider::
+
+  nonfix sun mon tue wed thu fri sat;
+  type day sun | day mon | day tue | day wed | day thu | day fri | day sat;
+
+Once the type is defined, we can turn it into an enumeration simply as
+follows::
+
+  enum day;
+
+There's also a convenience function :func:`defenum` which defines the type
+and makes it enumerable in one go::
+
+  defenum day [sun,mon,tue,wed,thu,fri,sat];
+
+In particular, this sets up the functions ``day`` and ``ord`` so that you
+can convert between members of the ``day`` type and the corresponding
+ordinals::
+
+  > ord sun;
+  0
+  > day (ans+3);
+  wed
+
+You can also retrieve the type of an enumerated type member (or rather its
+enumeration function) with :func:`enumof`::
+
+  > enumof sun;
+  day
+  > ans 5;
+  fri
+
+Basic arithmetic, comparisons and arithmetic sequences also work as usual,
+provided that the involved members are all from the same enumeration::
+
+  > succ mon;
+  tue
+  > pred sat;
+  fri
+  > sun+3;
+  wed
+  > fri-2;
+  wed
+  > fri-tue;
+  3
+  > mon..fri;
+  [mon,tue,wed,thu,fri]
+  > sun:tue..sat;
+  [sun,tue,thu,sat]
+  > sat:fri..mon;
+  [sat,fri,thu,wed,tue,mon]
+
+Note that given one member of the enumeration, you can use :func:`enumof`
+to quickly enumerate *all* members of the type starting at the given
+member. Here's a little helper function which does this::
+
+  enumerate x::enum = iterwhile (typep ty) succ x when ty = enumof x end;
+
+For instance::
+
+  > enumerate sun;
+  [sun,mon,tue,wed,thu,fri,sat]
+
+Also note that :func:`enum` silently skips elements which are already
+enumerated type members (no matter whether of the same or another type).
+Thus if you later add more elements to the ``day`` type, you can just call
+:func:`enum` again to update the enumeration accordingly::
+
+  > succ sat;
+  sat+1
+  > type day doomsday;
+  > enum day;
+  ()
+  > succ sat;
+  doomsday
 
 ..
 

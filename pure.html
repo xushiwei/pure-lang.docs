@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.56, September 06, 2012</p>
+<p>Version 0.56, September 20, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -279,9 +279,13 @@ the benefit that the compiled code runs much faster than the usual kinds of
 <p>You can use the interpreter as a sophisticated kind of &#8220;desktop calculator&#8221;
 program. Simply run the program from the shell as follows:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure
-<span class="go">Pure 0.56 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef</span>
-<span class="go">(Type &#39;help&#39; for help, &#39;help copying&#39; for license information.)</span>
-<span class="go">Loaded prelude from /usr/local/lib/pure/prelude.pure.</span>
+
+<span class="go"> __ \  |   |  __| _ \    Pure 0.56 (x86_64-unknown-linux-gnu)</span>
+<span class="go"> |   | |   | |    __/    Copyright (c) 2008-2012 by Albert Graef</span>
+<span class="go"> .__/ \__,_|_|  \___|    (Type &#39;help&#39; for help, &#39;help copying&#39;</span>
+<span class="go">_|                       for license information.)</span>
+
+<span class="go">Loaded prelude from /usr/lib/pure/prelude.pure.</span>
 
 <span class="gp">&gt;</span>
 </pre></div>
@@ -308,7 +312,8 @@ a bunch of syntax highlighting files and programming modes for various popular
 text editors are included in the Pure sources.</p>
 <p>More information about invoking the Pure interpreter can be found in the
 <a class="reference internal" href="#invoking-pure">Invoking Pure</a> section below. This is followed by a description of the Pure
-language in <a class="reference internal" href="#pure-overview">Pure Overview</a> and subsequent sections. The interactive
+language in <a class="reference internal" href="#pure-overview">Pure Overview</a> and subsequent sections, including an extensive
+<a class="reference internal" href="#examples">Examples</a> section which can serve as a mini-tutorial on Pure. The interactive
 facilities of the Pure interpreter are discussed in the <a class="reference internal" href="#interactive-usage">Interactive Usage</a>
 section, while the <a class="reference internal" href="#batch-compilation">Batch Compilation</a> section explains how to translate Pure
 programs to native executables and a number of other object file formats. The
@@ -589,7 +594,7 @@ switches for setting various compilation options; please see <a class="reference
 Options</a> below for details.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>Option parsing follows the usual (UNIX) conventions, but is somewhat
+<p>Option parsing follows the usual (Unix) conventions, but is somewhat
 more rigid than the GNU getopt conventions. In particular, it is <em>not</em>
 possible to combine short options, and there are no abbreviations for
 &#8220;long&#8221; options. Mixing options and other command line parameters is
@@ -1763,42 +1768,6 @@ all Pure programs. All computation performed by a Pure program consists in the
 evaluation of expressions, and expressions also form the building blocks of
 the equational rules which are used to define the constants, variables,
 functions and macros of a Pure program.</p>
-<p>Pure&#8217;s expression syntax can be summarized in the following grammar rules:</p>
-<pre>
-<strong id="grammar-token-expr">expr        </strong> ::=  &quot;\&quot; <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>+ &quot;-&gt;&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>
-                  | &quot;case&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;of&quot; <a class="reference internal" href="#grammar-token-rules"><tt class="xref docutils literal"><span class="pre">rules</span></tt></a> &quot;end&quot;
-                  | <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;when&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;end&quot;
-                  | <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;with&quot; <a class="reference internal" href="#grammar-token-rules"><tt class="xref docutils literal"><span class="pre">rules</span></tt></a> &quot;end&quot;
-                  | &quot;if&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;then&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;else&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
-<strong id="grammar-token-simple_expr">simple_expr </strong> ::=  <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-application"><tt class="xref docutils literal"><span class="pre">application</span></tt></a>
-<strong id="grammar-token-application">application </strong> ::=  <a class="reference internal" href="#grammar-token-application"><tt class="xref docutils literal"><span class="pre">application</span></tt></a> <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>
-<strong id="grammar-token-rules">rules       </strong> ::=  <a class="reference internal" href="#grammar-token-rule"><tt class="xref docutils literal"><span class="pre">rule</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-rule"><tt class="xref docutils literal"><span class="pre">rule</span></tt></a>)* [&quot;;&quot;]
-<strong id="grammar-token-simple_rules">simple_rules</strong> ::=  <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref docutils literal"><span class="pre">simple_rule</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref docutils literal"><span class="pre">simple_rule</span></tt></a>)* [&quot;;&quot;]
-<strong id="grammar-token-prim_expr">prim_expr   </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-number"><tt class="xref docutils literal"><span class="pre">number</span></tt></a>
-                  | <a class="reference internal" href="#grammar-token-string"><tt class="xref docutils literal"><span class="pre">string</span></tt></a>
-                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> &quot;)&quot;
-                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-left_op"><tt class="xref docutils literal"><span class="pre">left_op</span></tt></a> <a class="reference internal" href="#grammar-token-right_op"><tt class="xref docutils literal"><span class="pre">right_op</span></tt></a> &quot;)&quot;
-                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> &quot;)&quot;
-                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> &quot;)&quot;
-                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;)&quot;
-                  | <a class="reference internal" href="#grammar-token-left_op"><tt class="xref docutils literal"><span class="pre">left_op</span></tt></a> <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> <a class="reference internal" href="#grammar-token-right_op"><tt class="xref docutils literal"><span class="pre">right_op</span></tt></a>
-                  | &quot;[&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a> &quot;]&quot;
-                  | &quot;{&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a>)* [&quot;;&quot;] &quot;}&quot;
-                  | &quot;[&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;|&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;]&quot;
-                  | &quot;{&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;|&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;}&quot;
-<strong id="grammar-token-exprs">exprs       </strong> ::=  <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> (&quot;,&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>)*
-<strong id="grammar-token-op">op          </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
-<strong id="grammar-token-left_op">left_op     </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
-<strong id="grammar-token-right_op">right_op    </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
-</pre>
-<p>(Note that the <a class="reference internal" href="#grammar-token-rule"><tt class="xref std std-token docutils literal"><span class="pre">rule</span></tt></a> and <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref std std-token docutils literal"><span class="pre">simple_rule</span></tt></a> elements are part of the
-definition syntax, which is explained in the <a class="reference internal" href="#rule-syntax">Rule Syntax</a> section.)</p>
 <p>Typical examples of the different expression types are summarized in the
 following table. Note that lambdas bind most weakly, followed by the special
 <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a>, <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> and <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> constructs, followed by
@@ -1821,24 +1790,24 @@ override default precedences as usual.</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td>Lambda</td>
-<td><tt class="docutils literal"><span class="pre">\x-&gt;x+1</span></tt></td>
-<td>anonymous function</td>
+<tr class="row-even"><td>Block</td>
+<td><tt class="docutils literal"><span class="pre">\x</span> <span class="pre">y-&gt;2*x-y</span></tt></td>
+<td>anonymous function (lambda)</td>
 </tr>
-<tr class="row-odd"><td>Block</td>
-<td><tt class="docutils literal"><span class="pre">case</span> <span class="pre">x</span> <span class="pre">of</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">z;</span> <span class="pre">...</span> <span class="pre">end</span></tt></td>
-<td>pattern-matching conditional</td>
+<tr class="row-odd"><td></td>
+<td><tt class="docutils literal"><span class="pre">case</span> <span class="pre">f</span> <span class="pre">u</span> <span class="pre">of</span> <span class="pre">x,y</span> <span class="pre">=</span> <span class="pre">x+y</span> <span class="pre">end</span></tt></td>
+<td>case expression</td>
 </tr>
 <tr class="row-even"><td></td>
-<td><tt class="docutils literal"><span class="pre">x</span> <span class="pre">when</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">z;</span> <span class="pre">...</span> <span class="pre">end</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">x+y</span> <span class="pre">when</span> <span class="pre">x,y</span> <span class="pre">=</span> <span class="pre">f</span> <span class="pre">u</span> <span class="pre">end</span></tt></td>
 <td>local variable definition</td>
 </tr>
 <tr class="row-odd"><td></td>
-<td><tt class="docutils literal"><span class="pre">x</span> <span class="pre">with</span> <span class="pre">f</span> <span class="pre">y</span> <span class="pre">=</span> <span class="pre">z;</span> <span class="pre">...</span> <span class="pre">end</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">f</span> <span class="pre">u</span> <span class="pre">with</span> <span class="pre">f</span> <span class="pre">(x,y)</span> <span class="pre">=</span> <span class="pre">x+y</span> <span class="pre">end</span></tt></td>
 <td>local function definition</td>
 </tr>
 <tr class="row-even"><td>Conditional</td>
-<td><tt class="docutils literal"><span class="pre">if</span> <span class="pre">x</span> <span class="pre">then</span> <span class="pre">y</span> <span class="pre">else</span> <span class="pre">z</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">if</span> <span class="pre">x&gt;0</span> <span class="pre">then</span> <span class="pre">x</span> <span class="pre">else</span> <span class="pre">-x</span></tt></td>
 <td>conditional expression</td>
 </tr>
 <tr class="row-odd"><td>Simple</td>
@@ -1850,7 +1819,7 @@ override default precedences as usual.</p>
 <td>function application</td>
 </tr>
 <tr class="row-odd"><td>Primary</td>
-<td><tt class="docutils literal"><span class="pre">4711</span></tt>, <tt class="docutils literal"><span class="pre">1.2e-3</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">4711</span></tt>, <tt class="docutils literal"><span class="pre">4711L</span></tt>, <tt class="docutils literal"><span class="pre">1.2e-3</span></tt></td>
 <td>number</td>
 </tr>
 <tr class="row-even"><td></td>
@@ -1879,6 +1848,42 @@ override default precedences as usual.</p>
 </tr>
 </tbody>
 </table>
+<p>The formal syntax of expressions is as follows. (Note that the <a class="reference internal" href="#grammar-token-rule"><tt class="xref std std-token docutils literal"><span class="pre">rule</span></tt></a>
+and <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref std std-token docutils literal"><span class="pre">simple_rule</span></tt></a> elements are part of the definition syntax, which is
+explained in the <a class="reference internal" href="#rule-syntax">Rule Syntax</a> section.)</p>
+<pre>
+<strong id="grammar-token-expr">expr        </strong> ::=  &quot;\&quot; <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>+ &quot;-&gt;&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>
+                  | &quot;case&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;of&quot; <a class="reference internal" href="#grammar-token-rules"><tt class="xref docutils literal"><span class="pre">rules</span></tt></a> &quot;end&quot;
+                  | <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;when&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;end&quot;
+                  | <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;with&quot; <a class="reference internal" href="#grammar-token-rules"><tt class="xref docutils literal"><span class="pre">rules</span></tt></a> &quot;end&quot;
+                  | &quot;if&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;then&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;else&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
+<strong id="grammar-token-simple_expr">simple_expr </strong> ::=  <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-application"><tt class="xref docutils literal"><span class="pre">application</span></tt></a>
+<strong id="grammar-token-application">application </strong> ::=  <a class="reference internal" href="#grammar-token-application"><tt class="xref docutils literal"><span class="pre">application</span></tt></a> <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-prim_expr"><tt class="xref docutils literal"><span class="pre">prim_expr</span></tt></a>
+<strong id="grammar-token-prim_expr">prim_expr   </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-number"><tt class="xref docutils literal"><span class="pre">number</span></tt></a>
+                  | <a class="reference internal" href="#grammar-token-string"><tt class="xref docutils literal"><span class="pre">string</span></tt></a>
+                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> &quot;)&quot;
+                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-left_op"><tt class="xref docutils literal"><span class="pre">left_op</span></tt></a> <a class="reference internal" href="#grammar-token-right_op"><tt class="xref docutils literal"><span class="pre">right_op</span></tt></a> &quot;)&quot;
+                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> &quot;)&quot;
+                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-op"><tt class="xref docutils literal"><span class="pre">op</span></tt></a> <a class="reference internal" href="#grammar-token-simple_expr"><tt class="xref docutils literal"><span class="pre">simple_expr</span></tt></a> &quot;)&quot;
+                  | &quot;(&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;)&quot;
+                  | <a class="reference internal" href="#grammar-token-left_op"><tt class="xref docutils literal"><span class="pre">left_op</span></tt></a> <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> <a class="reference internal" href="#grammar-token-right_op"><tt class="xref docutils literal"><span class="pre">right_op</span></tt></a>
+                  | &quot;[&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a> &quot;]&quot;
+                  | &quot;{&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-exprs"><tt class="xref docutils literal"><span class="pre">exprs</span></tt></a>)* [&quot;;&quot;] &quot;}&quot;
+                  | &quot;[&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;|&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;]&quot;
+                  | &quot;{&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> &quot;|&quot; <a class="reference internal" href="#grammar-token-simple_rules"><tt class="xref docutils literal"><span class="pre">simple_rules</span></tt></a> &quot;}&quot;
+<strong id="grammar-token-exprs">exprs       </strong> ::=  <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a> (&quot;,&quot; <a class="reference internal" href="#grammar-token-expr"><tt class="xref docutils literal"><span class="pre">expr</span></tt></a>)*
+<strong id="grammar-token-op">op          </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
+<strong id="grammar-token-left_op">left_op     </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
+<strong id="grammar-token-right_op">right_op    </strong> ::=  <a class="reference internal" href="#grammar-token-qualified_symbol"><tt class="xref docutils literal"><span class="pre">qualified_symbol</span></tt></a>
+<strong id="grammar-token-rules">rules       </strong> ::=  <a class="reference internal" href="#grammar-token-rule"><tt class="xref docutils literal"><span class="pre">rule</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-rule"><tt class="xref docutils literal"><span class="pre">rule</span></tt></a>)* [&quot;;&quot;]
+<strong id="grammar-token-simple_rules">simple_rules</strong> ::=  <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref docutils literal"><span class="pre">simple_rule</span></tt></a> (&quot;;&quot; <a class="reference internal" href="#grammar-token-simple_rule"><tt class="xref docutils literal"><span class="pre">simple_rule</span></tt></a>)* [&quot;;&quot;]
+</pre>
 <div class="section" id="primary-expressions">
 <span id="id2"></span><h4><a class="toc-backref" href="#id41">Primary Expressions</a><a class="headerlink" href="#primary-expressions" title="Permalink to this headline">¶</a></h4>
 <p>The Pure language provides built-in support for machine integers (32 bit),
@@ -1945,7 +1950,7 @@ Pure also provides outfix (bracket) and nonfix (nullary operator)
 symbols. (Nonfix symbols actually work more or less like ordinary
 identifiers, but the <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> attribute tells the compiler that
 when such a symbol occurs on the left-hand side of an equation, it is
-always to be interpreted as a literal, cf. <a class="reference internal" href="#variables-in-equations">Variables in Equations</a>.)</p>
+always to be interpreted as a literal, cf. <a class="reference internal" href="#the-head-function-rule">The &#8220;Head = Function&#8221; Rule</a>.)</p>
 <p>Operator (and nonfix) symbols may take the form of an identifier or a
 sequence of punctuation characters, which may optionally be qualified with
 a namespace prefix. These symbols must always be declared before use. Once
@@ -2016,26 +2021,26 @@ whatever is most convenient for the problem at hand.</p>
 
 <dl class="describe">
 <dt>
-<tt class="descname">Matrices: {1.0,2.0,3.0}, {1,2;3,4}, {1L,y+1;foo,bar}</tt></dt>
+<tt class="descname">Matrices: {1.0,2.0,3.0}, {1,2;3,4}, {cos t,-sin t;sin t,cos t}</tt></dt>
 <dd><p>Pure also offers matrices, a kind of two-dimensional arrays, as a built-in
 data structure which provides efficient storage and element access. These
 work more or less like their Octave/MATLAB equivalents, but using curly
-braces instead of brackets; commas are used to separate the columns of a
-matrix, semicolons for its rows. Component values may either be individual
+braces instead of brackets. Component values may either be individual
 elements (&#8220;scalars&#8221;) or submatrices which are combined to form a larger
 matrix, provided that all dimensions match up. Here, a scalar is any
 expression which doesn&#8217;t yield a matrix; these are considered to be 1x1
 submatrices for the purpose of matrix construction. (Note that this
 &#8220;splicing&#8221; behaviour pertains to matrix construction only; nested matrix
 <a class="reference internal" href="#patterns">patterns</a> are always matched literally.)</p>
-<p>The comma arranges submatrices in columns, while the semicolon arranges
-them in rows. So, if both <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are <tt class="docutils literal"><span class="pre">n</span></tt> x <tt class="docutils literal"><span class="pre">m</span></tt> matrices, then
-<tt class="docutils literal"><span class="pre">{x,y}</span></tt> becomes an <tt class="docutils literal"><span class="pre">n</span></tt> x <tt class="docutils literal"><span class="pre">2*m</span></tt> matrix consisting of all the columns
-of <tt class="docutils literal"><span class="pre">x</span></tt> followed by all the columns of <tt class="docutils literal"><span class="pre">y</span></tt>. Likewise, <tt class="docutils literal"><span class="pre">{x;y}</span></tt> becomes
-a <tt class="docutils literal"><span class="pre">2*n</span></tt> x <tt class="docutils literal"><span class="pre">m</span></tt> matrix (all the rows of <tt class="docutils literal"><span class="pre">x</span></tt> above of all rows of
-<tt class="docutils literal"><span class="pre">y</span></tt>). For instance, <tt class="docutils literal"><span class="pre">{{1;3},{2;4}}</span></tt> is another way to write the 2x2
-matrix <tt class="docutils literal"><span class="pre">{1,2;3,4}</span></tt>. More examples can be found in the <a class="reference internal" href="#matrices-and-vectors">Matrices and
-Vectors</a> section.</p>
+<p>The comma arranges submatrices and scalars in columns, while the semicolon
+arranges them in rows. So, if both <tt class="docutils literal"><span class="pre">x</span></tt> and <tt class="docutils literal"><span class="pre">y</span></tt> are <tt class="docutils literal"><span class="pre">n</span></tt> x <tt class="docutils literal"><span class="pre">m</span></tt>
+matrices, then <tt class="docutils literal"><span class="pre">{x,y}</span></tt> becomes an <tt class="docutils literal"><span class="pre">n</span></tt> x <tt class="docutils literal"><span class="pre">2*m</span></tt> matrix consisting of
+all the columns of <tt class="docutils literal"><span class="pre">x</span></tt> followed by all the columns of <tt class="docutils literal"><span class="pre">y</span></tt>. Likewise,
+<tt class="docutils literal"><span class="pre">{x;y}</span></tt> becomes a <tt class="docutils literal"><span class="pre">2*n</span></tt> x <tt class="docutils literal"><span class="pre">m</span></tt> matrix (all the rows of <tt class="docutils literal"><span class="pre">x</span></tt> above of
+all rows of <tt class="docutils literal"><span class="pre">y</span></tt>). For instance, <tt class="docutils literal"><span class="pre">{{1;3},{2;4}}</span></tt> is another way to write
+the 2x2 matrix <tt class="docutils literal"><span class="pre">{1,2;3,4}</span></tt>. Row vectors are denoted as 1 x <tt class="docutils literal"><span class="pre">n</span></tt> matrices
+(<tt class="docutils literal"><span class="pre">{1,2,3}</span></tt>), column vectors as <tt class="docutils literal"><span class="pre">n</span></tt> x 1 matrices (<tt class="docutils literal"><span class="pre">{1;2;3}</span></tt>). More
+examples can be found in the <a class="reference internal" href="#matrices-and-vectors">Matrices and Vectors</a> section.</p>
 <p>Pure supports both numeric and symbolic matrices. The former are
 homogeneous arrays of double, complex double or (machine) int matrices,
 while the latter can contain any mixture of Pure expressions. Pure will
@@ -2061,12 +2066,18 @@ which generated elements should actually be added to the result.
 Comprehensions are in fact just syntactic sugar for a combination of
 lambdas, conditional expressions and certain list and matrix operations,
 but they are often much easier to write.</p>
+<p>Thus, for instance, <tt class="docutils literal"><span class="pre">[f</span> <span class="pre">x</span> <span class="pre">|</span> <span class="pre">x=1..n]</span></tt> is pretty much the same as <tt class="docutils literal"><span class="pre">map</span> <span class="pre">f</span>
+<span class="pre">(1..n)</span></tt>, while <tt class="docutils literal"><span class="pre">[x</span> <span class="pre">|</span> <span class="pre">x=xs;</span> <span class="pre">x&gt;0]</span></tt> corresponds to <tt class="docutils literal"><span class="pre">filter</span> <span class="pre">(&gt;0)</span> <span class="pre">xs</span></tt>.
+However, comprehensions are considerably more general in that they allow
+you to draw values from different kinds of aggregates including lists,
+matrices and strings. Also, matrix comprehensions alternate between row and
+column generation so that most common mathematical abbreviations carry over
+quite easily. Patterns can be used on the left-hand side of generator
+clauses as usual, and will be matched against the actual list or matrix
+elements; any unmatched elements are filtered out automatically, like in
+Haskell.</p>
 <p>More details and examples can be found in the <a class="reference internal" href="#examples">Examples</a> section; in
-particular, see <a class="reference internal" href="#list-comprehensions">List Comprehensions</a>. Matrix comprehensions work pretty
-much like list comprehensions, but produce matrices instead of lists; they
-also alternate between row and column generation so that most common
-mathematical abbreviations carry over quite easily, see <a class="reference internal" href="#matrices-and-vectors">Matrices and
-Vectors</a>.</p>
+particular, see <a class="reference internal" href="#list-comprehensions">List Comprehensions</a> and <a class="reference internal" href="#matrices-and-vectors">Matrices and Vectors</a>.</p>
 </dd></dl>
 
 </div>
@@ -2126,14 +2137,24 @@ just like the other arithmetic operations.</p>
 <div class="section" id="special-expressions">
 <span id="end"></span><span id="with"></span><span id="when"></span><span id="case"></span><span id="else"></span><span id="then"></span><span id="if"></span><h4><a class="toc-backref" href="#id43">Special Expressions</a><a class="headerlink" href="#special-expressions" title="Permalink to this headline">¶</a></h4>
 <p>Some special notations are provided for conditional expressions as well as
-anonymous functions (lambdas) and blocks of local function and variable
-definitions.</p>
+anonymous functions (lambdas) and local function and variable definitions.
+The latter are also called <strong class="dfn">block expressions</strong> since they introduce local
+bindings of variable and function symbols which may override other global or
+local bindings of these symbols. This gives rise to a kind of <strong class="dfn">block
+structure</strong> similar to Algol-like programming languages. Please check <a class="reference internal" href="#scoping-rules">Scoping
+Rules</a> below for more information about this.</p>
+<p>The constructs described here are called &#8220;special&#8221; because, in contrast to the
+other forms of expressions, they cannot occur in normal form terms as
+first-class values (at least not literally; there is an alternative quoted
+representation of special expressions, however, which <em>can</em> be manipulated
+with macros and functions for meta programming purposes, cf. <a class="reference internal" href="#built-in-macros-and-special-expressions">Built-in Macros
+and Special Expressions</a>).</p>
 <dl class="describe">
 <dt>
 <tt class="descname">Conditional expressions: if x then y else z</tt></dt>
 <dd><p>Evaluates to <tt class="docutils literal"><span class="pre">y</span></tt> or <tt class="docutils literal"><span class="pre">z</span></tt> depending on whether <tt class="docutils literal"><span class="pre">x</span></tt> is &#8220;true&#8221; (i.e., a
-nonzero integer). An exception is raised if the condition is not an
-integer.</p>
+nonzero integer). A <a class="reference internal" href="purelib.html#failed_cond" title="failed_cond"><tt class="xref pure pure-const docutils literal"><span class="pre">failed_cond</span></tt></a> exception is raised if the
+condition is not an integer.</p>
 </dd></dl>
 
 <dl class="describe">
@@ -2144,8 +2165,8 @@ lambda matches its argument against the left-hand side pattern <tt class="docuti
 then evaluates the right-hand side body <tt class="docutils literal"><span class="pre">y</span></tt> with the variables in <tt class="docutils literal"><span class="pre">x</span></tt>
 bound to their corresponding values. Pure supports multiple-argument
 lambdas (e.g, <tt class="docutils literal"><span class="pre">\x</span> <span class="pre">y</span> <span class="pre">-&gt;</span> <span class="pre">x*y</span></tt>), as well as pattern-matching lambda
-abstractions such as <tt class="docutils literal"><span class="pre">\(x,y)</span> <span class="pre">-&gt;</span> <span class="pre">x*y</span></tt>. An exception is raised if the
-actual arguments do not match the given patterns.</p>
+abstractions such as <tt class="docutils literal"><span class="pre">\(x,y)</span> <span class="pre">-&gt;</span> <span class="pre">x*y</span></tt>. A <a class="reference internal" href="purelib.html#failed_match" title="failed_match"><tt class="xref pure pure-const docutils literal"><span class="pre">failed_match</span></tt></a> exception
+is raised if the actual arguments do not match the given patterns.</p>
 </dd></dl>
 
 <dl class="describe">
@@ -2156,8 +2177,9 @@ similar to the Haskell <tt class="docutils literal"><span class="pre">case</span
 in turn against each left-hand side pattern <tt class="docutils literal"><span class="pre">u</span></tt> in the rule list, and the
 first pattern which matches <tt class="docutils literal"><span class="pre">x</span></tt> gives the value of the entire expression,
 by evaluating the corresponding right-hand side <tt class="docutils literal"><span class="pre">v</span></tt> with the variables in
-the pattern bound to their corresponding values. An exception is raised if
-the target expression doesn&#8217;t match any of the patterns.</p>
+the pattern bound to their corresponding values. A <a class="reference internal" href="purelib.html#failed_match" title="failed_match"><tt class="xref pure pure-const docutils literal"><span class="pre">failed_match</span></tt></a>
+exception is raised if the target expression doesn&#8217;t match any of the
+patterns.</p>
 </dd></dl>
 
 <dl class="describe">
@@ -2169,11 +2191,11 @@ subject terms against corresponding patterns, similar to <a class="reference int
 the lambda expression <tt class="docutils literal"><span class="pre">(\u</span> <span class="pre">-&gt;</span> <span class="pre">x)</span> <span class="pre">v</span></tt> or the <tt class="docutils literal"><span class="pre">case</span></tt> expression <tt class="docutils literal"><span class="pre">case</span> <span class="pre">v</span>
 <span class="pre">of</span> <span class="pre">u</span> <span class="pre">=</span> <span class="pre">x</span> <span class="pre">end</span></tt>, so it matches <tt class="docutils literal"><span class="pre">v</span></tt> against the pattern <tt class="docutils literal"><span class="pre">u</span></tt> and evaluates
 <tt class="docutils literal"><span class="pre">x</span></tt> with the variables in <tt class="docutils literal"><span class="pre">u</span></tt> bound to their corresponding values (or
-raises an exception if <tt class="docutils literal"><span class="pre">v</span></tt> doesn&#8217;t match <tt class="docutils literal"><span class="pre">u</span></tt>). However, a <tt class="docutils literal"><span class="pre">when</span></tt>
-clause may contain multiple definitions, which are processed from left to
-right, so that later definitions may refer to the variables in earlier
-ones. (This is exactly the same as several nested single definitions, with
-the first binding being the &#8220;outermost&#8221; one.)</p>
+raises a <a class="reference internal" href="purelib.html#failed_match" title="failed_match"><tt class="xref pure pure-const docutils literal"><span class="pre">failed_match</span></tt></a> exception if <tt class="docutils literal"><span class="pre">v</span></tt> doesn&#8217;t match <tt class="docutils literal"><span class="pre">u</span></tt>).
+However, a <tt class="docutils literal"><span class="pre">when</span></tt> clause may contain multiple definitions, which are
+processed from left to right, so that later definitions may refer to the
+variables in earlier ones. (This is exactly the same as several nested
+single definitions, with the first binding being the &#8220;outermost&#8221; one.)</p>
 </dd></dl>
 
 <dl class="describe">
@@ -2194,11 +2216,33 @@ is raised in this case. (This is in contrast to a lambda which otherwise is
 pretty much like a nameless local function defined by a single rule.)</p>
 </dd></dl>
 
-<p>Note that most of these constructs introduce local bindings of variable and
-function symbols which may override other global or local bindings of these
-symbols. This gives rise to a kind of <strong class="dfn">block structure</strong> similar to Algol-like
-programming languages. Please check <a class="reference internal" href="#scoping-rules">Scoping Rules</a> below for more
-information about this.</p>
+<p>The block constructs are similar to those available in most modern functional
+languages. In Pure these constructs are all implemented in terms of the basic
+term rewriting machinery, using <a class="reference external" href="http://en.wikipedia.org/wiki/Lambda_lifting">lambda lifting</a> to eliminate local
+functions, and the following equivalences which reduce lambdas as well as
+<a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> and <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> expressions to special kinds of local
+functions or local function applications:</p>
+<div class="highlight-pure"><div class="highlight"><pre>\x1 ... xn -&gt; y
+≡ f <span class="kr">with</span> f x1 ... xn = y<span class="p">;</span> f _ ... _ = <span class="nb">throw</span> failed_match <span class="kr">end</span>
+
+<span class="kr">case</span> x <span class="kr">of</span> y1 = z1<span class="p">;</span> ...<span class="p">;</span> yn = zn <span class="kr">end</span>
+≡ f x <span class="kr">with</span> f y1 = z1<span class="p">;</span> ...<span class="p">;</span> f yn = zn<span class="p">;</span> f _ = <span class="nb">throw</span> failed_match <span class="kr">end</span>
+
+x <span class="kr">when</span> y = z <span class="kr">end</span>
+≡ f z <span class="kr">with</span> f y = x<span class="p">;</span> f _ = <span class="nb">throw</span> failed_match <span class="kr">end</span>
+
+x <span class="kr">when</span> y1 = z1<span class="p">;</span> ...<span class="p">;</span> yn = zn <span class="kr">end</span>
+≡ x <span class="kr">when</span> yn = zn <span class="kr">end</span> ... <span class="kr">when</span> y1 = z1 <span class="kr">end</span>
+</pre></div>
+</div>
+<p>Note that by convention these constructs report a <a class="reference internal" href="purelib.html#failed_match" title="failed_match"><tt class="xref pure pure-const docutils literal"><span class="pre">failed_match</span></tt></a>
+exception in case of argument mismatch. So they&#8217;re treated like <a class="reference internal" href="#defined-functions">defined
+functions</a>, which is somewhat at odds with the term rewriting semantics. This
+is done for convenience, however, so that the programmer doesn&#8217;t have to deal
+with unevaluated applications of nameless block constructs in normal form
+terms. The case of named local functions is considered different because it
+effectively represents a local rewriting system which should be treated
+accordingly, in order to allow for symbolic evaluation.</p>
 </div>
 </div>
 <div class="section" id="special-forms">
@@ -3522,8 +3566,8 @@ line as follows:</p>
 <span class="go">Hello, world!</span>
 </pre></div>
 </div>
-<p>You may notice a slight delay when executing the script, before the <tt class="docutils literal"><span class="pre">Hello,</span>
-<span class="pre">world!</span></tt> message appears. That&#8217;s because the interpreter first has to compile
+<p>You may notice a slight delay when executing the script, before the &#8220;<tt class="docutils literal"><span class="pre">Hello,</span>
+<span class="pre">world!</span></tt>&#8221; message appears. That&#8217;s because the interpreter first has to compile
 the definitions in your script as well as the prelude and other imported
 modules before the <tt class="docutils literal"><span class="pre">puts</span> <span class="pre">&quot;Hello,</span> <span class="pre">world!&quot;</span></tt> expression can be evaluated. The
 startup times can be reduced (sometimes considerably) by compiling scripts to
@@ -3608,7 +3652,7 @@ use a shebang like:</p>
 <p>This will always work if the Pure interpreter is installed somewhere on the
 system <span class="target" id="index-9"></span><tt class="xref std std-envvar docutils literal"><span class="pre">PATH</span></tt>. However, due to incompatibilities in the ways
 shebang lines are parsed by the shell on different Unix systems, the
-following shebang line might <em>not</em> work as expected:</p>
+following might <em>not</em> work as expected:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="cp">#!/usr/bin/env pure -x</span>
 </pre></div>
 </div>
@@ -3675,19 +3719,20 @@ More information about this can be found in the <a class="reference internal" hr
 most of the time you&#8217;ll probably use the Pure interpreter in an interactive
 way. You then simply run it like this:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> pure
-</pre></div>
-</div>
-<p>The interpreter prints its sign-on message and leaves you at its command
-prompt:</p>
-<div class="highlight-console"><div class="highlight"><pre><span class="go">Pure 0.56 (x86_64-unknown-linux-gnu) Copyright (c) 2008-2012 by Albert Graef</span>
-<span class="go">(Type &#39;help&#39; for help, &#39;help copying&#39; for license information.)</span>
-<span class="go">Loaded prelude from /usr/local/lib/pure/prelude.pure.</span>
+
+<span class="go"> __ \  |   |  __| _ \    Pure 0.56 (x86_64-unknown-linux-gnu)</span>
+<span class="go"> |   | |   | |    __/    Copyright (c) 2008-2012 by Albert Graef</span>
+<span class="go"> .__/ \__,_|_|  \___|    (Type &#39;help&#39; for help, &#39;help copying&#39;</span>
+<span class="go">_|                       for license information.)</span>
+
+<span class="go">Loaded prelude from /usr/lib/pure/prelude.pure.</span>
 
 <span class="gp">&gt;</span>
 </pre></div>
 </div>
-<p>(You can also try <tt class="docutils literal"><span class="pre">pure</span> <span class="pre">--spiffy</span></tt> for a fancier sign-on, or <tt class="docutils literal"><span class="pre">pure</span> <span class="pre">-q</span></tt> to
-suppress the message.)</p>
+<p>The interpreter prints its sign-on message and leaves you at its command
+prompt. (You can also try <tt class="docutils literal"><span class="pre">pure</span> <span class="pre">--plain</span></tt> for a less fancy sign-on, or <tt class="docutils literal"><span class="pre">pure</span>
+<span class="pre">-q</span></tt> to completely suppress the message.)</p>
 <p>At this point you can just start typing definitions and expressions to be
 evaluated. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
@@ -3697,10 +3742,9 @@ evaluated. For instance:</p>
 </div>
 <p>Note that Pure is a free-format language, and thus definitions and expressions
 <em>must</em> be terminated with a semicolon, so that the interpreter knows when
-you&#8217;re done entering each item. This may need some time getting used to, but
-it&#8217;s actually pretty convenient because you can easily type more than one
-expression on a single line, or split longer constructs across multiple
-lines:</p>
+you&#8217;re done entering each item. This probably needs getting used to, but it&#8217;s
+convenient because you can easily type more than one expression on a single
+line, or split longer constructs across multiple lines:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="mi">6</span>*<span class="mi">7</span><span class="p">;</span> <span class="mf">16.3805</span>*<span class="mf">5.0</span><span class="p">;</span>
 <span class="mi">42</span>
 <span class="mf">81.9025</span>
@@ -3726,6 +3770,19 @@ always valid input at Pure&#8217;s toplevel.)</p>
 <p>In such a case, just correct the error and resubmit the offending input. The
 interpreter&#8217;s readline facility makes this pretty convenient, because you can
 use the cursor keys to recall previous input lines and edit them as needed.</p>
+<p>Other kinds of errors may happen at runtime, when evaluating a syntactically
+correct expression. These give rise to so-called exceptions. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="mi">1</span> div <span class="mi">0</span><span class="p">;</span>
+<span class="gr">&lt;stdin&gt;, line 9: </span>unhandled exception &#39;signal 8&#39; while evaluating &#39;1 div 0&#39;
+</pre></div>
+</div>
+<p>Besides integer division by zero (flagged as &#8216;<tt class="docutils literal"><span class="pre">signal</span> <span class="pre">8</span></tt>&#8216; here), common
+sources of exceptions are failed matches and conditionals, interrupts (e.g.,
+if the user aborts an evaluation with <tt class="kbd docutils literal"><span class="pre">Ctrl-c</span></tt>) and stack overflows
+(cf. <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail Recursion</a>). Normally these are fatal and require
+you to fix the program or the expression that you entered, but programs can
+also catch these errors and handle them in any desired way, cf. <a class="reference internal" href="#exception-handling">Exception
+Handling</a>.</p>
 <p>Note that in contrast to most other programming languages, undefined
 identifiers are generally <em>not</em> an error in Pure. Instead, you&#8217;ll simply get
 an unevaluated normal form:</p>
@@ -3735,10 +3792,10 @@ foo <span class="mi">5</span>
 </div>
 <p>Therefore, we recommend invoking the interpreter with the <a class="reference internal" href="#cmdoption-pure-w"><em class="xref std std-option">-w</em></a> option
 so that it at least warns you about unknown symbols. You can also enter this
-option interactively using the <em class="xref std std-option">--warn</em> pragma:</p>
+option interactively or in a script using the <em class="xref std std-option">--warn</em> pragma:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="cp">#! --warn</span>
 <span class="gp">&gt; </span>bar <span class="mi">5</span><span class="p">;</span>
-<span class="gr">&lt;stdin&gt;, line 11: </span>warning: implicit declaration of &#39;bar&#39;
+<span class="gr">&lt;stdin&gt;, line 12: </span>warning: implicit declaration of &#39;bar&#39;
 bar <span class="mi">5</span>
 </pre></div>
 </div>
@@ -3761,25 +3818,24 @@ yields the most recent result printed by the interpreter:</p>
 <span class="mf">163.805</span>
 </pre></div>
 </div>
-<p>The interpreter has a few other special commands which, like <a class="reference internal" href="purelib.html#ans" title="ans"><tt class="xref pure pure-func docutils literal"><span class="pre">ans</span></tt></a>, are
-only available when the interpreter is run interactively. For instance, you
-can purge the value of a variable like this (this also works with any other
-defined item, such as constants, functions and macros):</p>
+<p>The interpreter recognizes a few other special commands which, like
+<a class="reference internal" href="purelib.html#ans" title="ans"><tt class="xref pure pure-func docutils literal"><span class="pre">ans</span></tt></a>, are only available when it is run interactively. For instance,
+you can purge the value of a variable like this (this also works with any
+other defined item, such as constants, functions and macros):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>clear x
 <span class="gp">&gt; </span>x<span class="p">;</span>
 x
 </pre></div>
 </div>
 <p>Another useful command is <tt class="docutils literal"><span class="pre">show</span></tt> which prints the definition of anything
-that you can define in a Pure script, such as variables and functions:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show y
-<span class="kr">let</span> y = <span class="mf">163.805</span><span class="p">;</span>
-<span class="gp">&gt; </span>show fact
+that you can define in a Pure script, such as variables and functions. For
+instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show fact
 fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
 </pre></div>
 </div>
 <p>You can also just type <tt class="docutils literal"><span class="pre">show</span></tt> to print all definitions done interactively at
-the command prompt, which is useful to review our accomplishments so far:</p>
+the command prompt, which lets us review our accomplishments so far:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show
 fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
 <span class="kr">let</span> y = <span class="mf">163.805</span><span class="p">;</span>
@@ -3794,7 +3850,7 @@ file in a text editor and maybe edit it as needed. By default, <tt class="docuti
 interactive definitions in a hidden file named <tt class="docutils literal"><span class="pre">.pure</span></tt> in the current
 directory, which gets reloaded automatically if we later rerun the interpreter
 in the same directory. We can also print this file, e.g., with the Unix
-<tt class="docutils literal"><span class="pre">cat</span></tt> command (note that <tt class="docutils literal"><span class="pre">!</span></tt> executes a shell command):</p>
+<tt class="docutils literal"><span class="pre">cat</span></tt> command (note that &#8216;<tt class="docutils literal"><span class="pre">!</span></tt>&#8216; executes a shell command):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>!cat .pure
 <span class="c1">// dump written Wed Sep  5 10:00:15 2012</span>
 fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
@@ -3802,17 +3858,19 @@ fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class=
 </pre></div>
 </div>
 <p>If we mess up badly, it&#8217;s often convenient to just rerun the interpreter from
-scratch so that we can restart from a clean environment:</p>
+scratch so that we can try again in a clean environment:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>run
 </pre></div>
 </div>
 <p>As we&#8217;ve saved our scribblings with <tt class="docutils literal"><span class="pre">dump</span></tt> previously, those definitions
-will be reloaded:</p>
+will be reloaded automatically:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show
 fact n = <span class="kr">if</span> n&lt;=<span class="mi">0</span> <span class="kr">then</span> <span class="mi">1</span> <span class="kr">else</span> n*fact (n-<span class="mi">1</span>)<span class="p">;</span>
 <span class="kr">let</span> y = <span class="mf">163.805</span><span class="p">;</span>
 </pre></div>
 </div>
+<p>If you don&#8217;t want this then you can just remove the <tt class="docutils literal"><span class="pre">.pure</span></tt> file or rename
+it before invoking <tt class="docutils literal"><span class="pre">run</span></tt>.</p>
 <p>Another helpful command is <tt class="docutils literal"><span class="pre">help</span></tt> which brings up the online documentation
 (this requires that you&#8217;ve configured the interpreter for the web browser that
 you use; see <a class="reference internal" href="#online-help">Online Help</a>):</p>
@@ -3836,15 +3894,20 @@ of the command syntax and the available commands.</p>
 <h3><a class="toc-backref" href="#id64">Basic Examples</a><a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h3>
 <p>Pure has a few built-in data types, namely numbers (machine integers, bigints
 and double precision floating point numbers), strings, matrices, symbols,
-functions and pointer values. Other expressions are formed from these using
-function application. We also call these <strong class="dfn">terms</strong>. Some terms may reduce to
-other terms, others simply stand for themselves; these are also called <strong class="dfn">normal
-forms</strong> and are what constitutes a &#8220;value&#8221; in Pure.</p>
-<p>Pure&#8217;s prelude defines many of the common operations on numbers, strings,
-lists and other basic data types that you may want to use, so the interpreter
-can be used as a sophisticated kind of desktop calculator right away. Let&#8217;s
-start out with some simple calculations involving integer and floating point
-numbers:</p>
+functions and pointer values. Compound expressions are formed from these using
+function application. In the syntax of the Pure language, these are also known
+as <a class="reference internal" href="#simple-expressions">simple expressions</a>. For want of a catchier name, we also simply call
+them <strong class="dfn">terms</strong>. Pure is a programming language based on <strong class="dfn">term rewriting</strong>, so all
+computations performed in Pure consist of the rewriting of terms. Some terms
+may reduce to other terms, others simply stand for themselves; the latter are
+also called <strong class="dfn">normal forms</strong> and are what constitutes a &#8220;value&#8221; in the Pure
+language.</p>
+<p>When the Pure interpreter starts up, it normally loads a collection of Pure
+scripts collectively called the <strong class="dfn">prelude</strong>. The prelude defines many of the
+usual operations on numbers, strings, lists and other basic data structures
+that you may need, so you can start using the interpreter as a sophisticated
+kind of desktop calculator right away. Let&#8217;s begin with some simple
+calculations involving integer and floating point numbers:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="mi">6</span>*<span class="mi">7</span><span class="p">;</span>
 <span class="mi">42</span>
 <span class="gp">&gt; </span><span class="mf">16.3805</span>*<span class="mf">5.0</span><span class="p">;</span>
@@ -3918,23 +3981,36 @@ system). For instance:</p>
 </pre></div>
 </div>
 <p>The <a class="reference internal" href="purelib.html#module-math"><tt class="xref pure pure-mod docutils literal"><span class="pre">math</span></tt></a> module also provides you with complex and rational number
-types for doing more advanced calculations.</p>
+types for doing more advanced calculations, but we won&#8217;t go into that here.</p>
 <p>Before we proceed, a few remarks about the syntax of function applications are
-in order. The first thing you should note is that in Pure, like in most other
-modern functional languages, function application is simply denoted by
-juxtaposition:</p>
+in order. Function application is an explicit operation in Pure, so that
+functions become first class values which can be passed around as function
+arguments and results. Like in most modern functional languages, function
+application is simply denoted by juxtaposition:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sqrt <span class="mi">2</span><span class="p">;</span>
 <span class="mf">1.4142135623731</span>
 </pre></div>
 </div>
-<p>Multiple arguments are specified in the same fashion:</p>
+<p>In this case, you may also write <tt class="docutils literal"><span class="pre">sqrt(2)</span></tt> instead, but multiple arguments
+are normally specified as <tt class="docutils literal"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></tt> rather than <tt class="docutils literal"><span class="pre">f(x,y,z)</span></tt>. The former
+notation is known as <strong class="dfn">currying</strong> (named after the American mathematician and
+logician Haskell B. Curry), and is ubiquitous in modern functional programming
+languages. The latter notation can be used in Pure as well, but it actually
+indicates that <tt class="docutils literal"><span class="pre">f</span></tt> is called on a <em>single</em>, structured argument (in this
+case a tuple). However, most predefined functions use the curried notation in
+Pure. For instance, the <a class="reference internal" href="purelib.html#max" title="max"><tt class="xref pure pure-func docutils literal"><span class="pre">max</span></tt></a> function defined in the prelude takes two
+separate arguments, so it is invoked as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>max <span class="mi">4</span> <span class="mi">7</span><span class="p">;</span>
 <span class="mi">7</span>
 </pre></div>
 </div>
-<p>Parentheses can be used for grouping expressions as usual. In particular, if a
-function application appears as an argument in another function application
-then it must be parenthesized as follows:</p>
+<p>Function application associates to the left, so the above is parsed as <tt class="docutils literal"><span class="pre">(max</span>
+<span class="pre">4)</span> <span class="pre">7</span></tt>, where <tt class="docutils literal"><span class="pre">max</span> <span class="pre">4</span></tt> is called a <strong class="dfn">partial application</strong> of the <a class="reference internal" href="purelib.html#max" title="max"><tt class="xref pure pure-func docutils literal"><span class="pre">max</span></tt></a>
+function. A partial application is a function in its own right; e.g., <tt class="docutils literal"><span class="pre">max</span>
+<span class="pre">4</span></tt> denotes the function which computes <tt class="docutils literal"><span class="pre">max</span> <span class="pre">4</span> <span class="pre">y</span></tt> for each given <tt class="docutils literal"><span class="pre">y</span></tt>.</p>
+<p>Parentheses are used for grouping expressions as usual. In particular, since
+function application associates to the left, a nested function application in
+a function argument must be parenthesized as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sqrt (sqrt <span class="mi">2</span>)<span class="p">;</span>
 <span class="mf">1.18920711500272</span>
 </pre></div>
@@ -3945,32 +4021,29 @@ function application binds stronger than any of these:</p>
 <span class="mf">2.44948974278318</span>
 </pre></div>
 </div>
-<p>This style of writing function applications is also known as <strong class="dfn">currying</strong>, and
-is ubiquitous in modern functional programming languages. Just the function
-symbol itself, or a function symbol applied to some but not all arguments (a
-so-called <strong class="dfn">partial application</strong>) is a proper Pure value which represents a
-function. We can apply this function, e.g., to a list of values, as follows:</p>
+<p>The <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a> function lets us apply a function to each member of a given
+list, which gives us a quick way of tabulating function values:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map sqrt (<span class="mi">0</span>..<span class="mi">2</span>)<span class="p">;</span>
 [<span class="mf">0.0</span>,<span class="mf">1.0</span>,<span class="mf">1.4142135623731</span>]
-<span class="gp">&gt; </span>map (max <span class="mi">0</span>) (-<span class="mi">3</span>..<span class="mi">3</span>)<span class="p">;</span>
+</pre></div>
+</div>
+<p>Here, the list argument is specified as an <strong class="dfn">arithmetic sequence</strong> <tt class="docutils literal"><span class="pre">0..2</span></tt>
+which evaluates to the list <tt class="docutils literal"><span class="pre">[0,1,2]</span></tt>. This is fairly convenient when
+tabulating values of numeric functions. Here is another example which employs
+a partial application of the <a class="reference internal" href="purelib.html#max" title="max"><tt class="xref pure pure-func docutils literal"><span class="pre">max</span></tt></a> function as the function argument:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map (max <span class="mi">0</span>) (-<span class="mi">3</span>..<span class="mi">3</span>)<span class="p">;</span>
 [<span class="mi">0</span>,<span class="mi">0</span>,<span class="mi">0</span>,<span class="mi">0</span>,<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span>]
 </pre></div>
 </div>
-<p>The expression <tt class="docutils literal"><span class="pre">0..2</span></tt> denotes an arithmetic sequence which evaluates to the
-list <tt class="docutils literal"><span class="pre">[0,1,2]</span></tt>. Likewise, <tt class="docutils literal"><span class="pre">-3..3</span></tt> denotes the list of integers between
-<tt class="docutils literal"><span class="pre">-3</span></tt> and <tt class="docutils literal"><span class="pre">3</span></tt>. This gives us a quick way of tabulating function values.</p>
-<p>Note that in the latter example, <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> is a partial application since
-<tt class="docutils literal"><span class="pre">max</span></tt> expects two arguments but we&#8217;ve only specified one. We also say that
-<tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> is an <strong class="dfn">unsaturated</strong> application. So <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> becomes a function
-expecting one argument which <tt class="docutils literal"><span class="pre">map</span></tt> applies to the list members. When this
-function gets applied, say, to the first list member <tt class="docutils literal"><span class="pre">-3</span></tt>, we obtain the
-application <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt> which now has all the arguments that it needs; we
-also say that <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt> is <strong class="dfn">saturated</strong>, which means that it&#8217;s &#8220;ready to
-go&#8221;. Evaluating <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt> gives <tt class="docutils literal"><span class="pre">0</span></tt> which becomes the first member of
-the result list returned by <tt class="docutils literal"><span class="pre">map</span></tt>. The other list members are calculated in
-an analogous fashion. It is easy to see that <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> calculates what
-mathematicians call the &#8220;positive part&#8221; of its argument <tt class="docutils literal"><span class="pre">x</span></tt>, which is <tt class="docutils literal"><span class="pre">x</span></tt>
-itself if it is greater than <tt class="docutils literal"><span class="pre">0</span></tt> and <tt class="docutils literal"><span class="pre">0</span></tt> otherwise.</p>
+<p>Note that when the <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> function gets applied, say, to the first list
+member <tt class="docutils literal"><span class="pre">-3</span></tt>, we obtain the application <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt> which now has all the
+arguments that it needs; we also say that <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt> is a <strong class="dfn">saturated</strong>
+application, which means that it&#8217;s &#8220;ready to go&#8221;. Evaluating <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span> <span class="pre">(-3)</span></tt>
+gives <tt class="docutils literal"><span class="pre">0</span></tt> which becomes the first member of the result list returned by
+<tt class="docutils literal"><span class="pre">map</span></tt>. The other list members are calculated in an analogous fashion. It is
+easy to see that <tt class="docutils literal"><span class="pre">max</span> <span class="pre">0</span></tt> thus computes what mathematicians call the
+&#8220;positive part&#8221; of its argument <tt class="docutils literal"><span class="pre">x</span></tt>, which is <tt class="docutils literal"><span class="pre">x</span></tt> itself if it is greater
+than <tt class="docutils literal"><span class="pre">0</span></tt> and <tt class="docutils literal"><span class="pre">0</span></tt> otherwise.</p>
 <p>Operators aren&#8217;t special either, they are just functions in disguise. You can
 turn any operator into an ordinary function by enclosing it in parentheses.
 Thus <tt class="docutils literal"><span class="pre">(+)</span></tt> denotes the function which adds its two arguments, and <tt class="docutils literal"><span class="pre">x+1</span></tt>
@@ -3989,7 +4062,8 @@ denotes a function which doubles its argument:</p>
 </div>
 <p>Moreover, Pure offers some convenient syntactic sugar to denote so-called
 <strong class="dfn">operator sections</strong> which specify a binary operator with only either its left
-or right operand.  For instance, <tt class="docutils literal"><span class="pre">(+1)</span></tt> denotes the &#8220;increment by 1&#8221; and
+or right operand. So the doubling function above may also be denoted as
+<tt class="docutils literal"><span class="pre">(2*)</span></tt> or <tt class="docutils literal"><span class="pre">(*2)</span></tt>. Similarly, <tt class="docutils literal"><span class="pre">(+1)</span></tt> denotes the &#8220;increment by 1&#8221; and
 <tt class="docutils literal"><span class="pre">(1/)</span></tt> the reciprocal function:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map (+<span class="mi">1</span>) (<span class="mi">1</span>..<span class="mi">5</span>)<span class="p">;</span>
 [<span class="mi">2</span>,<span class="mi">3</span>,<span class="mi">4</span>,<span class="mi">5</span>,<span class="mi">6</span>]
@@ -4003,8 +4077,10 @@ convenient shorthand for a partial application:</p>
 (/) <span class="mi">1</span>
 </pre></div>
 </div>
-<p>In contrast, the former kind (a <strong class="dfn">right section</strong>) expands to an application of
-the <a class="reference internal" href="purelib.html#flip" title="flip"><tt class="xref pure pure-func docutils literal"><span class="pre">flip</span></tt></a> function,</p>
+<p>The former kind (a <strong class="dfn">right section</strong>) can&#8217;t be handled this way, because it&#8217;s
+the <em>first</em> operand which is missing, and partial applications only allow you
+to omit trailing arguments. Instead, right sections expand to a partial
+application of the <a class="reference internal" href="purelib.html#flip" title="flip"><tt class="xref pure pure-func docutils literal"><span class="pre">flip</span></tt></a> function,</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>(+<span class="mi">1</span>)<span class="p">;</span>
 flip (+) <span class="mi">1</span>
 </pre></div>
@@ -4013,12 +4089,11 @@ flip (+) <span class="mi">1</span>
 <div class="highlight-pure"><div class="highlight"><pre>flip f x y = f y x<span class="p">;</span>
 </pre></div>
 </div>
-<p>Thus a right section like <tt class="docutils literal"><span class="pre">(+1)</span></tt> expands to a partial application of
-<a class="reference internal" href="purelib.html#flip" title="flip"><tt class="xref pure pure-func docutils literal"><span class="pre">flip</span></tt></a> which, when the missing operand is supplied, reduces to an
-application of the first (function) argument while also flipping around the
-operands. For another example, here&#8217;s how you can compute third powers <tt class="docutils literal"><span class="pre">3^x</span></tt>
-of some numbers <tt class="docutils literal"><span class="pre">x</span></tt>. We can do this with a right section of the <a class="reference internal" href="purelib.html#^" title="^"><tt class="xref pure pure-func docutils literal"><span class="pre">^</span></tt></a>
-operator as follows:</p>
+<p>Note that <tt class="docutils literal"><span class="pre">flip</span> <span class="pre">(+)</span> <span class="pre">1</span></tt> thus denotes a function which, when the missing
+operand is supplied, reduces to an application of the first (function)
+argument while also flipping around the operands. For another example, here&#8217;s
+how you can compute third powers <tt class="docutils literal"><span class="pre">3^x</span></tt> of some numbers <tt class="docutils literal"><span class="pre">x</span></tt> with a right
+section of the &#8216;<a class="reference internal" href="purelib.html#^" title="^"><tt class="xref pure pure-func docutils literal"><span class="pre">^</span></tt></a>&#8216; operator:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map (^<span class="mi">3</span>) (<span class="mi">1</span>..<span class="mi">5</span>)<span class="p">;</span>
 [<span class="mf">1.0</span>,<span class="mf">8.0</span>,<span class="mf">27.0</span>,<span class="mf">64.0</span>,<span class="mf">125.0</span>]
 </pre></div>
@@ -4309,24 +4384,22 @@ against the patterns and, if everything matches up, the right-hand side of the
 rule is invoked with the variables in the patterns bound to their
 corresponding values.</p>
 <p>The simplest nontrivial patterns are <a class="reference internal" href="#type-tags">type tags</a> which can be placed on a
-variable to restrict the type of value an argument can match. For instance,
-let&#8217;s reconsider our <tt class="docutils literal"><span class="pre">square</span></tt> function. If we already know that we will only
-apply this function to machine int values then it makes sense to restrict the
-argument pattern <tt class="docutils literal"><span class="pre">x</span></tt> so that it can only match an int value. (If you try
-this interactively, make sure that you restart the interpreter with <tt class="docutils literal"><span class="pre">run</span></tt> or
-at least <tt class="docutils literal"><span class="pre">clear</span></tt> any existing definition of <tt class="docutils literal"><span class="pre">square</span></tt> before entering the
-new definition.)</p>
+variable to restrict the type of value an argument can match. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>square x<span class="p">::</span><span class="kt">int</span> = x*x<span class="p">;</span>
 <span class="gp">&gt; </span>square <span class="mi">7</span><span class="p">;</span>
 <span class="mi">49</span>
-<span class="gp">&gt; </span>square <span class="mf">7.0</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that in contrast to our previous generic definition of the <tt class="docutils literal"><span class="pre">square</span></tt>
+function we gave in <a class="reference internal" href="#defining-functions">Defining Functions</a>, this definition now only applies to
+the case of an <tt class="docutils literal"><span class="pre">int</span></tt> argument:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>square <span class="mf">7.0</span><span class="p">;</span>
 square <span class="mf">7.0</span>
 </pre></div>
 </div>
-<p>Note that since we added the type tag <tt class="docutils literal"><span class="pre">int</span></tt>, the double value <tt class="docutils literal"><span class="pre">7.0</span></tt>
-doesn&#8217;t match the <tt class="docutils literal"><span class="pre">x</span></tt> parameter any more, so <tt class="docutils literal"><span class="pre">square</span> <span class="pre">7.0</span></tt> has now become a
-normal form term. However, we can still add a rule for double values if we
-want these to be handled as well:</p>
+<p>Polymorphic definitions can be made by giving separate equations for the
+different argument types. For instance, we can easily add an equation for the
+<tt class="docutils literal"><span class="pre">double</span></tt> case:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>square x<span class="p">::</span><span class="kt">double</span> = x*x<span class="p">;</span>
 <span class="gp">&gt; </span>show square
 square x<span class="p">::</span><span class="kt">int</span> = x*x<span class="p">;</span>
@@ -4336,61 +4409,64 @@ square x<span class="p">::</span><span class="kt">double</span> = x*x<span class
 <span class="mf">49.0</span>
 </pre></div>
 </div>
-<p>Here the right-hand side of both rules is the same. In such cases it is
-possible to factor out the common right-hand side using the &#8216;<tt class="docutils literal"><span class="pre">|</span></tt>&#8216; delimiter
-as follows:</p>
+<p>Here the right-hand sides of both rules are the same. Pure has a convenient
+shorthand notation for this case which lets you factor out the common
+right-hand side using the &#8216;<tt class="docutils literal"><span class="pre">|</span></tt>&#8216; delimiter as follows:</p>
 <div class="highlight-pure"><div class="highlight"><pre>square x<span class="p">::</span><span class="kt">int</span> | square x<span class="p">::</span><span class="kt">double</span> = x*x<span class="p">;</span>
 </pre></div>
 </div>
-<p>The compiler will expand this to:</p>
+<p>The compiler expands this to the same two rules as above:</p>
 <div class="highlight-pure"><div class="highlight"><pre>square x<span class="p">::</span><span class="kt">int</span> = x*x<span class="p">;</span>
 square x<span class="p">::</span><span class="kt">double</span> = x*x<span class="p">;</span>
 </pre></div>
 </div>
-<p>It is important to note the difference between this and the generic definition
-of <tt class="docutils literal"><span class="pre">square</span></tt> we gave in <a class="reference internal" href="#defining-functions">Defining Functions</a>:</p>
+<p>Let&#8217;s compare this to our earlier generic definition of <tt class="docutils literal"><span class="pre">square</span></tt>:</p>
 <div class="highlight-pure"><div class="highlight"><pre>square x = x*x<span class="p">;</span>
 </pre></div>
 </div>
-<p>The latter definition applies to <em>any</em> argument <tt class="docutils literal"><span class="pre">x</span></tt> whatsoever and thus the
-definition is &#8220;closed&#8221;. Because equations are considered in the order in which
-they are written, there&#8217;s no way you could add another &#8220;special case&#8221; rule to
-this definition later.</p>
+<p>There are two different kinds of polymorphism at work here. The latter,
+generic definition is an example of <strong class="dfn">parametric polymorphism</strong>; it applies to
+<em>any</em> type of argument <tt class="docutils literal"><span class="pre">x</span></tt> whatsoever (at least if it makes sense to
+multiply a member of the type with itself). Also note that this definition is
+&#8220;closed&#8221;; because equations are considered in the order in which they are
+written, there&#8217;s no way you could add another &#8220;special case&#8221; rule to this
+definition later.</p>
 <p>In contrast, the former definition leaves any application of <tt class="docutils literal"><span class="pre">square</span></tt> to a
-value other than an int or a double undefined. By these means, we can define
-an operation on as many types of arguments as we like, and (this is the
-crucial point) define the function in <em>different</em> ways for different argument
-types. For instance, here is a rule which defines <tt class="docutils literal"><span class="pre">square</span></tt> on lists in a
-pointwise fashion, by squaring each list member:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>square x<span class="p">::</span>list = map square x<span class="p">;</span>
-<span class="gp">&gt; </span>square (<span class="mi">1</span>..<span class="mi">7</span>)<span class="p">;</span>
-[<span class="mi">1</span>,<span class="mi">4</span>,<span class="mi">9</span>,<span class="mi">16</span>,<span class="mi">25</span>,<span class="mi">36</span>,<span class="mi">49</span>]
+value other than <tt class="docutils literal"><span class="pre">int</span></tt> or <tt class="docutils literal"><span class="pre">double</span></tt> undefined. This gives us the
+opportunity to define <tt class="docutils literal"><span class="pre">square</span></tt> on as many types of arguments as we like, and
+(this is the crucial point) define the function in <em>different</em> ways for
+different argument types. This is also known as <strong class="dfn">ad-hoc polymorphism</strong> or
+<strong class="dfn">function overloading</strong>. For instance, if we later need to square 2x2 matrices,
+we might add a rule like:</p>
+<div class="highlight-pure"><div class="highlight"><pre>square {a,b<span class="p">;</span>c,d} = {a*a+b*c,a*b+b*d<span class="p">;</span>c*a+d*c,c*b+d*d}<span class="p">;</span>
 </pre></div>
 </div>
 <p>Pure places no restriction on the number of equations used to define a
 function, and the different equations may in fact be scattered out over many
-different places. This gives us a kind of &#8220;function overloading&#8221;, and in fact
-Pure makes heavy use of this feature in its standard library as well. For
-instance, the arithmetic operators are defined on all built-in numeric types
-and even on mixed arguments. You can also add your own equations for the
-predefined operations. For instance, we may want to extend the predefined
-<a class="reference internal" href="purelib.html#*" title="*"><tt class="xref pure pure-func docutils literal"><span class="pre">*</span></tt></a> operator so that it also works on strings, by repeating a string a
-given number of times, like in Python. Here&#8217;s a rule for <a class="reference internal" href="purelib.html#*" title="*"><tt class="xref pure pure-func docutils literal"><span class="pre">*</span></tt></a> which does
-this. Our definition employs a list comprehension and the standard library
-function <a class="reference internal" href="purelib.html#strcat" title="strcat"><tt class="xref pure pure-func docutils literal"><span class="pre">strcat</span></tt></a> which concatenates a list of strings:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>n<span class="p">::</span><span class="kt">int</span> * s<span class="p">::</span><span class="kt">string</span> = strcat [s | i = <span class="mi">1</span>..n]<span class="p">;</span>
-<span class="gp">&gt; </span><span class="mi">5</span>*<span class="s">&quot;abc&quot;</span><span class="p">;</span>
-<span class="s">&quot;abcabcabcabcabc&quot;</span>
+different places. So as long as the left-hand side patterns properly
+discriminate between the different cases, you can overload any operation in
+Pure to handle as many argument types as you want. However, it is important to
+note that in contrast to overloaded functions in statically typed languages
+such as C++, there&#8217;s really only <em>one</em> <tt class="docutils literal"><span class="pre">square</span></tt> function here which handles
+all the different argument types. The necessary &#8220;dispatching&#8221; to select the
+proper rewriting rule for the argument values at hand is done at runtime by
+pattern matching.</p>
+<p>Parametric polymorphism has the advantage that it lets you define polymorphic
+functions in a very concise way. On the other hand, ad-hoc polymorphism lets
+you deal with disparate cases of an operation which cannot easily be
+reconciled. It also allows you to tailor the definition to the specific case
+at hand, which might be more efficient than using a generic rule. You can also
+combine both approaches, but in this case you have to list the special case
+rules before the generic ones. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre>square x<span class="p">::</span><span class="kt">int</span> | square x<span class="p">::</span><span class="kt">double</span> |
+square x = x*x<span class="p">;</span>
 </pre></div>
 </div>
-<p>So as long as the left-hand side patterns properly discriminate between the
-different cases, you can &#8220;overload&#8221; any operation in Pure to handle as many
-argument types as you want. However, it is important to note that in contrast
-to overloaded functions in statically typed languages such as C++, there&#8217;s
-really only <em>one</em> <tt class="docutils literal"><span class="pre">square</span></tt> function and <em>one</em> <tt class="docutils literal"><span class="pre">*</span></tt> operator here which
-handle all the different argument types. The necessary &#8220;dispatching&#8221; to select
-the proper rewriting rule for the argument values at hand is done by pattern
-matching.</p>
+<p>(Note that the first two rules are just specialization of the last rule to
+<tt class="docutils literal"><span class="pre">int</span></tt> and <tt class="docutils literal"><span class="pre">double</span></tt> arguments, so we could in fact eliminate the special
+case rules here and still get the same results. But the type tags tell the
+compiler that the argument in these rules is always an <tt class="docutils literal"><span class="pre">int</span></tt> or <tt class="docutils literal"><span class="pre">double</span></tt>,
+respectively, so it may generate more efficient code for these cases.)</p>
 <p>Patterns may also involve constant values, in which case the constant must be
 matched literally in the argument. For instance, here is another definition of
 the Ackerman function from <a class="reference internal" href="#defining-functions">Defining Functions</a> which uses constant argument
@@ -4410,14 +4486,14 @@ equation before the first one will cause the definition to loop on <tt class="do
 <p>Another point that deserves mentioning here is that constants on the left-hand
 side of a rule <em>must</em> be matched literally, cf. <a class="reference internal" href="#constant-patterns">Constant Patterns</a>. E.g.,
 <tt class="docutils literal"><span class="pre">ack</span> <span class="pre">0</span> <span class="pre">y</span></tt> only matches if the first argument is really <tt class="docutils literal"><span class="pre">0</span></tt>, not <tt class="docutils literal"><span class="pre">0.0</span></tt> or
-<tt class="docutils literal"><span class="pre">0L</span></tt>, although these compare equal to <tt class="docutils literal"><span class="pre">0</span></tt>. So the above definition of
+<tt class="docutils literal"><span class="pre">0L</span></tt> (although these compare equal to <tt class="docutils literal"><span class="pre">0</span></tt>). So the above definition of
 <tt class="docutils literal"><span class="pre">ack</span></tt> isn&#8217;t quite the same as our previous definition from <a class="reference internal" href="#defining-functions">Defining
 Functions</a>. If you wanted the definition above to also work with double and
 bigint values, you&#8217;d have to add corresponding rules for the <tt class="docutils literal"><span class="pre">0.0</span></tt> and
 <tt class="docutils literal"><span class="pre">0L</span></tt> cases.</p>
-<p>Patterns can also be used to &#8220;destructure&#8221; aggregate values like lists, tuples
-and matrices, binding variables to the component values. For instance, to
-compute the sum of a list of values, you may write:</p>
+<p>Last but not least, patterns are also used to &#8220;deconstruct&#8221; structured values
+like lists, tuples and matrices, binding variables to the component
+values. For instance, to compute the sum of a list of values, you may write:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum [] = <span class="mi">0</span><span class="p">;</span>
 <span class="gp">&gt; </span>sum (x:xs) = x+sum xs<span class="p">;</span>
 <span class="gp">&gt; </span>sum (<span class="mi">1</span>..<span class="mi">100</span>)<span class="p">;</span>
@@ -4435,17 +4511,27 @@ and <a class="reference internal" href="purelib.html#foldr" title="foldr"><tt cl
 function above is actually equivalent to <tt class="docutils literal"><span class="pre">foldr</span> <span class="pre">(+)</span> <span class="pre">0</span></tt>, see <a class="reference internal" href="#list-processing">List
 Processing</a> below for details.)</p>
 <p>Instead of placing the patterns directly into the left-hand sides of the
-function definition, it is also possible to do the necessary pattern-matching
-in the right hand side, by employing a <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression:</p>
+function definition, you might also do the necessary pattern-matching in the
+right hand side, by employing a <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression:</p>
 <div class="highlight-pure"><div class="highlight"><pre>sum xs = <span class="kr">case</span> xs <span class="kr">of</span> [] = <span class="mi">0</span><span class="p">;</span> x:xs = x+sum xs <span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>Note that the <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression works slightly different to a pattern
-matching function definition in that it raises an exception if the target
-expression is not matched (cf. <a class="reference internal" href="#patterns">Patterns</a>).  To avoid that, you may want to add
-a type tag here, which ensures that the argument of <tt class="docutils literal"><span class="pre">sum</span></tt> is of the proper
-type:</p>
+<p>This works a bit different, though, since a <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression raises
+an exception if the target expression is not matched (cf. <a class="reference internal" href="#patterns">Patterns</a>):</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:xs)<span class="p">;</span>
+<span class="gr">&lt;stdin&gt;, line 2: </span>unhandled exception &#39;failed_match&#39; while evaluating &#39;sum (1:2:xs)&#39;
+</pre></div>
+</div>
+<p>To avoid that, you may want to add a type tag, which ensures that the argument
+of <tt class="docutils literal"><span class="pre">sum</span></tt> is of the proper type:</p>
 <div class="highlight-pure"><div class="highlight"><pre>sum xs<span class="p">::</span>list = <span class="kr">case</span> xs <span class="kr">of</span> [] = <span class="mi">0</span><span class="p">;</span> x:xs = x+sum xs <span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Now the case of an improper list is handled a bit more gracefully, yielding
+the same normal form expression you&#8217;d get with the first definition of <tt class="docutils literal"><span class="pre">sum</span></tt>
+above:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sum (<span class="mi">1</span>:<span class="mi">2</span>:xs)<span class="p">;</span>
+<span class="mi">1</span>+(<span class="mi">2</span>+sum xs)
 </pre></div>
 </div>
 <p>Pure also allows to define <tt class="docutils literal"><span class="pre">sum</span></tt> in a more traditional way which will be
@@ -4457,9 +4543,10 @@ correspond to Lisp&#8217;s &#8220;car&#8221; and &#8220;cdr&#8221;):</p>
 <p>Choosing one or the other is again a question of style. However, if you&#8217;re
 dealing with concrete data structures such as lists, pattern-matching
 definitions are often more convenient and easier to understand.</p>
-<p>Pattern matching also works with user-defined constructors. For instance,
-here&#8217;s how to implement an insertion operation which can be used to construct
-a binary tree data structure useful for sorting and searching:</p>
+<p>Pattern matching also works with user-defined constructors (cf. <a class="reference internal" href="#data-types">Data
+Types</a>). For instance, here&#8217;s how to implement an insertion operation which
+can be used to construct a binary tree data structure useful for sorting and
+searching:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">nonfix</span> nil<span class="p">;</span>
 
 insert nil y         = bin y nil nil<span class="p">;</span>
@@ -4535,6 +4622,10 @@ with an equivalent lambda:</p>
 [<span class="mi">1</span>,<span class="mi">4</span>,<span class="mi">9</span>,<span class="mi">16</span>,<span class="mi">25</span>,<span class="mi">36</span>,<span class="mi">49</span>,<span class="mi">64</span>,<span class="mi">81</span>,<span class="mi">100</span>]
 </pre></div>
 </div>
+<p>For obvious reasons lambdas work best for non-recursive functions. While there
+are techniques to create recursive functions out of lambdas using so-called
+fixed point combinators (cf. <a class="reference internal" href="purelib.html#fix" title="fix"><tt class="xref pure pure-func docutils literal"><span class="pre">fix</span></tt></a>), named functions are much more
+convenient for that purpose.</p>
 <p><a class="reference internal" href="#pattern-matching">Pattern matching</a> works in local definitions as usual. For instance, here
 are several ways to swap two values represented as a tuple, using either a
 local function or a <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> or <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression:</p>
@@ -4548,22 +4639,46 @@ local function or a <a class="reference internal" href="#when"><tt class="xref s
 <span class="mi">2</span>,<span class="mi">1</span>
 </pre></div>
 </div>
-<p>As discussed earlier, local definitions provide a kind of hierarchical block
-structure, cf. <a class="reference internal" href="#scoping-rules">Scoping Rules</a>. A local function can refer to other local
+<p>You&#8217;ll also frequently find code like the following, where a global &#8220;wrapper&#8221;
+function just sets up some initial parameter values and then invokes a local
+&#8220;worker&#8221; function which does all the real work. The following function
+calculates the sum of the positive integers up to <tt class="docutils literal"><span class="pre">n</span></tt> (the &#8220;accumulating
+parameters&#8221; technique used in this example will be explained later,
+cf. <a class="reference internal" href="#recursion">Recursion</a>).</p>
+<div class="highlight-pure"><div class="highlight"><pre>sum n = sum <span class="mi">0</span> n <span class="kr">with</span>
+  sum s n = s <span class="kr">if</span> n &lt; <span class="mi">0</span><span class="p">;</span>
+          = sum (s+n) (n-<span class="mi">1</span>) <span class="kr">otherwise</span><span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that there are actually <em>two</em> separate functions named <tt class="docutils literal"><span class="pre">sum</span></tt> here. This
+works because according to the <a class="reference internal" href="#scoping-rules">scoping rules</a> the right-hand side of the
+global definition is under the scope of the <a class="reference internal" href="#with"><tt class="xref std std-keyword docutils literal"><span class="pre">with</span></tt></a> clause, and thus
+the call <tt class="docutils literal"><span class="pre">sum</span> <span class="pre">0</span> <span class="pre">n</span></tt> on the right-hand refers to the <em>local</em> <tt class="docutils literal"><span class="pre">sum</span></tt> function,
+not the global one. (While it is perfectly correct and even makes sense in
+this example, this style may be somewhat confusing, so we often prefer to give
+wrapper and worker different names for clarity.)</p>
+<p>As discussed in <a class="reference internal" href="#scoping-rules">Scoping Rules</a>, a local function can refer to other local
 functions and variables in its parent environments. It can also be returned as
-a function value, in which case it becomes a <strong class="dfn">lexical closure</strong> which carries
-around with it the local variable environment it was created in. For
-instance:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>adder x = f <span class="kr">with</span> f y = x+y <span class="kr">end</span><span class="p">;</span>
+a function value, which is where things get really interesting. The local
+function value then becomes a <strong class="dfn">lexical closure</strong> which carries around with it
+the local variable environment it was created in. For instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>adder x = add <span class="kr">with</span> add y = x+y <span class="kr">end</span><span class="p">;</span>
 <span class="gp">&gt; </span><span class="kr">let</span> g = adder <span class="mi">5</span><span class="p">;</span> g<span class="p">;</span> map g (<span class="mi">1</span>..<span class="mi">5</span>)<span class="p">;</span>
-f
+add
 [<span class="mi">6</span>,<span class="mi">7</span>,<span class="mi">8</span>,<span class="mi">9</span>,<span class="mi">10</span>]
 </pre></div>
 </div>
-<p>Note that here the local function <tt class="docutils literal"><span class="pre">f</span></tt> refers to the argument value <tt class="docutils literal"><span class="pre">x</span></tt> of
-its parent function <tt class="docutils literal"><span class="pre">adder</span></tt>. The invocation <tt class="docutils literal"><span class="pre">adder</span> <span class="pre">5</span></tt> returns an instance
-of <tt class="docutils literal"><span class="pre">f</span></tt> which has <tt class="docutils literal"><span class="pre">x</span></tt> bound to the value <tt class="docutils literal"><span class="pre">5</span></tt> so that <tt class="docutils literal"><span class="pre">f</span> <span class="pre">y</span></tt> reduces to
-<tt class="docutils literal"><span class="pre">5+y</span></tt> for each <tt class="docutils literal"><span class="pre">y</span></tt>.</p>
+<p>Note that here the local function <tt class="docutils literal"><span class="pre">add</span></tt> refers to the argument value <tt class="docutils literal"><span class="pre">x</span></tt>
+of its parent function <tt class="docutils literal"><span class="pre">adder</span></tt>. The invocation <tt class="docutils literal"><span class="pre">adder</span> <span class="pre">5</span></tt> thus returns an
+instance of <tt class="docutils literal"><span class="pre">add</span></tt> which has <tt class="docutils literal"><span class="pre">x</span></tt> bound to the value <tt class="docutils literal"><span class="pre">5</span></tt>, so that <tt class="docutils literal"><span class="pre">add</span>
+<span class="pre">y</span></tt> reduces to <tt class="docutils literal"><span class="pre">5+y</span></tt> for each <tt class="docutils literal"><span class="pre">y</span></tt>. This works as if this instance of the
+<tt class="docutils literal"><span class="pre">add</span></tt> closure had an invisible <tt class="docutils literal"><span class="pre">x</span></tt> argument of <tt class="docutils literal"><span class="pre">5</span></tt> attached to it. (And
+this is in fact how closures are implemented internally, using a
+transformation called <a class="reference external" href="http://en.wikipedia.org/wiki/Lambda_lifting">lambda lifting</a> which effectively turns local
+functions into global ones.) You should study this example carefully until you
+fully understand how it works; we&#8217;ll see a bunch of other, more complicated
+examples of this kind later.</p>
 <p>Lexical closures also provide a means to encapsulate data in a way reminiscent
 of object-oriented programming. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">nonfix</span> coords<span class="p">;</span>
@@ -4629,8 +4744,12 @@ written in other languages such as C.</p>
 <p>Before we consider the more advanced uses of functions in Pure, a few remarks
 about data types are in order. Like Lisp, Pure is basically a &#8220;typeless&#8221;
 language. That doesn&#8217;t mean that there are no data types; in fact, they&#8217;re a
-dime a dozen in Pure. But often those data types will only be in your head, as
-Pure allows you to make up new data formats as you go.</p>
+dime a dozen in Pure. But Pure lets you make up your own data structures as
+you go, without even formally defining a data type. Data types <em>can</em> be
+defined and associated with a name pretty much in the same way as functions,
+but that&#8217;s just a convenience and completely optional. This sets Pure apart
+from statically typed languages like ML and Haskell, where explicit data type
+definitions are mandatory if you want to introduce new data structures.</p>
 <p>As we&#8217;ve seen, Pure knows about a few built-in types such as numbers, strings,
 symbols and functions; everything else is a function application. If a symbol
 is defined as a function, which merely means that there are some rewriting
@@ -4644,10 +4763,11 @@ cons <span class="mi">3</span> (cons <span class="mi">5</span> nil)
 </div>
 <p>There&#8217;s nothing mysterious about this; the <tt class="docutils literal"><span class="pre">cons</span></tt> and <tt class="docutils literal"><span class="pre">nil</span></tt> symbols being
 used here aren&#8217;t defined anywhere, and thus any terms constructed with these
-symbols are just &#8220;data&#8221;, no questions asked. Sometimes we also call such
-symbols <strong class="dfn">constructors</strong>. (Note that this usage of the term &#8220;constructor&#8221; means
-something completely different from constructors in object-oriented
-programming, which are special routines used to instantiate an object.)</p>
+symbols are just &#8220;data&#8221;, no questions asked. We also call such symbols
+<strong class="dfn">constructors</strong>. (Note that these are different from constructors in
+object-oriented programming; constructor applications in term rewriting and
+functional programming normally don&#8217;t execute any code, they&#8217;re just literal
+data objects.)</p>
 <p>We can now go ahead and define some operations on this kind of data. (To these
 ends, it&#8217;s necessary to declare <tt class="docutils literal"><span class="pre">nil</span></tt> as a nonfix symbol so that we can use
 it as a literal in patterns; cf. <a class="reference internal" href="#pattern-matching">Pattern Matching</a>.)</p>
@@ -4669,24 +4789,27 @@ that we need then we could turn it into a full-blown replacement for Pure&#8217;
 list data structure. In fact Pure&#8217;s lists work in a very similar fashion,
 using the infix &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; constructor and the empty list <tt class="docutils literal"><span class="pre">[]</span></tt> in lieu of
 <tt class="docutils literal"><span class="pre">cons</span></tt> and <tt class="docutils literal"><span class="pre">nil</span></tt>, respectively.</p>
-<p>If we want, we can use the facilities described in <a class="reference internal" href="#type-rules">Type Rules</a> to define a
-new data type for the data structure we just invented, e.g.:</p>
+<p>If we want, we can define a new data type for the data structure we just
+invented. This works by giving a number of <a class="reference internal" href="#type-rules">type rules</a> similar to those used
+in function definitions. In general, these may denote arbitrary unary
+predicates, but in our case it&#8217;s sufficient to just list the patterns of terms
+which are supposed to be members of the type (see <a class="reference internal" href="#type-rules">Type Rules</a> for an
+explanation of the definition syntax):</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">type</span> mylist nil | mylist (cons x xs)<span class="p">;</span>
 </pre></div>
 </div>
-<p>This lets us use the <tt class="docutils literal"><span class="pre">mylist</span></tt> type as a tag on the left-hand side of an
-equation, cf. <a class="reference internal" href="#pattern-matching">Pattern Matching</a>. But if we&#8217;re content with using the
+<p>This definition lets us use the <tt class="docutils literal"><span class="pre">mylist</span></tt> type as a tag on the left-hand side
+of an equation, cf. <a class="reference internal" href="#pattern-matching">Pattern Matching</a>. But if we&#8217;re content with using the
 patterns directly then we might just as well do without that.</p>
-<p>These types are sometimes also called <strong class="dfn">algebraic</strong>, i.e., an algebraic type
-consists of terms made from constructor symbols which may be applied to other
-data elements to form a compound data structure. In fact, most user-defined
-data structures are algebraic types in Pure, and there are plenty of examples
-of these in the standard library as well. In particular, lists and tuples are
-algebraic types, as are complex and rational numbers, and most of Pure&#8217;s
-container data types such as dictionaries and sets are also implemented as
-algebraic types.</p>
-<p>Pure allows you to have constructor symbols with equations, too. For
-instance:</p>
+<p>Types consisting solely of constructor term patterns are sometimes also called
+<strong class="dfn">algebraic types</strong>. In fact, most user-defined data structures are algebraic
+types in Pure, and there are plenty of examples of these in the standard
+library as well. In particular, lists and tuples are algebraic types, as are
+complex and rational numbers, and most of Pure&#8217;s container data types such as
+dictionaries and sets are also implemented as algebraic types.</p>
+<p>Pure differs from most functional languages in that symbols may act as <em>both</em>
+constructors and defined functions, depending on the arguments. Thus Pure
+allows you to have &#8220;constructors with equations&#8221;. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre>cons nil ys = ys<span class="p">;</span>
 cons (cons x xs) ys = cons x (cons xs ys)<span class="p">;</span>
 </pre></div>
@@ -4699,6 +4822,9 @@ lists are always flat now:</p>
 cons <span class="mi">1</span> (cons <span class="mi">2</span> (cons <span class="mi">3</span> nil))
 </pre></div>
 </div>
+<p>Examples of such constructor equations can be found in the standard library as
+well, such as the rules used to flatten tuples, keep rational numbers in
+lowest terms, or confine the angles of complex numbers in polar notation.</p>
 <p>Another possible use of constructor equations is to check the well-formedness
 of constructor terms. For instance, in our example we might want to preclude
 terms like <tt class="docutils literal"><span class="pre">cons</span> <span class="pre">1</span> <span class="pre">2</span></tt> which don&#8217;t have a <tt class="docutils literal"><span class="pre">mylist</span></tt> in the second argument
@@ -4709,10 +4835,85 @@ exception in such cases (cf. <a class="reference internal" href="#exception-hand
 <span class="gr">&lt;stdin&gt;, line 18: </span>unhandled exception &#39;bad_mylist 2&#39; while evaluating &#39;cons 1 2&#39;
 </pre></div>
 </div>
-<p>To summarize, Pure&#8217;s generic term data structure makes it really easy to
-create custom kinds of data by just applying a constructor or partial function
-to other data. Named data types can be defined as a convenience or for the
-purpose of data abstraction, but that&#8217;s completely optional.</p>
+<p>A specific kind of algebraic data types which are useful in many applications
+are the <strong class="dfn">enumerated types</strong>. In this case the type consists of symbolic
+constants (nonfix symbols) only, which are the elements of the type. For
+instance:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">nonfix</span> sun mon tue wed thu fri sat<span class="p">;</span>
+<span class="kr">type</span> day sun | day mon | day tue | day wed | day thu | day fri | day sat<span class="p">;</span>
+</pre></div>
+</div>
+<p>However, to make this type actually work as an enumerated type, we may want to
+provide definitions for basic arithmetic, <a class="reference internal" href="purelib.html#ord" title="ord"><tt class="xref pure pure-func docutils literal"><span class="pre">ord</span></tt></a>, <a class="reference internal" href="purelib.html#succ" title="succ"><tt class="xref pure pure-func docutils literal"><span class="pre">succ</span></tt></a>, etc. This
+is rather straightforward, but tedious. So as of Pure 0.56, the standard
+library provides a little utility module, <a class="reference internal" href="purelib.html#module-enum"><tt class="xref pure pure-mod docutils literal"><span class="pre">enum</span></tt></a>, which generates the
+necessary definitions in an automatic fashion. All we have to do is to import
+the module and then invoke the <a class="reference internal" href="purelib.html#enum" title="enum"><tt class="xref pure pure-func docutils literal"><span class="pre">enum</span></tt></a> function on the type and we&#8217;re
+set:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> enum<span class="p">;</span>
+enum day<span class="p">;</span>
+</pre></div>
+</div>
+<p>It&#8217;s also possible to define the type and make it enumerable in one go using
+the <a class="reference internal" href="purelib.html#defenum" title="defenum"><tt class="xref pure pure-func docutils literal"><span class="pre">defenum</span></tt></a> function:</p>
+<div class="highlight-pure"><div class="highlight"><pre>defenum day [sun,mon,tue,wed,thu,fri,sat]<span class="p">;</span>
+</pre></div>
+</div>
+<p>In either case, we can now perform calculations with the members of the type
+just like with other predefined enumerated types such as numbers and
+characters:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>ord sun<span class="p">;</span>
+<span class="mi">0</span>
+<span class="gp">&gt; </span>day (ans+<span class="mi">3</span>)<span class="p">;</span>
+wed
+<span class="gp">&gt; </span>pred sat<span class="p">;</span>
+fri
+<span class="gp">&gt; </span>sun+<span class="mi">3</span><span class="p">;</span>
+wed
+<span class="gp">&gt; </span>fri-<span class="mi">2</span><span class="p">;</span>
+wed
+<span class="gp">&gt; </span>fri-tue<span class="p">;</span>
+<span class="mi">3</span>
+<span class="gp">&gt; </span>mon..fri<span class="p">;</span>
+[mon,tue,wed,thu,fri]
+<span class="gp">&gt; </span>sun:tue..sat<span class="p">;</span>
+[sun,tue,thu,sat]
+<span class="gp">&gt; </span>sat:fri..mon<span class="p">;</span>
+[sat,fri,thu,wed,tue,mon]
+</pre></div>
+</div>
+<p>A more abstract way to define algebraic types are the <a class="reference internal" href="#interface-types">interface types</a>. For
+instance, if we take another look at the operations defined on our list type,
+we may observe that the data structure is quite apparent from the patterns in
+the rules of operations such as &#8216;<tt class="docutils literal"><span class="pre">#</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">+</span></tt>&#8216;. Pure lets us leverage
+that information by creating an algebraic type from a collection of operation
+patterns it supports. For instance, we may write:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">interface</span> list_alike <span class="kr">with</span>
+  #x<span class="p">::</span>list_alike<span class="p">;</span>
+  x<span class="p">::</span>list_alike + y<span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This defines a generic type consisting of all terms which may be passed as an
+argument to both &#8216;<tt class="docutils literal"><span class="pre">#</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">+</span></tt>&#8216;. We can ask the interpreter about the
+patterns actually matched by the type as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show interface list_alike
+<span class="kr">type</span> list_alike s<span class="p">::</span><span class="kt">string</span><span class="p">;</span>
+<span class="kr">type</span> list_alike []<span class="p">;</span>
+<span class="kr">type</span> list_alike (x:xs)<span class="p">;</span>
+<span class="kr">type</span> list_alike nil<span class="p">;</span>
+<span class="kr">type</span> list_alike (cons x xs)<span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that the <tt class="docutils literal"><span class="pre">list_alike</span></tt> type not only includes our own list type, but
+also any other data structure providing the &#8216;<tt class="docutils literal"><span class="pre">#</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">+</span></tt>&#8216; operations.
+This also comprises the standard list and string types for which there are
+definitions of the &#8216;<tt class="docutils literal"><span class="pre">#</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">+</span></tt>&#8216; operations in the prelude.</p>
+<p>Pure&#8217;s interface types are a first attempt at formalizing the notion of <a class="reference external" href="http://en.wikipedia.org/wiki/Duck_typing">Duck
+typing</a> in Pure. They are thus still a bit experimental and require some
+diligence in defining the interface operations in a suitable way. Please check
+<a class="reference internal" href="#interface-types">Interface Types</a> in the <a class="reference internal" href="#declarations">Declarations</a> section for more information and
+examples.</p>
 </div>
 <div class="section" id="recursion">
 <h3><a class="toc-backref" href="#id69">Recursion</a><a class="headerlink" href="#recursion" title="Permalink to this headline">¶</a></h3>
@@ -4748,10 +4949,10 @@ works:</p>
 [<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">6</span>,<span class="mi">24</span>,<span class="mi">120</span>,<span class="mi">720</span>,<span class="mi">5040</span>,<span class="mi">40320</span>,<span class="mi">362880</span>,<span class="mi">3628800</span>]
 </pre></div>
 </div>
-<p>We mention in passing here that these numbers grow fairly quickly, so they
-outgrow the 32 bit range and start wrapping around already at <tt class="docutils literal"><span class="pre">n==13</span></tt>. To
-avoid that, you&#8217;ll have to do the computation with bigints, or you could use
-floating point values if you don&#8217;t mind the limited precision.</p>
+<p>Note that these numbers grow fairly quickly; they outgrow the 32 bit range and
+start wrapping around already at <tt class="docutils literal"><span class="pre">n==13</span></tt>. To avoid that, you&#8217;ll have to do
+the computation with bigints, or you could use floating point values if you
+don&#8217;t mind the limited precision.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mi">13</span><span class="p">;</span>
 <span class="mi">1932053504</span>
 <span class="gp">&gt; </span>fact <span class="mi">13L</span><span class="p">;</span>
@@ -4762,13 +4963,14 @@ floating point values if you don&#8217;t mind the limited precision.</p>
 <span class="mf">2.65252859812191e+32</span>
 </pre></div>
 </div>
-<p>However, you&#8217;ll run into another, more serious issue if you want to compute
-some really huge factorials. That&#8217;s because each recursive invocation of
-<tt class="docutils literal"><span class="pre">fact</span></tt> needs some amount of stack space. (If you&#8217;re not familiar with how
-subroutine calls are executed by keeping the execution context on a stack then
-you should revisit your basic computer science lessons now.) When the numbers
-become big enough then the stack space may be exhausted which usually results
-in a fatal runtime error:</p>
+<p>However, you&#8217;ll run into another, more serious obstacle if you want to compute
+factorials for some really big values of <tt class="docutils literal"><span class="pre">n</span></tt>. That&#8217;s because each recursive
+invocation of <tt class="docutils literal"><span class="pre">fact</span></tt> needs some small amount of memory on the execution
+stack, a so-called &#8220;stack frame&#8221;. (If you&#8217;re not familiar with how subroutine
+calls are executed by keeping the execution context on a stack then you should
+revisit your basic computer science lessons now.) When <tt class="docutils literal"><span class="pre">n</span></tt> becomes big
+enough then the stack space may be exhausted, which usually results in a fatal
+runtime error:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mi">1000000L</span><span class="p">;</span>
 Segmentation fault
 </pre></div>
@@ -4777,8 +4979,8 @@ Segmentation fault
 an orderly exception when this happens, see <a class="reference internal" href="#stack-size-and-tail-recursion">Stack Size and Tail Recursion</a>
 for details. To enable this, you&#8217;ll need to set the <span class="target" id="index-10"></span><a class="reference internal" href="#envvar-PURE_STACK"><tt class="xref std std-envvar docutils literal"><span class="pre">PURE_STACK</span></tt></a>
 environment variable to the maximum stack size in kilobytes. E.g., on
-Unix-like systems you can type the following in a Bourne-compatible shell (or
-put this command into your shell&#8217;s startup file):</p>
+Unix-like systems you can type the following in a Bourne-compatible shell, or
+put this command into your shell&#8217;s startup file:</p>
 <div class="highlight-console"><div class="highlight"><pre><span class="gp">$</span> <span class="nb">export </span><span class="nv">PURE_STACK</span><span class="o">=</span>1024
 </pre></div>
 </div>
@@ -4787,20 +4989,17 @@ kilobytes. We deliberately picked a small limit here so that the stack
 overflows are detected sooner.)</p>
 <p>Now start the interpreter again, enter the above definition of <tt class="docutils literal"><span class="pre">fact</span></tt> and
 try it with some large value of <tt class="docutils literal"><span class="pre">n</span></tt>. You&#8217;ll get something like:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n = n*fact (n-<span class="mi">1</span>) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
-<span class="gp">&gt; </span>       = <span class="mi">1</span> <span class="kr">otherwise</span><span class="p">;</span>
-<span class="gp">&gt; </span>fact <span class="mi">100000L</span><span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mi">100000L</span><span class="p">;</span>
 <span class="gr">&lt;stdin&gt;, line 3: </span>unhandled exception &#39;stack_fault&#39; while evaluating &#39;fact 100000L&#39;
 </pre></div>
 </div>
 <p>Ok, so we now get an orderly exception, which is much better than being kicked
 out of the interpreter. But this doesn&#8217;t really solve the problem. How can we
 avoid using all that stack space in the first place? In a language like C we&#8217;d
-be using a specialized loop construct instead of recursion, which translates
-to some kind of &#8220;goto&#8221; instruction instead of a subroutine call so that we&#8217;re
-safe. But this isn&#8217;t an option in Pure. Instead, we can rewrite the definition
-so that it becomes <strong class="dfn">tail-recursive</strong>. This means that the recursive call
-becomes the final operation on the right-hand side of the recursive rule.</p>
+be using a specialized loop construct instead of recursion. But this isn&#8217;t an
+option in Pure. Instead, we can rewrite the definition so that it becomes
+<strong class="dfn">tail-recursive</strong>. This means that the recursive call becomes the final
+operation on the right-hand side of the recursive rule.</p>
 <p>The trick of the trade to turn a recursive function into a tail-recursive one
 is the <strong class="dfn">accumulating parameter</strong> technique. The idea here is to have a separate
 &#8220;worker&#8221; function which carries around an extra argument representing the
@@ -4820,23 +5019,21 @@ is fairly common in functional programs.</p>
 <p>Our worker function is tail-recursive since the recursive call to <tt class="docutils literal"><span class="pre">loop</span></tt> is
 indeed the final call on the right-hand side of the first equation defining
 <tt class="docutils literal"><span class="pre">loop</span></tt>. The Pure compiler generates code which optimizes such &#8220;tail calls&#8221;
-so that they essentially become &#8220;goto&#8221; instructions rather than subroutine
-calls in the generated assembler code. These don&#8217;t require any additional
-stack space, so our definition should work in constant stack space now. And in
-fact after entering our new definition of <tt class="docutils literal"><span class="pre">fact</span></tt> we can now compute <tt class="docutils literal"><span class="pre">fact</span>
-<span class="pre">100000L</span></tt> just fine:</p>
+so that they reuse the stack frame of the calling function. Thus a
+tail-recursive function like <tt class="docutils literal"><span class="pre">loop</span></tt> will execute in constant stack
+space. And in fact after entering our new definition of <tt class="docutils literal"><span class="pre">fact</span></tt> we can now
+compute <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">100000L</span></tt> just fine:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact <span class="mi">100000L</span><span class="p">;</span>
 <span class="mi">2824229407960347874293421578024535518477</span>... <span class="c1">// lots of digits follow</span>
 </pre></div>
 </div>
-<p>The accumulating parameter technique is actually pretty general. While it
-can&#8217;t deal with general recursion (e.g., if a function needs to traverse a
-tree-like data structure, which requires multiple recursive calls), it covers
-all the kinds of simple iterative algorithms which you&#8217;d do using loop
-constructs in traditional programming languages. Some algorithms may require
-additional techniques such as tabulation, however, so that they can be written
-in an iterative form. To see how this works, let&#8217;s consider the Fibonacci
-numbers. These can be computed with the following naive recursive definition:</p>
+<p>The accumulating parameter technique isn&#8217;t fully general, but it covers all
+the kinds of simple iterative algorithms which you&#8217;d do using loop constructs
+in traditional programming languages. Some algorithms may require additional
+techniques such as <strong class="dfn">tabulation</strong> (keeping track of some or all intermediate
+results), however, so that they can be written in an iterative form. To see
+how this can be done in Pure, let&#8217;s consider the Fibonacci numbers. These can
+be computed with the following naive recursive definition:</p>
 <div class="highlight-pure"><div class="highlight"><pre>fib n = <span class="kr">if</span> n&lt;=<span class="mi">1</span> <span class="kr">then</span> n <span class="kr">else</span> fib (n-<span class="mi">2</span>) + fib (n-<span class="mi">1</span>)<span class="p">;</span>
 </pre></div>
 </div>
@@ -4847,19 +5044,16 @@ numbers. These can be computed with the following naive recursive definition:</p
 </div>
 <p>Note that the right-hand side of the definition above involves <em>two</em> recursive
 invocations of <tt class="docutils literal"><span class="pre">fib</span></tt> in the <a class="reference internal" href="#else"><tt class="xref std std-keyword docutils literal"><span class="pre">else</span></tt></a> branch. This is bad because it
-means our definition will need exponential running time. (More precisely, if
-you do the math then you&#8217;ll find that the ratio between the running times of
-successive invocations quickly starts approaching the golden ratio φ =
-1.618..., which is no accident because the times are proportional to the
-Fibonacci function itself!)</p>
+means our definition will need exponential running time. (More precisely,
+you&#8217;ll find that the ratio between the running times of successive invocations
+quickly starts approaching the golden ratio φ = 1.618..., which is no accident
+because the times are proportional to the Fibonacci function itself!)</p>
 <p>Using a simple iterative algorithm, it is possible to calculate the Fibonacci
 numbers in linear time instead. Observe that each member of the sequence is
-simply the sum of the two preceding members. Thus if we just keep track of two
-successive members <tt class="docutils literal"><span class="pre">fib</span> <span class="pre">(n-1)</span></tt> and <tt class="docutils literal"><span class="pre">fib</span> <span class="pre">n</span></tt> of the sequence then we can
-compute the next pair of members <tt class="docutils literal"><span class="pre">fib</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">fib</span> <span class="pre">(n+1)</span></tt> with a single
-addition. This yields the following tail-recursive implementation, using the
-same kind of &#8220;wrapper-worker&#8221; design that we already saw in the case of the
-factorial above:</p>
+simply the sum of the two preceding members. If we keep track of the last two
+members of the sequence then we can compute the next member with a single
+addition. This yields the following tail-recursive implementation which uses
+the same kind of &#8220;wrapper-worker&#8221; design:</p>
 <div class="highlight-pure"><div class="highlight"><pre>fib n = loop n <span class="mi">0L</span> <span class="mi">1L</span> <span class="kr">with</span>
   loop n a b = loop (n-<span class="mi">1</span>) b (a+b) <span class="kr">if</span> n&gt;<span class="mi">0</span><span class="p">;</span>
              = a <span class="kr">otherwise</span><span class="p">;</span>
@@ -5104,10 +5298,10 @@ case of <tt class="docutils literal"><span class="pre">t2</span></tt> and <tt cl
 function isn&#8217;t tail-recursive and we may thus run into stack overflows for
 large trees.</p>
 <p>This problem, while posed in an abstract way here, is not only of academic
-interest. For instance, trees may be used as a data structure for &#8220;strings&#8221;
-which allows us to do concatenation in constant time by just delaying it. In
-this case we certainly don&#8217;t want to explicitly carry out all those
-concatenations in order to decide whether two such strings are the same.</p>
+interest. For instance, trees may be used as an alternative string data
+structure which implements concatenation in constant time by just delaying
+it. In this case we certainly don&#8217;t want to explicitly carry out all those
+concatenations in order to decide whether two such objects are the same.</p>
 <p>Therefore, this problem has been studied extensively and more efficient
 approaches have been developed. One way to solve the problem involves the
 technique of <strong class="dfn">continuation passing</strong> which is a generalization of the
@@ -5130,14 +5324,12 @@ samefringe (\c -&gt; genfringe t1 c done) (\c -&gt; genfringe t2 c done) <span c
 </pre></div>
 </div>
 <p>As Baker admits himself, this style of programming isn&#8217;t &#8220;particularly
-perspicuous&#8221;, so we&#8217;ll explain the algorithm in a moment. But first let&#8217;s
-verify that the program indeed works as advertized. For this purpose, it&#8217;s
-helpful to print out the actual comparisons performed in the innermost lambda
-in the definition of the local <tt class="docutils literal"><span class="pre">samefringe</span></tt> function. To these ends, add a
-little debugging statement so that the code reads as follows (also, don&#8217;t
-forget to add the import clause &#8220;<tt class="docutils literal"><span class="pre">using</span> <span class="pre">system;</span></tt>&#8221; before the global
-definition of <tt class="docutils literal"><span class="pre">samefringe</span></tt>, so that the <a class="reference internal" href="purelib.html#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> function is
-available):</p>
+perspicuous&#8221;, so we&#8217;ll explain the algorithm in a moment. But first let us
+verify that the program indeed works as advertized. It&#8217;s helpful to print out
+the actual comparisons performed in the innermost lambda in the definition of
+the local <tt class="docutils literal"><span class="pre">samefringe</span></tt> function, which can be done by adding a little
+debugging statement as follows (this also needs an import clause &#8220;<tt class="docutils literal"><span class="pre">using</span>
+<span class="pre">system;</span></tt>&#8221; to make the <a class="reference internal" href="purelib.html#printf" title="printf"><tt class="xref pure pure-func docutils literal"><span class="pre">printf</span></tt></a> function available):</p>
 <div class="highlight-pure"><div class="highlight"><pre>samefringe g1 g2 =
   g1 (\x1 g1 -&gt; g2 (\x2 g2 -&gt; printf <span class="s">&quot;%s === %s?</span><span class="se">\n</span><span class="s">&quot;</span> (str x1,str x2) $$
                               x1===x2 &amp;&amp; (x1===[] || samefringe g1 g2)))<span class="p">;</span>
@@ -5164,19 +5356,21 @@ at the same time. This test deals with the corner case that one fringe is a
 prefix of the other. For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> t4 = [[a,b],c,[[d]],e,[f,[[g,h,i]]]]<span class="p">;</span>
 <span class="gp">&gt; </span>samefringe t4 t2<span class="p">;</span>
-a == a?
-b == b?
-c == c?
-d == d?
-e == e?
-f == f?
-g == g?
-h == h?
-i == []?
+a === a?
+b === b?
+c === c?
+d === d?
+e === e?
+f === f?
+g === g?
+h === h?
+i === []?
 <span class="mi">0</span>
 </pre></div>
 </div>
-<p>Things go a bit differently, however, when comparing <tt class="docutils literal"><span class="pre">t3</span></tt> and <tt class="docutils literal"><span class="pre">t2</span></tt>:</p>
+<p>Things go a bit differently, however, when comparing <tt class="docutils literal"><span class="pre">t3</span></tt> and <tt class="docutils literal"><span class="pre">t2</span></tt>; as
+soon as we hit the first discrepany between the two fringes, the algorithm
+bails out and correctly asserts that the fringes are different:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>samefringe t3 t2<span class="p">;</span>
 a === a?
 b === b?
@@ -5184,11 +5378,8 @@ d === c?
 <span class="mi">0</span>
 </pre></div>
 </div>
-<p>So, as soon as we hit the first discrepany between the two fringes, the
-algorithm bails out and correctly asserts that the fringes are different.</p>
-<p>It goes without saying that the above algorithm is anything but obvious,
-although at first sight the code looks innocent enough. So let&#8217;s take a closer
-look at its various parts now. First, the <tt class="docutils literal"><span class="pre">genfringe</span></tt> function:</p>
+<p>Let&#8217;s take a closer look at the various parts of the algorithm now. First, the
+<tt class="docutils literal"><span class="pre">genfringe</span></tt> function:</p>
 <div class="highlight-pure"><div class="highlight"><pre>genfringe [] c g = g c<span class="p">;</span>
 genfringe (x:t) c g = genfringe x c (\c -&gt; genfringe t c g)<span class="p">;</span>
 genfringe x c g = c x g<span class="p">;</span>
@@ -5793,7 +5984,8 @@ corresponds to a numeric code point in Unicode. Hence, e.g., <tt class="docutils
 <span class="s">&quot;The quick brown fox&quot;</span>
 </pre></div>
 </div>
-<p>Character arithmetic also makes enumerations of characters work as expected:</p>
+<p>Character arithmetic also makes arithmetic sequences of characters work as
+expected:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="s">&quot;a&quot;</span>..<span class="s">&quot;k&quot;</span><span class="p">;</span> <span class="s">&quot;k&quot;</span>:<span class="s">&quot;j&quot;</span>..<span class="s">&quot;a&quot;</span><span class="p">;</span>
 [<span class="s">&quot;a&quot;</span>,<span class="s">&quot;b&quot;</span>,<span class="s">&quot;c&quot;</span>,<span class="s">&quot;d&quot;</span>,<span class="s">&quot;e&quot;</span>,<span class="s">&quot;f&quot;</span>,<span class="s">&quot;g&quot;</span>,<span class="s">&quot;h&quot;</span>,<span class="s">&quot;i&quot;</span>,<span class="s">&quot;j&quot;</span>,<span class="s">&quot;k&quot;</span>]
 [<span class="s">&quot;k&quot;</span>,<span class="s">&quot;j&quot;</span>,<span class="s">&quot;i&quot;</span>,<span class="s">&quot;h&quot;</span>,<span class="s">&quot;g&quot;</span>,<span class="s">&quot;f&quot;</span>,<span class="s">&quot;e&quot;</span>,<span class="s">&quot;d&quot;</span>,<span class="s">&quot;c&quot;</span>,<span class="s">&quot;b&quot;</span>,<span class="s">&quot;a&quot;</span>]
@@ -5860,7 +6052,10 @@ format string. These are all explained in detail in the <a class="reference inte
 <p>List comprehensions are Pure&#8217;s main workhorse for generating and processing
 all kinds of list values. You can think of them as a combination of
 <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a> and <a class="reference internal" href="purelib.html#filter" title="filter"><tt class="xref pure pure-func docutils literal"><span class="pre">filter</span></tt></a> using a prettier syntax reminiscent of the way
-in which sets are commonly specified in mathematics.</p>
+in which sets are commonly specified in mathematics. List comprehensions are
+in fact just syntactic sugar, so anything that can be done with them can also
+be accomplished with Pure&#8217;s generic list functions; but often they are much
+easier to write and understand.</p>
 <p>In the simplest case, list comprehensions are just a shorthand for <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a>
 with lambdas:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[<span class="mi">2</span>*x-<span class="mi">1</span> | x = <span class="mi">1</span>..<span class="mi">10</span>]<span class="p">;</span>
@@ -5883,47 +6078,67 @@ determine the elements that are to be included in the result list.</p>
 </pre></div>
 </div>
 <p>This can be read as &#8220;the list of all <tt class="docutils literal"><span class="pre">2*x-1</span></tt> for which <tt class="docutils literal"><span class="pre">x</span></tt> runs through
-<tt class="docutils literal"><span class="pre">1..10</span></tt> and for which <tt class="docutils literal"><span class="pre">x</span> <span class="pre">mod</span> <span class="pre">3</span></tt>&#8221;. Note that <tt class="docutils literal"><span class="pre">x</span> <span class="pre">mod</span> <span class="pre">3</span></tt> is in fact a
-predicate which returns &#8220;true&#8221; (non-zero) if and only if <tt class="docutils literal"><span class="pre">x</span></tt> is not a
-multiple of <tt class="docutils literal"><span class="pre">3</span></tt>.</p>
-<p>List comprehensions can have as many generator and filter clauses as you want,
-which are considered in left-to-right order so that later clauses may refer to
-any variables introduced in earlier generator clauses. E.g., here&#8217;s how you can
-generate the list of all pairs <tt class="docutils literal"><span class="pre">(i,j)</span></tt> with <tt class="docutils literal"><span class="pre">1&lt;=i&lt;=j&lt;=5</span></tt> such that <tt class="docutils literal"><span class="pre">i+j</span></tt>
-is even:</p>
+<tt class="docutils literal"><span class="pre">1..10</span></tt> and for which <tt class="docutils literal"><span class="pre">x</span> <span class="pre">mod</span> <span class="pre">3</span></tt> is non-zero&#8221; (which means that <tt class="docutils literal"><span class="pre">x</span></tt> is
+not a multiple of <tt class="docutils literal"><span class="pre">3</span></tt>). It is roughly equivalent to:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map (\x-&gt;<span class="mi">2</span>*x-<span class="mi">1</span>) (filter (\x-&gt;x mod <span class="mi">3</span>) (<span class="mi">1</span>..<span class="mi">10</span>))<span class="p">;</span>
+[<span class="mi">1</span>,<span class="mi">3</span>,<span class="mi">7</span>,<span class="mi">9</span>,<span class="mi">13</span>,<span class="mi">15</span>,<span class="mi">19</span>]
+</pre></div>
+</div>
+<p>List comprehensions can also draw values from other kinds of aggregates such
+as strings and matrices, but the result is always a list:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[x-<span class="mi">1</span> | x = <span class="s">&quot;IBM&quot;</span>]<span class="p">;</span>
+[<span class="s">&quot;H&quot;</span>,<span class="s">&quot;A&quot;</span>,<span class="s">&quot;L&quot;</span>]
+<span class="gp">&gt; </span>[<span class="mi">1</span>/x | x = {<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span><span class="p">;</span><span class="mi">4</span>,<span class="mi">5</span>,<span class="mi">6</span>}<span class="p">;</span> ~x mod <span class="mi">2</span>]<span class="p">;</span>
+[<span class="mf">0.5</span>,<span class="mf">0.25</span>,<span class="mf">0.166666666666667</span>]
+</pre></div>
+</div>
+<p>List comprehensions can have as many generator and filter clauses as you want.
+The clauses are considered in left-to-right order so that later clauses may
+refer to any variables introduced in earlier generator clauses. E.g., here&#8217;s
+how you can generate the list of all pairs <tt class="docutils literal"><span class="pre">(i,j)</span></tt> with <tt class="docutils literal"><span class="pre">1&lt;=i&lt;=j&lt;=5</span></tt> such
+that <tt class="docutils literal"><span class="pre">i+j</span></tt> is even:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[i,j | i = <span class="mi">1</span>..<span class="mi">5</span><span class="p">;</span> j = i..<span class="mi">5</span><span class="p">;</span> ~(i+j) mod <span class="mi">2</span>]<span class="p">;</span>
 [(<span class="mi">1</span>,<span class="mi">1</span>),(<span class="mi">1</span>,<span class="mi">3</span>),(<span class="mi">1</span>,<span class="mi">5</span>),(<span class="mi">2</span>,<span class="mi">2</span>),(<span class="mi">2</span>,<span class="mi">4</span>),(<span class="mi">3</span>,<span class="mi">3</span>),(<span class="mi">3</span>,<span class="mi">5</span>),(<span class="mi">4</span>,<span class="mi">4</span>),(<span class="mi">5</span>,<span class="mi">5</span>)]
 </pre></div>
 </div>
 <p>The left-hand side of a generator clause can be an arbitary pattern, which is
-useful if you need to dissect the list elements. E.g., let&#8217;s check the sums of
-the previous result to see whether they&#8217;re in fact all even:</p>
+useful if you need to peek at the list elements to see what&#8217;s inside. For
+instance, let&#8217;s take the previous result and check that the sums of the number
+pairs are in fact all even:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[i+j | i,j = ans]<span class="p">;</span>
 [<span class="mi">2</span>,<span class="mi">4</span>,<span class="mi">6</span>,<span class="mi">4</span>,<span class="mi">6</span>,<span class="mi">6</span>,<span class="mi">8</span>,<span class="mi">8</span>,<span class="mi">10</span>]
 </pre></div>
 </div>
-<p>All this can of course also be done with the Pure&#8217;s generic list functions,
-but list comprehensions are often easier to write and understand. For
-instance, here&#8217;s how we can apply a list comprehension recursively to
-implement a variation of Erathosthenes&#8217; classical prime sieve:</p>
+<p>Generator clauses involving patterns also act as filters; unmatched elements
+are filtered out automatically:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[i+j | i,j = [<span class="s">&quot;to be ignored&quot;</span>,(<span class="mi">1</span>,<span class="mi">1</span>),(<span class="mi">2</span>,<span class="mi">2</span>),<span class="mi">3</span>]]<span class="p">;</span>
+[<span class="mi">2</span>,<span class="mi">4</span>]
+</pre></div>
+</div>
+<p>List comprehensions can also be nested to an arbitrary depth. For instance, we
+may rewrite the &#8220;even sums&#8221; comprehension from above as follows, in order to
+group the pairs into sublists for each value of <tt class="docutils literal"><span class="pre">i</span></tt>:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>[[i,j | j = i..<span class="mi">5</span><span class="p">;</span> ~(i+j) mod <span class="mi">2</span>] | i = <span class="mi">1</span>..<span class="mi">5</span>]<span class="p">;</span>
+[[(<span class="mi">1</span>,<span class="mi">1</span>),(<span class="mi">1</span>,<span class="mi">3</span>),(<span class="mi">1</span>,<span class="mi">5</span>)],[(<span class="mi">2</span>,<span class="mi">2</span>),(<span class="mi">2</span>,<span class="mi">4</span>)],[(<span class="mi">3</span>,<span class="mi">3</span>),(<span class="mi">3</span>,<span class="mi">5</span>)],[(<span class="mi">4</span>,<span class="mi">4</span>)],[(<span class="mi">5</span>,<span class="mi">5</span>)]]
+</pre></div>
+</div>
+<p>A notorious example is the following recursive algorithm which implements a
+variation of Erathosthenes&#8217; classical prime sieve. (This method is actually
+rather slow and thus not suitable for computing large primes, but we&#8217;re not
+concerned with that here.)</p>
 <div class="highlight-pure"><div class="highlight"><pre>primes n        = sieve (<span class="mi">2</span>..n) <span class="kr">with</span>
   sieve []      = []<span class="p">;</span>
   sieve (p:qs)  = p : sieve [q | q = qs<span class="p">;</span> q mod p]<span class="p">;</span>
 <span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>At a glance, we can see how this definition works: Starting from the list
-<tt class="docutils literal"><span class="pre">2..n</span></tt>, we successively take the first element <tt class="docutils literal"><span class="pre">p</span></tt> from the list and
-remove all multiples of <tt class="docutils literal"><span class="pre">p</span></tt> from the rest of the list. We then apply this
-process recursively to the rest of the list. The result is the list of all
-primes up to <tt class="docutils literal"><span class="pre">n</span></tt>:</p>
+<p>Note that the sieve recursively filters out the multiples of the current front
+element <tt class="docutils literal"><span class="pre">p</span></tt> of the list, which, by virtue of the construction, is always a
+prime number. The result is the list of all primes up to <tt class="docutils literal"><span class="pre">n</span></tt>:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>primes <span class="mi">100</span><span class="p">;</span>
 [<span class="mi">2</span>,<span class="mi">3</span>,<span class="mi">5</span>,<span class="mi">7</span>,<span class="mi">11</span>,<span class="mi">13</span>,<span class="mi">17</span>,<span class="mi">19</span>,<span class="mi">23</span>,<span class="mi">29</span>,<span class="mi">31</span>,<span class="mi">37</span>,<span class="mi">41</span>,<span class="mi">43</span>,<span class="mi">47</span>,<span class="mi">53</span>,<span class="mi">59</span>,<span class="mi">61</span>,<span class="mi">67</span>,<span class="mi">71</span>,<span class="mi">73</span>,<span class="mi">79</span>,<span class="mi">83</span>,<span class="mi">89</span>,<span class="mi">97</span>]
 </pre></div>
 </div>
-<p>Note that this is a rather inefficient version of Erathosthenes&#8217; sieve; it
-needs quadratic running time which makes it unsuitable for computing larger
-primes. But it&#8217;s nice to look at and easy to understand.</p>
 <p>List comprehensions are also a useful device to organize backtracking
 searches. For instance, here&#8217;s an algorithm for the n queens problem, which
 returns the list of all placements of <tt class="docutils literal"><span class="pre">n</span></tt> queens on an <tt class="docutils literal"><span class="pre">n</span></tt> x <tt class="docutils literal"><span class="pre">n</span></tt> board
@@ -7110,16 +7325,16 @@ still write a &#8220;constructor equation&#8221; like the following:</p>
 <p>Examples for all types of symbol declarations can be found in the
 <a class="reference internal" href="purelib.html#prelude"><em>prelude</em></a> which declares a bunch of standard (arithmetic,
 relational, logical) operator symbols as well as the list and pair
-constructors &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">,</span></tt>&#8216;, and a few nonfix symbols (mostly for
-denoting different kinds of exceptions).</p>
+constructors &#8216;<tt class="docutils literal"><span class="pre">:</span></tt>&#8216; and &#8216;<tt class="docutils literal"><span class="pre">,</span></tt>&#8216;, and a few nonfix symbols (<a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and
+<a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a>, as well as different kinds of exceptions).</p>
 </div>
 <div class="section" id="interface-types">
 <span id="interface"></span><span id="id11"></span><h3><a class="toc-backref" href="#id83">Interface Types</a><a class="headerlink" href="#interface-types" title="Permalink to this headline">¶</a></h3>
 <p>Besides the &#8220;concrete&#8221; types already described in the <a class="reference internal" href="#type-rules">Type Rules</a> section,
 Pure provides another, more abstract way to characterize a type through the
 collection of operations it supports. These <strong class="dfn">interface types</strong> work pretty much
-like in Google&#8217;s <a class="reference internal" href="#go">Go</a> programming language. They provide a safe form of &#8220;Duck
-typing&#8221; in which the operations available on a type are stated explicitly, and
+like in Google&#8217;s <a class="reference internal" href="#go">Go</a> programming language. They provide a safe form of <a class="reference external" href="http://en.wikipedia.org/wiki/Duck_typing">Duck
+typing</a> in which the operations available on a type are stated explicitly, and
 hence members of the type are always known to provide all of the listed
 operations.</p>
 <p>An interface declaration gives the type name along with a collection of
@@ -8885,7 +9100,10 @@ calls to <tt class="docutils literal"><span class="pre">void</span></tt> in ordi
 <tt class="docutils literal"><span class="pre">void</span></tt>&#8216;s argument is needed to detect the &#8220;outermost filter clause&#8221;
 situation. The interested reader may refer to the prelude code to see how the
 prelude implementation of <tt class="docutils literal"><span class="pre">__do__</span></tt> uses some helper macros to make this
-work.</p>
+work. Another detail of the full version of <tt class="docutils literal"><span class="pre">__do__</span></tt> is the handling of
+patterns on the left-hand side of generator clauses, which requires some
+special magic to filter out unmatched list elements; we also omitted this here
+for brevity.</p>
 </div>
 <div class="section" id="reflection">
 <h3><a class="toc-backref" href="#id99">Reflection</a><a class="headerlink" href="#reflection" title="Permalink to this headline">¶</a></h3>
@@ -9619,7 +9837,7 @@ times <tt class="docutils literal"><span class="pre">m</span></tt> matrix <tt cl
 <p>Also new in Pure 0.45 is the support for passing <tt class="docutils literal"><span class="pre">argv</span></tt>-style vectors as
 arguments. For instance, here is how you can use <tt class="docutils literal"><span class="pre">fork</span></tt> and <tt class="docutils literal"><span class="pre">execvp</span></tt> to
 implement a poor man&#8217;s version of the C <tt class="docutils literal"><span class="pre">system</span></tt> function. (This is
-UNIX-specific and doesn&#8217;t do much error-checking, but you get the idea.)</p>
+Unix-specific and doesn&#8217;t do much error-checking, but you get the idea.)</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">extern</span> <span class="kt">int</span> fork()<span class="p">;</span>
 <span class="kr">extern</span> <span class="kt">int</span> execvp(<span class="kt">char</span> *path, <span class="kt">char</span> **argv)<span class="p">;</span>
 <span class="kr">extern</span> <span class="kt">int</span> waitpid(<span class="kt">int</span> pid, <span class="kt">int</span> *status, <span class="kt">int</span> options)<span class="p">;</span>
@@ -12301,11 +12519,21 @@ previous default) any more. If you&#8217;re still running an older LLVM version 
 would like to keep using llvm-gcc, you will have to set some environment
 variables; please see the <a class="reference internal" href="install.html"><em>installation instructions</em></a> for
 details.</p>
-<p>Pure 0.56 introduced the <a class="reference internal" href="purelib.html#non-splicing"><em>non-splicing vector brackets</em></a>
+<p>Pure 0.56 fixed the meaning of patterns in comprehensions so that unmatched
+elements are now filtered out automatically, like in Haskell. The previous
+behaviour of raising an exception in such cases offered no real benefits and
+was in fact very inconvenient in most situations.</p>
+<p>Pure 0.56 also introduced the <a class="reference internal" href="purelib.html#non-splicing"><em>non-splicing vector brackets</em></a>
 <tt class="docutils literal"><span class="pre">{|</span> <span class="pre">|}</span></tt> as an alternative notation for nested vector structures, as well as
-the <a class="reference internal" href="#namespace-brackets">namespace brackets</a> to quickly switch namespaces inside an
-expression. Moreover, interactive commands can now optionally be escaped by
-prefixing them with a special character (see <a class="reference internal" href="#interactive-usage">Interactive Usage</a> for details).</p>
+the <a class="reference internal" href="#namespace-brackets">namespace brackets</a> to quickly switch namespaces inside an expression.
+The <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> constants are now declared as
+<a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> symbols in the prelude so that they can be used in patterns,
+and there&#8217;s a new <a class="reference internal" href="purelib.html#bool/type" title="bool"><tt class="xref pure pure-type docutils literal"><span class="pre">bool</span></tt></a> type to check for normalized truth values
+and a <a class="reference internal" href="purelib.html#bool" title="bool"><tt class="xref pure pure-func docutils literal"><span class="pre">bool</span></tt></a> function to convert machine integers to normalized truth
+values. There&#8217;s also a new <a class="reference internal" href="purelib.html#module-enum"><tt class="xref pure pure-mod docutils literal"><span class="pre">enum</span></tt></a> module to facilitate the creation of
+enumerated types. Moreover, interactive commands can now optionally be escaped
+by prefixing them with a special character (see <a class="reference internal" href="#interactive-usage">Interactive Usage</a> for
+details).</p>
 </div>
 <div class="section" id="error-recovery">
 <h3><a class="toc-backref" href="#id135">Error Recovery</a><a class="headerlink" href="#error-recovery" title="Permalink to this headline">¶</a></h3>
@@ -12479,26 +12707,24 @@ bar <span class="mi">99</span>,<span class="mi">100</span>
 </div>
 <div class="section" id="head-function-pitfalls">
 <h3><a class="toc-backref" href="#id140">&#8220;Head = Function&#8221; Pitfalls</a><a class="headerlink" href="#head-function-pitfalls" title="Permalink to this headline">¶</a></h3>
-<p>&#8220;As&#8221; patterns are also a useful device if you need to manipulate function
-applications in a generic way. Note that <a class="reference internal" href="#the-head-function-rule">the &#8220;head = function&#8221; rule</a>
-stipulates that the head symbol <tt class="docutils literal"><span class="pre">f</span></tt> of an application <tt class="docutils literal"><span class="pre">f</span> <span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></tt>
-occurring on (or inside) the left-hand side of an equation, variable binding,
-or pattern-matching lambda expression, is always interpreted as a literal
-function symbol (not a variable). This implies that you cannot match the
-&#8220;function&#8221; component of an application against a variable, at least not
-directly. An anonymous &#8220;as&#8221; pattern like <tt class="docutils literal"><span class="pre">f&#64;_</span></tt> does the trick, however,
-since the anonymous variable is always recognized, even if it occurs as the
-head symbol of a function application. Here&#8217;s a little example which
-demonstrates how you can convert a function application to a list containing
-the function and all arguments:</p>
+<p><a class="reference internal" href="#the-head-function-rule">The &#8220;head = function&#8221; rule</a> stipulates that the head symbol <tt class="docutils literal"><span class="pre">f</span></tt> of an
+application <tt class="docutils literal"><span class="pre">f</span> <span class="pre">x1</span> <span class="pre">...</span> <span class="pre">xn</span></tt> occurring on (or inside) the left-hand side of an
+equation, variable binding, or pattern-matching lambda expression, is always
+interpreted as a literal function symbol (not a variable). This implies that
+you cannot match the &#8220;function&#8221; component of an application against a
+variable, at least not directly. An anonymous &#8220;as&#8221; pattern like <tt class="docutils literal"><span class="pre">f&#64;_</span></tt> does
+the trick, however, since the anonymous variable is always recognized, even if
+it occurs as the head symbol of a function application. Here&#8217;s a little
+example which demonstrates how you can convert a function application to a
+list containing the function and all arguments:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foo x = a [] x <span class="kr">with</span> a xs (x<span class="p">@</span>_ y) = a (y:xs) x<span class="p">;</span> a xs x = x:xs <span class="kr">end</span><span class="p">;</span>
 <span class="gp">&gt; </span>foo (a b c d)<span class="p">;</span>
 [a,b,c,d]
 </pre></div>
 </div>
 <p>This may seem a little awkward, but as a matter of fact the &#8220;head = function&#8221;
-rule is quite useful the way that it is, since it covers the common cases
-without forcing the programmer to declare &#8220;constructor&#8221; symbols (except nonfix
+rule is quite convenient, since it covers the common cases without forcing the
+programmer to declare variable or constructor symbols (other than nonfix
 symbols). On the other hand, generic rules operating on arbitrary function
 applications are not all that common, so having to &#8220;escape&#8221; a variable using
 the anonymous &#8220;as&#8221; pattern trick is a small price to pay for that convenience.</p>
@@ -12509,23 +12735,21 @@ foop f = <span class="kr">case</span> f <span class="kr">of</span> foo = <span c
 </pre></div>
 </div>
 <p>You might expect <tt class="docutils literal"><span class="pre">foop</span></tt> to return true for <tt class="docutils literal"><span class="pre">foo</span></tt>, and false on all other
-values. Better think again, because in reality <tt class="docutils literal"><span class="pre">foop</span></tt> will always return
-true! In fact, the Pure compiler will warn you about the second rule of the
-<a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression not being used at all:</p>
+values, but in reality <tt class="docutils literal"><span class="pre">foop</span></tt> will always return true! In fact, the Pure
+compiler will warn you about the second rule of the <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression
+not being used at all:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>foop <span class="mi">99</span><span class="p">;</span>
 warning: rule never reduced: _ = <span class="mi">0</span><span class="p">;</span>
 <span class="mi">1</span>
 </pre></div>
 </div>
-<p>This happens because an identifier on the left-hand side of a rule, which is
-neither the head symbol of a function application nor a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>
-symbol, is always considered to be a variable (cf. <a class="reference internal" href="#variables-in-equations">Variables in Equations</a>),
-even if that symbol is defined as a global function elsewhere.  So <tt class="docutils literal"><span class="pre">foo</span></tt>
-isn&#8217;t a literal name in the above <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression, it&#8217;s a variable!
-(As a matter of fact, this is rather useful, since otherwise a rule like <tt class="docutils literal"><span class="pre">f</span> <span class="pre">g</span>
-<span class="pre">=</span> <span class="pre">g+1</span></tt> would suddenly change meaning if you happen to add a definition like
-<tt class="docutils literal"><span class="pre">g</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">x-1</span></tt> somewhere else in your program, which certainly isn&#8217;t
-desirable.)</p>
+<p>This is again due to the &#8220;head = function&#8221; rule; <tt class="docutils literal"><span class="pre">foo</span></tt> is neither the head
+symbol of a function application nor a <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> symbol here, so it is
+considered a variable, even though it is defined as a global function
+elsewhere. (As a matter of fact, this is rather useful, since otherwise a rule
+like <tt class="docutils literal"><span class="pre">f</span> <span class="pre">g</span> <span class="pre">=</span> <span class="pre">g+1</span></tt> would suddenly change meaning if you happen to add a
+definition like <tt class="docutils literal"><span class="pre">g</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">x-1</span></tt> somewhere else in your program, which certainly
+isn&#8217;t desirable.)</p>
 <p>A possible workaround is to &#8220;escape&#8221; the function symbol using an empty
 namespace qualifier:</p>
 <div class="highlight-pure"><div class="highlight"><pre>foop f = <span class="kr">case</span> f <span class="kr">of</span> <span class="p">::</span>foo = <span class="mi">1</span><span class="p">;</span> _ = <span class="mi">0</span> <span class="kr">end</span><span class="p">;</span>
@@ -12951,15 +13175,11 @@ to redefine it as a constant, or vice versa, since Pure won&#8217;t let you rede
 an existing constant or variable as a different kind of symbol. The same also
 holds if a symbol is currently defined as a function or a macro.)</p>
 <p>Constants can also be used in patterns (i.e., on the left-hand side of a rule
-in a definition or a <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression), but only if you also declare
-the corresponding symbol as <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>. This is useful, e.g., if you&#8217;d
-like to use constants such as <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> on the
-left-hand side of a definition, just like other <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> symbols:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>show false true
-<span class="kr">const</span> false = <span class="mi">0</span><span class="p">;</span>
-<span class="kr">const</span> true = <span class="mi">1</span><span class="p">;</span>
-<span class="gp">&gt; </span><span class="kr">nonfix</span> false true<span class="p">;</span>
-<span class="gp">&gt; </span>check false = <span class="s">&quot;no&quot;</span><span class="p">;</span> check true = <span class="s">&quot;yes&quot;</span><span class="p">;</span>
+in a definition or a <a class="reference internal" href="#case"><tt class="xref std std-keyword docutils literal"><span class="pre">case</span></tt></a> expression), but only if they&#8217;re also
+declared as <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>. The prelude already does this for the truth
+values <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> (which are in fact just <tt class="docutils literal"><span class="pre">1</span></tt> and
+<tt class="docutils literal"><span class="pre">0</span></tt>), so that you can write, e.g.:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>check false = <span class="s">&quot;no&quot;</span><span class="p">;</span> check true = <span class="s">&quot;yes&quot;</span><span class="p">;</span>
 <span class="gp">&gt; </span>show check
 check <span class="mi">0</span> = <span class="s">&quot;no&quot;</span><span class="p">;</span>
 check <span class="mi">1</span> = <span class="s">&quot;yes&quot;</span><span class="p">;</span>
@@ -12967,13 +13187,17 @@ check <span class="mi">1</span> = <span class="s">&quot;yes&quot;</span><span cl
 <span class="s">&quot;yes&quot;</span>
 </pre></div>
 </div>
-<p>Note that without the <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> declaration, the above definition of
-<tt class="docutils literal"><span class="pre">check</span></tt> wouldn&#8217;t work as intended, because the <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and
-<a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> symbols on the left-hand side of the two equations would be
-interpreted as local variables. Also note that the standard library never
-declares any constant symbols as <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>, since once a symbol is
-<a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a> there&#8217;s no going back. Thus the library leaves this to the
-programmer to decide.</p>
+<p>Note that if <a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> weren&#8217;t <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>, the
+above definition of <tt class="docutils literal"><span class="pre">check</span></tt> wouldn&#8217;t work as intended, because the
+<a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> symbols on the left-hand side of the two
+equations would be interpreted as local variables. Also note that
+<a class="reference internal" href="purelib.html#true" title="true"><tt class="xref pure pure-const docutils literal"><span class="pre">true</span></tt></a> and <a class="reference internal" href="purelib.html#false" title="false"><tt class="xref pure pure-const docutils literal"><span class="pre">false</span></tt></a> are really an exceptional case; they aren&#8217;t
+likely to be used as variables, so the prelude can make them <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>
+by default. In most cases the standard library refrains from declaring
+constant symbols as <a class="reference internal" href="#nonfix"><tt class="xref std std-keyword docutils literal"><span class="pre">nonfix</span></tt></a>, so that they don&#8217;t accidentally clobber
+variables in user code. This is the case, in particular, for constants in the
+<a class="reference internal" href="purelib.html#module-math"><tt class="xref pure pure-mod docutils literal"><span class="pre">math</span></tt></a> module such as <a class="reference internal" href="purelib.html#e" title="e"><tt class="xref pure pure-const docutils literal"><span class="pre">e</span></tt></a>, <a class="reference internal" href="purelib.html#pi" title="pi"><tt class="xref pure pure-const docutils literal"><span class="pre">pi</span></tt></a> and <a class="reference internal" href="purelib.html#i" title="i"><tt class="xref pure pure-const docutils literal"><span class="pre">i</span></tt></a> which are
+much more likely to be used as variable symbols.</p>
 <p>As the value of a constant is known at compile time, the compiler can apply
 various optimizations to uses of such values. In particular, the Pure compiler
 inlines constant scalars (numbers, strings and pointers) by literally
@@ -13237,14 +13461,14 @@ Gutenberg University of Mainz, Germany.</p>
 the language. In particular, I&#8217;d like to thank Scott E. Dillard, Rooslan
 S. Khayrov, Jim Pryor, Eddie Rucker, Libor Spacek, Jiri Spitz, Peter
 Summerland and Sergei Winitzki for their significant contributions of code,
-patches and documentation. Thanks are also due to Toni Graffy, Michel Salim
-and Ryan Schmidt who maintain the SUSE Linux, Fedora Core and OSX packages, as
-well as to Vili Aapro, Jason E. Aten, Alvaro Castro Castilla, John Cowan,
-Chris Double, Tim Haynes, Roman Neuhauser, Wm Leler, John Lunney and Max Wolf
-for suggesting improvements and pointing out shortcomings, misfeatures and
-outright bugs. If it wasn&#8217;t for all these people and others who contribute to
-the lively discussions on the mailing list, this project probably wouldn&#8217;t
-have got anywhere.</p>
+patches and documentation. Thanks are also due to Björn Lindig, Michel Salim,
+Ryan Schmidt and Zhihao Yuan who maintain the Arch Linux, Fedora, OSX and
+FreeBSD packages and ports, as well as to Vili Aapro, Jason E. Aten, Alvaro
+Castro Castilla, John Cowan, Chris Double, Tim Haynes, Wm Leler, John Lunney,
+Roman Neuhauser and Max Wolf for suggesting improvements and pointing out
+shortcomings, misfeatures and outright bugs. If it wasn&#8217;t for all these people
+and others who contribute to the lively discussions on the mailing list, this
+project probably wouldn&#8217;t have got anywhere.</p>
 <p>Last but not least, a big thank you goes to Chris Lattner and the entire LLVM
 team. <a class="reference internal" href="#llvm">LLVM</a> really changed the game for us compiler writers, as we can now
 stop worrying about all the nitty-gritty details of code generation and

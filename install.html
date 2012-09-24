@@ -57,7 +57,7 @@
             
   <div class="section" id="installing-pure-and-llvm">
 <h1>Installing Pure (and LLVM)<a class="headerlink" href="#installing-pure-and-llvm" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.56, September 20, 2012</p>
+<p>Version 0.56, September 24, 2012</p>
 <div class="line-block">
 <div class="line">Albert Graef &lt;Dr.Graef at t-online.de&gt;</div>
 <div class="line">Eddie Rucker &lt;erucker at bmc.edu&gt;</div>
@@ -461,11 +461,11 @@ site-lisp directory. (In fact, you can specify any directory on Emacs&#8217;
 loadpath for <tt class="docutils literal"><span class="pre">elispdir</span></tt>.)</p>
 <p>Before you can use Pure mode, you still have to add some stuff to your .emacs
 file to load the mode at startup. A minimal setup looks like this:</p>
-<div class="highlight-console"><div class="highlight"><pre><span class="go">(require &#39;pure-mode)</span>
-<span class="go">(setq auto-mode-alist</span>
-<span class="go">      (cons &#39;(&quot;\\.pure\\(rc\\)?$&quot; . pure-mode) auto-mode-alist))</span>
-<span class="go">(add-hook &#39;pure-mode-hook &#39;turn-on-font-lock)</span>
-<span class="go">(add-hook &#39;pure-eval-mode-hook &#39;turn-on-font-lock)</span>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;pure-mode</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">setq</span> <span class="nv">auto-mode-alist</span>
+      <span class="p">(</span><span class="nb">cons </span><span class="o">&#39;</span><span class="p">(</span><span class="s">&quot;\\.pure\\(rc\\)?$&quot;</span> <span class="o">.</span> <span class="nv">pure-mode</span><span class="p">)</span> <span class="nv">auto-mode-alist</span><span class="p">))</span>
+<span class="p">(</span><span class="nf">add-hook</span> <span class="ss">&#39;pure-mode-hook</span> <span class="ss">&#39;turn-on-font-lock</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">add-hook</span> <span class="ss">&#39;pure-eval-mode-hook</span> <span class="ss">&#39;turn-on-font-lock</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This loads Pure mode, associates the .pure and .purerc filename extensions
@@ -474,12 +474,12 @@ with it, and enables syntax highlighting.</p>
 file. In particular, we recommend installing emacs-w3m and enabling it as
 follows in your .emacs file, so that you can read the online documentation in
 Emacs:</p>
-<div class="highlight-console"><div class="highlight"><pre><span class="go">(require &#39;w3m-load)</span>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;w3m-load</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Also, you can enable code folding by adding this to your .emacs:</p>
-<div class="highlight-console"><div class="highlight"><pre><span class="go">(require &#39;hideshow)</span>
-<span class="go">(add-hook &#39;pure-mode-hook &#39;hs-minor-mode)</span>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;hideshow</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">add-hook</span> <span class="ss">&#39;pure-mode-hook</span> <span class="ss">&#39;hs-minor-mode</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>These lines should come before the loading of Pure mode in your .emacs, so
@@ -491,6 +491,23 @@ Pure file to check that it works, e.g.:</p>
 </div>
 <p>The online help about Pure mode can be read with <tt class="docutils literal"><span class="pre">C-h</span> <span class="pre">m</span></tt>. The Pure
 documentation can be accessed in Pure mode with <tt class="docutils literal"><span class="pre">C-c</span> <span class="pre">h</span></tt>.</p>
+</div>
+<div class="section" id="texmacs-mode">
+<h2>TeXmacs Mode<a class="headerlink" href="#texmacs-mode" title="Permalink to this headline">¶</a></h2>
+<p>Pure 0.56 has minimal support for running Pure as a session in <a class="reference external" href="http://www.texmacs.org/">GNU TeXmacs</a>.
+This is triggered by the (as yet undocumented) <tt class="docutils literal"><span class="pre">--texmacs</span></tt> option of the
+interpreter. The following little TeXmacs plugin file will do the trick:</p>
+<div class="highlight-scheme"><div class="highlight"><pre><span class="p">(</span><span class="nf">plugin-configure</span> <span class="nv">pure</span>
+  <span class="p">(</span><span class="nf">:require</span> <span class="p">(</span><span class="nf">url-exists-in-path?</span> <span class="s">&quot;pure&quot;</span><span class="p">))</span>
+  <span class="p">(</span><span class="nf">:launch</span> <span class="s">&quot;pure -i --texmacs&quot;</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">:session</span> <span class="s">&quot;Pure&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Place this as pure/progs/init-pure.scm in your ~/.TeXmacs/plugins folder.
+After restarting TeXmacs you should find Pure in TeXmacs&#8217; Insert / Session
+menu. Note that <em>both</em> the <tt class="docutils literal"><span class="pre">-i</span></tt> and <tt class="docutils literal"><span class="pre">--texmacs</span></tt> options are required in
+the launch command to make this work (you might also want to add the <tt class="docutils literal"><span class="pre">-q</span></tt>
+option to suppress the signon message of the interpreter).</p>
 </div>
 <div class="section" id="installing-an-llvm-capable-c-c-compiler">
 <h2>Installing an LLVM-capable C/C++ Compiler<a class="headerlink" href="#installing-an-llvm-capable-c-c-compiler" title="Permalink to this headline">¶</a></h2>
@@ -987,6 +1004,7 @@ unzip these into some convenient location on your harddrive and set up
 <li><a class="reference internal" href="#quick-summary">Quick Summary</a></li>
 <li><a class="reference internal" href="#basic-installation">Basic Installation</a></li>
 <li><a class="reference internal" href="#emacs-pure-mode">Emacs Pure Mode</a></li>
+<li><a class="reference internal" href="#texmacs-mode">TeXmacs Mode</a></li>
 <li><a class="reference internal" href="#installing-an-llvm-capable-c-c-compiler">Installing an LLVM-capable C/C++ Compiler</a><ul>
 <li><a class="reference internal" href="#clang">clang</a></li>
 <li><a class="reference internal" href="#llvm-gcc">llvm-gcc</a></li>

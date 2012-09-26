@@ -13,7 +13,7 @@ File: pure.info,  Node: Top,  Next: Introduction,  Up: (dir)
 The Pure Manual
 ***************
 
-  Version 0.56, September 20, 2012
+  Version 0.56, September 26, 2012
 
   Albert Gräf <<Dr.Graef@t-online.de>>
 
@@ -12499,10 +12499,7 @@ reductions of local and anonymous function applications.
   If you don't need that much detail, you can also switch to skip mode
 by invoking the `trace' command with the `-s' option. This allows you
 to see a quick summary of the computation which only shows reductions
-by rules directly involving the active tracepoints. (Note that it's
-only possible to see reductions by global functions that way, since
-there's no way to set breakpoints or tracepoints on a local function.)
-For instance:
+by rules directly involving the active tracepoints. For instance:
 
     > trace -s
     > fact 1;
@@ -12519,10 +12516,10 @@ For instance:
     1
 
 Moreover, the `trace' command can also be invoked with the `-a' option
-to trace all global function calls, which is convenient to quickly
-obtain a full transcript of a reduction sequence. The same options also
-work in an analogous fashion with macro calls, see the *note Macros:
-62. section for some examples.
+to trace all function calls, which is convenient to quickly obtain a
+full transcript of a reduction sequence. The same options also work in
+an analogous fashion with macro calls, see the *note Macros: 62.
+section for some examples.
 
   The current sets of breakpoints and tracepoints can be changed with
 the `break', `trace' and `del' commands, as shown above, and just
@@ -12532,6 +12529,53 @@ Commands: 105. above for details. Also note that these are really
 interpreter commands, so to invoke them in the debugger you have to
 escape them with the `!' command (or whatever other *note --escape: 1e.
 prefix you specified).
+
+  The debugger can also be triggered programmatically with the built-in
+parameter-less functions `break' and `trace'. This gives you much
+better control over the precise location and the conditions under which
+the debugger should be invoked. Just place a call to `break' or `trace'
+near the point where you'd like to start debugging or tracing; this can
+be done either with the sequencing operator '*note $$: a4.' or with a
+*note when: 89. clause. The debugger will then be invoked at the next
+opportunity (usually when a function is called or a reduction is
+completed).  For instance:
+
+    > fact n::int = if n>0 then break $$ n*fact (n-1) else 1;
+    > fact 10;
+    ++ [2] break: extern void pure_break() = break;
+         --> ()
+    ** [2] fact: fact n::int = if n>0 then break$$n*fact (n-1) else 1;
+         n = 9
+    :
+
+Here the debugger is invoked right after the call to `break', when the
+`n*fact (n-1)' expression in the *note then: 8c. branch is about to be
+evaluated. The debugger thus stops at the recursive invocation of `fact
+9'.  Tracing works in a similar fashion, using `trace' in lieu of
+`break', and continues until the current stack frame is exited. One
+major advantage of this method is that it is possible to invoke `break'
+or `trace' only under certain conditions, so that you can focus on
+interesting "events" during evaluation, which can make debugging much
+less tedious. In our example, in order to stop when `n' becomes `1', we
+might invoke `break' as follows:
+
+    > fact n::int = if n>0 then n>1||break $$ n*fact (n-1) else 1;
+    > fact 3;
+    ++ [4] break: extern void pure_break() = break;
+         --> ()
+    ** [4] fact: fact n::int = if n>0 then n>1||break$$n*fact (n-1) else 1;
+         n = 0
+    : p
+       [1] fact: fact n::int = if n>0 then n>1||break$$n*fact (n-1) else 1;
+         n = 3
+       [2] fact: fact n::int = if n>0 then n>1||break$$n*fact (n-1) else 1;
+         n = 2
+       [3] fact: fact n::int = if n>0 then n>1||break$$n*fact (n-1) else 1;
+         n = 1
+    ** [4] fact: fact n::int = if n>0 then n>1||break$$n*fact (n-1) else 1;
+         n = 0
+    :
+
 
 
 File: pure.info,  Node: Last Result,  Next: Pretty-Printing,  Prev: Debugging,  Up: Interactive Usage
@@ -12942,7 +12986,7 @@ batch-compiled programs:
      which are actually called somewhere in the static program text are
      available to `eval'.  (The *note -u: 2b. option and the *note
      --required: 5c.  pragma can be used to avoid this, see *note
-     Options Affecting Code Size: 15d. below.)
+     Options Affecting Code Size: 15e. below.)
 
    * Code which gets executed to compute constant values at compile
      time will generally _not_ be executed in the compiled executable,
@@ -12953,7 +12997,7 @@ batch-compiled programs:
      requires an initialization at run time, then the batch compiler
      will generate code for that. (The same happens if the *note
      --noconst: 52. option is used to force computation of constant
-     values at run time, see *note Options Affecting Code Size: 15d.)
+     values at run time, see *note Options Affecting Code Size: 15e.)
 
   What this boils down to is that in the batch-compiled program you
 will have to avoid anything which requires the compile time or
@@ -13440,11 +13484,11 @@ File: pure.info,  Node: Backward Compatibility,  Next: Error Recovery,  Prev: Et
 13.2 Backward Compatibility
 ===========================
 
-Pure is based on the author's earlier *note Q: 164. language, but it
+Pure is based on the author's earlier *note Q: 165. language, but it
 offers many new and powerful features and programs run much faster than
 their Q equivalents. The language also went through a thorough facelift
 in order to modernize the syntax and make it more similar to other
-modern-style functional languages, in particular *note Miranda: 165.
+modern-style functional languages, in particular *note Miranda: 166.
 and *note Haskell: 83. Thus porting Q scripts to Pure often involves a
 substantial amount of manual work, but it can (and has) been done.
 
@@ -13509,7 +13553,7 @@ already normalized, or you'll have to normalize the result yourself.
   Also, as of Pure 0.41 the batch compiler produces stripped
 executables by default. To create unstripped executables you now have
 to use the *note -u: 2b.  option, see *note Options Affecting Code
-Size: 15d. for details. The `-s' option to produce stripped executables
+Size: 15e. for details. The `-s' option to produce stripped executables
 is still provided for backward compatibility, but it won't have any
 effect unless you use it to override a previous *note -u: 2b. option.
 
@@ -14464,7 +14508,7 @@ initialization code in this case. For all practical purposes, this
 turns the constant into a read-only variable. (There's also a code
 generation option to force this behaviour even for "normal" constants
 for which it's not strictly necessary, in order to create smaller
-executables; see *note Options Affecting Code Size: 15d. for details.)
+executables; see *note Options Affecting Code Size: 15e. for details.)
 
 
 File: pure.info,  Node: External C Functions,  Next: Calling Special Forms,  Prev: Constant Definitions,  Up: Caveats and Notes
@@ -14520,7 +14564,7 @@ File: pure.info,  Node: Laziness,  Next: Name Capture,  Prev: Calling Special Fo
 13.18 Laziness
 ==============
 
-Pure does lazy evaluation in the same way as *note Alice ML: 171,
+Pure does lazy evaluation in the same way as *note Alice ML: 172,
 providing an explicit operation (*note &: a5.) to defer evaluation and
 create a "future" which is called by need. However, note that like any
 language with a basically eager evaluation strategy, Pure cannot really
@@ -15929,198 +15973,200 @@ Ref: definition-levels495398
 Node: Debugging500648
 Ref: debugging500755
 Ref: 49500755
-Ref: 159502446
+Ref: 159500755
+Ref: id18500755
+Ref: 15a502446
 Ref: index-56502446
-Node: Last Result514071
-Ref: last result514176
-Ref: 146514176
-Ref: last-result514176
-Node: Pretty-Printing514886
-Ref: pretty-printing515003
-Ref: df515003
-Ref: de515209
-Ref: __show__515209
-Node: User-Defined Commands518800
-Ref: user-defined commands518925
-Ref: 13a518925
-Ref: user-defined-commands518925
-Node: Interactive Startup524982
-Ref: interactive startup525083
-Ref: 14b525083
-Ref: interactive-startup525083
-Ref: 15a525448
-Ref: index-57525448
-Node: Batch Compilation526407
-Ref: batch compilation526514
-Ref: d526514
-Ref: batch-compilation526514
-Ref: 15b526514
-Ref: id18526514
-Ref: 15c529873
-Ref: partial-evaluation529873
-Node: Example533022
-Ref: example533117
-Ref: 15e533117
-Node: Options Affecting Code Size537609
-Ref: options affecting code size537738
-Ref: 15d537738
-Ref: options-affecting-code-size537738
-Node: Other Output Code Formats541226
-Ref: other output code formats541377
-Ref: 15f541377
-Ref: other-output-code-formats541377
-Ref: 160547265
-Ref: llvm-documentation547265
-Node: Calling Pure Functions From C547265
-Ref: calling pure functions from c547380
-Ref: 161547380
-Ref: calling-pure-functions-from-c547380
-Node: Caveats and Notes548873
-Ref: caveats and notes548969
-Ref: e548969
-Ref: caveats-and-notes548969
-Node: Etymology549652
-Ref: etymology549744
-Ref: 162549744
-Node: Backward Compatibility550635
-Ref: backward compatibility550750
-Ref: 163550750
-Ref: backward-compatibility550750
-Node: Error Recovery560750
-Ref: error recovery560884
-Ref: 166560884
-Ref: error-recovery560884
-Node: Splicing Tuples and Matrices561540
-Ref: splicing tuples and matrices561665
-Ref: 97561665
-Ref: splicing-tuples-and-matrices561665
-Node: With and when563606
-Ref: with and when563736
-Ref: 167563736
-Ref: with-and-when563736
-Node: Non-Linear Patterns567476
-Ref: non-linear patterns567591
-Ref: 168567591
-Ref: non-linear-patterns567591
-Node: "As" Patterns568991
-Ref: "as" patterns569119
-Ref: 108569119
-Ref: as-patterns569119
-Node: "Head = Function" Pitfalls569875
-Ref: "head = function" pitfalls570001
-Ref: b2570001
-Ref: head-function-pitfalls570001
-Node: Defined Functions573313
-Ref: defined functions573455
-Ref: 60573455
-Ref: defined-functions573455
-Node: Stack Size and Tail Recursion576783
-Ref: stack size and tail recursion576931
-Ref: 4f576931
-Ref: stack-size-and-tail-recursion576931
-Ref: 169577319
-Ref: index-58577319
-Ref: 16a577531
-Ref: index-59577531
-Ref: 16b577819
-Ref: index-60577819
-Node: Handling of Asynchronous Signals579187
-Ref: handling of asynchronous signals579333
-Ref: 50579333
-Ref: handling-of-asynchronous-signals579333
-Node: Recursive Types581354
-Ref: recursive types581481
-Ref: c3581481
-Ref: recursive-types581481
-Ref: 16c584438
-Ref: id19584438
-Node: Interfaces586661
-Ref: interfaces586776
-Ref: f4586776
-Node: Numeric Calculations590403
-Ref: numeric calculations590523
-Ref: 16d590523
-Ref: numeric-calculations590523
-Node: Constant Definitions592434
-Ref: constant definitions592564
-Ref: cc592564
-Ref: constant-definitions592564
-Node: External C Functions598450
-Ref: external c functions598581
-Ref: 11b598581
-Ref: external-c-functions598581
-Ref: 16e599863
-Ref: libffi599863
-Node: Calling Special Forms600248
-Ref: calling special forms600367
-Ref: 16f600367
-Ref: calling-special-forms600367
-Node: Laziness600855
-Ref: laziness600966
-Ref: 170600966
-Node: Name Capture605546
-Ref: name capture605627
-Ref: 10b605627
-Ref: name-capture605627
-Node: Author609010
-Ref: author609105
-Ref: 172609105
-Node: Acknowledgements609240
-Ref: acknowledgements609325
-Ref: 173609325
-Node: Copying610564
-Ref: copying610663
-Ref: 3610663
-Node: References and Links613025
-Ref: references and links613113
-Ref: 174613113
-Ref: references-and-links613113
-Ref: 9f613162
-Ref: aardappel613162
-Ref: 171613303
-Ref: alice-ml613303
-Ref: 12613438
-Ref: baader-and-nipkow613438
-Ref: ef613556
-Ref: bertrand613556
-Ref: 129613816
-Ref: clang613816
-Ref: 12b614074
-Ref: dragonegg614074
-Ref: 12c614285
-Ref: faust614285
-Ref: 175614372
-Ref: gnu-multiprecision-library614372
-Ref: 93614372
-Ref: gmp614372
-Ref: 176614480
-Ref: gnu-octave614480
-Ref: dd614480
-Ref: octave614480
-Ref: 9a614624
-Ref: gnu-scientific-library614624
-Ref: 177614624
-Ref: gsl614624
-Ref: f1614785
-Ref: go614785
-Ref: 83614849
-Ref: haskell614849
-Ref: 8614915
-Ref: llvm614915
-Ref: 12a614980
-Ref: llvm-gcc614980
-Ref: 165615198
-Ref: miranda615198
-Ref: 84615369
-Ref: ml615369
-Ref: 11615528
-Ref: michael-o-donnell615528
-Ref: 164615678
-Ref: q615678
-Node: Index615763
-Ref: index615835
-Ref: 8f634051
-Ref: 8e634082
+Node: Last Result516017
+Ref: last result516122
+Ref: 146516122
+Ref: last-result516122
+Node: Pretty-Printing516832
+Ref: pretty-printing516949
+Ref: df516949
+Ref: de517155
+Ref: __show__517155
+Node: User-Defined Commands520746
+Ref: user-defined commands520871
+Ref: 13a520871
+Ref: user-defined-commands520871
+Node: Interactive Startup526928
+Ref: interactive startup527029
+Ref: 14b527029
+Ref: interactive-startup527029
+Ref: 15b527394
+Ref: index-57527394
+Node: Batch Compilation528353
+Ref: batch compilation528460
+Ref: d528460
+Ref: batch-compilation528460
+Ref: 15c528460
+Ref: id19528460
+Ref: 15d531819
+Ref: partial-evaluation531819
+Node: Example534968
+Ref: example535063
+Ref: 15f535063
+Node: Options Affecting Code Size539555
+Ref: options affecting code size539684
+Ref: 15e539684
+Ref: options-affecting-code-size539684
+Node: Other Output Code Formats543172
+Ref: other output code formats543323
+Ref: 160543323
+Ref: other-output-code-formats543323
+Ref: 161549211
+Ref: llvm-documentation549211
+Node: Calling Pure Functions From C549211
+Ref: calling pure functions from c549326
+Ref: 162549326
+Ref: calling-pure-functions-from-c549326
+Node: Caveats and Notes550819
+Ref: caveats and notes550915
+Ref: e550915
+Ref: caveats-and-notes550915
+Node: Etymology551598
+Ref: etymology551690
+Ref: 163551690
+Node: Backward Compatibility552581
+Ref: backward compatibility552696
+Ref: 164552696
+Ref: backward-compatibility552696
+Node: Error Recovery562696
+Ref: error recovery562830
+Ref: 167562830
+Ref: error-recovery562830
+Node: Splicing Tuples and Matrices563486
+Ref: splicing tuples and matrices563611
+Ref: 97563611
+Ref: splicing-tuples-and-matrices563611
+Node: With and when565552
+Ref: with and when565682
+Ref: 168565682
+Ref: with-and-when565682
+Node: Non-Linear Patterns569422
+Ref: non-linear patterns569537
+Ref: 169569537
+Ref: non-linear-patterns569537
+Node: "As" Patterns570937
+Ref: "as" patterns571065
+Ref: 108571065
+Ref: as-patterns571065
+Node: "Head = Function" Pitfalls571821
+Ref: "head = function" pitfalls571947
+Ref: b2571947
+Ref: head-function-pitfalls571947
+Node: Defined Functions575259
+Ref: defined functions575401
+Ref: 60575401
+Ref: defined-functions575401
+Node: Stack Size and Tail Recursion578729
+Ref: stack size and tail recursion578877
+Ref: 4f578877
+Ref: stack-size-and-tail-recursion578877
+Ref: 16a579265
+Ref: index-58579265
+Ref: 16b579477
+Ref: index-59579477
+Ref: 16c579765
+Ref: index-60579765
+Node: Handling of Asynchronous Signals581133
+Ref: handling of asynchronous signals581279
+Ref: 50581279
+Ref: handling-of-asynchronous-signals581279
+Node: Recursive Types583300
+Ref: recursive types583427
+Ref: c3583427
+Ref: recursive-types583427
+Ref: 16d586384
+Ref: id20586384
+Node: Interfaces588607
+Ref: interfaces588722
+Ref: f4588722
+Node: Numeric Calculations592349
+Ref: numeric calculations592469
+Ref: 16e592469
+Ref: numeric-calculations592469
+Node: Constant Definitions594380
+Ref: constant definitions594510
+Ref: cc594510
+Ref: constant-definitions594510
+Node: External C Functions600396
+Ref: external c functions600527
+Ref: 11b600527
+Ref: external-c-functions600527
+Ref: 16f601809
+Ref: libffi601809
+Node: Calling Special Forms602194
+Ref: calling special forms602313
+Ref: 170602313
+Ref: calling-special-forms602313
+Node: Laziness602801
+Ref: laziness602912
+Ref: 171602912
+Node: Name Capture607492
+Ref: name capture607573
+Ref: 10b607573
+Ref: name-capture607573
+Node: Author610956
+Ref: author611051
+Ref: 173611051
+Node: Acknowledgements611186
+Ref: acknowledgements611271
+Ref: 174611271
+Node: Copying612510
+Ref: copying612609
+Ref: 3612609
+Node: References and Links614971
+Ref: references and links615059
+Ref: 175615059
+Ref: references-and-links615059
+Ref: 9f615108
+Ref: aardappel615108
+Ref: 172615249
+Ref: alice-ml615249
+Ref: 12615384
+Ref: baader-and-nipkow615384
+Ref: ef615502
+Ref: bertrand615502
+Ref: 129615762
+Ref: clang615762
+Ref: 12b616020
+Ref: dragonegg616020
+Ref: 12c616231
+Ref: faust616231
+Ref: 176616318
+Ref: gnu-multiprecision-library616318
+Ref: 93616318
+Ref: gmp616318
+Ref: 177616426
+Ref: gnu-octave616426
+Ref: dd616426
+Ref: octave616426
+Ref: 9a616570
+Ref: gnu-scientific-library616570
+Ref: 178616570
+Ref: gsl616570
+Ref: f1616731
+Ref: go616731
+Ref: 83616795
+Ref: haskell616795
+Ref: 8616861
+Ref: llvm616861
+Ref: 12a616926
+Ref: llvm-gcc616926
+Ref: 166617144
+Ref: miranda617144
+Ref: 84617315
+Ref: ml617315
+Ref: 11617474
+Ref: michael-o-donnell617474
+Ref: 165617624
+Ref: q617624
+Node: Index617709
+Ref: index617781
+Ref: 8f635997
+Ref: 8e636028
 
 End Tag Table
 

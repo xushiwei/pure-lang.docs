@@ -57,7 +57,7 @@
             
   <div class="section" id="the-pure-manual">
 <h1>The Pure Manual<a class="headerlink" href="#the-pure-manual" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.56, September 28, 2012</p>
+<p>Version 0.56, October 04, 2012</p>
 <p>Albert Gräf &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</p>
 <p>Copyright (c) 2009-2012 by Albert Gräf. This document is available under the
 <a class="reference external" href="http://www.gnu.org/copyleft/fdl.html">GNU Free Documentation License</a>. Also see the <a class="reference internal" href="#copying">Copying</a> section for licensing information of the
@@ -11611,47 +11611,47 @@ details. Also note that these are really interpreter commands, so to invoke
 them in the debugger you have to escape them with the <tt class="docutils literal"><span class="pre">!</span></tt> command
 (or whatever other <a class="reference internal" href="#cmdoption-pure--escape"><em class="xref std std-option">--escape</em></a> prefix you specified).</p>
 <p>The debugger can also be triggered programmatically with the built-in
-parameter-less functions <a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a> and <a class="reference internal" href="purelib.html#trace" title="trace"><tt class="xref pure pure-func docutils literal"><span class="pre">trace</span></tt></a>. This gives you much
-better control over the precise location and the conditions under which the
-debugger should be invoked. Just place a call to <a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a> or
-<a class="reference internal" href="purelib.html#trace" title="trace"><tt class="xref pure pure-func docutils literal"><span class="pre">trace</span></tt></a> near the point where you&#8217;d like to start debugging or tracing;
-this can be done either with the sequencing operator &#8216;<a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a>&#8216; or with a
-<a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> clause. The debugger will then be invoked at the next
+parameter-less functions <a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a> and <a class="reference internal" href="purelib.html#__trace__" title="__trace__"><tt class="xref pure pure-func docutils literal"><span class="pre">__trace__</span></tt></a>. This gives
+you much better control over the precise location and the conditions under
+which the debugger should be invoked. Just place a call to <a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a>
+or <a class="reference internal" href="purelib.html#__trace__" title="__trace__"><tt class="xref pure pure-func docutils literal"><span class="pre">__trace__</span></tt></a> near the point where you&#8217;d like to start debugging or
+tracing; this can be done either with the sequencing operator &#8216;<a class="reference internal" href="#$$" title="$$"><tt class="xref pure pure-func docutils literal"><span class="pre">$$</span></tt></a>&#8216; or
+with a <a class="reference internal" href="#when"><tt class="xref std std-keyword docutils literal"><span class="pre">when</span></tt></a> clause. The debugger will then be invoked at the next
 opportunity (usually when a function is called or a reduction is completed).
 For instance:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> <span class="nb">break</span> $$ n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> <span class="nb">__break__</span> $$ n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
 <span class="gp">&gt; </span>fact <span class="mi">10</span><span class="p">;</span>
-++ [<span class="mi">2</span>] <span class="nb">break</span>: <span class="kr">extern</span> <span class="kt">void</span> pure_break() = <span class="nb">break</span><span class="p">;</span>
+++ [<span class="mi">2</span>] <span class="nb">__break__</span>: <span class="kr">extern</span> <span class="kt">void</span> pure_break() = <span class="nb">__break__</span><span class="p">;</span>
      --&gt; ()
-** [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> <span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+** [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> <span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">9</span>
 :
 </pre></div>
 </div>
-<p>Here the debugger is invoked right after the call to <a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a>, when the
-<tt class="docutils literal"><span class="pre">n*fact</span> <span class="pre">(n-1)</span></tt> expression in the <a class="reference internal" href="#then"><tt class="xref std std-keyword docutils literal"><span class="pre">then</span></tt></a> branch is about to be
+<p>Here the debugger is invoked right after the call to <a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a>, when
+the <tt class="docutils literal"><span class="pre">n*fact</span> <span class="pre">(n-1)</span></tt> expression in the <a class="reference internal" href="#then"><tt class="xref std std-keyword docutils literal"><span class="pre">then</span></tt></a> branch is about to be
 evaluated. The debugger thus stops at the recursive invocation of <tt class="docutils literal"><span class="pre">fact</span> <span class="pre">9</span></tt>.
-Tracing works in a similar fashion, using <a class="reference internal" href="purelib.html#trace" title="trace"><tt class="xref pure pure-func docutils literal"><span class="pre">trace</span></tt></a> in lieu of
-<a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a>, and continues until the current stack frame is exited. One
-major advantage of this method is that it is possible to invoke <a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a>
-or <a class="reference internal" href="purelib.html#trace" title="trace"><tt class="xref pure pure-func docutils literal"><span class="pre">trace</span></tt></a> only under certain conditions, so that you can focus on
-interesting &#8220;events&#8221; during evaluation, which can make debugging much less
-tedious. In our example, in order to stop when <tt class="docutils literal"><span class="pre">n</span></tt> becomes <tt class="docutils literal"><span class="pre">1</span></tt>, we might
-invoke <a class="reference internal" href="purelib.html#break" title="break"><tt class="xref pure pure-func docutils literal"><span class="pre">break</span></tt></a> as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span> $$ n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+Tracing works in a similar fashion, using <a class="reference internal" href="purelib.html#__trace__" title="__trace__"><tt class="xref pure pure-func docutils literal"><span class="pre">__trace__</span></tt></a> in lieu of
+<a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a>, and continues until the current stack frame is exited. One
+major advantage of this method is that it is possible to invoke
+<a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a> or <a class="reference internal" href="purelib.html#__trace__" title="__trace__"><tt class="xref pure pure-func docutils literal"><span class="pre">__trace__</span></tt></a> only under certain conditions, so that
+you can focus on interesting &#8220;events&#8221; during evaluation, which can make
+debugging much less tedious. In our example, in order to stop when <tt class="docutils literal"><span class="pre">n</span></tt>
+becomes <tt class="docutils literal"><span class="pre">1</span></tt>, we might invoke <a class="reference internal" href="purelib.html#__break__" title="__break__"><tt class="xref pure pure-func docutils literal"><span class="pre">__break__</span></tt></a> as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span> $$ n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
 <span class="gp">&gt; </span>fact <span class="mi">3</span><span class="p">;</span>
-++ [<span class="mi">4</span>] <span class="nb">break</span>: <span class="kr">extern</span> <span class="kt">void</span> pure_break() = <span class="nb">break</span><span class="p">;</span>
+++ [<span class="mi">4</span>] <span class="nb">__break__</span>: <span class="kr">extern</span> <span class="kt">void</span> pure_break() = <span class="nb">__break__</span><span class="p">;</span>
      --&gt; ()
-** [<span class="mi">4</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+** [<span class="mi">4</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">0</span>
 : p
-   [<span class="mi">1</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+   [<span class="mi">1</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">3</span>
-   [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+   [<span class="mi">2</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">2</span>
-   [<span class="mi">3</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+   [<span class="mi">3</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">1</span>
-** [<span class="mi">4</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">break</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
+** [<span class="mi">4</span>] fact: fact n<span class="p">::</span><span class="kt">int</span> = <span class="kr">if</span> n&gt;<span class="mi">0</span> <span class="kr">then</span> n&gt;<span class="mi">1</span>||<span class="nb">__break__</span>$$n*fact (n-<span class="mi">1</span>) <span class="kr">else</span> <span class="mi">1</span><span class="p">;</span>
      n = <span class="mi">0</span>
 :
 </pre></div>

@@ -49,9 +49,9 @@ list.
 @anchor{0}@anchor{reduce}@anchor{1}@anchor{proc-interface}@anchor{2}@anchor{embedding-reduce}The interface can be found in reduce.pure (in particular, have a look at the
 @pxref{3,,high-level interface} defined near the end of the module), some basic
 examples are in reduce_examp.pure. Please note that at present, this module is
-still highly experimental and under heavy development. But the basic
-functionality appears to work, and you're welcome to discuss the new interface
-on the mailing list and/or submit bug reports and patches.
+still experimental and under development. But the basic functionality appears
+to work, and you're welcome to discuss the new interface on the mailing list
+and/or submit bug reports and patches.
 
 
 @menu
@@ -151,27 +151,30 @@ Sets the verbosity level; 0 means no messages at all (which is the
 default when using this module), and the following values may be or'ed
 together to pick what you need:
 
-@display
-1: messages whenever garbage collection happens@w{ }
-2:  messages whenever a module of code is loaded@w{ }
-4: extra details in the garbage collector messages@w{ }
-@end display
+@quotation
+1 messages whenever garbage collection happens
+
+2 messages whenever a module of code is loaded
+
+4 extra details in the garbage collector messages
+@end quotation
 @end deffn
 
 @geindex reduce load function
 @anchor{b}@anchor{reduce load}
 @deffn {Function} reduce::load name::string
 
-Loads REDUCE packages. Please check the REDUCE documentation for
-details.
+Loads REDUCE packages. This works like REDUCE's @code{load_package}
+command; please check the REDUCE documentation for details.
 @end deffn
 
 @geindex reduce switch function
 @anchor{c}@anchor{reduce switch}
 @deffn {Function} reduce::switch name:string val::int
 
-Lets you change global REDUCE options. Please check the REDUCE
-documentation for details.
+Lets you change global REDUCE options. This works like REDUCE's @code{on}
+and @code{off} declarations; please check the REDUCE documentation for
+details.
 @end deffn
 
 For convenience, the following operations are in the default namespace:
@@ -201,22 +204,25 @@ it will most likely crash in such cases.
 
 @geindex declare function
 @anchor{f}@anchor{declare}
-@deffn {Function} declare x ys
+@deffn {Function} declare declsym [foo,bar,...]
 
-Declare symbol properties. Currently, the following common kinds of
-declarations are supported:
+Declare symbols and their properties; please see the Declarations
+section in the Reduce manual for details. The second argument can also
+be a singleton symbol if the particular kind of declaration permits
+this. In the present implementation, @code{declsym} must be one of:
 
-@example
-declare operator [foo,bar,...];
-declare depend [y,x,...];
-declare nodepend [y,x,...];
-declare property [x,y,...];
-@end example
-
-@noindent
-In the latter form, @code{property} can be any of @code{even}, @code{odd},
-@code{linear} and @code{symmetric}. @code{ys} can also be a singleton symbol if
-the declaration permits this. Please see the Reduce manual for details.
+@itemize *
+@item
+@code{operator} (declares an operator symbol);
+@item
+@code{antisymmetric}, @code{symmetric}, @code{even}, @code{odd}, @code{linear},
+@code{noncom} and @code{nonzero} (declares properties of already declared
+operator symbols).
+@item
+@code{depend}, @code{nodepend}, @code{factor}, @code{remfac}, @code{order},
+@code{korder} (declares kernel dependencies and orders, these take both
+symbols and prefix expressions as arguments).
+@end itemize
 @end deffn
 
 In Pure land, REDUCE expressions are represented using standard curried
@@ -240,7 +246,21 @@ Reduce (Free CSL version), 27-Sep-12 ...
 @end example
 
 @noindent
-Another example showing how to execute Lisp code:
+Note that the result returned by @pxref{d,,simplify} is always a quoted
+expression. Even if the expression can be further reduced on the Pure side,
+you'll have to use @code{eval} to force its evaluation:
+
+@example
+> using math;
+> eval ans;
+[x==0.0+:2.64575131106459,x==0.0+:-2.64575131106459]
+@end example
+
+@noindent
+You can also execute Lisp code in the CSL interpreter hosting the REDUCE
+system. This is sometimes necessary to access special functionality, but
+should be done with care (at present invalid Lisp code can easily crash the
+interpreter). For instance:
 
 @example
 > lisp ('list a b c d e);
@@ -251,10 +271,15 @@ Another example showing how to execute Lisp code:
 
 @noindent
 Note that Lisp forms are represented in curried notation. Free symbols are
-quoted automatically, and Pure lists are converted to corresponding Lisp
+quoted automatically, and Pure lists are mapped to corresponding Lisp
 lists. If the result is a Lisp list, it will be converted back to a Pure
-list. The following example illustrates how you can use the @pxref{e,,lisp}
-function to declare an operator symbol and change or query its properties:
+list. Most simple kinds of Lisp calls should be doable that way, but don't
+expect any miracles; the @pxref{e,,lisp} function is provided to access
+special functionality in the "symbolic mode" of the REDUCE system, not
+to turn Pure into a full-featured Lisp frontend.
+
+The following example illustrates how you can use the @pxref{e,,lisp} function
+to declare an operator symbol and change or query its properties:
 
 @example
 > lisp ('operator [myop]);
@@ -268,7 +293,9 @@ function to declare an operator symbol and change or query its properties:
 @end example
 
 @noindent
-The same can also be done with the @pxref{f,,declare} function as follows:
+If you find it awkward to evaluate Lisp forms in Pure, you can also achieve
+the same with the @pxref{f,,declare} function which covers most of the common
+REDUCE declarations that might be needed:
 
 @example
 > declare operator myop;
@@ -280,7 +307,8 @@ The same can also be done with the @pxref{f,,declare} function as follows:
 @end example
 
 @noindent
-Please see reduce_examp.pure and tests.pure for more examples.
+Many more examples can be found in the reduce_examp.pure and tests.pure
+scripts included in the distribution.
 
 
 @node Index,,High-Level Interface,Top

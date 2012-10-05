@@ -70,9 +70,9 @@ list.</p>
 <p>The interface can be found in reduce.pure (in particular, have a look at the
 <a class="reference internal" href="#high-level-interface">high-level interface</a> defined near the end of the module), some basic
 examples are in reduce_examp.pure. Please note that at present, this module is
-still highly experimental and under heavy development. But the basic
-functionality appears to work, and you&#8217;re welcome to discuss the new interface
-on the mailing list and/or submit bug reports and patches.</p>
+still experimental and under development. But the basic functionality appears
+to work, and you&#8217;re welcome to discuss the new interface on the mailing list
+and/or submit bug reports and patches.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>Get the latest source from
@@ -146,25 +146,26 @@ necessary to call <a class="reference internal" href="#reduce::finish" title="re
 <dd><p>Sets the verbosity level; 0 means no messages at all (which is the
 default when using this module), and the following values may be or&#8217;ed
 together to pick what you need:</p>
-<div class="line-block">
-<div class="line">1: messages whenever garbage collection happens</div>
-<div class="line">2:  messages whenever a module of code is loaded</div>
-<div class="line">4: extra details in the garbage collector messages</div>
-</div>
+<blockquote>
+<div><p>1 messages whenever garbage collection happens</p>
+<p>2 messages whenever a module of code is loaded</p>
+<p>4 extra details in the garbage collector messages</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="reduce::load">
 <tt class="descclassname">reduce::</tt><tt class="descname">load</tt> name::string<a class="headerlink" href="#reduce::load" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads REDUCE packages. Please check the REDUCE documentation for
-details.</p>
+<dd><p>Loads REDUCE packages. This works like REDUCE&#8217;s <tt class="docutils literal"><span class="pre">load_package</span></tt>
+command; please check the REDUCE documentation for details.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="reduce::switch">
 <tt class="descclassname">reduce::</tt><tt class="descname">switch</tt> name:string val::int<a class="headerlink" href="#reduce::switch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lets you change global REDUCE options. Please check the REDUCE
-documentation for details.</p>
+<dd><p>Lets you change global REDUCE options. This works like REDUCE&#8217;s <tt class="docutils literal"><span class="pre">on</span></tt>
+and <tt class="docutils literal"><span class="pre">off</span></tt> declarations; please check the REDUCE documentation for
+details.</p>
 </dd></dl>
 
 <p>For convenience, the following operations are in the default namespace:</p>
@@ -191,18 +192,20 @@ it will most likely crash in such cases.</p>
 
 <dl class="function">
 <dt id="declare">
-<tt class="descname">declare</tt> x ys<a class="headerlink" href="#declare" title="Permalink to this definition">¶</a></dt>
-<dd><p>Declare symbol properties. Currently, the following common kinds of
-declarations are supported:</p>
-<div class="highlight-pure"><div class="highlight"><pre>declare operator [foo,bar,...]<span class="p">;</span>
-declare depend [y,x,...]<span class="p">;</span>
-declare nodepend [y,x,...]<span class="p">;</span>
-declare property [x,y,...]<span class="p">;</span>
-</pre></div>
-</div>
-<p>In the latter form, <tt class="docutils literal"><span class="pre">property</span></tt> can be any of <tt class="docutils literal"><span class="pre">even</span></tt>, <tt class="docutils literal"><span class="pre">odd</span></tt>,
-<tt class="docutils literal"><span class="pre">linear</span></tt> and <tt class="docutils literal"><span class="pre">symmetric</span></tt>. <tt class="docutils literal"><span class="pre">ys</span></tt> can also be a singleton symbol if
-the declaration permits this. Please see the Reduce manual for details.</p>
+<tt class="descname">declare</tt> declsym [foo,bar,...]<a class="headerlink" href="#declare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declare symbols and their properties; please see the Declarations
+section in the Reduce manual for details. The second argument can also
+be a singleton symbol if the particular kind of declaration permits
+this. In the present implementation, <tt class="docutils literal"><span class="pre">declsym</span></tt> must be one of:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">operator</span></tt> (declares an operator symbol);</li>
+<li><tt class="docutils literal"><span class="pre">antisymmetric</span></tt>, <tt class="docutils literal"><span class="pre">symmetric</span></tt>, <tt class="docutils literal"><span class="pre">even</span></tt>, <tt class="docutils literal"><span class="pre">odd</span></tt>, <tt class="docutils literal"><span class="pre">linear</span></tt>,
+<tt class="docutils literal"><span class="pre">noncom</span></tt> and <tt class="docutils literal"><span class="pre">nonzero</span></tt> (declares properties of already declared
+operator symbols).</li>
+<li><tt class="docutils literal"><span class="pre">depend</span></tt>, <tt class="docutils literal"><span class="pre">nodepend</span></tt>, <tt class="docutils literal"><span class="pre">factor</span></tt>, <tt class="docutils literal"><span class="pre">remfac</span></tt>, <tt class="docutils literal"><span class="pre">order</span></tt>,
+<tt class="docutils literal"><span class="pre">korder</span></tt> (declares kernel dependencies and orders, these take both
+symbols and prefix expressions as arguments).</li>
+</ul>
 </dd></dl>
 
 <p>In Pure land, REDUCE expressions are represented using standard curried
@@ -222,7 +225,18 @@ Reduce (Free CSL version), <span class="mi">27</span>-Sep-<span class="mi">12</s
 [x==sqrt <span class="mi">7</span>*i,x==-sqrt <span class="mi">7</span>*i]
 </pre></div>
 </div>
-<p>Another example showing how to execute Lisp code:</p>
+<p>Note that the result returned by <a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> is always a quoted
+expression. Even if the expression can be further reduced on the Pure side,
+you&#8217;ll have to use <a class="reference internal" href="purelib.html#eval" title="eval"><tt class="xref pure pure-func docutils literal"><span class="pre">eval</span></tt></a> to force its evaluation:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">using</span> math<span class="p">;</span>
+<span class="gp">&gt; </span>eval ans<span class="p">;</span>
+[x==<span class="mf">0.0</span>+:<span class="mf">2.64575131106459</span>,x==<span class="mf">0.0</span>+:-<span class="mf">2.64575131106459</span>]
+</pre></div>
+</div>
+<p>You can also execute Lisp code in the CSL interpreter hosting the REDUCE
+system. This is sometimes necessary to access special functionality, but
+should be done with care (at present invalid Lisp code can easily crash the
+interpreter). For instance:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;list a b c d e)<span class="p">;</span>
 [a,b,c,d,e]
 <span class="gp">&gt; </span>lisp (&#39;cdr [a,b,[c,d],e])<span class="p">;</span>
@@ -230,10 +244,14 @@ Reduce (Free CSL version), <span class="mi">27</span>-Sep-<span class="mi">12</s
 </pre></div>
 </div>
 <p>Note that Lisp forms are represented in curried notation. Free symbols are
-quoted automatically, and Pure lists are converted to corresponding Lisp
+quoted automatically, and Pure lists are mapped to corresponding Lisp
 lists. If the result is a Lisp list, it will be converted back to a Pure
-list. The following example illustrates how you can use the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a>
-function to declare an operator symbol and change or query its properties:</p>
+list. Most simple kinds of Lisp calls should be doable that way, but don&#8217;t
+expect any miracles; the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function is provided to access
+special functionality in the &#8220;symbolic mode&#8221; of the REDUCE system, not
+to turn Pure into a full-featured Lisp frontend.</p>
+<p>The following example illustrates how you can use the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function
+to declare an operator symbol and change or query its properties:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;operator [myop])<span class="p">;</span>
 []
 <span class="gp">&gt; </span>lisp (&#39;flag [myop] odd)<span class="p">;</span>
@@ -244,7 +262,9 @@ function to declare an operator symbol and change or query its properties:</p>
 -myop x
 </pre></div>
 </div>
-<p>The same can also be done with the <a class="reference internal" href="#declare" title="declare"><tt class="xref pure pure-func docutils literal"><span class="pre">declare</span></tt></a> function as follows:</p>
+<p>If you find it awkward to evaluate Lisp forms in Pure, you can also achieve
+the same with the <a class="reference internal" href="#declare" title="declare"><tt class="xref pure pure-func docutils literal"><span class="pre">declare</span></tt></a> function which covers most of the common
+REDUCE declarations that might be needed:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>declare operator myop<span class="p">;</span>
 []
 <span class="gp">&gt; </span>declare odd myop<span class="p">;</span>
@@ -253,7 +273,8 @@ function to declare an operator symbol and change or query its properties:</p>
 -myop x
 </pre></div>
 </div>
-<p>Please see reduce_examp.pure and tests.pure for more examples.</p>
+<p>Many more examples can be found in the reduce_examp.pure and tests.pure
+scripts included in the distribution.</p>
 </div>
 </div>
 

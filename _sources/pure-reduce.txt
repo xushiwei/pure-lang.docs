@@ -24,9 +24,9 @@ list.
 The interface can be found in reduce.pure (in particular, have a look at the
 `high-level interface`_ defined near the end of the module), some basic
 examples are in reduce_examp.pure. Please note that at present, this module is
-still highly experimental and under heavy development. But the basic
-functionality appears to work, and you're welcome to discuss the new interface
-on the mailing list and/or submit bug reports and patches.
+still experimental and under development. But the basic functionality appears
+to work, and you're welcome to discuss the new interface on the mailing list
+and/or submit bug reports and patches.
 
 Installation
 ============
@@ -101,19 +101,22 @@ provided:
    default when using this module), and the following values may be or'ed
    together to pick what you need:
 
-   | 1: messages whenever garbage collection happens
-   | 2:  messages whenever a module of code is loaded
-   | 4: extra details in the garbage collector messages
+     1 messages whenever garbage collection happens
+
+     2 messages whenever a module of code is loaded
+
+     4 extra details in the garbage collector messages
 
 .. function:: reduce::load name::string
 
-   Loads REDUCE packages. Please check the REDUCE documentation for
-   details.
+   Loads REDUCE packages. This works like REDUCE's ``load_package``
+   command; please check the REDUCE documentation for details.
 
 .. function:: reduce::switch name:string val::int
 
-   Lets you change global REDUCE options. Please check the REDUCE
-   documentation for details.
+   Lets you change global REDUCE options. This works like REDUCE's ``on``
+   and ``off`` declarations; please check the REDUCE documentation for
+   details.
 
 For convenience, the following operations are in the default namespace:
 
@@ -134,19 +137,22 @@ For convenience, the following operations are in the default namespace:
    interface isn't very forgiving if you try to execute invalid Lisp code;
    it will most likely crash in such cases.
 
-.. function:: declare x ys
+.. function:: declare declsym [foo,bar,...]
 
-   Declare symbol properties. Currently, the following common kinds of
-   declarations are supported::
+   Declare symbols and their properties; please see the Declarations
+   section in the Reduce manual for details. The second argument can also
+   be a singleton symbol if the particular kind of declaration permits
+   this. In the present implementation, ``declsym`` must be one of:
 
-     declare operator [foo,bar,...];
-     declare depend [y,x,...];
-     declare nodepend [y,x,...];
-     declare property [x,y,...];
+   * ``operator`` (declares an operator symbol);
 
-   In the latter form, ``property`` can be any of ``even``, ``odd``,
-   ``linear`` and ``symmetric``. ``ys`` can also be a singleton symbol if
-   the declaration permits this. Please see the Reduce manual for details.
+   * ``antisymmetric``, ``symmetric``, ``even``, ``odd``, ``linear``,
+     ``noncom`` and ``nonzero`` (declares properties of already declared
+     operator symbols).
+
+   * ``depend``, ``nodepend``, ``factor``, ``remfac``, ``order``,
+     ``korder`` (declares kernel dependencies and orders, these take both
+     symbols and prefix expressions as arguments).
 
 In Pure land, REDUCE expressions are represented using standard curried
 notation; some special conversions are applied to make arithmetic
@@ -166,7 +172,18 @@ calculations::
   > simplify $ solve (x^2+7) x;
   [x==sqrt 7*i,x==-sqrt 7*i]
 
-Another example showing how to execute Lisp code::
+Note that the result returned by :func:`simplify` is always a quoted
+expression. Even if the expression can be further reduced on the Pure side,
+you'll have to use :func:`eval` to force its evaluation::
+
+  > using math;
+  > eval ans;
+  [x==0.0+:2.64575131106459,x==0.0+:-2.64575131106459]
+
+You can also execute Lisp code in the CSL interpreter hosting the REDUCE
+system. This is sometimes necessary to access special functionality, but
+should be done with care (at present invalid Lisp code can easily crash the
+interpreter). For instance::
 
   > lisp ('list a b c d e);
   [a,b,c,d,e]
@@ -174,10 +191,15 @@ Another example showing how to execute Lisp code::
   [b,[c,d],e]
 
 Note that Lisp forms are represented in curried notation. Free symbols are
-quoted automatically, and Pure lists are converted to corresponding Lisp
+quoted automatically, and Pure lists are mapped to corresponding Lisp
 lists. If the result is a Lisp list, it will be converted back to a Pure
-list. The following example illustrates how you can use the :func:`lisp`
-function to declare an operator symbol and change or query its properties::
+list. Most simple kinds of Lisp calls should be doable that way, but don't
+expect any miracles; the :func:`lisp` function is provided to access
+special functionality in the "symbolic mode" of the REDUCE system, not
+to turn Pure into a full-featured Lisp frontend.
+
+The following example illustrates how you can use the :func:`lisp` function
+to declare an operator symbol and change or query its properties::
 
   > lisp ('operator [myop]);
   []
@@ -188,7 +210,9 @@ function to declare an operator symbol and change or query its properties::
   > simplify (myop (-x));
   -myop x
 
-The same can also be done with the :func:`declare` function as follows::
+If you find it awkward to evaluate Lisp forms in Pure, you can also achieve
+the same with the :func:`declare` function which covers most of the common
+REDUCE declarations that might be needed::
 
   > declare operator myop;
   []
@@ -197,5 +221,6 @@ The same can also be done with the :func:`declare` function as follows::
   > simplify (myop (-x));
   -myop x
 
-Please see reduce_examp.pure and tests.pure for more examples.
+Many more examples can be found in the reduce_examp.pure and tests.pure
+scripts included in the distribution.
 

@@ -20,21 +20,23 @@ pure-reduce
     Kurt Pagani <<kp@scios.ch>> 
   This is a module providing access to the Reduce
 (http://www.reduce-algebra.com/) computer algebra system from Pure. It
-is based on the PROC interface
-(http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup)
-(a "procedural" interface to embed Reduce as a C library). More
-background information and a discussion of the interface can be found
-in the Embedding REDUCE
+uses an "embedded" version of Reduce which can be provided in the form
+of a shared library. The *note Installation: 0. section below describes
+how to build this library from the Reduce sources. More background
+information and a discussion of the interface can be found in the
+Embedding REDUCE
 (http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb)
 thread on the Pure mailing list.
 
-  The interface can be found in reduce.pure (in particular, have a look
-at the *note high-level interface: 3. defined near the end of the
-module), some basic examples are in reduce_examp.pure. Please note that
-at present this module is still experimental and under development. But
-the basic functionality appears to work, and you're welcome to discuss
-the new interface on the mailing list and/or submit bug reports and
-patches.
+  The interface can be found in the reduce.pure module. It actually
+consists of two parts, a *note low-level interface: 3. which consists
+of a number of C entry points provided by the Reduce library, and a
+*note high-level interface: 4. which provides everything that the Pure
+programmer needs to use Reduce from Pure.  Some basic examples are in
+reduce_examp.pure. Please note that at present this module is still
+experimental and under development. But the basic functionality works,
+and you're welcome to discuss the new interface on the mailing list
+and/or submit bug reports and patches.
 
 * Menu:
 
@@ -53,13 +55,13 @@ File: pure-reduce.info,  Node: Installation,  Next: Low-Level Interface,  Prev: 
 Get the latest source from
 <http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz>.
 
-  You'll need both the embedded Reduce library (named reduce.so,
-reduce.dylib or reduce.dll, depending on the system you have) and a
-Reduce image file (reduce.img) to make this module work. A Makefile is
-included with this package so that you can build these yourself from
-the Reduce sources. (In principle, this only needs to be done once for
-the initial installation of this module, but you may want to repeat
-this procedure every once in a while to get the latest Reduce version.)
+  You'll need both the Reduce library (named reduce.so, reduce.dylib or
+reduce.dll, depending on the system you have) and a Reduce image file
+(reduce.img) to make this module work. A Makefile is included with this
+package so that you can build these yourself from the Reduce sources.
+(In principle, this only needs to be done once for the initial
+installation of this module, but you may want to repeat this procedure
+every once in a while to get the latest Reduce version.)
 
   You can check out the latest Reduce version from its svn repository
 with the following command:
@@ -69,14 +71,35 @@ with the following command:
 This may take a while; Reduce is a _big_ package. Once it's finished,
 just drop the resulting reduce-algebra directory into the pure-reduce
 source directory. Run `make' and then (if needed) `make install' in the
-pure-reduce source directory. You should also run `make check' which
-runs a few tests in order to verify that the interface works ok (this
-can be done without installing the package, but needs the Reduce image
-and library).
+pure-reduce directory (_not_ in the reduce-algebra directory!). You
+should also run `make check' which runs a few tests in order to verify
+that the interface works ok (this can be done without installing the
+package, but needs the Reduce image and library).
 
-     Note: In case the above procedure doesn't work for you, there are
-     more detailed instructions on how to compile the relevant parts of
-     Reduce in the pure_reduce.txt file included in the distribution.
+  In case the above procedure doesn't work for you, there are more
+detailed instructions on how to compile the relevant parts of Reduce in
+the pure_reduce.txt file included in the distribution. Also note that
+the pure-reduce module requires neither a full Reduce installation nor
+a full build of the Reduce package; just running `make' in the
+pure-reduce source directory suffices. Thus the additional items
+discussed below are all completely optional.
+
+  For convenience, the Makefile also has a `make reduce' target which
+builds a minimal Reduce executable. If you use that option, `make
+install' installs this executable along with the library and image
+files, so that you can then run Reduce directly from the command line
+by just typing `reduce'. Please note that this is a rather minimalistic
+Reduce frontend; it's small, builds with minimal fuss and doesn't need
+any support files other than the image file, but doesn't have all the
+bells and whistles of the full Reduce version.
+
+  If you want to install the full Reduce version, the easiest way to go
+is to download one of the binary packages available on SourceForge
+(http://sourceforge.net/projects/reduce-algebra/). You can also build
+Reduce yourself from the sources; please check the build instructions in
+the reduce-algebra folder for details. (Basically, you'll need to run
+`./configure --with-csl' or `./configure --with-psl' and then `make'
+there. Be patient, this takes a while.)
 
 
 File: pure-reduce.info,  Node: Low-Level Interface,  Next: High-Level Interface,  Prev: Installation,  Up: Top
@@ -84,13 +107,16 @@ File: pure-reduce.info,  Node: Low-Level Interface,  Next: High-Level Interface,
 2 Low-Level Interface
 *********************
 
-The low-level interface is a straight wrapper of the PROC interface
-(http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup),
-please check the proc.h file in the Reduce sources for details. These
-routines are all in the `reduce' namespace. Normally you shouldn't have
-to call these functions directly, since we provide a high-level,
-idiomatic Pure interface which makes calling Reduce from Pure much more
-convenient.
+The low-level interface is a straight wrapper of the C entry points
+provided by the Reduce library, also known as the "procedural" or PROC
+(http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup)
+interface, for short. It uses an embedded version of Reduce which runs
+on a free and open-source Lisp flavour known as CSL
+(http://lisp.codemist.co.uk/) (Codemist Standard Lisp). The external C
+routines are all declared in the `reduce' namespace. Normally you
+shouldn't have to call these functions directly, since we provide a
+high-level, idiomatic Pure interface which makes calling Reduce from
+Pure much more convenient, see below.
 
 
 File: pure-reduce.info,  Node: High-Level Interface,  Next: Basic Examples,  Prev: Low-Level Interface,  Up: Top
@@ -105,28 +131,27 @@ provided:
 
  -- variable: REDUCE_PATH
      This variable holds a colon-delimited search path used to locate
-     the Reduce image file (see *note reduce start: 9. below). By
+     the Reduce image file (see *note reduce start: b. below). By
      default this includes the current directory and the Pure library
      directory.
 
  -- Function: reduce::start image::string args::smatrix
      Initializes the Reduce system. This is done automatically when
      loading this module, so normally you shouldn't have to call this
-     manually, unless the image file isn't found or you want to restart
-     the Reduce system with your own image file or your own set of
-     options. In any case, this needs to be executed once before
-     calling any other operation of this module. When calling this
-     operation manually, you need to specify the name of the Reduce
-     image file and any desired extra arguments as a string vector.
-     Unless the filename contains a slash, *note reduce start: 9.
-     searches the directories in *note REDUCE_PATH: 8. for the image
-     file. An exception is raised if the image file isn't found.
+     manually, unless the default image file wasn't found or you want
+     to restart the Reduce system with your own image file or your own
+     set of options. When calling this operation manually, you need to
+     specify the name of the Reduce image file and any desired extra
+     arguments as a string vector.  Unless the filename contains a
+     slash, *note reduce start: b. searches the directories in *note
+     REDUCE_PATH: a. for the image file. An exception is raised if the
+     image file isn't found.
 
  -- Function: reduce::finish
      Finalizes the Reduce system. You can call this to release the
-     resources of the Reduce system. (*note reduce start: 9. also
+     resources of the Reduce system. (*note reduce start: b. also
      invokes this automatically if a Reduce instance is already
-     running, so it isn't necessary to call *note reduce finish: a. in
+     running, so it isn't necessary to call *note reduce finish: c. in
      this case.)
 
  -- Function: reduce::verbosity n
@@ -195,6 +220,11 @@ namespace:
      internal precision, floating point values are still returned as
      double precision numbers in Pure land.
 
+ -- Function: plotreset
+     This is identical to the `plotreset' command provided by Reduce's
+     gnuplot (http://www.gnuplot.info/) interface, and is sometimes
+     needed to reset the plot subsystem.
+
   At present, this module makes no attempt to capture terminal output
 such as error messages produced by Reduce, so you should be prepared to
 read these in the terminal in which Pure is running, or capture them
@@ -229,7 +259,7 @@ calculations:
     > simplify $ solve (x^2+7) x;
     [x==sqrt 7*i,x==-sqrt 7*i]
 
-Note that the result returned by *note simplify: e. is always a quoted
+Note that the result returned by *note simplify: 10. is always a quoted
 expression. If the expression can be further reduced on the Pure side,
 you'll have to use Pure's `eval' function to force its evaluation:
 
@@ -250,12 +280,12 @@ the interpreter). For instance:
 Free symbols are quoted automatically, and Pure lists are mapped to
 corresponding Lisp lists. If the result is a Lisp list, it will be
 converted back to a Pure list. Most simple kinds of Lisp calls should be
-doable that way, but don't expect any miracles; the *note lisp: f.
+doable that way, but don't expect any miracles; the *note lisp: 11.
 function is provided to access special functionality in the "symbolic
 mode" of the Reduce system, not to turn Pure into a full-featured Lisp
 frontend.
 
-  The following example illustrates how you can use the *note lisp: f.
+  The following example illustrates how you can use the *note lisp: 11.
 function to declare an operator symbol and change or query its
 properties:
 
@@ -269,7 +299,7 @@ properties:
     -myop x
 
 If you find it awkward to evaluate Lisp forms in Pure, you can also
-achieve the same with the *note declare: 10. function which covers most
+achieve the same with the *note declare: 12. function which covers most
 of the common Reduce declarations that might be needed:
 
     > declare operator myop;
@@ -278,6 +308,12 @@ of the common Reduce declarations that might be needed:
     []
     > simplify (myop (-x));
     -myop x
+
+This example shows how you can do a simple plot using Reduce's gnuplot
+(http://www.gnuplot.info/) module:
+
+    > simplify $ plot [sin x/x, x=='(-20..20), terminal=="wxt", title=="sinc"];
+    0
 
 Many more examples can be found in the reduce_examp.pure and tests.pure
 scripts included in the distribution.
@@ -291,69 +327,89 @@ Index
  [index ]
 * Menu:
 
-* declare function:                      High-Level Interface. (line 76)
-* lisp function:                         High-Level Interface. (line 67)
-* precision function:                    High-Level Interface. (line 95)
-* reduce finish function:                High-Level Interface. (line 30)
-* reduce load function:                  High-Level Interface. (line 48)
-* reduce module:                         Top.                  (line  6)
-* reduce start function:                 High-Level Interface. (line 17)
-* reduce switch function:                High-Level Interface. (line 52)
-* reduce verbosity function:             High-Level Interface. (line 37)
-* REDUCE_PATH variable:                  High-Level Interface. (line 11)
-* simplify function:                     High-Level Interface. (line 60)
+* declare function:                      High-Level Interface.
+                                                              (line  75)
+* lisp function:                         High-Level Interface.
+                                                              (line  66)
+* plotreset function:                    High-Level Interface.
+                                                              (line 102)
+* precision function:                    High-Level Interface.
+                                                              (line  94)
+* reduce finish function:                High-Level Interface.
+                                                              (line  29)
+* reduce load function:                  High-Level Interface.
+                                                              (line  47)
+* reduce module:                         Top.                 (line   6)
+* reduce start function:                 High-Level Interface.
+                                                              (line  17)
+* reduce switch function:                High-Level Interface.
+                                                              (line  51)
+* reduce verbosity function:             High-Level Interface.
+                                                              (line  36)
+* REDUCE_PATH variable:                  High-Level Interface.
+                                                              (line  11)
+* simplify function:                     High-Level Interface.
+                                                              (line  59)
 
 
 
 Tag Table:
 Node: Top294
-Ref: 01027
-Ref: reduce1027
-Ref: 11027
-Ref: proc-interface1027
-Ref: 21027
-Ref: embedding-reduce1027
-Node: Installation1563
-Ref: installation1660
-Ref: 41660
-Ref: module-reduce1660
-Ref: 51660
-Ref: a-reduce-interface-for-the-pure-programming-language1660
-Ref: 61660
-Node: Low-Level Interface3118
-Ref: low-level interface3232
-Ref: 73232
-Ref: low-level-interface3232
-Node: High-Level Interface3741
-Ref: high-level interface3857
-Ref: 33857
-Ref: high-level-interface3857
-Ref: 84133
-Ref: reduce_path4133
-Ref: 94382
-Ref: reduce start4382
-Ref: a5184
-Ref: reduce finish5184
-Ref: b5499
-Ref: reduce verbosity5499
-Ref: c5899
-Ref: reduce load5899
-Ref: d6073
-Ref: reduce switch6073
-Ref: e6358
-Ref: simplify6358
-Ref: f6673
-Ref: lisp6673
-Ref: 107173
-Ref: declare7173
-Ref: 118064
-Ref: precision8064
-Node: Basic Examples9549
-Ref: basic examples9651
-Ref: 129651
-Ref: basic-examples9651
-Node: Index11760
-Ref: index11833
+Ref: 11028
+Ref: reduce1028
+Ref: 21028
+Ref: embedding-reduce1028
+Node: Installation1727
+Ref: installation1824
+Ref: 51824
+Ref: module-reduce1824
+Ref: 61824
+Ref: a-reduce-interface-for-the-pure-programming-language1824
+Ref: 01824
+Ref: 74543
+Ref: sourceforge4543
+Node: Low-Level Interface4543
+Ref: low-level interface4657
+Ref: 34657
+Ref: low-level-interface4657
+Ref: 85380
+Ref: proc5380
+Ref: 95380
+Ref: csl5380
+Node: High-Level Interface5380
+Ref: high-level interface5496
+Ref: 45496
+Ref: high-level-interface5496
+Ref: a5772
+Ref: reduce_path5772
+Ref: b6021
+Ref: reduce start6021
+Ref: c6733
+Ref: reduce finish6733
+Ref: d7048
+Ref: reduce verbosity7048
+Ref: e7448
+Ref: reduce load7448
+Ref: f7622
+Ref: reduce switch7622
+Ref: 107907
+Ref: simplify7907
+Ref: 118222
+Ref: lisp8222
+Ref: 128722
+Ref: declare8722
+Ref: 139613
+Ref: precision9613
+Ref: 1410037
+Ref: plotreset10037
+Ref: 1510242
+Ref: gnuplot10242
+Node: Basic Examples11303
+Ref: basic examples11405
+Ref: 1611405
+Ref: basic-examples11405
+Node: Index13711
+Ref: index13784
 
 End Tag Table
 

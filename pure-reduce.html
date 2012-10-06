@@ -63,21 +63,24 @@
 <div class="line">Kurt Pagani &lt;<a class="reference external" href="mailto:kp&#37;&#52;&#48;scios&#46;ch">kp<span>&#64;</span>scios<span>&#46;</span>ch</a>&gt;</div>
 </div>
 <p>This is a module providing access to the <a class="reference external" href="http://www.reduce-algebra.com/">Reduce</a> computer algebra system from
-Pure. It is based on the <a class="reference external" href="http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup">PROC interface</a> (a &#8220;procedural&#8221; interface to embed
-Reduce as a C library). More background information and a discussion of the
-interface can be found in the <a class="reference external" href="http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb">Embedding REDUCE</a> thread on the Pure mailing
-list.</p>
-<p>The interface can be found in reduce.pure (in particular, have a look at the
-<a class="reference internal" href="#high-level-interface">high-level interface</a> defined near the end of the module), some basic
-examples are in reduce_examp.pure. Please note that at present this module is
-still experimental and under development. But the basic functionality appears
-to work, and you&#8217;re welcome to discuss the new interface on the mailing list
-and/or submit bug reports and patches.</p>
+Pure. It uses an &#8220;embedded&#8221; version of Reduce which can be provided in the
+form of a shared library. The <a class="reference internal" href="#installation">Installation</a> section below describes how to
+build this library from the Reduce sources. More background information and a
+discussion of the interface can be found in the <a class="reference external" href="http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb">Embedding REDUCE</a> thread on
+the Pure mailing list.</p>
+<p>The interface can be found in the reduce.pure module. It actually consists of
+two parts, a <a class="reference internal" href="#low-level-interface">low-level interface</a> which consists of a number of C entry
+points provided by the Reduce library, and a <a class="reference internal" href="#high-level-interface">high-level interface</a> which
+provides everything that the Pure programmer needs to use Reduce from Pure.
+Some basic examples are in reduce_examp.pure. Please note that at present this
+module is still experimental and under development. But the basic
+functionality works, and you&#8217;re welcome to discuss the new interface on the
+mailing list and/or submit bug reports and patches.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>Get the latest source from
 <a class="reference external" href="http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz">http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz</a>.</p>
-<p>You&#8217;ll need both the embedded Reduce library (named reduce.so, reduce.dylib or
+<p>You&#8217;ll need both the Reduce library (named reduce.so, reduce.dylib or
 reduce.dll, depending on the system you have) and a Reduce image file
 (reduce.img) to make this module work. A Makefile is included with this
 package so that you can build these yourself from the Reduce sources. (In
@@ -92,23 +95,41 @@ following command:</p>
 <p>This may take a while; Reduce is a <em>big</em> package. Once it&#8217;s finished, just
 drop the resulting reduce-algebra directory into the pure-reduce source
 directory. Run <tt class="docutils literal"><span class="pre">make</span></tt> and then (if needed) <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> in the
-pure-reduce source directory. You should also run <tt class="docutils literal"><span class="pre">make</span> <span class="pre">check</span></tt> which runs a
-few tests in order to verify that the interface works ok (this can be done
-without installing the package, but needs the Reduce image and library).</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">In case the above procedure doesn&#8217;t work for you, there are more
-detailed instructions on how to compile the relevant parts of Reduce in the
-pure_reduce.txt file included in the distribution.</p>
-</div>
+pure-reduce directory (<em>not</em> in the reduce-algebra directory!). You should
+also run <tt class="docutils literal"><span class="pre">make</span> <span class="pre">check</span></tt> which runs a few tests in order to verify that the
+interface works ok (this can be done without installing the package, but needs
+the Reduce image and library).</p>
+<p>In case the above procedure doesn&#8217;t work for you, there are more detailed
+instructions on how to compile the relevant parts of Reduce in the
+pure_reduce.txt file included in the distribution. Also note that the
+pure-reduce module requires neither a full Reduce installation nor a full
+build of the Reduce package; just running <tt class="docutils literal"><span class="pre">make</span></tt> in the pure-reduce source
+directory suffices. Thus the additional items discussed below are all
+completely optional.</p>
+<p>For convenience, the Makefile also has a <tt class="docutils literal"><span class="pre">make</span> <span class="pre">reduce</span></tt> target which builds a
+minimal Reduce executable. If you use that option, <tt class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></tt> installs
+this executable along with the library and image files, so that you can then
+run Reduce directly from the command line by just typing <tt class="docutils literal"><span class="pre">reduce</span></tt>. Please
+note that this is a rather minimalistic Reduce frontend; it&#8217;s small, builds
+with minimal fuss and doesn&#8217;t need any support files other than the image
+file, but doesn&#8217;t have all the bells and whistles of the full Reduce version.</p>
+<p>If you want to install the full Reduce version, the easiest way to go is to
+download one of the binary packages available on <a class="reference external" href="http://sourceforge.net/projects/reduce-algebra/">SourceForge</a>. You can also
+build Reduce yourself from the sources; please check the build instructions in
+the reduce-algebra folder for details. (Basically, you&#8217;ll need to run
+<tt class="docutils literal"><span class="pre">./configure</span> <span class="pre">--with-csl</span></tt> or <tt class="docutils literal"><span class="pre">./configure</span> <span class="pre">--with-psl</span></tt> and then <tt class="docutils literal"><span class="pre">make</span></tt>
+there. Be patient, this takes a while.)</p>
 </div>
 <div class="section" id="low-level-interface">
 <h2>Low-Level Interface<a class="headerlink" href="#low-level-interface" title="Permalink to this headline">¶</a></h2>
-<p>The low-level interface is a straight wrapper of the <a class="reference external" href="http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup">PROC interface</a>,
-please check the proc.h file in the Reduce sources for details. These
-routines are all in the <tt class="docutils literal"><span class="pre">reduce</span></tt> namespace. Normally you shouldn&#8217;t have
-to call these functions directly, since we provide a high-level, idiomatic
-Pure interface which makes calling Reduce from Pure much more convenient.</p>
+<p>The low-level interface is a straight wrapper of the C entry points
+provided by the Reduce library, also known as the &#8220;procedural&#8221; or <a class="reference external" href="http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup">PROC</a>
+interface, for short. It uses an embedded version of Reduce which runs on a
+free and open-source Lisp flavour known as <a class="reference external" href="http://lisp.codemist.co.uk/">CSL</a> (Codemist Standard
+Lisp). The external C routines are all declared in the <tt class="docutils literal"><span class="pre">reduce</span></tt>
+namespace. Normally you shouldn&#8217;t have to call these functions directly,
+since we provide a high-level, idiomatic Pure interface which makes calling
+Reduce from Pure much more convenient, see below.</p>
 </div>
 <div class="section" id="high-level-interface">
 <h2>High-Level Interface<a class="headerlink" href="#high-level-interface" title="Permalink to this headline">¶</a></h2>
@@ -129,14 +150,13 @@ includes the current directory and the Pure library directory.</p>
 <tt class="descclassname">reduce::</tt><tt class="descname">start</tt> image::string args::smatrix<a class="headerlink" href="#reduce::start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes the Reduce system. This is done automatically when loading
 this module, so normally you shouldn&#8217;t have to call this manually,
-unless the image file isn&#8217;t found or you want to restart the Reduce
-system with your own image file or your own set of options. In any
-case, this needs to be executed once before calling any other operation
-of this module. When calling this operation manually, you need to
-specify the name of the Reduce image file and any desired extra
-arguments as a string vector. Unless the filename contains a slash,
-<a class="reference internal" href="#reduce::start" title="reduce::start"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::start</span></tt></a> searches the directories in <a class="reference internal" href="#REDUCE_PATH" title="REDUCE_PATH"><tt class="xref pure pure-var docutils literal"><span class="pre">REDUCE_PATH</span></tt></a> for
-the image file. An exception is raised if the image file isn&#8217;t found.</p>
+unless the default image file wasn&#8217;t found or you want to restart the
+Reduce system with your own image file or your own set of options. When
+calling this operation manually, you need to specify the name of the
+Reduce image file and any desired extra arguments as a string vector.
+Unless the filename contains a slash, <a class="reference internal" href="#reduce::start" title="reduce::start"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::start</span></tt></a> searches the
+directories in <a class="reference internal" href="#REDUCE_PATH" title="REDUCE_PATH"><tt class="xref pure pure-var docutils literal"><span class="pre">REDUCE_PATH</span></tt></a> for the image file. An exception is
+raised if the image file isn&#8217;t found.</p>
 </dd></dl>
 
 <dl class="function">
@@ -230,6 +250,13 @@ floating point values are still returned as double precision numbers in
 Pure land.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="plotreset">
+<tt class="descname">plotreset</tt><a class="headerlink" href="#plotreset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is identical to the <tt class="docutils literal"><span class="pre">plotreset</span></tt> command provided by Reduce&#8217;s
+<a class="reference external" href="http://www.gnuplot.info/">gnuplot</a> interface, and is sometimes needed to reset the plot subsystem.</p>
+</dd></dl>
+
 <p>At present, this module makes no attempt to capture terminal output such as
 error messages produced by Reduce, so you should be prepared to read these
 in the terminal in which Pure is running, or capture them yourself using
@@ -304,6 +331,12 @@ Reduce declarations that might be needed:</p>
 []
 <span class="gp">&gt; </span>simplify (myop (-x))<span class="p">;</span>
 -myop x
+</pre></div>
+</div>
+<p>This example shows how you can do a simple plot using Reduce&#8217;s <a class="reference external" href="http://www.gnuplot.info/">gnuplot</a>
+module:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ plot [sin x/x, x==&#39;(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;wxt&quot;</span>, title==<span class="s">&quot;sinc&quot;</span>]<span class="p">;</span>
+<span class="mi">0</span>
 </pre></div>
 </div>
 <p>Many more examples can be found in the reduce_examp.pure and tests.pure

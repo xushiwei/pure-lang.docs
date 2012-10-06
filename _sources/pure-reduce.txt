@@ -12,21 +12,23 @@ Version 0.1, |today|
 | Kurt Pagani <kp@scios.ch>
 
 This is a module providing access to the Reduce_ computer algebra system from
-Pure. It is based on the `PROC interface`_ (a "procedural" interface to embed
-Reduce as a C library). More background information and a discussion of the
-interface can be found in the `Embedding REDUCE`_ thread on the Pure mailing
-list.
+Pure. It uses an "embedded" version of Reduce which can be provided in the
+form of a shared library. The Installation_ section below describes how to
+build this library from the Reduce sources. More background information and a
+discussion of the interface can be found in the `Embedding REDUCE`_ thread on
+the Pure mailing list.
 
 .. _Reduce: http://www.reduce-algebra.com/
-.. _PROC interface: http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup
 .. _Embedding REDUCE: http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb
 
-The interface can be found in reduce.pure (in particular, have a look at the
-`high-level interface`_ defined near the end of the module), some basic
-examples are in reduce_examp.pure. Please note that at present this module is
-still experimental and under development. But the basic functionality appears
-to work, and you're welcome to discuss the new interface on the mailing list
-and/or submit bug reports and patches.
+The interface can be found in the reduce.pure module. It actually consists of
+two parts, a `low-level interface`_ which consists of a number of C entry
+points provided by the Reduce library, and a `high-level interface`_ which
+provides everything that the Pure programmer needs to use Reduce from Pure.
+Some basic examples are in reduce_examp.pure. Please note that at present this
+module is still experimental and under development. But the basic
+functionality works, and you're welcome to discuss the new interface on the
+mailing list and/or submit bug reports and patches.
 
 Installation
 ============
@@ -34,7 +36,7 @@ Installation
 Get the latest source from
 http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz.
 
-You'll need both the embedded Reduce library (named reduce.so, reduce.dylib or
+You'll need both the Reduce library (named reduce.so, reduce.dylib or
 reduce.dll, depending on the system you have) and a Reduce image file
 (reduce.img) to make this module work. A Makefile is included with this
 package so that you can build these yourself from the Reduce sources. (In
@@ -52,23 +54,51 @@ following command:
 This may take a while; Reduce is a *big* package. Once it's finished, just
 drop the resulting reduce-algebra directory into the pure-reduce source
 directory. Run ``make`` and then (if needed) ``make install`` in the
-pure-reduce source directory. You should also run ``make check`` which runs a
-few tests in order to verify that the interface works ok (this can be done
-without installing the package, but needs the Reduce image and library).
+pure-reduce directory (*not* in the reduce-algebra directory!). You should
+also run ``make check`` which runs a few tests in order to verify that the
+interface works ok (this can be done without installing the package, but needs
+the Reduce image and library).
 
-.. note:: In case the above procedure doesn't work for you, there are more
-   detailed instructions on how to compile the relevant parts of Reduce in the
-   pure_reduce.txt file included in the distribution.
+In case the above procedure doesn't work for you, there are more detailed
+instructions on how to compile the relevant parts of Reduce in the
+pure_reduce.txt file included in the distribution. Also note that the
+pure-reduce module requires neither a full Reduce installation nor a full
+build of the Reduce package; just running ``make`` in the pure-reduce source
+directory suffices. Thus the additional items discussed below are all
+completely optional.
+
+For convenience, the Makefile also has a ``make reduce`` target which builds a
+minimal Reduce executable. If you use that option, ``make install`` installs
+this executable along with the library and image files, so that you can then
+run Reduce directly from the command line by just typing ``reduce``. Please
+note that this is a rather minimalistic Reduce frontend; it's small, builds
+with minimal fuss and doesn't need any support files other than the image
+file, but doesn't have all the bells and whistles of the full Reduce version.
+
+If you want to install the full Reduce version, the easiest way to go is to
+download one of the binary packages available on SourceForge_. You can also
+build Reduce yourself from the sources; please check the build instructions in
+the reduce-algebra folder for details. (Basically, you'll need to run
+``./configure --with-csl`` or ``./configure --with-psl`` and then ``make``
+there. Be patient, this takes a while.)
+
+.. _SourceForge: http://sourceforge.net/projects/reduce-algebra/
 ..
 
 Low-Level Interface
 ===================
 
-The low-level interface is a straight wrapper of the `PROC interface`_,
-please check the proc.h file in the Reduce sources for details. These
-routines are all in the ``reduce`` namespace. Normally you shouldn't have
-to call these functions directly, since we provide a high-level, idiomatic
-Pure interface which makes calling Reduce from Pure much more convenient.
+The low-level interface is a straight wrapper of the C entry points
+provided by the Reduce library, also known as the "procedural" or PROC_
+interface, for short. It uses an embedded version of Reduce which runs on a
+free and open-source Lisp flavour known as CSL_ (Codemist Standard
+Lisp). The external C routines are all declared in the ``reduce``
+namespace. Normally you shouldn't have to call these functions directly,
+since we provide a high-level, idiomatic Pure interface which makes calling
+Reduce from Pure much more convenient, see below.
+
+.. _PROC: http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup
+.. _CSL: http://lisp.codemist.co.uk/
 
 ..
 
@@ -90,14 +120,13 @@ provided:
 
    Initializes the Reduce system. This is done automatically when loading
    this module, so normally you shouldn't have to call this manually,
-   unless the image file isn't found or you want to restart the Reduce
-   system with your own image file or your own set of options. In any
-   case, this needs to be executed once before calling any other operation
-   of this module. When calling this operation manually, you need to
-   specify the name of the Reduce image file and any desired extra
-   arguments as a string vector. Unless the filename contains a slash,
-   :func:`reduce::start` searches the directories in :var:`REDUCE_PATH` for
-   the image file. An exception is raised if the image file isn't found.
+   unless the default image file wasn't found or you want to restart the
+   Reduce system with your own image file or your own set of options. When
+   calling this operation manually, you need to specify the name of the
+   Reduce image file and any desired extra arguments as a string vector.
+   Unless the filename contains a slash, :func:`reduce::start` searches the
+   directories in :var:`REDUCE_PATH` for the image file. An exception is
+   raised if the image file isn't found.
 
 .. function:: reduce::finish
 
@@ -177,6 +206,13 @@ For convenience, the following operations are in the default namespace:
    floating point values are still returned as double precision numbers in
    Pure land.
 
+.. function:: plotreset
+
+   This is identical to the ``plotreset`` command provided by Reduce's
+   gnuplot_ interface, and is sometimes needed to reset the plot subsystem.
+
+.. _gnuplot: http://www.gnuplot.info/
+
 At present, this module makes no attempt to capture terminal output such as
 error messages produced by Reduce, so you should be prepared to read these
 in the terminal in which Pure is running, or capture them yourself using
@@ -255,6 +291,12 @@ Reduce declarations that might be needed::
   []
   > simplify (myop (-x));
   -myop x
+
+This example shows how you can do a simple plot using Reduce's gnuplot_
+module::
+
+  > simplify $ plot [sin x/x, x=='(-20..20), terminal=="wxt", title=="sinc"];
+  0
 
 Many more examples can be found in the reduce_examp.pure and tests.pure
 scripts included in the distribution.

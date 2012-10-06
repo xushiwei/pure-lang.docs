@@ -41,17 +41,20 @@ Albert Graef <@email{Dr.Graef@@t-online.de}>@w{ }
 Kurt Pagani <@email{kp@@scios.ch}>@w{ }
 @end display
 This is a module providing access to the @uref{http://www.reduce-algebra.com/,Reduce} computer algebra system from
-Pure. It is based on the @uref{http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup,PROC interface} (a "procedural" interface to embed
-Reduce as a C library). More background information and a discussion of the
-interface can be found in the @uref{http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb,Embedding REDUCE} thread on the Pure mailing
-list.
+Pure. It uses an "embedded" version of Reduce which can be provided in the
+form of a shared library. The @pxref{0,,Installation} section below describes how to
+build this library from the Reduce sources. More background information and a
+discussion of the interface can be found in the @uref{http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb,Embedding REDUCE} thread on
+the Pure mailing list.
 
-@anchor{0}@anchor{reduce}@anchor{1}@anchor{proc-interface}@anchor{2}@anchor{embedding-reduce}The interface can be found in reduce.pure (in particular, have a look at the
-@pxref{3,,high-level interface} defined near the end of the module), some basic
-examples are in reduce_examp.pure. Please note that at present this module is
-still experimental and under development. But the basic functionality appears
-to work, and you're welcome to discuss the new interface on the mailing list
-and/or submit bug reports and patches.
+@anchor{1}@anchor{reduce}@anchor{2}@anchor{embedding-reduce}The interface can be found in the reduce.pure module. It actually consists of
+two parts, a @pxref{3,,low-level interface} which consists of a number of C entry
+points provided by the Reduce library, and a @pxref{4,,high-level interface} which
+provides everything that the Pure programmer needs to use Reduce from Pure.
+Some basic examples are in reduce_examp.pure. Please note that at present this
+module is still experimental and under development. But the basic
+functionality works, and you're welcome to discuss the new interface on the
+mailing list and/or submit bug reports and patches.
 
 
 @menu
@@ -64,12 +67,12 @@ and/or submit bug reports and patches.
 
 
 @node Installation,Low-Level Interface,Top,Top
-@anchor{installation}@anchor{4}@anchor{module-reduce}@anchor{5}@anchor{a-reduce-interface-for-the-pure-programming-language}@anchor{6}
+@anchor{installation}@anchor{5}@anchor{module-reduce}@anchor{6}@anchor{a-reduce-interface-for-the-pure-programming-language}@anchor{0}
 @chapter Installation
 Get the latest source from
 @indicateurl{http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz}.
 
-You'll need both the embedded Reduce library (named reduce.so, reduce.dylib or
+You'll need both the Reduce library (named reduce.so, reduce.dylib or
 reduce.dll, depending on the system you have) and a Reduce image file
 (reduce.img) to make this module work. A Makefile is included with this
 package so that you can build these yourself from the Reduce sources. (In
@@ -88,32 +91,50 @@ svn co https://reduce-algebra.svn.sourceforge.net/svnroot/reduce-algebra/trunk/ 
 This may take a while; Reduce is a @emph{big} package. Once it's finished, just
 drop the resulting reduce-algebra directory into the pure-reduce source
 directory. Run @code{make} and then (if needed) @code{make install} in the
-pure-reduce source directory. You should also run @code{make check} which runs a
-few tests in order to verify that the interface works ok (this can be done
-without installing the package, but needs the Reduce image and library).
+pure-reduce directory (@emph{not} in the reduce-algebra directory!). You should
+also run @code{make check} which runs a few tests in order to verify that the
+interface works ok (this can be done without installing the package, but needs
+the Reduce image and library).
 
+In case the above procedure doesn't work for you, there are more detailed
+instructions on how to compile the relevant parts of Reduce in the
+pure_reduce.txt file included in the distribution. Also note that the
+pure-reduce module requires neither a full Reduce installation nor a full
+build of the Reduce package; just running @code{make} in the pure-reduce source
+directory suffices. Thus the additional items discussed below are all
+completely optional.
 
-@cartouche
-@quotation Note
-In case the above procedure doesn't work for you, there are more
-detailed instructions on how to compile the relevant parts of Reduce in the
-pure_reduce.txt file included in the distribution.
-@end quotation
-@end cartouche
+For convenience, the Makefile also has a @code{make reduce} target which builds a
+minimal Reduce executable. If you use that option, @code{make install} installs
+this executable along with the library and image files, so that you can then
+run Reduce directly from the command line by just typing @code{reduce}. Please
+note that this is a rather minimalistic Reduce frontend; it's small, builds
+with minimal fuss and doesn't need any support files other than the image
+file, but doesn't have all the bells and whistles of the full Reduce version.
 
+If you want to install the full Reduce version, the easiest way to go is to
+download one of the binary packages available on @uref{http://sourceforge.net/projects/reduce-algebra/,SourceForge}. You can also
+build Reduce yourself from the sources; please check the build instructions in
+the reduce-algebra folder for details. (Basically, you'll need to run
+@code{./configure --with-csl} or @code{./configure --with-psl} and then @code{make}
+there. Be patient, this takes a while.)
 
+@anchor{7}@anchor{sourceforge}
 @node Low-Level Interface,High-Level Interface,Installation,Top
-@anchor{low-level interface}@anchor{7}@anchor{low-level-interface}
+@anchor{low-level interface}@anchor{3}@anchor{low-level-interface}
 @chapter Low-Level Interface
-The low-level interface is a straight wrapper of the @uref{http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup,PROC interface},
-please check the proc.h file in the Reduce sources for details. These
-routines are all in the @code{reduce} namespace. Normally you shouldn't have
-to call these functions directly, since we provide a high-level, idiomatic
-Pure interface which makes calling Reduce from Pure much more convenient.
+The low-level interface is a straight wrapper of the C entry points
+provided by the Reduce library, also known as the "procedural" or @uref{http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/csl/cslbase/proc.h?view=markup,PROC}
+interface, for short. It uses an embedded version of Reduce which runs on a
+free and open-source Lisp flavour known as @uref{http://lisp.codemist.co.uk/,CSL} (Codemist Standard
+Lisp). The external C routines are all declared in the @code{reduce}
+namespace. Normally you shouldn't have to call these functions directly,
+since we provide a high-level, idiomatic Pure interface which makes calling
+Reduce from Pure much more convenient, see below.
 
-
+@anchor{8}@anchor{proc}@anchor{9}@anchor{csl}
 @node High-Level Interface,Basic Examples,Low-Level Interface,Top
-@anchor{high-level interface}@anchor{3}@anchor{high-level-interface}
+@anchor{high-level interface}@anchor{4}@anchor{high-level-interface}
 @chapter High-Level Interface
 The goal here is to make it easy to run Reduce from Pure; to these ends,
 the most important features of the low-level PROC interface are wrapped in
@@ -121,42 +142,41 @@ a convenient way. Currently the following variables and functions are
 provided:
 
 @geindex REDUCE_PATH variable
-@anchor{8}@anchor{reduce_path}
+@anchor{a}@anchor{reduce_path}
 @deffn {variable} REDUCE_PATH
 
 This variable holds a colon-delimited search path used to locate the
-Reduce image file (see @pxref{9,,reduce start} below). By default this
+Reduce image file (see @pxref{b,,reduce start} below). By default this
 includes the current directory and the Pure library directory.
 @end deffn
 
 @geindex reduce start function
-@anchor{9}@anchor{reduce start}
+@anchor{b}@anchor{reduce start}
 @deffn {Function} reduce::start image::string args::smatrix
 
 Initializes the Reduce system. This is done automatically when loading
 this module, so normally you shouldn't have to call this manually,
-unless the image file isn't found or you want to restart the Reduce
-system with your own image file or your own set of options. In any
-case, this needs to be executed once before calling any other operation
-of this module. When calling this operation manually, you need to
-specify the name of the Reduce image file and any desired extra
-arguments as a string vector. Unless the filename contains a slash,
-@pxref{9,,reduce start} searches the directories in @pxref{8,,REDUCE_PATH} for
-the image file. An exception is raised if the image file isn't found.
+unless the default image file wasn't found or you want to restart the
+Reduce system with your own image file or your own set of options. When
+calling this operation manually, you need to specify the name of the
+Reduce image file and any desired extra arguments as a string vector.
+Unless the filename contains a slash, @pxref{b,,reduce start} searches the
+directories in @pxref{a,,REDUCE_PATH} for the image file. An exception is
+raised if the image file isn't found.
 @end deffn
 
 @geindex reduce finish function
-@anchor{a}@anchor{reduce finish}
+@anchor{c}@anchor{reduce finish}
 @deffn {Function} reduce::finish
 
 Finalizes the Reduce system. You can call this to release the resources
-of the Reduce system. (@pxref{9,,reduce start} also invokes this
+of the Reduce system. (@pxref{b,,reduce start} also invokes this
 automatically if a Reduce instance is already running, so it isn't
-necessary to call @pxref{a,,reduce finish} in this case.)
+necessary to call @pxref{c,,reduce finish} in this case.)
 @end deffn
 
 @geindex reduce verbosity function
-@anchor{b}@anchor{reduce verbosity}
+@anchor{d}@anchor{reduce verbosity}
 @deffn {Function} reduce::verbosity n
 
 Sets the verbosity level; 0 means no messages at all (which is the
@@ -173,7 +193,7 @@ together to pick what you need:
 @end deffn
 
 @geindex reduce load function
-@anchor{c}@anchor{reduce load}
+@anchor{e}@anchor{reduce load}
 @deffn {Function} reduce::load name::string
 
 Loads Reduce packages. This works like Reduce's @code{load_package}
@@ -181,7 +201,7 @@ command; please check the Reduce documentation for details.
 @end deffn
 
 @geindex reduce switch function
-@anchor{d}@anchor{reduce switch}
+@anchor{f}@anchor{reduce switch}
 @deffn {Function} reduce::switch name:string val::int
 
 Lets you change global Reduce options. This works like Reduce's @code{on}
@@ -192,7 +212,7 @@ details.
 For convenience, the following operations are in the default namespace:
 
 @geindex simplify function
-@anchor{e}@anchor{simplify}
+@anchor{10}@anchor{simplify}
 @deffn {Function} simplify x
 
 This is the main entry point. It takes an algebraic expression in Pure
@@ -202,7 +222,7 @@ want to prevent it from being evaluated on the Pure side.
 @end deffn
 
 @geindex lisp function
-@anchor{f}@anchor{lisp}
+@anchor{11}@anchor{lisp}
 @deffn {Function} lisp x
 
 This can be used to execute arbitrary Lisp code, which is sometimes
@@ -215,7 +235,7 @@ likely crash in such cases.
 @end deffn
 
 @geindex declare function
-@anchor{10}@anchor{declare}
+@anchor{12}@anchor{declare}
 @deffn {Function} declare declsym [foo,bar,...]
 
 Declare symbols and their properties; please see the Declarations
@@ -241,7 +261,7 @@ simplifications).
 @end deffn
 
 @geindex precision function
-@anchor{11}@anchor{precision}
+@anchor{13}@anchor{precision}
 @deffn {Function} precision prec::int
 
 Sets the internal Reduce precision in decimal digits for floating point
@@ -252,7 +272,15 @@ floating point values are still returned as double precision numbers in
 Pure land.
 @end deffn
 
-At present, this module makes no attempt to capture terminal output such as
+@geindex plotreset function
+@anchor{14}@anchor{plotreset}
+@deffn {Function} plotreset
+
+This is identical to the @code{plotreset} command provided by Reduce's
+@uref{http://www.gnuplot.info/,gnuplot} interface, and is sometimes needed to reset the plot subsystem.
+@end deffn
+
+@anchor{15}@anchor{gnuplot}At present, this module makes no attempt to capture terminal output such as
 error messages produced by Reduce, so you should be prepared to read these
 in the terminal in which Pure is running, or capture them yourself using
 the output redirection facilities of the shell if needed.
@@ -272,7 +300,7 @@ purposes.)
 
 
 @node Basic Examples,Index,High-Level Interface,Top
-@anchor{basic examples}@anchor{12}@anchor{basic-examples}
+@anchor{basic examples}@anchor{16}@anchor{basic-examples}
 @chapter Basic Examples
 Here is a simple example showing how to start up Reduce and do some
 calculations:
@@ -287,7 +315,7 @@ Reduce (Free CSL version), 27-Sep-12 ...
 @end example
 
 @noindent
-Note that the result returned by @pxref{e,,simplify} is always a quoted
+Note that the result returned by @pxref{10,,simplify} is always a quoted
 expression. If the expression can be further reduced on the Pure side,
 you'll have to use Pure's @code{eval} function to force its evaluation:
 
@@ -314,11 +342,11 @@ interpreter). For instance:
 Free symbols are quoted automatically, and Pure lists are mapped to
 corresponding Lisp lists. If the result is a Lisp list, it will be
 converted back to a Pure list. Most simple kinds of Lisp calls should be
-doable that way, but don't expect any miracles; the @pxref{f,,lisp} function
+doable that way, but don't expect any miracles; the @pxref{11,,lisp} function
 is provided to access special functionality in the "symbolic mode" of the
 Reduce system, not to turn Pure into a full-featured Lisp frontend.
 
-The following example illustrates how you can use the @pxref{f,,lisp} function
+The following example illustrates how you can use the @pxref{11,,lisp} function
 to declare an operator symbol and change or query its properties:
 
 @example
@@ -334,7 +362,7 @@ to declare an operator symbol and change or query its properties:
 
 @noindent
 If you find it awkward to evaluate Lisp forms in Pure, you can also achieve
-the same with the @pxref{10,,declare} function which covers most of the common
+the same with the @pxref{12,,declare} function which covers most of the common
 Reduce declarations that might be needed:
 
 @example
@@ -344,6 +372,15 @@ Reduce declarations that might be needed:
 []
 > simplify (myop (-x));
 -myop x
+@end example
+
+@noindent
+This example shows how you can do a simple plot using Reduce's @uref{http://www.gnuplot.info/,gnuplot}
+module:
+
+@example
+> simplify $ plot [sin x/x, x=='(-20..20), terminal=="wxt", title=="sinc"];
+0
 @end example
 
 @noindent

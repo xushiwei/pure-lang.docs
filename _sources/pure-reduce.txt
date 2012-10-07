@@ -1,7 +1,7 @@
 
-====================================================
-A Reduce Interface for the Pure Programming Language
-====================================================
+==============================================
+Computer Algebra with Pure: A Reduce Interface
+==============================================
 
 .. default-domain:: pure
 .. module:: reduce
@@ -11,24 +11,45 @@ Version 0.1, |today|
 | Albert Graef <Dr.Graef@t-online.de>
 | Kurt Pagani <kp@scios.ch>
 
-This is a module providing access to the Reduce_ computer algebra system from
-Pure. It uses an "embedded" version of Reduce which can be provided in the
-form of a shared library. The Installation_ section below describes how to
-build this library from the Reduce sources. More background information and a
-discussion of the interface can be found in the `Embedding REDUCE`_ thread on
-the Pure mailing list.
+One of Pure's distinguishing features as a term rewriting programming language
+is that it makes the symbolic manipulation of expressions very easy and
+convenient. It is thus a natural environment for hosting a full-featured
+computer algebra system (CAS). Computer algebra systems are complex pieces of
+software including advanced algorithms for symbolic integration and equation
+solving. While it would be possible to reimplement all these algorithms in
+Pure, this would be a major undertaking. A much better option is to interface
+to an existing CAS which has already proven its worth to the scientific
+computing community, has been tested extensively and is known to be both
+reliable and efficient.
 
-.. _Reduce: http://www.reduce-algebra.com/
+This is also the approach taken by Pure's :mod:`reduce` module which
+interfaces to the well-known Reduce_ system. Reduce is the second-oldest
+computer algebra system (the oldest one being Macsyma/`Maxima`_) and is widely
+recognized as being very powerful and efficient. It is free/open source
+software distributed under a BSD-style license_, actively maintained on its
+SourceForge_ website, and implementations exist for all major computing
+platforms. It is thus a very good choice of a CAS for Pure, and the
+:mod:`reduce` module provides a seamless integration of Reduce and Pure. The
+module uses an "embedded" version of Reduce in the form of a shared library
+which is very easy to build from the Reduce sources; the Installation_ section
+below describes how to do this. More background information and a discussion
+of the interface can be found in the `Embedding REDUCE`_ thread on the Pure
+mailing list.
+
+.. _SourceForge: http://sourceforge.net/projects/reduce-algebra/
+.. _license: http://reduce-algebra.svn.sourceforge.net/viewvc/reduce-algebra/trunk/README
+
+.. _Reduce: http://reduce-algebra.sourceforge.net/
+.. _Maxima: http://maxima.sourceforge.net/
 .. _Embedding REDUCE: http://groups.google.com/group/pure-lang/browse_thread/thread/c11e82ca2e9e8cbb
 
-The interface can be found in the reduce.pure module. It actually consists of
-two parts, a `low-level interface`_ which consists of a number of C entry
-points provided by the Reduce library, and a `high-level interface`_ which
-provides everything that the Pure programmer needs to use Reduce from Pure.
-Some basic examples are in reduce_examp.pure. Please note that at present this
-module is still experimental and under development. But the basic
-functionality works, and you're welcome to discuss the new interface on the
-mailing list and/or submit bug reports and patches.
+The interface can be found in the reduce.pure module. It has two parts, a
+`low-level interface`_ which consists of a number of C entry points supplied
+by the Reduce library, and a `high-level interface`_ which provides everything
+that the Pure programmer needs to use Reduce from Pure. Please note that at
+present this module is still experimental. But the basic functionality works,
+and you're welcome to discuss the new interface on the mailing list and/or
+submit bug reports and patches.
 
 Installation
 ============
@@ -55,7 +76,7 @@ This may take a while; Reduce is a *big* package. Once it's finished, just
 drop the resulting reduce-algebra directory into the pure-reduce source
 directory. Run ``make`` and then (if needed) ``make install`` in the
 pure-reduce directory (*not* in the reduce-algebra directory!). You should
-also run ``make check`` which runs a few tests in order to verify that the
+also run ``make check`` which performs a few tests in order to verify that the
 interface works ok (this can be done without installing the package, but needs
 the Reduce image and library).
 
@@ -70,18 +91,17 @@ For convenience, the Makefile also has a ``make reduce`` target which builds a
 minimal Reduce executable. If you use that option, ``make install`` installs
 this executable along with the library and image files, so that you can then
 run Reduce directly from the command line by just typing ``reduce``. Please
-note that this is a rather minimalistic Reduce frontend; it's small, builds
-with minimal fuss and doesn't need any support files other than the image
-file, but doesn't have all the bells and whistles of the full Reduce version.
+note that this is a really minimalistic Reduce frontend. It's small, easy to
+build and doesn't need any support files other than the image file, but it
+doesn't have any of the bells and whistles of the full Reduce version either.
 
-If you want to install the full Reduce version, the easiest way to go is to
-download one of the binary packages available on SourceForge_. You can also
-build Reduce yourself from the sources; please check the build instructions in
-the reduce-algebra folder for details. (Basically, you'll need to run
-``./configure --with-csl`` or ``./configure --with-psl`` and then ``make``
-there. Be patient, this takes a while.)
+If you want to install the full Reduce version, there are binary packages for
+various systems available on SourceForge_. You can also build Reduce yourself
+from the sources; please check the build instructions in the reduce-algebra
+folder for details. (Basically, you'll need to run ``./configure --with-csl``
+or ``./configure --with-psl`` and then ``make`` there. Be patient, this takes
+a while.)
 
-.. _SourceForge: http://sourceforge.net/projects/reduce-algebra/
 ..
 
 Low-Level Interface
@@ -106,8 +126,12 @@ High-Level Interface
 
 The goal here is to make it easy to run Reduce from Pure; to these ends,
 the most important features of the low-level PROC interface are wrapped in
-a convenient way. Currently the following variables and functions are
-provided:
+a convenient way. After installing the module, it can be imported in your
+Pure scripts as follows::
+
+  using reduce;
+
+This makes the following variables and functions available:
 
 .. variable:: REDUCE_PATH
 
@@ -225,10 +249,14 @@ operators can be used to denote equations, ranges and assignments in
 Reduce, respectively. (Note that you may have to quote these in some cases
 so that they don't get evaluated on the Pure side.) Also, Reduce's
 ``arbconst n``, ``arbint n`` and ``arbcomplex n`` terms are mapped to Greek
-symbols ``αn``, ``βn`` and ``ζn`` on the Pure side. (All these automatic
-conversions can also be turned off on the output side with the ``#!
---disable mapped`` compilation pragma; this may be useful for debugging
-purposes.)
+symbols ``αn``, ``βn`` and ``ζn`` on the Pure side. For debugging purposes,
+all these automatic conversions can also be turned off on the output side
+with the '``#!  --disable mapped``' compilation pragma; this needs to be
+placed *before* the '``using reduce;``' import clause to take effect. There
+are a number of other conditional compilation options which may be used to
+selectively turn off some of the conversions; please check the module
+source for details.
+
 
 Basic Examples
 ==============
@@ -294,9 +322,25 @@ Reduce declarations that might be needed::
 This example shows how you can do a simple plot using Reduce's gnuplot_
 module::
 
-  > simplify $ plot [sin x/x, x=='(-20..20), terminal=="wxt", title=="sinc"];
+  > simplify $ plot [sin x/x, x=='(-20..20), terminal=="wxt"];
+  0
+
+This pops up a wxWidgets window (``terminal=="wxt"``) with a plot of the given
+function in it, see the screenshot below. The ``x=='(-20..20)`` argument
+specifies the desired range of the ``x`` variable (note that the range needs
+to be quoted so that it gets through to Reduce rather than being evaluated on
+the Pure side).
+
+.. figure:: gnuplot.png
+   :scale: 60%
+   :align: center
+
+   Reduce gnuplot example.
+
+The same plot can be written to a PostScript file sinc.ps as follows::
+
+  > simplify $ plot [sin x/x, x=='(-20..20), terminal=="postscript", output=="sinc.ps"];
   0
 
 Many more examples can be found in the reduce_examp.pure and tests.pure
 scripts included in the distribution.
-

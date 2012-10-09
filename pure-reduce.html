@@ -200,10 +200,30 @@ together to pick what you need:</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="reduce::capture">
+<tt class="descclassname">reduce::</tt><tt class="descname">capture</tt> flag::int<a class="headerlink" href="#reduce::capture" title="Permalink to this definition">¶</a></dt>
+<dt id="reduce::output">
+<tt class="descclassname">reduce::</tt><tt class="descname">output</tt><a class="headerlink" href="#reduce::output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Captures output from Reduce. If <tt class="docutils literal"><span class="pre">flag</span></tt> is nonzero,
+<a class="reference internal" href="#reduce::capture" title="reduce::capture"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::capture</span></tt></a> arranges for all output from Reduce to be
+buffered. The contents of the buffer can then be read using the
+<a class="reference internal" href="#reduce::output" title="reduce::output"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::output</span></tt></a> function which returns a string value. If
+<tt class="docutils literal"><span class="pre">flag</span></tt> is zero, capturing is disabled so that output goes to stdout
+again.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="reduce::load">
 <tt class="descclassname">reduce::</tt><tt class="descname">load</tt> name::string<a class="headerlink" href="#reduce::load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads Reduce packages. This works like Reduce&#8217;s <tt class="docutils literal"><span class="pre">load_package</span></tt>
 command; please check the Reduce documentation for details.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="reduce::in">
+<tt class="descclassname">reduce::</tt><tt class="descname">in</tt> name::string<a class="headerlink" href="#reduce::in" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sources the given Reduce (.red) file. This works like the Lisp <tt class="docutils literal"><span class="pre">in</span></tt>
+function. Output is captured using <a class="reference internal" href="#reduce::capture" title="reduce::capture"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::capture</span></tt></a>, see above.</p>
 </dd></dl>
 
 <dl class="function">
@@ -277,10 +297,6 @@ Pure land.</p>
 <a class="reference external" href="http://www.gnuplot.info/">gnuplot</a> interface, and is sometimes needed to reset the plot subsystem.</p>
 </dd></dl>
 
-<p>At present, this module makes no attempt to capture terminal output such as
-error messages produced by Reduce, so you should be prepared to read these
-in the terminal in which Pure is running, or capture them yourself using
-the output redirection facilities of the shell if needed.</p>
 <p>In Pure land, Reduce and Lisp expressions are represented using Pure&#8217;s
 standard curried notation. Marshalling of numeric data works in a
 straightforward fashion and includes all natively supported Pure data types
@@ -361,7 +377,7 @@ specifies the desired range of the <tt class="docutils literal"><span class="pre
 to be quoted so that it gets through to Reduce rather than being evaluated on
 the Pure side).</p>
 <div class="figure align-center">
-<a class="reference internal image-reference" href="_images/gnuplot.png"><img alt="_images/gnuplot.png" src="_images/gnuplot.png" style="width: 385.2px; height: 280.2px;" /></a>
+<a class="reference internal image-reference" href="_images/gnuplot.png"><img alt="_images/gnuplot.png" src="_images/gnuplot.png" style="width: 449.4px; height: 326.9px;" /></a>
 <p class="caption">Reduce gnuplot example.</p>
 </div>
 <p>The same plot can be written to a PostScript file sinc.ps as follows:</p>
@@ -510,21 +526,20 @@ decomposition.</p>
 <p>Let us find the decomposition of:</p>
 <div class="math">
 <p><img src="_images/math/6ad7d10cfa19f1ccab4ae0c476fef6d8370f68c7.png" alt="f(x) = \frac{2}{(x+1)^2 \,(x+2)}"/></p>
-</div><div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> f = <span class="mi">2</span>/((x+<span class="mi">1</span>)ˆ<span class="mi">2</span>*(x+<span class="mi">2</span>))
+</div><div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span><span class="kr">let</span> f = <span class="mi">2</span>/((x+<span class="mi">1</span>)^<span class="mi">2</span>*(x+<span class="mi">2</span>))<span class="p">;</span>
 <span class="gp">&gt; </span>simplify $ pf f x<span class="p">;</span>
 [<span class="mi">2</span>/(x+<span class="mi">2</span>),(-<span class="mi">2</span>)/(x+<span class="mi">1</span>),<span class="mi">2</span>/(x^<span class="mi">2</span>+<span class="mi">2</span>*x+<span class="mi">1</span>)]
 </pre></div>
 </div>
 <p>this means</p>
 <div class="math">
-<p><img src="_images/math/7c9c1923cbcc9c40a6c066319c461c380e918525.png" alt="f(x) = \frac{-2}{x+3} + \frac{2}{x+2} + \frac{2}{x^2+2x+1}"/></p>
+<p><img src="_images/math/75656f73ed0eba76e6598833830deebf17c26288.png" alt="f(x) = \frac{2}{x+2} + \frac{-2}{x+1} + \frac{2}{x^2+2x+1}"/></p>
 </div><p>If one wants the denominators in factored form, one has to use the
 switch <tt class="docutils literal"><span class="pre">off</span> <span class="pre">exp</span></tt>:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>reduce<span class="p">::</span>switch <span class="s">&quot;exp&quot;</span> <span class="mi">0</span> <span class="p">;</span>
 <span class="mi">0</span>
-<span class="gp">&gt;</span>
 <span class="gp">&gt; </span>simplify $ pf f x<span class="p">;</span>
-[<span class="mi">2</span>/(x+<span class="mi">2</span>),(-<span class="mi">2</span>)/(x+<span class="mi">1</span>),<span class="mi">2</span>/(((x:<span class="mi">1</span>):<span class="mi">1</span>):<span class="mi">1</span>)^<span class="mi">2</span>] <span class="c1">// (x+1)^2 ???</span>
+[<span class="mi">2</span>/(x+<span class="mi">2</span>),(-<span class="mi">2</span>)/(x+<span class="mi">1</span>),<span class="mi">2</span>/(x+<span class="mi">1</span>)^<span class="mi">2</span>]
 </pre></div>
 </div>
 <p>Note how the switch <tt class="docutils literal"><span class="pre">off</span> <span class="pre">exp</span></tt> is used in Pure.</p>
@@ -1397,8 +1412,7 @@ is safe to use. The above example can also be done as follows:</p>
 -myop x
 </pre></div>
 </div>
-<p>For a list of supported declarations via <tt class="docutils literal"><span class="pre">declare</span></tt> consult the
-module file <tt class="docutils literal"><span class="pre">reduce.pure</span></tt>.</p>
+<p>For a list of supported declarations see the description of <a class="reference internal" href="#declare" title="declare"><tt class="xref pure pure-func docutils literal"><span class="pre">declare</span></tt></a>.</p>
 <p>In Pure the REDUCE switches can be turned <tt class="docutils literal"><span class="pre">on/off</span></tt> as follows:</p>
 <blockquote class="pull-quote">
 <div><tt class="docutils literal"><span class="pre">reduce::switch</span> <span class="pre">&quot;switch-id&quot;</span> <span class="pre">0/1</span> <span class="pre">;</span></tt></div></blockquote>
@@ -1407,7 +1421,7 @@ module file <tt class="docutils literal"><span class="pre">reduce.pure</span></t
 <div><tt class="docutils literal"><span class="pre">reduce::load</span> <span class="pre">&quot;package-id&quot;</span> <span class="pre">;</span></tt></div></blockquote>
 <p>A REDUCE source file may be <em>read-in</em> by the command:</p>
 <blockquote class="pull-quote">
-<div><tt class="docutils literal"><span class="pre">lisp</span> <span class="pre">('in</span> <span class="pre">[&quot;path/filename.red&quot;])</span> <span class="pre">;</span></tt></div></blockquote>
+<div><tt class="docutils literal"><span class="pre">reduce::in</span> <span class="pre">&quot;path/filename.red&quot;</span> <span class="pre">;</span></tt></div></blockquote>
 </div>
 <div class="section" id="plotting">
 <h3>Plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h3>

@@ -57,7 +57,7 @@
             
   <div class="section" id="module-reduce">
 <span id="computer-algebra-with-pure-a-reduce-interface"></span><h1>Computer Algebra with Pure: A Reduce Interface<a class="headerlink" href="#module-reduce" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, October 10, 2012</p>
+<p>Version 0.1, October 11, 2012</p>
 <div class="line-block">
 <div class="line">Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</div>
 <div class="line">Kurt Pagani &lt;<a class="reference external" href="mailto:kp&#37;&#52;&#48;scios&#46;ch">kp<span>&#64;</span>scios<span>&#46;</span>ch</a>&gt;</div>
@@ -154,7 +154,9 @@ the module, it can be imported in your Pure scripts as follows:</p>
 </pre></div>
 </div>
 <p>This starts up Reduce and makes the following variables and functions
-available in Pure:</p>
+available in Pure.</p>
+<div class="section" id="starting-and-stopping-reduce">
+<h3>Starting and Stopping Reduce<a class="headerlink" href="#starting-and-stopping-reduce" title="Permalink to this headline">¶</a></h3>
 <dl class="variable">
 <dt id="REDUCE_PATH">
 <em class="property">variable </em><tt class="descname">REDUCE_PATH</tt><a class="headerlink" href="#REDUCE_PATH" title="Permalink to this definition">¶</a></dt>
@@ -186,6 +188,9 @@ automatically if a Reduce instance is already running, so it isn&#8217;t
 necessary to call <a class="reference internal" href="#reduce::finish" title="reduce::finish"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::finish</span></tt></a> in this case.)</p>
 </dd></dl>
 
+</div>
+<div class="section" id="maintenance-operations">
+<h3>Maintenance Operations<a class="headerlink" href="#maintenance-operations" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="reduce::verbosity">
 <tt class="descclassname">reduce::</tt><tt class="descname">verbosity</tt> n<a class="headerlink" href="#reduce::verbosity" title="Permalink to this definition">¶</a></dt>
@@ -197,6 +202,14 @@ together to pick what you need:</p>
 <p>2: messages whenever a module of code is loaded</p>
 <p>4: extra details in the garbage collector messages</p>
 </div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="reduce::switch">
+<tt class="descclassname">reduce::</tt><tt class="descname">switch</tt> name:string val::int<a class="headerlink" href="#reduce::switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lets you change global Reduce options. This works like Reduce&#8217;s <tt class="docutils literal"><span class="pre">on</span></tt>
+and <tt class="docutils literal"><span class="pre">off</span></tt> declarations; please check the Reduce documentation for
+details.</p>
 </dd></dl>
 
 <dl class="function">
@@ -233,14 +246,9 @@ command; please check the Reduce documentation for details.</p>
 function. Output is captured using <a class="reference internal" href="#reduce::capture" title="reduce::capture"><tt class="xref pure pure-func docutils literal"><span class="pre">reduce::capture</span></tt></a>, see above.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="reduce::switch">
-<tt class="descclassname">reduce::</tt><tt class="descname">switch</tt> name:string val::int<a class="headerlink" href="#reduce::switch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lets you change global Reduce options. This works like Reduce&#8217;s <tt class="docutils literal"><span class="pre">on</span></tt>
-and <tt class="docutils literal"><span class="pre">off</span></tt> declarations; please check the Reduce documentation for
-details.</p>
-</dd></dl>
-
+</div>
+<div class="section" id="evaluation">
+<h3>Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline">¶</a></h3>
 <p>For convenience, the following operations are in the default namespace:</p>
 <dl class="function">
 <dt id="simplify">
@@ -255,16 +263,15 @@ want to prevent it from being evaluated on the Pure side.</p>
 <dt id="lisp">
 <tt class="descname">lisp</tt> x<a class="headerlink" href="#lisp" title="Permalink to this definition">¶</a></dt>
 <dd><p>This can be used to execute arbitrary Lisp code, which is sometimes
-necessary to perform special functions in the Reduce system. For
-convenience, free symbols are quoted automatically, and Pure lists are
-mapped to corresponding Lisp lists and vice versa. The result is always
-a Pure list or an atomic value. Note that you need to quote <tt class="docutils literal"><span class="pre">x</span></tt> if you
-want to prevent it from being evaluated on the Pure side. This is to be
-used with care. An orderly exception is raised if you try to execute a
-non-existing Lisp function. But there are some internal functions in
-Reduce which aren&#8217;t very forgiving if you try to execute them with
-invalid arguments, and will most likely crash the Reduce system in such
-cases. You have been warned!</p>
+necessary to perform special functions in the Reduce system. Note that
+you need to quote <tt class="docutils literal"><span class="pre">x</span></tt> if you want to prevent it from being evaluated
+on the Pure side. This is true, in particular, for the quote itself,
+which needs an extra level so that one quote goes through to the Lisp
+system (e.g.: <tt class="docutils literal"><span class="pre">lisp</span> <span class="pre">(''(a</span> <span class="pre">b</span> <span class="pre">c))</span></tt>). For convenience, free symbols are
+quoted automatically, and Pure lists are mapped to corresponding Lisp
+lists and vice versa (so <tt class="docutils literal"><span class="pre">lisp</span> <span class="pre">[a,b,c]</span></tt> actually yields the same
+result as <tt class="docutils literal"><span class="pre">lisp</span> <span class="pre">(''(a</span> <span class="pre">b</span> <span class="pre">c))</span></tt>). The result is always a Pure list or an
+atomic value.</p>
 </dd></dl>
 
 <dl class="function">
@@ -318,24 +325,35 @@ Pure land.</p>
 <a class="reference external" href="http://www.gnuplot.info/">gnuplot</a> interface, and is sometimes needed to reset the plot subsystem.</p>
 </dd></dl>
 
-<p>In Pure land, Reduce and Lisp expressions are represented using Pure&#8217;s
-standard curried notation. Marshalling of numeric data works in a
-straightforward fashion and includes all natively supported Pure data types
-(machine ints, bigints, doubles, rationals and complex numbers). Some
-special conversions are applied to algebraic expressions to make arithmetic
-operations such as <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">*</span></tt> etc. work as expected. In addition, the
-<tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">=&gt;</span></tt>, <tt class="docutils literal"><span class="pre">..</span></tt> and <tt class="docutils literal"><span class="pre">:=</span></tt> infix operators can be used to denote
-equations, replacement rules, ranges and assignments in Reduce,
-respectively. (Note that you may have to quote these in some cases so that
-they don&#8217;t get evaluated on the Pure side.) Also, Reduce&#8217;s <tt class="docutils literal"><span class="pre">arbconst</span> <span class="pre">n</span></tt>,
-<tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">arbcomplex</span> <span class="pre">n</span></tt> terms are mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>,
-<tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the Pure side. For debugging purposes, all these
-automatic conversions can also be turned off on the output side with the
-&#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216; compilation pragma; this needs to be placed
-<em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span> <span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a
-number of other conditional compilation options which may be used to
-selectively turn off some of the conversions; please check the module
-source for details.</p>
+<p>In Pure land, Reduce expressions are represented using Pure&#8217;s standard
+curried notation. Marshalling of numeric data works in a straightforward
+fashion and includes all natively supported Pure data types (machine ints,
+bigints, doubles, rationals and complex numbers). Some special conversions
+are applied to algebraic expressions to make arithmetic operations such as
+<tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">*</span></tt> etc. work as expected. In addition, the <tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">=&gt;</span></tt>, <tt class="docutils literal"><span class="pre">..</span></tt>
+and <tt class="docutils literal"><span class="pre">:=</span></tt> infix operators can be used to denote equations, replacement
+rules, ranges and assignments in Reduce, respectively. (Note that you may
+have to quote these in some cases so that they don&#8217;t get evaluated on the
+Pure side.) Also, Reduce&#8217;s <tt class="docutils literal"><span class="pre">arbconst</span> <span class="pre">n</span></tt>, <tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">arbcomplex</span>
+<span class="pre">n</span></tt> terms are mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>, <tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the Pure
+side. For debugging purposes, all these automatic conversions can also be
+turned off on the output side with the &#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216;
+compilation pragma; this needs to be placed <em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span>
+<span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a number of other
+conditional compilation options which may be used to selectively turn off
+some of the conversions; please check the module source for details.</p>
+<p>Lisp expressions are handled in a similar fashion, but here only a few
+basic Pure data types (integers, doubles, strings and lists) are converted
+to and from corresponding Lisp data. Function applications in Pure&#8217;s
+curried notation are mapped to corresponding Lisp forms. The result of
+invoking <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> is always one of the supported atomic types or a Pure
+list.</p>
+<p>The <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function is to be used with care. An orderly Pure
+exception is raised if you try to execute a non-existing Lisp function. But
+there are some internal functions in Reduce which aren&#8217;t very forgiving if
+you try to execute them with invalid arguments, and will most likely crash
+the Reduce system in such cases. You have been warned!</p>
+</div>
 </div>
 <div class="section" id="basic-examples">
 <h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>
@@ -345,6 +363,8 @@ calculations:</p>
 Reduce (Free CSL version), <span class="mi">27</span>-Sep-<span class="mi">12</span> ...
 <span class="gp">&gt; </span>simplify $ df ((x+<span class="mi">5</span>)^<span class="mi">3</span>) x<span class="p">;</span>
 <span class="mi">3</span>*x^<span class="mi">2</span>+<span class="mi">30</span>*x+<span class="mi">75</span>
+<span class="gp">&gt; </span>simplify $ intg (exp (<span class="mi">2</span>*x)) x<span class="p">;</span>
+e^(<span class="mi">2</span>*x)/<span class="mi">2</span>
 <span class="gp">&gt; </span>simplify $ solve (x^<span class="mi">2</span>+<span class="mi">7</span>) x<span class="p">;</span>
 [x==sqrt <span class="mi">7</span>*i,x==-sqrt <span class="mi">7</span>*i]
 </pre></div>
@@ -357,15 +377,54 @@ you&#8217;ll have to use Pure&#8217;s <a class="reference internal" href="pureli
 [x==<span class="mf">0.0</span>+:<span class="mf">2.64575131106459</span>,x==<span class="mf">0.0</span>+:-<span class="mf">2.64575131106459</span>]
 </pre></div>
 </div>
-<p>You can also execute Lisp code in the CSL interpreter hosting the Reduce
-system. This is sometimes necessary to access special functionality, but
-should be done with care (at present invalid Lisp code can easily crash the
-interpreter). Most simple kinds of Lisp calls should be doable that way, but
-don&#8217;t expect any miracles; the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function is provided to access
-special functionality in the &#8220;symbolic mode&#8221; of the Reduce system, not to turn
-Pure into a full-featured Lisp frontend. The following example illustrates how
-you can use the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function to declare an operator symbol and change
-or query its properties:</p>
+<p>The following example shows how you can do a simple plot using Reduce&#8217;s
+<a class="reference external" href="http://www.gnuplot.info/">gnuplot</a> module:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ plot [sin x/x, x==&#39;(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;wxt&quot;</span>]<span class="p">;</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>This pops up a wxWidgets window (<tt class="docutils literal"><span class="pre">terminal==&quot;wxt&quot;</span></tt>) with a plot of the given
+function in it, see the <a class="reference internal" href="#screenshot">screenshot</a> below. The <tt class="docutils literal"><span class="pre">x=='(-20..20)</span></tt> argument
+specifies the desired range of the <tt class="docutils literal"><span class="pre">x</span></tt> variable (note that the range needs
+to be quoted so that it gets through to Reduce rather than being evaluated on
+the Pure side).</p>
+<div class="figure align-center" id="screenshot">
+<a class="reference internal image-reference" href="_images/gnuplot.png"><img alt="_images/gnuplot.png" src="_images/gnuplot.png" style="width: 449.4px; height: 326.9px;" /></a>
+<p class="caption">Reduce gnuplot example.</p>
+</div>
+<p>The same plot can be written to a PostScript file sinc.ps as follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ plot [sin x/x, x==&#39;(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;postscript&quot;</span>, output==<span class="s">&quot;sinc.ps&quot;</span>]<span class="p">;</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function can be used to execute Lisp code in the CSL
+interpreter hosting the Reduce system. Here are some basic examples. Note
+that, to be on the safe side, we just always quote the argument to
+<a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> here to prevent its evaluation on the Pure side. This isn&#8217;t
+always necessary but won&#8217;t hurt either, unless you specifically want to
+evaluate a computed expression.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;plus <span class="mi">2</span> <span class="mi">3</span>)<span class="p">;</span>
+<span class="mi">5</span>
+<span class="gp">&gt; </span>lisp (&#39;car (list a b c d e))<span class="p">;</span>
+a
+<span class="gp">&gt; </span>lisp (&#39;cdr [a,b,[c,d],e])<span class="p">;</span>
+[b,[c,d],e]
+</pre></div>
+</div>
+<p>Lisp&#8217;s truth values are <tt class="docutils literal"><span class="pre">t</span></tt> and <tt class="docutils literal"><span class="pre">nil</span></tt>; the latter is just the empty list,
+so that&#8217;s what you get if a Lisp predicate evaluates to &#8220;false&#8221;:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;lessp <span class="mi">5</span> <span class="mi">3</span>)<span class="p">;</span>
+[]
+<span class="gp">&gt; </span>lisp (&#39;greaterp <span class="mi">5</span> <span class="mi">3</span>)<span class="p">;</span>
+t
+</pre></div>
+</div>
+<p>Most simple kinds of Lisp calls should be doable that way, but don&#8217;t expect
+any miracles; the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function is provided to access special
+functionality in the &#8220;symbolic mode&#8221; of the Reduce system, not to turn Pure
+into a full-featured Lisp frontend. The following example illustrates how you
+can use the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function to declare an operator symbol and change or
+query its properties:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;operator [myop])<span class="p">;</span>
 []
 <span class="gp">&gt; </span>lisp (&#39;flag [myop] odd)<span class="p">;</span>
@@ -387,28 +446,65 @@ Reduce declarations that might be needed:</p>
 -myop x
 </pre></div>
 </div>
-<p>This example shows how you can do a simple plot using Reduce&#8217;s <a class="reference external" href="http://www.gnuplot.info/">gnuplot</a>
-module:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ plot [sin x/x, x==&#39;(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;wxt&quot;</span>]<span class="p">;</span>
-<span class="mi">0</span>
+<p>For basic Pure-based usage of Reduce, it&#8217;s convenient to have a simple
+read-eval-print loop which lets you just type some declarations and
+expressions to be simplified (in Pure syntax), and takes care of all the
+quoting and invoking <a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> for you. Here&#8217;s a little Pure script
+which does that:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> math, reduce, system<span class="p">;</span>
+
+<span class="cm">/* You might want to replace this with the real readline if you have the</span>
+<span class="cm">   corresponding Pure module installed. See the red.pure script in the</span>
+<span class="cm">   distribution for details. */</span>
+myreadline prompt<span class="p">::</span><span class="kt">string</span> = fputs prompt stdout $$ fflush stdout $$ gets<span class="p">;</span>
+
+red = loop <span class="kr">with</span>
+  <span class="c1">// A simplistic REPL.</span>
+  loop = <span class="kr">case</span> myreadline <span class="s">&quot;&gt; &quot;</span> <span class="kr">of</span>
+    s<span class="p">::</span><span class="kt">string</span> = process s $$ loop <span class="kr">if</span> ~null s<span class="p">;</span>
+    _ = () <span class="kr">otherwise</span><span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+  <span class="c1">// Get rid of trailing blanks and semicolons.</span>
+  process s = process (init s) <span class="kr">if</span> any (==last s) [<span class="s">&quot; &quot;</span>,<span class="s">&quot;;&quot;</span>]<span class="p">;</span>
+  <span class="c1">// Process a declaration or REDUCE expression.</span>
+  process s = <span class="kr">case</span> val s <span class="kr">of</span>
+    val _ = fputs <span class="s">&quot;** syntax error</span><span class="se">\n</span><span class="s">&quot;</span> stderr <span class="kr">if</span> ~null lasterr<span class="p">;</span>
+    on flag = reduce<span class="p">::</span>switch (str flag) <span class="mi">1</span><span class="p">;</span>
+    off flag = reduce<span class="p">::</span>switch (str flag) <span class="mi">0</span><span class="p">;</span>
+    x<span class="p">@</span>(declare _ _) = eval x<span class="p">;</span>
+    x = puts (str (simplify x)) <span class="kr">otherwise</span><span class="p">;</span>
+  <span class="kr">end</span><span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>This pops up a wxWidgets window (<tt class="docutils literal"><span class="pre">terminal==&quot;wxt&quot;</span></tt>) with a plot of the given
-function in it, see the <a class="reference internal" href="#screenshot">screenshot</a> below. The <tt class="docutils literal"><span class="pre">x=='(-20..20)</span></tt> argument
-specifies the desired range of the <tt class="docutils literal"><span class="pre">x</span></tt> variable (note that the range needs
-to be quoted so that it gets through to Reduce rather than being evaluated on
-the Pure side).</p>
-<div class="figure align-center" id="screenshot">
-<a class="reference internal image-reference" href="_images/gnuplot.png"><img alt="_images/gnuplot.png" src="_images/gnuplot.png" style="width: 449.4px; height: 326.9px;" /></a>
-<p class="caption">Reduce gnuplot example.</p>
-</div>
-<p>The same plot can be written to a PostScript file sinc.ps as follows:</p>
-<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ plot [sin x/x, x==&#39;(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;postscript&quot;</span>, output==<span class="s">&quot;sinc.ps&quot;</span>]<span class="p">;</span>
+<p>Now you can run <tt class="docutils literal"><span class="pre">red</span></tt> at the Pure prompt and start typing the stuff you want
+to evaluate, one expression or declaration per line. Enter an empty line or
+<tt class="kbd docutils literal"><span class="pre">Ctrl-D</span></tt> when you&#8217;re done to return to the Pure command prompt.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>red<span class="p">;</span>
+<span class="gp">&gt; </span>df ((x+<span class="mi">5</span>)^<span class="mi">3</span>) x
+<span class="mi">3</span>*x^<span class="mi">2</span>+<span class="mi">30</span>*x+<span class="mi">75</span>
+<span class="gp">&gt; </span>intg (exp (<span class="mi">2</span>*x)) x
+e^(<span class="mi">2</span>*x)/<span class="mi">2</span>
+<span class="gp">&gt; </span>on rounded
+<span class="gp">&gt; </span>solve (x^<span class="mi">2</span>+<span class="mi">7</span>==<span class="mi">17</span>) x
+[x==<span class="mf">3.16227766016838</span>,x==-<span class="mf">3.16227766016838</span>]
+<span class="gp">&gt; </span>off rounded
+<span class="gp">&gt; </span>solve (x^<span class="mi">2</span>+<span class="mi">7</span>==<span class="mi">17</span>) x
+[x==sqrt <span class="mi">10</span>,x==-sqrt <span class="mi">10</span>]
+<span class="gp">&gt; </span>declare operator myop
+<span class="gp">&gt; </span>declare odd myop
+<span class="gp">&gt; </span>myop (-x)
+-myop x
+<span class="gp">&gt; </span>plot [sin x/x, x==(-<span class="mi">20</span>..<span class="mi">20</span>), terminal==<span class="s">&quot;wxt&quot;</span>]
 <span class="mi">0</span>
+<span class="gp">&gt; </span>^D
+()
 </pre></div>
 </div>
-<p>Many more examples can be found in the reduce_examp.pure and tests.pure
-scripts included in the distribution.</p>
+<p>Note that we barely scratched the surface here; Reduce is a very complex
+system with lots of capabilities. Many more examples can be found in the
+reduce_examp.pure and tests.pure scripts included in the distribution, and in
+the <a class="reference internal" href="#examples-by-topic">Examples by Topic</a> section below.</p>
 </div>
 <div class="section" id="examples-by-topic">
 <h2>Examples by Topic<a class="headerlink" href="#examples-by-topic" title="Permalink to this headline">¶</a></h2>
@@ -508,7 +604,7 @@ which specifically deals with algebraic functions. The REDUCE User&#8217;s Manua
 <div><em>This package [...] will analytically integrate a wide range
 of expressions involving square roots where the answer exists in that class
 of functions.  It is an implementation of the work described in
-J.H. Davenport</em> <a class="reference internal" href="#lncs102">[LNCS102]</a></div></blockquote>
+J.H. Davenport</em> <a class="reference internal" href="#lncs102">[LNCS102]</a>.</div></blockquote>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>reduce<span class="p">::</span>load <span class="s">&quot;algint&quot;</span> <span class="p">;</span>
 <span class="mi">0</span>
 <span class="gp">&gt; </span>simplify $ intg (sqrt(x+sqrt(x^<span class="mi">2</span>+<span class="mi">1</span>))/x) x <span class="p">;</span>
@@ -1627,7 +1723,12 @@ GCD Package</em>, Proc.  SYMSAC ’81, ACM (New York) (1981), 109-116.</dd>
 <li><a class="reference internal" href="#">Computer Algebra with Pure: A Reduce Interface</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#low-level-interface">Low-Level Interface</a></li>
-<li><a class="reference internal" href="#high-level-interface">High-Level Interface</a></li>
+<li><a class="reference internal" href="#high-level-interface">High-Level Interface</a><ul>
+<li><a class="reference internal" href="#starting-and-stopping-reduce">Starting and Stopping Reduce</a></li>
+<li><a class="reference internal" href="#maintenance-operations">Maintenance Operations</a></li>
+<li><a class="reference internal" href="#evaluation">Evaluation</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#basic-examples">Basic Examples</a></li>
 <li><a class="reference internal" href="#examples-by-topic">Examples by Topic</a><ul>
 <li><a class="reference internal" href="#differentiation">Differentiation</a></li>

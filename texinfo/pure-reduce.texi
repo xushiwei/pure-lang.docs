@@ -88,9 +88,8 @@ Examples by Topic
 
 * Differentiation::
 * Integration::
-* Length and Map::
+* Length Map and Select::
 * Partial Fractions::
-* Selection::
 * Solving::
 * Even and Odd Operators::
 * Linear Operators::
@@ -314,18 +313,33 @@ want to prevent it from being evaluated on the Pure side.
 @deffn {Function} lisp x
 
 This can be used to execute arbitrary Lisp code, which is sometimes
-necessary to perform special functions in the Reduce system. Free
-symbols are quoted automatically, and Pure lists are mapped to
-corresponding Lisp lists and vice versa. The result is always a Pure
-list or an atomic value. Note that you need to quote @code{x} if you want
-to prevent it from being evaluated on the Pure side. This is to be used
-with care. At present, the PROC interface isn't very forgiving if you
-try to execute invalid Lisp code; it will most likely crash in such
-cases.
+necessary to perform special functions in the Reduce system. For
+convenience, free symbols are quoted automatically, and Pure lists are
+mapped to corresponding Lisp lists and vice versa. The result is always
+a Pure list or an atomic value. Note that you need to quote @code{x} if you
+want to prevent it from being evaluated on the Pure side. This is to be
+used with care. An orderly exception is raised if you try to execute a
+non-existing Lisp function. But there are some internal functions in
+Reduce which aren't very forgiving if you try to execute them with
+invalid arguments, and will most likely crash the Reduce system in such
+cases. You have been warned!
+@end deffn
+
+@geindex lispsym function
+@anchor{18}@anchor{lispsym}
+@deffn {Function} lispsym s::string
+
+This function creates a special Pure identifier for any symbol given as
+a string, even symbols which don't conform to Pure syntax. This is
+sometimes needed to specify special Lisp symbols in calls to
+@pxref{17,,lisp}, such as @code{lisp (lispsym "oem-supervisor")}. (Note that if
+such a special symbol occurs as a literal in a result returned by
+@pxref{17,,lisp} or @pxref{16,,simplify} then it will get mangled into a form
+which conforms to Pure syntax.)
 @end deffn
 
 @geindex declare function
-@anchor{18}@anchor{declare}
+@anchor{19}@anchor{declare}
 @deffn {Function} declare declsym [foo,bar,...]
 
 Declare symbols and their properties; please see the Declarations
@@ -351,7 +365,7 @@ simplifications).
 @end deffn
 
 @geindex precision function
-@anchor{19}@anchor{precision}
+@anchor{1a}@anchor{precision}
 @deffn {Function} precision prec::int
 
 Sets the internal Reduce precision in decimal digits for floating point
@@ -363,34 +377,35 @@ Pure land.
 @end deffn
 
 @geindex plotreset function
-@anchor{1a}@anchor{plotreset}
+@anchor{1b}@anchor{plotreset}
 @deffn {Function} plotreset
 
 This is identical to the @code{plotreset} command provided by Reduce's
 @uref{http://www.gnuplot.info/,gnuplot} interface, and is sometimes needed to reset the plot subsystem.
 @end deffn
 
-@anchor{1b}@anchor{gnuplot}In Pure land, Reduce and Lisp expressions are represented using Pure's
+@anchor{1c}@anchor{gnuplot}In Pure land, Reduce and Lisp expressions are represented using Pure's
 standard curried notation. Marshalling of numeric data works in a
 straightforward fashion and includes all natively supported Pure data types
 (machine ints, bigints, doubles, rationals and complex numbers). Some
 special conversions are applied to algebraic expressions to make arithmetic
 operations such as @code{+}, @code{*} etc. work as expected. In addition, the
-@code{==}, @code{..} and @code{:=} infix operators can be used to denote equations,
-ranges and assignments in Reduce, respectively. (Note that you may have to
-quote these in some cases so that they don't get evaluated on the Pure
-side.) Also, Reduce's @code{arbconst n}, @code{arbint n} and @code{arbcomplex n}
-terms are mapped to Greek symbols @code{αn}, @code{βn} and @code{ζn} on the Pure
-side. For debugging purposes, all these automatic conversions can also be
-turned off on the output side with the '@code{#!  --disable mapped}'
-compilation pragma; this needs to be placed @emph{before} the '@code{using
-reduce;}' import clause to take effect. There are a number of other
-conditional compilation options which may be used to selectively turn off
-some of the conversions; please check the module source for details.
+@code{==}, @code{=>}, @code{..} and @code{:=} infix operators can be used to denote
+equations, replacement rules, ranges and assignments in Reduce,
+respectively. (Note that you may have to quote these in some cases so that
+they don't get evaluated on the Pure side.) Also, Reduce's @code{arbconst n},
+@code{arbint n} and @code{arbcomplex n} terms are mapped to Greek symbols @code{αn},
+@code{βn} and @code{ζn} on the Pure side. For debugging purposes, all these
+automatic conversions can also be turned off on the output side with the
+'@code{#!  --disable mapped}' compilation pragma; this needs to be placed
+@emph{before} the '@code{using reduce;}' import clause to take effect. There are a
+number of other conditional compilation options which may be used to
+selectively turn off some of the conversions; please check the module
+source for details.
 
 
 @node Basic Examples,Examples by Topic,High-Level Interface,Top
-@anchor{basic examples}@anchor{1c}@anchor{basic-examples}
+@anchor{basic examples}@anchor{1d}@anchor{basic-examples}
 @chapter Basic Examples
 Here is a simple example showing how to start up Reduce and do some
 calculations:
@@ -439,7 +454,7 @@ or query its properties:
 
 @noindent
 If you find it awkward to evaluate Lisp forms in Pure, you can also achieve
-the same with the @pxref{18,,declare} function which covers most of the common
+the same with the @pxref{19,,declare} function which covers most of the common
 Reduce declarations that might be needed:
 
 @example
@@ -462,12 +477,12 @@ module:
 
 @noindent
 This pops up a wxWidgets window (@code{terminal=="wxt"}) with a plot of the given
-function in it, see the @pxref{1d,,screenshot} below. The @code{x=='(-20..20)} argument
+function in it, see the @pxref{1e,,screenshot} below. The @code{x=='(-20..20)} argument
 specifies the desired range of the @code{x} variable (note that the range needs
 to be quoted so that it gets through to Reduce rather than being evaluated on
 the Pure side).
 
-@anchor{1d}@anchor{screenshot}
+@anchor{1e}@anchor{screenshot}
 @float Figure
 
 
@@ -489,24 +504,27 @@ scripts included in the distribution.
 
 
 @node Examples by Topic,Index,Basic Examples,Top
-@anchor{examples by topic}@anchor{1e}@anchor{examples-by-topic}
+@anchor{examples by topic}@anchor{1f}@anchor{examples-by-topic}
 @chapter Examples by Topic
-This is a small excerpt from the @strong{REDUCE User's Manual} @pxref{1f,,[REDUM]},
-translated to Pure syntax. For any details we refer to that
-document. With this guide it should be straightforward to interprete
-back and forth.
-The REDUCE User's Manual as well as the documentation of each package and
-other valuable information may be found at
+This is a small excerpt from the @strong{REDUCE User's Manual} @pxref{20,,[REDUM]},
+translated to Pure syntax. For any details we refer to that document. With
+this guide it should be straightforward to translate back and forth between
+Pure and REDUCE syntax for the invocation of REDUCE functions. The one thing
+you have to keep in mind is that Pure uses @emph{curried} notation for function
+applications, so where a function is invoked as @code{f(x,y,z)} in REDUCE, you'll
+have to call it as @code{f x y z} in Pure (with parentheses around each argument
+which is a compound expression).
 
+The REDUCE User's Manual as well as the documentation of each package and
+other valuable information may be found at:
 @indicateurl{http://www.reduce-algebra.com/documentation.htm}
 
 
 @menu
 * Differentiation::
 * Integration::
-* Length and Map::
+* Length Map and Select::
 * Partial Fractions::
-* Selection::
 * Solving::
 * Even and Odd Operators::
 * Linear Operators::
@@ -533,7 +551,7 @@ other valuable information may be found at
 
 
 @node Differentiation,Integration,,Examples by Topic
-@anchor{differentiation}@anchor{20}
+@anchor{differentiation}@anchor{21}
 @section Differentiation
 The operator @code{df} is used to represent partial differentiation with respect
 to one or more variables.
@@ -579,8 +597,8 @@ The results are @math{\cos(z) \frac@{\partial z@} @{\partial \cos(x)@}} and  @ma
 respectively, as expected.
 
 
-@node Integration,Length and Map,Differentiation,Examples by Topic
-@anchor{integration}@anchor{21}
+@node Integration,Length Map and Select,Differentiation,Examples by Topic
+@anchor{integration}@anchor{22}
 @section Integration
 @code{INT} is an operator in REDUCE for indefinite integration using a
 combination of the Risch-Norman algorithm and pattern matching.
@@ -626,13 +644,13 @@ intg (sqrt (sqrt (x^2+1)+x)/x) x
 @noindent
 Apparently no solution was found. There is a package @code{ALGINT} in REDUCE
 which specifically deals with algebraic functions. The REDUCE User's Manual
-@pxref{1f,,[REDUM]} says:
+@pxref{20,,[REDUM]} says:
 
 @quotation
 @emph{This package [...] will analytically integrate a wide range
 of expressions involving square roots where the answer exists in that class
 of functions.  It is an implementation of the work described in
-J.H. Davenport} @pxref{22,,[LNCS102]}
+J.H. Davenport} @pxref{23,,[LNCS102]}
 @end quotation
 
 @example
@@ -648,17 +666,23 @@ atan ((sqrt (sqrt (x^2+1)+x)*sqrt (x^2+1)-sqrt (sqrt (x^2+1)+x)*x-sqrt
 Note how to load packages.
 
 
-@node Length and Map,Partial Fractions,Integration,Examples by Topic
-@anchor{length and map}@anchor{23}@anchor{length-and-map}
-@section Length and Map
-@code{LENGTH} is a generic operator for finding the length of various objects in
-the system, while the @code{MAP} operator applies a uniform evaluation pattern to
-all members of a composite structure: a matrix, a list, or the arguments of an
-operator expression.
+@node Length Map and Select,Partial Fractions,Integration,Examples by Topic
+@anchor{length map and select}@anchor{24}@anchor{length-map-and-select}
+@section Length, Map and Select
+@code{LENGTH} is a generic operator for finding the length of compound objects.
+Besides lists and matrices, this also includes algebraic expressions. The
+@code{MAP} and @code{SELECT} operators let you manipulate such objects by applying a
+function to each element of the structure, or by picking the elements
+satisfying a given predicate function. Thus these operations serve pretty much
+the same purposes as @code{#} (or @code{dim}), @code{map} and
+@code{filter} in Pure, but in REDUCE they also work with the operands of an
+algebraic expression.
 
 @deffn {Description} length exprn
 
-@deffnx {Description} map fun obj
+@deffnx {Description} map fun exprn
+
+@deffnx {Description} select fun exprn
 @end deffn
 
 @example
@@ -667,24 +691,84 @@ operator expression.
 > simplify $ length (x^n+a*x+2);
 3
 
+> simplify $ 'map sqrt [1,2,3];
+[1,2^(1/2),3^(1/2)]
+> simplify $ 'map log  [x^n,x^m,sin x];
+[log (x^n),log (x^m),log (sin x)]
+@end example
+
+@noindent
+Note that @code{map} must be quoted if we want to evaluate it in REDUCE, since
+it's also a function in Pure. In this case, we might as well do the
+calculation using Pure's @code{map}; the result is exactly the same.
+
+@example
 > simplify $ map sqrt [1,2,3];
 [1,2^(1/2),3^(1/2)]
-> simplify $ map log  [x^n,x^m,sin x] ;
+> simplify $ map log  [x^n,x^m,sin x];
 [log (x^n),log (x^m),log (sin x)]
+@end example
 
-> simplify $ map (\y->df y x)  [x^n,x^m,sin x] ;
+@noindent
+If the function to be applied in calls to @code{MAP} or @code{SELECT} is a compound
+expression, it must either contain a single free variable (indicated with the
+@code{~} prefix, e.g.: @code{~w}) or a replacement rule of the form @code{var =>
+exprn}. In either case the current elements are substituted for the free
+variable when the function is applied.
+
+@example
+> simplify $ 'map (y=>df y x)   [x^n,x^m,sin x];
 [x^n*n/x,x^m*m/x,cos x]
-> simplify $ map (\y->intg y x)  [x^n,x^m,sin x] ;
+> simplify $ 'map (y=>intg y x) [x^n,x^m,sin x];
+[x^n*x/(n+1),x^m*x/(m+1),-cos x]
+
+> simplify $ select (evenp (deg (~w) y)) ((x+y)^5);
+x^5+10*x^3*y^2+5*x*y^4
+> simplify $ select (w=>evenp (deg w y)) ((x+y)^5);
+x^5+10*x^3*y^2+5*x*y^4
+@end example
+
+@noindent
+Contrast this with Pure where the function argument to @code{map} is often
+specified as a lambda:
+
+@example
+> simplify $ map (\y->df y x)   [x^n,x^m,sin x];
+[x^n*n/x,x^m*m/x,cos x]
+> simplify $ map (\y->intg y x) [x^n,x^m,sin x];
 [x^n*x/(n+1),x^m*x/(m+1),-cos x]
 @end example
 
 @noindent
-Note that the @code{lambda} expression in REDUCE is replaced by the
-corresponding Pure version.
+In principle, the same correspondences also hold between REDUCE's @code{select}
+and Pure's @code{filter}. For instance, consider:
+
+@example
+> simplify $ select (w=>evenp (deg w x)) [2*x^2,3*x^3,4*x^4];
+[2*x^2,4*x^4]
+@end example
+
+@noindent
+The equivalent Pure @code{filter} is:
+
+@example
+> filter (\w->simplify $ evenp (deg w x)) [2*x^2,3*x^3,4*x^4];
+[2*x^2,4*x^4]
+@end example
+
+@noindent
+Note that REDUCE is now being called inside the predicate function, the rest
+of the processing is done in Pure.
+
+Whether to prefer the calculation of maps and filters in REDUCE or in Pure is
+largely a matter of taste and which environment you feel most comfortable
+with. However, Pure offers a comprehensive collection of list processing
+functions for various purposes, which can at times be easier to use than the
+corresponding REDUCE facilities.
 
 
-@node Partial Fractions,Selection,Length and Map,Examples by Topic
-@anchor{partial fractions}@anchor{24}@anchor{partial-fractions}
+@node Partial Fractions,Solving,Length Map and Select,Examples by Topic
+@anchor{partial fractions}@anchor{25}@anchor{partial-fractions}
 @section Partial Fractions
 The @code{PF} operator transforms an expression into a list of partial fractions
 with respect to the main variable. @code{PF} does a complete partial fraction
@@ -720,18 +804,7 @@ switch @code{off exp}:
 Note how the value of a Reduce switch is changed in Pure.
 
 
-@node Selection,Solving,Partial Fractions,Examples by Topic
-@anchor{selection}@anchor{25}
-@section Selection
-The @code{SELECT} operator extracts from a list, or from the arguments of an
-@code{n–ary} operator, elements corresponding to a boolean predicate.
-It is used with the syntax:
-
-@deffn {Description} select fun list
-@end deffn
-
-
-@node Solving,Even and Odd Operators,Selection,Examples by Topic
+@node Solving,Even and Odd Operators,Partial Fractions,Examples by Topic
 @anchor{solving}@anchor{26}
 @section Solving
 @code{SOLVE} is an operator for solving one or more simultaneous algebraic
@@ -1031,8 +1104,8 @@ a
 @noindent
 @code{PART} may also be used to substitute a given part of an expression. In
 this case, the @code{PART} construct appears on the left-hand side of an
-assignment statement, and the expression to replace the given part on the
-right-hand side.
+assignment statement (cf. @pxref{2e,,Assignment}), and the expression to replace the
+given part on the right-hand side.
 
 @example
 >  simplify $ xx:=a+b;
@@ -1046,12 +1119,12 @@ a+c
 @noindent
 
 @node Polynomials and Rationals,Substitution,Parts of Algebraic Expressions,Examples by Topic
-@anchor{polynomials and rationals}@anchor{2e}@anchor{polynomials-and-rationals}
+@anchor{polynomials and rationals}@anchor{2f}@anchor{polynomials-and-rationals}
 @section Polynomials and Rationals
 REDUCE is capable of factorizing univariate and multivariate polynomials with
 integer coefficients, finding all factors with integer coefficients. The
 package for doing this was written by Dr. Arthur C. Norman and Ms. P. Mary Ann
-Moore at The University of Cambridge.  It is described in @pxref{2f,,[SYMSAC81]}.
+Moore at The University of Cambridge.  It is described in @pxref{30,,[SYMSAC81]}.
 
 @deffn {Description} factorize expr::polynomial [p::prime]
 @end deffn
@@ -1211,7 +1284,7 @@ a*c+b*c
 @noindent
 
 @node Substitution,Assignment,Polynomials and Rationals,Examples by Topic
-@anchor{substitution}@anchor{30}
+@anchor{substitution}@anchor{31}
 @section Substitution
 An important class of commands in REDUCE define substitutions for variables and
 expressions to be made during the evaluation of expressions.
@@ -1234,7 +1307,7 @@ using the @code{reduce} macro.
 
 
 @node Assignment,Matrix Calculations,Substitution,Examples by Topic
-@anchor{assignment}@anchor{31}
+@anchor{assignment}@anchor{2e}
 @section Assignment
 One may assign values to variables in the REDUCE environment. Note that
 in Pure the @code{set} operator and @code{:=} are equivalent, i.e. both sides
@@ -1268,7 +1341,7 @@ A very powerful feature of REDUCE is the ease with which matrix calculations
 can be performed. It fits very well into Pure's native matrix type.
 
 To keep it simple we show the usage of the different operators by examples
-using the well known @strong{Pauli matrices}. See, e.g.,
+using the well known @cite{Pauli matrices}. See, e.g.,
 @indicateurl{http://en.wikipedia.org/wiki/Pauli_matrices} for a reference.
 
 @example
@@ -1803,7 +1876,7 @@ operator symbols and their properties (@code{simplify} won't do that). E.g.:
 
 @noindent
 For the most common kinds of declarations, the @pxref{0,,reduce} module provides
-the @pxref{18,,declare} function which takes care of the necessary Lisp magic and
+the @pxref{19,,declare} function which takes care of the necessary Lisp magic and
 is safe to use. The above example can also be done as follows:
 
 @example
@@ -1814,7 +1887,7 @@ is safe to use. The above example can also be done as follows:
 @end example
 
 @noindent
-Please see the description of @pxref{18,,declare} for a list of supported
+Please see the description of @pxref{19,,declare} for a list of supported
 declarations.
 
 The @pxref{0,,reduce} module also provides a few other basic maintenance functions
@@ -1907,19 +1980,19 @@ side):
 @node References,,Plotting,Examples by Topic
 @anchor{references}@anchor{3c}
 @section References
-@anchor{1f}@anchor{redum}
+@anchor{20}@anchor{redum}
 @table @asis
 @item [REDUM]
 @emph{REDUCE User’s Manual}, Version 3.8, Anthony C. Hearn, Santa Monica, CA, USA.
 @end table
 
-@anchor{22}@anchor{lncs102}
+@anchor{23}@anchor{lncs102}
 @table @asis
 @item [LNCS102]
 @emph{On the Integration of Algebraic Functions}, LNCS 102, Springer Verlag, 1981.
 @end table
 
-@anchor{2f}@anchor{symsac81}
+@anchor{30}@anchor{symsac81}
 @table @asis
 @item [SYMSAC81]
 P. M. A. Moore and A.C. Norman, @emph{Implementing a Polynomial Factorization and

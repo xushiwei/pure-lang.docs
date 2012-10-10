@@ -255,14 +255,28 @@ want to prevent it from being evaluated on the Pure side.</p>
 <dt id="lisp">
 <tt class="descname">lisp</tt> x<a class="headerlink" href="#lisp" title="Permalink to this definition">¶</a></dt>
 <dd><p>This can be used to execute arbitrary Lisp code, which is sometimes
-necessary to perform special functions in the Reduce system. Free
-symbols are quoted automatically, and Pure lists are mapped to
-corresponding Lisp lists and vice versa. The result is always a Pure
-list or an atomic value. Note that you need to quote <tt class="docutils literal"><span class="pre">x</span></tt> if you want
-to prevent it from being evaluated on the Pure side. This is to be used
-with care. At present, the PROC interface isn&#8217;t very forgiving if you
-try to execute invalid Lisp code; it will most likely crash in such
-cases.</p>
+necessary to perform special functions in the Reduce system. For
+convenience, free symbols are quoted automatically, and Pure lists are
+mapped to corresponding Lisp lists and vice versa. The result is always
+a Pure list or an atomic value. Note that you need to quote <tt class="docutils literal"><span class="pre">x</span></tt> if you
+want to prevent it from being evaluated on the Pure side. This is to be
+used with care. An orderly exception is raised if you try to execute a
+non-existing Lisp function. But there are some internal functions in
+Reduce which aren&#8217;t very forgiving if you try to execute them with
+invalid arguments, and will most likely crash the Reduce system in such
+cases. You have been warned!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="lispsym">
+<tt class="descname">lispsym</tt> s::string<a class="headerlink" href="#lispsym" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a special Pure identifier for any symbol given as
+a string, even symbols which don&#8217;t conform to Pure syntax. This is
+sometimes needed to specify special Lisp symbols in calls to
+<a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a>, such as <tt class="docutils literal"><span class="pre">lisp</span> <span class="pre">(lispsym</span> <span class="pre">&quot;oem-supervisor&quot;)</span></tt>. (Note that if
+such a special symbol occurs as a literal in a result returned by
+<a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> or <a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> then it will get mangled into a form
+which conforms to Pure syntax.)</p>
 </dd></dl>
 
 <dl class="function">
@@ -310,17 +324,18 @@ straightforward fashion and includes all natively supported Pure data types
 (machine ints, bigints, doubles, rationals and complex numbers). Some
 special conversions are applied to algebraic expressions to make arithmetic
 operations such as <tt class="docutils literal"><span class="pre">+</span></tt>, <tt class="docutils literal"><span class="pre">*</span></tt> etc. work as expected. In addition, the
-<tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">..</span></tt> and <tt class="docutils literal"><span class="pre">:=</span></tt> infix operators can be used to denote equations,
-ranges and assignments in Reduce, respectively. (Note that you may have to
-quote these in some cases so that they don&#8217;t get evaluated on the Pure
-side.) Also, Reduce&#8217;s <tt class="docutils literal"><span class="pre">arbconst</span> <span class="pre">n</span></tt>, <tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">arbcomplex</span> <span class="pre">n</span></tt>
-terms are mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>, <tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the Pure
-side. For debugging purposes, all these automatic conversions can also be
-turned off on the output side with the &#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216;
-compilation pragma; this needs to be placed <em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span>
-<span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a number of other
-conditional compilation options which may be used to selectively turn off
-some of the conversions; please check the module source for details.</p>
+<tt class="docutils literal"><span class="pre">==</span></tt>, <tt class="docutils literal"><span class="pre">=&gt;</span></tt>, <tt class="docutils literal"><span class="pre">..</span></tt> and <tt class="docutils literal"><span class="pre">:=</span></tt> infix operators can be used to denote
+equations, replacement rules, ranges and assignments in Reduce,
+respectively. (Note that you may have to quote these in some cases so that
+they don&#8217;t get evaluated on the Pure side.) Also, Reduce&#8217;s <tt class="docutils literal"><span class="pre">arbconst</span> <span class="pre">n</span></tt>,
+<tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">arbcomplex</span> <span class="pre">n</span></tt> terms are mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>,
+<tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the Pure side. For debugging purposes, all these
+automatic conversions can also be turned off on the output side with the
+&#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216; compilation pragma; this needs to be placed
+<em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span> <span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a
+number of other conditional compilation options which may be used to
+selectively turn off some of the conversions; please check the module
+source for details.</p>
 </div>
 <div class="section" id="basic-examples">
 <h2>Basic Examples<a class="headerlink" href="#basic-examples" title="Permalink to this headline">¶</a></h2>
@@ -398,12 +413,16 @@ scripts included in the distribution.</p>
 <div class="section" id="examples-by-topic">
 <h2>Examples by Topic<a class="headerlink" href="#examples-by-topic" title="Permalink to this headline">¶</a></h2>
 <p>This is a small excerpt from the <strong>REDUCE User&#8217;s Manual</strong> <a class="reference internal" href="#redum">[REDUM]</a>,
-translated to Pure syntax. For any details we refer to that
-document. With this guide it should be straightforward to interprete
-back and forth.
-The REDUCE User&#8217;s Manual as well as the documentation of each package and
-other valuable information may be found at</p>
-<p><a class="reference external" href="http://www.reduce-algebra.com/documentation.htm">http://www.reduce-algebra.com/documentation.htm</a></p>
+translated to Pure syntax. For any details we refer to that document. With
+this guide it should be straightforward to translate back and forth between
+Pure and REDUCE syntax for the invocation of REDUCE functions. The one thing
+you have to keep in mind is that Pure uses <em>curried</em> notation for function
+applications, so where a function is invoked as <tt class="docutils literal"><span class="pre">f(x,y,z)</span></tt> in REDUCE, you&#8217;ll
+have to call it as <tt class="docutils literal"><span class="pre">f</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></tt> in Pure (with parentheses around each argument
+which is a compound expression).</p>
+<p>The REDUCE User&#8217;s Manual as well as the documentation of each package and
+other valuable information may be found at:
+<a class="reference external" href="http://www.reduce-algebra.com/documentation.htm">http://www.reduce-algebra.com/documentation.htm</a></p>
 <div class="section" id="differentiation">
 <h3>Differentiation<a class="headerlink" href="#differentiation" title="Permalink to this headline">¶</a></h3>
 <p>The operator <tt class="docutils literal"><span class="pre">df</span></tt> is used to represent partial differentiation with respect
@@ -500,17 +519,23 @@ atan ((sqrt (sqrt (x^<span class="mi">2</span>+<span class="mi">1</span>)+x)*sqr
 </div>
 <p>Note how to load packages.</p>
 </div>
-<div class="section" id="length-and-map">
-<h3>Length and Map<a class="headerlink" href="#length-and-map" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">LENGTH</span></tt> is a generic operator for finding the length of various objects in
-the system, while the <tt class="docutils literal"><span class="pre">MAP</span></tt> operator applies a uniform evaluation pattern to
-all members of a composite structure: a matrix, a list, or the arguments of an
-operator expression.</p>
+<div class="section" id="length-map-and-select">
+<h3>Length, Map and Select<a class="headerlink" href="#length-map-and-select" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">LENGTH</span></tt> is a generic operator for finding the length of compound objects.
+Besides lists and matrices, this also includes algebraic expressions. The
+<tt class="docutils literal"><span class="pre">MAP</span></tt> and <tt class="docutils literal"><span class="pre">SELECT</span></tt> operators let you manipulate such objects by applying a
+function to each element of the structure, or by picking the elements
+satisfying a given predicate function. Thus these operations serve pretty much
+the same purposes as <a class="reference internal" href="purelib.html##" title="#"><tt class="xref pure pure-func docutils literal"><span class="pre">#</span></tt></a> (or <a class="reference internal" href="purelib.html#dim" title="dim"><tt class="xref pure pure-func docutils literal"><span class="pre">dim</span></tt></a>), <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a> and
+<a class="reference internal" href="purelib.html#filter" title="filter"><tt class="xref pure pure-func docutils literal"><span class="pre">filter</span></tt></a> in Pure, but in REDUCE they also work with the operands of an
+algebraic expression.</p>
 <dl class="describe">
 <dt>
 <tt class="descname">length exprn</tt></dt>
 <dt>
-<tt class="descname">map fun obj</tt></dt>
+<tt class="descname">map fun exprn</tt></dt>
+<dt>
+<tt class="descname">select fun exprn</tt></dt>
 <dd></dd></dl>
 
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ length (a+b)<span class="p">;</span>
@@ -518,19 +543,63 @@ operator expression.</p>
 <span class="gp">&gt; </span>simplify $ length (x^n+a*x+<span class="mi">2</span>)<span class="p">;</span>
 <span class="mi">3</span>
 
-<span class="gp">&gt; </span>simplify $ map sqrt [<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span>]<span class="p">;</span>
+<span class="gp">&gt; </span>simplify $ &#39;map sqrt [<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span>]<span class="p">;</span>
 [<span class="mi">1</span>,<span class="mi">2</span>^(<span class="mi">1</span>/<span class="mi">2</span>),<span class="mi">3</span>^(<span class="mi">1</span>/<span class="mi">2</span>)]
-<span class="gp">&gt; </span>simplify $ map log  [x^n,x^m,sin x] <span class="p">;</span>
+<span class="gp">&gt; </span>simplify $ &#39;map log  [x^n,x^m,sin x]<span class="p">;</span>
 [log (x^n),log (x^m),log (sin x)]
-
-<span class="gp">&gt; </span>simplify $ map (\y-&gt;df y x)  [x^n,x^m,sin x] <span class="p">;</span>
+</pre></div>
+</div>
+<p>Note that <tt class="docutils literal"><span class="pre">map</span></tt> must be quoted if we want to evaluate it in REDUCE, since
+it&#8217;s also a function in Pure. In this case, we might as well do the
+calculation using Pure&#8217;s <tt class="docutils literal"><span class="pre">map</span></tt>; the result is exactly the same.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ map sqrt [<span class="mi">1</span>,<span class="mi">2</span>,<span class="mi">3</span>]<span class="p">;</span>
+[<span class="mi">1</span>,<span class="mi">2</span>^(<span class="mi">1</span>/<span class="mi">2</span>),<span class="mi">3</span>^(<span class="mi">1</span>/<span class="mi">2</span>)]
+<span class="gp">&gt; </span>simplify $ map log  [x^n,x^m,sin x]<span class="p">;</span>
+[log (x^n),log (x^m),log (sin x)]
+</pre></div>
+</div>
+<p>If the function to be applied in calls to <tt class="docutils literal"><span class="pre">MAP</span></tt> or <tt class="docutils literal"><span class="pre">SELECT</span></tt> is a compound
+expression, it must either contain a single free variable (indicated with the
+<tt class="docutils literal"><span class="pre">~</span></tt> prefix, e.g.: <tt class="docutils literal"><span class="pre">~w</span></tt>) or a replacement rule of the form <tt class="docutils literal"><span class="pre">var</span> <span class="pre">=&gt;</span>
+<span class="pre">exprn</span></tt>. In either case the current elements are substituted for the free
+variable when the function is applied.</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ &#39;map (y=&gt;df y x)   [x^n,x^m,sin x]<span class="p">;</span>
 [x^n*n/x,x^m*m/x,cos x]
-<span class="gp">&gt; </span>simplify $ map (\y-&gt;intg y x)  [x^n,x^m,sin x] <span class="p">;</span>
+<span class="gp">&gt; </span>simplify $ &#39;map (y=&gt;intg y x) [x^n,x^m,sin x]<span class="p">;</span>
+[x^n*x/(n+<span class="mi">1</span>),x^m*x/(m+<span class="mi">1</span>),-cos x]
+
+<span class="gp">&gt; </span>simplify $ select (evenp (deg (~w) y)) ((x+y)^<span class="mi">5</span>)<span class="p">;</span>
+x^<span class="mi">5</span>+<span class="mi">10</span>*x^<span class="mi">3</span>*y^<span class="mi">2</span>+<span class="mi">5</span>*x*y^<span class="mi">4</span>
+<span class="gp">&gt; </span>simplify $ select (w=&gt;evenp (deg w y)) ((x+y)^<span class="mi">5</span>)<span class="p">;</span>
+x^<span class="mi">5</span>+<span class="mi">10</span>*x^<span class="mi">3</span>*y^<span class="mi">2</span>+<span class="mi">5</span>*x*y^<span class="mi">4</span>
+</pre></div>
+</div>
+<p>Contrast this with Pure where the function argument to <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a> is often
+specified as a lambda:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ map (\y-&gt;df y x)   [x^n,x^m,sin x]<span class="p">;</span>
+[x^n*n/x,x^m*m/x,cos x]
+<span class="gp">&gt; </span>simplify $ map (\y-&gt;intg y x) [x^n,x^m,sin x]<span class="p">;</span>
 [x^n*x/(n+<span class="mi">1</span>),x^m*x/(m+<span class="mi">1</span>),-cos x]
 </pre></div>
 </div>
-<p>Note that the <tt class="docutils literal"><span class="pre">lambda</span></tt> expression in REDUCE is replaced by the
-corresponding Pure version.</p>
+<p>In principle, the same correspondences also hold between REDUCE&#8217;s <tt class="docutils literal"><span class="pre">select</span></tt>
+and Pure&#8217;s <a class="reference internal" href="purelib.html#filter" title="filter"><tt class="xref pure pure-func docutils literal"><span class="pre">filter</span></tt></a>. For instance, consider:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ select (w=&gt;evenp (deg w x)) [<span class="mi">2</span>*x^<span class="mi">2</span>,<span class="mi">3</span>*x^<span class="mi">3</span>,<span class="mi">4</span>*x^<span class="mi">4</span>]<span class="p">;</span>
+[<span class="mi">2</span>*x^<span class="mi">2</span>,<span class="mi">4</span>*x^<span class="mi">4</span>]
+</pre></div>
+</div>
+<p>The equivalent Pure <a class="reference internal" href="purelib.html#filter" title="filter"><tt class="xref pure pure-func docutils literal"><span class="pre">filter</span></tt></a> is:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>filter (\w-&gt;simplify $ evenp (deg w x)) [<span class="mi">2</span>*x^<span class="mi">2</span>,<span class="mi">3</span>*x^<span class="mi">3</span>,<span class="mi">4</span>*x^<span class="mi">4</span>]<span class="p">;</span>
+[<span class="mi">2</span>*x^<span class="mi">2</span>,<span class="mi">4</span>*x^<span class="mi">4</span>]
+</pre></div>
+</div>
+<p>Note that REDUCE is now being called inside the predicate function, the rest
+of the processing is done in Pure.</p>
+<p>Whether to prefer the calculation of maps and filters in REDUCE or in Pure is
+largely a matter of taste and which environment you feel most comfortable
+with. However, Pure offers a comprehensive collection of list processing
+functions for various purposes, which can at times be easier to use than the
+corresponding REDUCE facilities.</p>
 </div>
 <div class="section" id="partial-fractions">
 <h3>Partial Fractions<a class="headerlink" href="#partial-fractions" title="Permalink to this headline">¶</a></h3>
@@ -562,17 +631,6 @@ switch <tt class="docutils literal"><span class="pre">off</span> <span class="pr
 </pre></div>
 </div>
 <p>Note how the value of a Reduce switch is changed in Pure.</p>
-</div>
-<div class="section" id="selection">
-<h3>Selection<a class="headerlink" href="#selection" title="Permalink to this headline">¶</a></h3>
-<p>The <tt class="docutils literal"><span class="pre">SELECT</span></tt> operator extracts from a list, or from the arguments of an
-<tt class="docutils literal"><span class="pre">n–ary</span></tt> operator, elements corresponding to a boolean predicate.
-It is used with the syntax:</p>
-<dl class="describe">
-<dt>
-<tt class="descname">select fun list</tt></dt>
-<dd></dd></dl>
-
 </div>
 <div class="section" id="solving">
 <h3>Solving<a class="headerlink" href="#solving" title="Permalink to this headline">¶</a></h3>
@@ -833,8 +891,8 @@ a
 </div>
 <p><tt class="docutils literal"><span class="pre">PART</span></tt> may also be used to substitute a given part of an expression. In
 this case, the <tt class="docutils literal"><span class="pre">PART</span></tt> construct appears on the left-hand side of an
-assignment statement, and the expression to replace the given part on the
-right-hand side.</p>
+assignment statement (cf. <a class="reference internal" href="#assignment">Assignment</a>), and the expression to replace the
+given part on the right-hand side.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span> simplify $ xx:=a+b<span class="p">;</span>
 a+b
 <span class="gp">&gt; </span> simplify $ part xx <span class="mi">2</span> := c <span class="p">;</span>
@@ -1039,7 +1097,7 @@ x^m*b+x^n*a+c
 <p>A very powerful feature of REDUCE is the ease with which matrix calculations
 can be performed. It fits very well into Pure&#8217;s native matrix type.</p>
 <p>To keep it simple we show the usage of the different operators by examples
-using the well known <strong class="dfn">Pauli matrices</strong>. See, e.g.,
+using the well known <cite>Pauli matrices</cite>. See, e.g.,
 <a class="reference external" href="http://en.wikipedia.org/wiki/Pauli_matrices">http://en.wikipedia.org/wiki/Pauli_matrices</a> for a reference.</p>
 <div class="math">
 <p><img src="_images/math/ef9429df1c03f8216e05dac3b1d943d56fb88af8.png" alt="\sigma_1 = \begin{pmatrix} 0&amp;1\\ 1&amp;0 \end{pmatrix} \,\,\,\,\,
@@ -1574,9 +1632,8 @@ GCD Package</em>, Proc.  SYMSAC ’81, ACM (New York) (1981), 109-116.</dd>
 <li><a class="reference internal" href="#examples-by-topic">Examples by Topic</a><ul>
 <li><a class="reference internal" href="#differentiation">Differentiation</a></li>
 <li><a class="reference internal" href="#integration">Integration</a></li>
-<li><a class="reference internal" href="#length-and-map">Length and Map</a></li>
+<li><a class="reference internal" href="#length-map-and-select">Length, Map and Select</a></li>
 <li><a class="reference internal" href="#partial-fractions">Partial Fractions</a></li>
-<li><a class="reference internal" href="#selection">Selection</a></li>
 <li><a class="reference internal" href="#solving">Solving</a></li>
 <li><a class="reference internal" href="#even-and-odd-operators">Even and Odd Operators</a></li>
 <li><a class="reference internal" href="#linear-operators">Linear Operators</a></li>

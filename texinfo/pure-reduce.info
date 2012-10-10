@@ -74,9 +74,8 @@ Examples by Topic
 
 * Differentiation::
 * Integration::
-* Length and Map::
+* Length Map and Select::
 * Partial Fractions::
-* Selection::
 * Solving::
 * Even and Odd Operators::
 * Linear Operators::
@@ -261,14 +260,27 @@ namespace:
 
  -- Function: lisp x
      This can be used to execute arbitrary Lisp code, which is sometimes
-     necessary to perform special functions in the Reduce system. Free
-     symbols are quoted automatically, and Pure lists are mapped to
-     corresponding Lisp lists and vice versa. The result is always a
-     Pure list or an atomic value. Note that you need to quote `x' if
-     you want to prevent it from being evaluated on the Pure side. This
-     is to be used with care. At present, the PROC interface isn't very
-     forgiving if you try to execute invalid Lisp code; it will most
-     likely crash in such cases.
+     necessary to perform special functions in the Reduce system. For
+     convenience, free symbols are quoted automatically, and Pure lists
+     are mapped to corresponding Lisp lists and vice versa. The result
+     is always a Pure list or an atomic value. Note that you need to
+     quote `x' if you want to prevent it from being evaluated on the
+     Pure side. This is to be used with care. An orderly exception is
+     raised if you try to execute a non-existing Lisp function. But
+     there are some internal functions in Reduce which aren't very
+     forgiving if you try to execute them with invalid arguments, and
+     will most likely crash the Reduce system in such cases. You have
+     been warned!
+
+ -- Function: lispsym s::string
+     This function creates a special Pure identifier for any symbol
+     given as a string, even symbols which don't conform to Pure
+     syntax. This is sometimes needed to specify special Lisp symbols
+     in calls to *note lisp: 17, such as `lisp (lispsym
+     "oem-supervisor")'. (Note that if such a special symbol occurs as
+     a literal in a result returned by *note lisp: 17. or *note
+     simplify: 16. then it will get mangled into a form which conforms
+     to Pure syntax.)
 
  -- Function: declare declsym [foo,bar,...]
      Declare symbols and their properties; please see the Declarations
@@ -308,18 +320,18 @@ straightforward fashion and includes all natively supported Pure data
 types (machine ints, bigints, doubles, rationals and complex numbers).
 Some special conversions are applied to algebraic expressions to make
 arithmetic operations such as `+', `*' etc. work as expected. In
-addition, the `==', `..' and `:=' infix operators can be used to denote
-equations, ranges and assignments in Reduce, respectively. (Note that
-you may have to quote these in some cases so that they don't get
-evaluated on the Pure side.) Also, Reduce's `arbconst n', `arbint n'
-and `arbcomplex n' terms are mapped to Greek symbols `αn', `βn' and
-`ζn' on the Pure side. For debugging purposes, all these automatic
-conversions can also be turned off on the output side with the '`#!
---disable mapped'' compilation pragma; this needs to be placed _before_
-the '`using reduce;'' import clause to take effect. There are a number
-of other conditional compilation options which may be used to
-selectively turn off some of the conversions; please check the module
-source for details.
+addition, the `==', `=>', `..' and `:=' infix operators can be used to
+denote equations, replacement rules, ranges and assignments in Reduce,
+respectively. (Note that you may have to quote these in some cases so
+that they don't get evaluated on the Pure side.) Also, Reduce's
+`arbconst n', `arbint n' and `arbcomplex n' terms are mapped to Greek
+symbols `αn', `βn' and `ζn' on the Pure side. For debugging purposes,
+all these automatic conversions can also be turned off on the output
+side with the '`#!  --disable mapped'' compilation pragma; this needs
+to be placed _before_ the '`using reduce;'' import clause to take
+effect. There are a number of other conditional compilation options
+which may be used to selectively turn off some of the conversions;
+please check the module source for details.
 
 
 File: pure-reduce.info,  Node: Basic Examples,  Next: Examples by Topic,  Prev: High-Level Interface,  Up: Top
@@ -366,7 +378,7 @@ properties:
     -myop x
 
 If you find it awkward to evaluate Lisp forms in Pure, you can also
-achieve the same with the *note declare: 18. function which covers most
+achieve the same with the *note declare: 19. function which covers most
 of the common Reduce declarations that might be needed:
 
     > declare operator myop;
@@ -383,7 +395,7 @@ This example shows how you can do a simple plot using Reduce's gnuplot
     0
 
 This pops up a wxWidgets window (`terminal=="wxt"') with a plot of the
-given function in it, see the *note screenshot: 1d. below. The
+given function in it, see the *note screenshot: 1e. below. The
 `x=='(-20..20)' argument specifies the desired range of the `x'
 variable (note that the range needs to be quoted so that it gets
 through to Reduce rather than being evaluated on the Pure side).
@@ -407,20 +419,25 @@ File: pure-reduce.info,  Node: Examples by Topic,  Next: Index,  Prev: Basic Exa
 *******************
 
 This is a small excerpt from the *REDUCE User's Manual* *note [REDUM]:
-1f, translated to Pure syntax. For any details we refer to that
-document. With this guide it should be straightforward to interprete
-back and forth.  The REDUCE User's Manual as well as the documentation
-of each package and other valuable information may be found at
+20, translated to Pure syntax. For any details we refer to that
+document. With this guide it should be straightforward to translate
+back and forth between Pure and REDUCE syntax for the invocation of
+REDUCE functions. The one thing you have to keep in mind is that Pure
+uses _curried_ notation for function applications, so where a function
+is invoked as `f(x,y,z)' in REDUCE, you'll have to call it as `f x y z'
+in Pure (with parentheses around each argument which is a compound
+expression).
 
-  <http://www.reduce-algebra.com/documentation.htm>
+  The REDUCE User's Manual as well as the documentation of each package
+and other valuable information may be found at:
+<http://www.reduce-algebra.com/documentation.htm>
 
 * Menu:
 
 * Differentiation::
 * Integration::
-* Length and Map::
+* Length Map and Select::
 * Partial Fractions::
-* Selection::
 * Solving::
 * Even and Odd Operators::
 * Linear Operators::
@@ -485,7 +502,7 @@ Note how to declare dependencies.
 \frac{\partial z} {\partial x}, respectively, as expected.
 
 
-File: pure-reduce.info,  Node: Integration,  Next: Length and Map,  Prev: Differentiation,  Up: Examples by Topic
+File: pure-reduce.info,  Node: Integration,  Next: Length Map and Select,  Prev: Differentiation,  Up: Examples by Topic
 
 5.2 Integration
 ===============
@@ -524,12 +541,12 @@ Example 3:
 
 Apparently no solution was found. There is a package `ALGINT' in REDUCE
 which specifically deals with algebraic functions. The REDUCE User's
-Manual *note [REDUM]: 1f. says:
+Manual *note [REDUM]: 20. says:
 
      _This package [...] will analytically integrate a wide range of
      expressions involving square roots where the answer exists in that
      class of functions.  It is an implementation of the work described
-     in J.H. Davenport_ *note [LNCS102]: 22.
+     in J.H. Davenport_ *note [LNCS102]: 23.
 
     > reduce::load "algint" ;
     0
@@ -541,39 +558,89 @@ Manual *note [REDUM]: 1f. says:
 Note how to load packages.
 
 
-File: pure-reduce.info,  Node: Length and Map,  Next: Partial Fractions,  Prev: Integration,  Up: Examples by Topic
+File: pure-reduce.info,  Node: Length Map and Select,  Next: Partial Fractions,  Prev: Integration,  Up: Examples by Topic
 
-5.3 Length and Map
-==================
+5.3 Length, Map and Select
+==========================
 
-`LENGTH' is a generic operator for finding the length of various
-objects in the system, while the `MAP' operator applies a uniform
-evaluation pattern to all members of a composite structure: a matrix, a
-list, or the arguments of an operator expression.
+`LENGTH' is a generic operator for finding the length of compound
+objects.  Besides lists and matrices, this also includes algebraic
+expressions. The `MAP' and `SELECT' operators let you manipulate such
+objects by applying a function to each element of the structure, or by
+picking the elements satisfying a given predicate function. Thus these
+operations serve pretty much the same purposes as `#' (or `dim'), `map'
+and `filter' in Pure, but in REDUCE they also work with the operands of
+an algebraic expression.
 
  -- Description: length exprn
- -- Description: map fun obj
+ -- Description: map fun exprn
+ -- Description: select fun exprn
 
     > simplify $ length (a+b);
     2
     > simplify $ length (x^n+a*x+2);
     3
 
-    > simplify $ map sqrt [1,2,3];
+    > simplify $ 'map sqrt [1,2,3];
     [1,2^(1/2),3^(1/2)]
-    > simplify $ map log  [x^n,x^m,sin x] ;
+    > simplify $ 'map log  [x^n,x^m,sin x];
     [log (x^n),log (x^m),log (sin x)]
 
-    > simplify $ map (\y->df y x)  [x^n,x^m,sin x] ;
+Note that `map' must be quoted if we want to evaluate it in REDUCE,
+since it's also a function in Pure. In this case, we might as well do
+the calculation using Pure's `map'; the result is exactly the same.
+
+    > simplify $ map sqrt [1,2,3];
+    [1,2^(1/2),3^(1/2)]
+    > simplify $ map log  [x^n,x^m,sin x];
+    [log (x^n),log (x^m),log (sin x)]
+
+If the function to be applied in calls to `MAP' or `SELECT' is a
+compound expression, it must either contain a single free variable
+(indicated with the `~' prefix, e.g.: `~w') or a replacement rule of
+the form `var => exprn'. In either case the current elements are
+substituted for the free variable when the function is applied.
+
+    > simplify $ 'map (y=>df y x)   [x^n,x^m,sin x];
     [x^n*n/x,x^m*m/x,cos x]
-    > simplify $ map (\y->intg y x)  [x^n,x^m,sin x] ;
+    > simplify $ 'map (y=>intg y x) [x^n,x^m,sin x];
     [x^n*x/(n+1),x^m*x/(m+1),-cos x]
 
-Note that the `lambda' expression in REDUCE is replaced by the
-corresponding Pure version.
+    > simplify $ select (evenp (deg (~w) y)) ((x+y)^5);
+    x^5+10*x^3*y^2+5*x*y^4
+    > simplify $ select (w=>evenp (deg w y)) ((x+y)^5);
+    x^5+10*x^3*y^2+5*x*y^4
+
+Contrast this with Pure where the function argument to `map' is often
+specified as a lambda:
+
+    > simplify $ map (\y->df y x)   [x^n,x^m,sin x];
+    [x^n*n/x,x^m*m/x,cos x]
+    > simplify $ map (\y->intg y x) [x^n,x^m,sin x];
+    [x^n*x/(n+1),x^m*x/(m+1),-cos x]
+
+In principle, the same correspondences also hold between REDUCE's
+`select' and Pure's `filter'. For instance, consider:
+
+    > simplify $ select (w=>evenp (deg w x)) [2*x^2,3*x^3,4*x^4];
+    [2*x^2,4*x^4]
+
+The equivalent Pure `filter' is:
+
+    > filter (\w->simplify $ evenp (deg w x)) [2*x^2,3*x^3,4*x^4];
+    [2*x^2,4*x^4]
+
+Note that REDUCE is now being called inside the predicate function, the
+rest of the processing is done in Pure.
+
+  Whether to prefer the calculation of maps and filters in REDUCE or in
+Pure is largely a matter of taste and which environment you feel most
+comfortable with. However, Pure offers a comprehensive collection of
+list processing functions for various purposes, which can at times be
+easier to use than the corresponding REDUCE facilities.
 
 
-File: pure-reduce.info,  Node: Partial Fractions,  Next: Selection,  Prev: Length and Map,  Up: Examples by Topic
+File: pure-reduce.info,  Node: Partial Fractions,  Next: Solving,  Prev: Length Map and Select,  Up: Examples by Topic
 
 5.4 Partial Fractions
 =====================
@@ -603,21 +670,9 @@ switch `off exp':
 Note how the value of a Reduce switch is changed in Pure.
 
 
-File: pure-reduce.info,  Node: Selection,  Next: Solving,  Prev: Partial Fractions,  Up: Examples by Topic
+File: pure-reduce.info,  Node: Solving,  Next: Even and Odd Operators,  Prev: Partial Fractions,  Up: Examples by Topic
 
-5.5 Selection
-=============
-
-The `SELECT' operator extracts from a list, or from the arguments of an
-`n–ary' operator, elements corresponding to a boolean predicate.  It is
-used with the syntax:
-
- -- Description: select fun list
-
-
-File: pure-reduce.info,  Node: Solving,  Next: Even and Odd Operators,  Prev: Selection,  Up: Examples by Topic
-
-5.6 Solving
+5.5 Solving
 ===========
 
 `SOLVE' is an operator for solving one or more simultaneous algebraic
@@ -685,7 +740,7 @@ For details consult the REDUCE user manual.
 
 File: pure-reduce.info,  Node: Even and Odd Operators,  Next: Linear Operators,  Prev: Solving,  Up: Examples by Topic
 
-5.7 Even and Odd Operators
+5.6 Even and Odd Operators
 ==========================
 
 An operator can be declared to be even or odd in its first argument by
@@ -711,7 +766,7 @@ the declarations `EVEN' and `ODD' respectively.
 
 File: pure-reduce.info,  Node: Linear Operators,  Next: Non-commuting Operators,  Prev: Even and Odd Operators,  Up: Examples by Topic
 
-5.8 Linear Operators
+5.7 Linear Operators
 ====================
 
 An operator can be declared to be linear in its first argument over
@@ -733,7 +788,7 @@ Note that `L x y' binds stronger than `(*)' in Pure.
 
 File: pure-reduce.info,  Node: Non-commuting Operators,  Next: Symmetric and Antisymmetric Operators,  Prev: Linear Operators,  Up: Examples by Topic
 
-5.9 Non-commuting Operators
+5.8 Non-commuting Operators
 ===========================
 
 An operator can be declared to be non-commutative under multiplication
@@ -752,8 +807,8 @@ by the declaration `NONCOM'.
 
 File: pure-reduce.info,  Node: Symmetric and Antisymmetric Operators,  Next: Creating/Removing Variable Dependencies,  Prev: Non-commuting Operators,  Up: Examples by Topic
 
-5.10 Symmetric and Antisymmetric Operators
-==========================================
+5.9 Symmetric and Antisymmetric Operators
+=========================================
 
 An operator can be declared to be symmetric with respect to its
 arguments by the declaration `SYMMETRIC'. Similarly, the declaration
@@ -782,7 +837,7 @@ arguments by the declaration `SYMMETRIC'. Similarly, the declaration
 
 File: pure-reduce.info,  Node: Creating/Removing Variable Dependencies,  Next: Internal Order of Variables,  Prev: Symmetric and Antisymmetric Operators,  Up: Examples by Topic
 
-5.11 Creating/Removing Variable Dependencies
+5.10 Creating/Removing Variable Dependencies
 ============================================
 
 There are several facilities in REDUCE, such as the differentiation
@@ -824,7 +879,7 @@ because `D' is declared to depend on `x'.  If we also let `a' depend on
 
 File: pure-reduce.info,  Node: Internal Order of Variables,  Next: Parts of Algebraic Expressions,  Prev: Creating/Removing Variable Dependencies,  Up: Examples by Topic
 
-5.12 Internal Order of Variables
+5.11 Internal Order of Variables
 ================================
 
 It is possible for the user to change the internal order of variables
@@ -847,7 +902,7 @@ effect on computation time.
 
 File: pure-reduce.info,  Node: Parts of Algebraic Expressions,  Next: Polynomials and Rationals,  Prev: Internal Order of Variables,  Up: Examples by Topic
 
-5.13 Parts of Algebraic Expressions
+5.12 Parts of Algebraic Expressions
 ===================================
 
 The following operators can be used to obtain a specific part of an
@@ -876,8 +931,8 @@ expression, or even change such a part to another expression.
 
 `PART' may also be used to substitute a given part of an expression. In
 this case, the `PART' construct appears on the left-hand side of an
-assignment statement, and the expression to replace the given part on
-the right-hand side.
+assignment statement (cf. *note Assignment: 2e.), and the expression to
+replace the given part on the right-hand side.
 
     >  simplify $ xx:=a+b;
     a+b
@@ -890,14 +945,14 @@ the right-hand side.
 
 File: pure-reduce.info,  Node: Polynomials and Rationals,  Next: Substitution,  Prev: Parts of Algebraic Expressions,  Up: Examples by Topic
 
-5.14 Polynomials and Rationals
+5.13 Polynomials and Rationals
 ==============================
 
 REDUCE is capable of factorizing univariate and multivariate
 polynomials with integer coefficients, finding all factors with integer
 coefficients. The package for doing this was written by Dr. Arthur C.
 Norman and Ms. P. Mary Ann Moore at The University of Cambridge.  It is
-described in *note [SYMSAC81]: 2f.
+described in *note [SYMSAC81]: 30.
 
  -- Description: factorize expr::polynomial [p::prime]
 
@@ -1025,7 +1080,7 @@ MAINVAR/NUM/REDUCT
 
 File: pure-reduce.info,  Node: Substitution,  Next: Assignment,  Prev: Polynomials and Rationals,  Up: Examples by Topic
 
-5.15 Substitution
+5.14 Substitution
 =================
 
 An important class of commands in REDUCE define substitutions for
@@ -1046,7 +1101,7 @@ in Pure, using the `reduce' macro.
 
 File: pure-reduce.info,  Node: Assignment,  Next: Matrix Calculations,  Prev: Substitution,  Up: Examples by Topic
 
-5.16 Assignment
+5.15 Assignment
 ===============
 
 One may assign values to variables in the REDUCE environment. Note that
@@ -1072,7 +1127,7 @@ evaluated, contrary to the `:=' version in REDUCE.
 
 File: pure-reduce.info,  Node: Matrix Calculations,  Next: Limits,  Prev: Assignment,  Up: Examples by Topic
 
-5.17 Matrix Calculations
+5.16 Matrix Calculations
 ========================
 
 A very powerful feature of REDUCE is the ease with which matrix
@@ -1080,7 +1135,7 @@ calculations can be performed. It fits very well into Pure's native
 matrix type.
 
   To keep it simple we show the usage of the different operators by
-examples using the well known *Pauli matrices*. See, e.g.,
+examples using the well known `Pauli matrices'. See, e.g.,
 <http://en.wikipedia.org/wiki/Pauli_matrices> for a reference.
 
     let s0 = {1,0;0,1} ;
@@ -1166,7 +1221,7 @@ Solving without `solve':
 
 File: pure-reduce.info,  Node: Limits,  Next: Ordinary differential equations solver,  Prev: Matrix Calculations,  Up: Examples by Topic
 
-5.18 Limits
+5.17 Limits
 ===========
 
 From the package description:
@@ -1189,7 +1244,7 @@ Notes: This package loads automatically.  Author: Stanley L. Kameny.
 
 File: pure-reduce.info,  Node: Ordinary differential equations solver,  Next: Series Summation and Products,  Prev: Limits,  Up: Examples by Topic
 
-5.19 Ordinary differential equations solver
+5.18 Ordinary differential equations solver
 ===========================================
 
 The `ODESOLVE' package is a solver for ordinary differential equations.
@@ -1216,7 +1271,7 @@ Remember to remove dependencies:
 
 File: pure-reduce.info,  Node: Series Summation and Products,  Next: Taylor Series,  Prev: Ordinary differential equations solver,  Up: Examples by Topic
 
-5.20 Series Summation and Products
+5.19 Series Summation and Products
 ==================================
 
 `SUM': A package for series summation
@@ -1247,7 +1302,7 @@ automatically.  Author: Fujio Kako.
 
 File: pure-reduce.info,  Node: Taylor Series,  Next: Boolean Expressions,  Prev: Series Summation and Products,  Up: Examples by Topic
 
-5.21 Taylor Series
+5.20 Taylor Series
 ==================
 
 `TAYLOR': Manipulation of Taylor series
@@ -1283,7 +1338,7 @@ returned by `simplify', although REDUCE will print them.
 
 File: pure-reduce.info,  Node: Boolean Expressions,  Next: Mathematical Functions,  Prev: Taylor Series,  Up: Examples by Topic
 
-5.22 Boolean Expressions
+5.21 Boolean Expressions
 ========================
 
 The truth values within REDUCE are `t' and `nil = ()' but are mapped to
@@ -1350,7 +1405,7 @@ environments.
 
 File: pure-reduce.info,  Node: Mathematical Functions,  Next: Definite Integrals,  Prev: Boolean Expressions,  Up: Examples by Topic
 
-5.23 Mathematical Functions
+5.22 Mathematical Functions
 ===========================
 
 REDUCE provides many mathematical functions which can take arbitrary
@@ -1458,7 +1513,7 @@ Melenk, Victor Adamchik, Francis Wright and several others.
 
 File: pure-reduce.info,  Node: Definite Integrals,  Next: Declarations Switches and Loading,  Prev: Mathematical Functions,  Up: Examples by Topic
 
-5.24 Definite Integrals
+5.23 Definite Integrals
 =======================
 
 `DEFINT': Calculating definite integrals by using the Meijer G
@@ -1519,7 +1574,7 @@ Various transformations:
 
 File: pure-reduce.info,  Node: Declarations Switches and Loading,  Next: Plotting,  Prev: Definite Integrals,  Up: Examples by Topic
 
-5.25 Declarations, Switches and Loading
+5.24 Declarations, Switches and Loading
 =======================================
 
 Lisp evaluation can be used in the REDUCE system, in particular, to
@@ -1532,7 +1587,7 @@ that). E.g.:
     > simplify (myop (-x)); // => -myop x
 
 For the most common kinds of declarations, the *note reduce: 0. module
-provides the *note declare: 18. function which takes care of the
+provides the *note declare: 19. function which takes care of the
 necessary Lisp magic and is safe to use. The above example can also be
 done as follows:
 
@@ -1541,7 +1596,7 @@ done as follows:
     > simplify (myop (-x));
     -myop x
 
-Please see the description of *note declare: 18. for a list of supported
+Please see the description of *note declare: 19. for a list of supported
 declarations.
 
   The *note reduce: 0. module also provides a few other basic
@@ -1592,7 +1647,7 @@ with the *note reduce output: 11.  function:
 
 File: pure-reduce.info,  Node: Plotting,  Next: References,  Prev: Declarations Switches and Loading,  Up: Examples by Topic
 
-5.26 Plotting
+5.25 Plotting
 =============
 
 REDUCE can do 2- and 3-dimensional function plots through its gnuplot
@@ -1618,7 +1673,7 @@ than being evaluated on the Pure side):
 
 File: pure-reduce.info,  Node: References,  Prev: Plotting,  Up: Examples by Topic
 
-5.27 References
+5.26 References
 ===============
 
 [REDUM]
@@ -1644,13 +1699,15 @@ Index
 * Menu:
 
 * declare function:                      High-Level Interface.
-                                                              (line  99)
+                                                              (line 112)
 * lisp function:                         High-Level Interface.
                                                               (line  88)
+* lispsym function:                      High-Level Interface.
+                                                              (line 102)
 * plotreset function:                    High-Level Interface.
-                                                              (line 126)
+                                                              (line 139)
 * precision function:                    High-Level Interface.
-                                                              (line 118)
+                                                              (line 131)
 * reduce capture function:               High-Level Interface.
                                                               (line  52)
 * reduce feed function:                  High-Level Interface.
@@ -1689,174 +1746,173 @@ Ref: 52410
 Ref: license2410
 Ref: 62410
 Ref: embedding-reduce2410
-Node: Installation3766
-Ref: installation3863
-Ref: 03863
-Ref: module-reduce3863
-Ref: 93863
-Ref: computer-algebra-with-pure-a-reduce-interface3863
-Ref: 13863
-Node: Low-Level Interface6539
-Ref: low-level interface6653
-Ref: 76653
-Ref: low-level-interface6653
-Ref: a7367
-Ref: proc7367
-Ref: b7367
-Ref: csl7367
-Node: High-Level Interface7367
-Ref: high-level interface7483
-Ref: 87483
-Ref: high-level-interface7483
-Ref: c7855
-Ref: reduce_path7855
-Ref: d8104
-Ref: reduce start8104
-Ref: e8816
-Ref: reduce finish8816
-Ref: f9131
-Ref: reduce verbosity9131
-Ref: 109531
-Ref: reduce capture9531
-Ref: 119571
-Ref: reduce output9571
-Ref: 129951
-Ref: reduce feed9951
-Ref: 1310126
-Ref: reduce load10126
-Ref: 1410300
-Ref: reduce in10300
-Ref: 1510494
-Ref: reduce switch10494
-Ref: 1610779
-Ref: simplify10779
-Ref: 1711094
-Ref: lisp11094
-Ref: 1811713
-Ref: declare11713
-Ref: 1912604
-Ref: precision12604
-Ref: 1a13028
-Ref: plotreset13028
-Ref: 1b13233
-Ref: gnuplot13233
-Node: Basic Examples14426
-Ref: basic examples14540
-Ref: 1c14540
-Ref: basic-examples14540
-Ref: 1d16769
-Ref: screenshot16769
-Node: Examples by Topic17115
-Ref: examples by topic17214
-Ref: 1e17214
-Ref: examples-by-topic17214
-Node: Differentiation18321
-Ref: differentiation18415
-Ref: 2018415
-Node: Integration19404
-Ref: integration19521
-Ref: 2119521
-Node: Length and Map21106
-Ref: length and map21225
-Ref: 2321225
-Ref: length-and-map21225
-Node: Partial Fractions22067
-Ref: partial fractions22184
-Ref: 2422184
-Ref: partial-fractions22184
-Node: Selection22817
-Ref: selection22927
-Ref: 2522927
-Node: Solving23159
-Ref: solving23274
-Ref: 2623274
-Node: Even and Odd Operators24878
-Ref: even and odd operators25000
-Ref: 2725000
-Ref: even-and-odd-operators25000
-Node: Linear Operators25394
-Ref: linear operators25532
-Ref: 2825532
-Ref: linear-operators25532
-Node: Non-commuting Operators25933
-Ref: non-commuting operators26086
-Ref: 2926086
-Ref: non-commuting-operators26086
-Node: Symmetric and Antisymmetric Operators26420
-Ref: symmetric and antisymmetric operators26596
-Ref: 2a26596
-Ref: symmetric-and-antisymmetric-operators26596
-Node: Creating/Removing Variable Dependencies27133
-Ref: creating/removing variable dependencies27313
-Ref: 2b27313
-Ref: creating-removing-variable-dependencies27313
-Node: Internal Order of Variables28223
-Ref: internal order of variables28396
-Ref: 2c28396
-Ref: internal-order-of-variables28396
-Node: Parts of Algebraic Expressions28906
-Ref: parts of algebraic expressions29065
-Ref: 2d29065
-Ref: parts-of-algebraic-expressions29065
-Node: Polynomials and Rationals30005
-Ref: polynomials and rationals30149
-Ref: 2e30149
-Ref: polynomials-and-rationals30149
-Node: Substitution33661
-Ref: substitution33785
-Ref: 3033785
-Node: Assignment34335
-Ref: assignment34453
-Ref: 3134453
-Node: Matrix Calculations35234
-Ref: matrix calculations35346
-Ref: 3235346
-Ref: matrix-calculations35346
-Node: Limits37453
-Ref: limits37593
-Ref: 3337593
-Node: Ordinary differential equations solver38128
-Ref: ordinary differential equations solver38278
-Ref: 3438278
-Ref: ordinary-differential-equations-solver38278
-Node: Series Summation and Products38825
-Ref: series summation and products38982
-Ref: 3538982
-Ref: series-summation-and-products38982
-Node: Taylor Series39722
-Ref: taylor series39860
-Ref: 3639860
-Ref: taylor-series39860
-Node: Boolean Expressions40869
-Ref: boolean expressions41000
-Ref: 3741000
-Ref: boolean-expressions41000
-Node: Mathematical Functions42549
-Ref: mathematical functions42685
-Ref: 3842685
-Ref: mathematical-functions42685
-Node: Definite Integrals45354
-Ref: definite integrals45504
-Ref: 3945504
-Ref: definite-integrals45504
-Node: Declarations Switches and Loading47079
-Ref: declarations switches and loading47215
-Ref: 3a47215
-Ref: declarations-switches-and-loading47215
-Node: Plotting49423
-Ref: plotting49551
-Ref: 3b49551
-Node: References50329
-Ref: references50415
-Ref: 3c50415
-Ref: 1f50448
-Ref: redum50448
-Ref: 2250547
-Ref: lncs10250547
-Ref: 2f50646
-Ref: symsac8150646
-Node: Index50817
-Ref: index50893
+Node: Installation3759
+Ref: installation3856
+Ref: 03856
+Ref: module-reduce3856
+Ref: 93856
+Ref: computer-algebra-with-pure-a-reduce-interface3856
+Ref: 13856
+Node: Low-Level Interface6532
+Ref: low-level interface6646
+Ref: 76646
+Ref: low-level-interface6646
+Ref: a7360
+Ref: proc7360
+Ref: b7360
+Ref: csl7360
+Node: High-Level Interface7360
+Ref: high-level interface7476
+Ref: 87476
+Ref: high-level-interface7476
+Ref: c7848
+Ref: reduce_path7848
+Ref: d8097
+Ref: reduce start8097
+Ref: e8809
+Ref: reduce finish8809
+Ref: f9124
+Ref: reduce verbosity9124
+Ref: 109524
+Ref: reduce capture9524
+Ref: 119564
+Ref: reduce output9564
+Ref: 129944
+Ref: reduce feed9944
+Ref: 1310119
+Ref: reduce load10119
+Ref: 1410293
+Ref: reduce in10293
+Ref: 1510487
+Ref: reduce switch10487
+Ref: 1610772
+Ref: simplify10772
+Ref: 1711087
+Ref: lisp11087
+Ref: 1811896
+Ref: lispsym11896
+Ref: 1912416
+Ref: declare12416
+Ref: 1a13307
+Ref: precision13307
+Ref: 1b13731
+Ref: plotreset13731
+Ref: 1c13936
+Ref: gnuplot13936
+Node: Basic Examples15155
+Ref: basic examples15269
+Ref: 1d15269
+Ref: basic-examples15269
+Ref: 1e17498
+Ref: screenshot17498
+Node: Examples by Topic17844
+Ref: examples by topic17943
+Ref: 1f17943
+Ref: examples-by-topic17943
+Node: Differentiation19387
+Ref: differentiation19481
+Ref: 2119481
+Node: Integration20470
+Ref: integration20594
+Ref: 2220594
+Node: Length Map and Select22179
+Ref: length map and select22305
+Ref: 2422305
+Ref: length-map-and-select22305
+Node: Partial Fractions25256
+Ref: partial fractions25378
+Ref: 2525378
+Ref: partial-fractions25378
+Node: Solving26011
+Ref: solving26134
+Ref: 2626134
+Node: Even and Odd Operators27738
+Ref: even and odd operators27860
+Ref: 2727860
+Ref: even-and-odd-operators27860
+Node: Linear Operators28254
+Ref: linear operators28392
+Ref: 2828392
+Ref: linear-operators28392
+Node: Non-commuting Operators28793
+Ref: non-commuting operators28946
+Ref: 2928946
+Ref: non-commuting-operators28946
+Node: Symmetric and Antisymmetric Operators29280
+Ref: symmetric and antisymmetric operators29456
+Ref: 2a29456
+Ref: symmetric-and-antisymmetric-operators29456
+Node: Creating/Removing Variable Dependencies29991
+Ref: creating/removing variable dependencies30171
+Ref: 2b30171
+Ref: creating-removing-variable-dependencies30171
+Node: Internal Order of Variables31081
+Ref: internal order of variables31254
+Ref: 2c31254
+Ref: internal-order-of-variables31254
+Node: Parts of Algebraic Expressions31764
+Ref: parts of algebraic expressions31923
+Ref: 2d31923
+Ref: parts-of-algebraic-expressions31923
+Node: Polynomials and Rationals32891
+Ref: polynomials and rationals33035
+Ref: 2f33035
+Ref: polynomials-and-rationals33035
+Node: Substitution36547
+Ref: substitution36671
+Ref: 3136671
+Node: Assignment37221
+Ref: assignment37339
+Ref: 2e37339
+Node: Matrix Calculations38120
+Ref: matrix calculations38232
+Ref: 3238232
+Ref: matrix-calculations38232
+Node: Limits40339
+Ref: limits40479
+Ref: 3340479
+Node: Ordinary differential equations solver41014
+Ref: ordinary differential equations solver41164
+Ref: 3441164
+Ref: ordinary-differential-equations-solver41164
+Node: Series Summation and Products41711
+Ref: series summation and products41868
+Ref: 3541868
+Ref: series-summation-and-products41868
+Node: Taylor Series42608
+Ref: taylor series42746
+Ref: 3642746
+Ref: taylor-series42746
+Node: Boolean Expressions43755
+Ref: boolean expressions43886
+Ref: 3743886
+Ref: boolean-expressions43886
+Node: Mathematical Functions45435
+Ref: mathematical functions45571
+Ref: 3845571
+Ref: mathematical-functions45571
+Node: Definite Integrals48240
+Ref: definite integrals48390
+Ref: 3948390
+Ref: definite-integrals48390
+Node: Declarations Switches and Loading49965
+Ref: declarations switches and loading50101
+Ref: 3a50101
+Ref: declarations-switches-and-loading50101
+Node: Plotting52309
+Ref: plotting52437
+Ref: 3b52437
+Node: References53215
+Ref: references53301
+Ref: 3c53301
+Ref: 2053334
+Ref: redum53334
+Ref: 2353433
+Ref: lncs10253433
+Ref: 3053532
+Ref: symsac8153532
+Node: Index53703
+Ref: index53779
 
 End Tag Table
 

@@ -423,9 +423,7 @@ Figure: Reduce gnuplot example.
 The *note lisp: 1a. function can be used to execute Lisp code in the CSL
 interpreter hosting the Reduce system. Here are some basic examples.
 Note that, to be on the safe side, we just always quote the argument to
-*note lisp: 1a. here to prevent its evaluation on the Pure side. This
-isn't always necessary but won't hurt either, unless you specifically
-want to evaluate a computed expression.
+*note lisp: 1a. here to prevent its evaluation on the Pure side.
 
     > lisp ('plus 2 3);
     5
@@ -470,10 +468,10 @@ of the common Reduce declarations that might be needed:
     -myop x
 
 For basic Pure-based usage of Reduce, it's convenient to have a simple
-read-eval-print loop which lets you just type some declarations and
-expressions to be simplified (in Pure syntax), and takes care of all the
-quoting and invoking *note simplify: 19. for you. Here's a little Pure
-script which does that:
+read-eval-print loop which lets you type some declarations and
+expressions to be simplified (in Pure syntax), and takes care of all
+the quoting and invoking *note simplify: 19. for you. Here's a little
+Pure script which does that:
 
     using math, reduce, system;
 
@@ -526,9 +524,8 @@ prompt.
     ()
 
 Note that we barely scratched the surface here; Reduce is a very complex
-system with lots of capabilities. Many more examples can be found in the
-reduce_examp.pure and tests.pure scripts included in the distribution,
-and in the *note Examples by Topic: 22. section below.
+system with lots of capabilities. The following section explores some
+of these areas in more detail.
 
 
 File: pure-reduce.info,  Node: Examples by Topic,  Next: Index,  Prev: Basic Examples,  Up: Top
@@ -751,11 +748,40 @@ The equivalent Pure `filter' is:
 Note that REDUCE is now being called inside the predicate function, the
 rest of the processing is done in Pure.
 
-  Whether to prefer the calculation of maps and filters in REDUCE or in
-Pure is largely a matter of taste and which environment you feel most
-comfortable with. However, Pure offers a comprehensive collection of
-list processing functions for various purposes, which can at times be
-easier to use than the corresponding REDUCE facilities.
+  Of course, if you want to apply `map', `filter' and similar Pure
+functions to an algebraic expression, you'll first have to extract its
+components as a list. Here's a little Pure function which mimics the
+way in which `MAP' and `SELECT' decompose an expression:
+
+    terms x = case x of
+      f@_ u v = collect f x with
+        // Collect the operands of variadic Reduce operators.
+        collect f (f@_ u v) = collect f u+collect f v;
+        collect f x = [x] otherwise;
+      end if any (===f) (vals reduce::variadic_syms);
+      = [u,v] if arity f == 2;
+      _ = [x] otherwise;
+    end;
+
+For instance, consider:
+
+    > simplify $ 'map (w=>w+1) (df ((x+y)^3) x);
+    3*x^2+6*x*y+3*y^2+3
+
+With the help of `terms' we can also do this using Pure's `map' as
+follows:
+
+    > map (+1) $ terms (simplify (df ((x+y)^3) x));
+    [3*x^2+1,6*x*y+1,3*y^2+1]
+    > simplify $ foldl (+) 0 ans;
+    3*x^2+6*x*y+3*y^2+3
+
+While the REDUCE version is shorter and only involves a single call to
+*note simplify: 19, with a little bit of programming the Pure solution
+can be made just as convenient. More importantly, this method easily
+generalizes to other list operations. This makes it possible to apply
+Pure's full arsenal of generic list functions which goes beyond what's
+available in REDUCE.
 
 
 File: pure-reduce.info,  Node: Partial Fractions,  Next: Solving,  Prev: Length Map and Select,  Up: Examples by Topic
@@ -1928,114 +1954,114 @@ Ref: 2016584
 Ref: basic-examples16584
 Ref: 2117755
 Ref: screenshot17755
-Node: Examples by Topic21738
-Ref: examples by topic21837
-Ref: 2221837
-Ref: examples-by-topic21837
-Node: Differentiation23281
-Ref: differentiation23375
-Ref: 2423375
-Node: Integration24364
-Ref: integration24488
-Ref: 2524488
-Node: Length Map and Select26073
-Ref: length map and select26199
-Ref: 2726199
-Ref: length-map-and-select26199
-Node: Partial Fractions29150
-Ref: partial fractions29272
-Ref: 2829272
-Ref: partial-fractions29272
-Node: Solving29905
-Ref: solving30028
-Ref: 2930028
-Node: Even and Odd Operators31632
-Ref: even and odd operators31754
-Ref: 2a31754
-Ref: even-and-odd-operators31754
-Node: Linear Operators32148
-Ref: linear operators32286
-Ref: 2b32286
-Ref: linear-operators32286
-Node: Non-commuting Operators32687
-Ref: non-commuting operators32840
-Ref: 2c32840
-Ref: non-commuting-operators32840
-Node: Symmetric and Antisymmetric Operators33174
-Ref: symmetric and antisymmetric operators33350
-Ref: 2d33350
-Ref: symmetric-and-antisymmetric-operators33350
-Node: Creating/Removing Variable Dependencies33885
-Ref: creating/removing variable dependencies34065
-Ref: 2e34065
-Ref: creating-removing-variable-dependencies34065
-Node: Internal Order of Variables34975
-Ref: internal order of variables35148
-Ref: 2f35148
-Ref: internal-order-of-variables35148
-Node: Parts of Algebraic Expressions35658
-Ref: parts of algebraic expressions35817
-Ref: 3035817
-Ref: parts-of-algebraic-expressions35817
-Node: Polynomials and Rationals36785
-Ref: polynomials and rationals36929
-Ref: 3236929
-Ref: polynomials-and-rationals36929
-Node: Substitution40441
-Ref: substitution40565
-Ref: 3440565
-Node: Assignment41115
-Ref: assignment41233
-Ref: 3141233
-Node: Matrix Calculations42014
-Ref: matrix calculations42126
-Ref: 3542126
-Ref: matrix-calculations42126
-Node: Limits44233
-Ref: limits44373
-Ref: 3644373
-Node: Ordinary differential equations solver44908
-Ref: ordinary differential equations solver45058
-Ref: 3745058
-Ref: ordinary-differential-equations-solver45058
-Node: Series Summation and Products45605
-Ref: series summation and products45762
-Ref: 3845762
-Ref: series-summation-and-products45762
-Node: Taylor Series46502
-Ref: taylor series46640
-Ref: 3946640
-Ref: taylor-series46640
-Node: Boolean Expressions47649
-Ref: boolean expressions47780
-Ref: 3a47780
-Ref: boolean-expressions47780
-Node: Mathematical Functions49329
-Ref: mathematical functions49465
-Ref: 3b49465
-Ref: mathematical-functions49465
-Node: Definite Integrals52134
-Ref: definite integrals52284
-Ref: 3c52284
-Ref: definite-integrals52284
-Node: Declarations Switches and Loading53859
-Ref: declarations switches and loading53995
-Ref: 3d53995
-Ref: declarations-switches-and-loading53995
-Node: Plotting56203
-Ref: plotting56331
-Ref: 3e56331
-Node: References57109
-Ref: references57195
-Ref: 3f57195
-Ref: 2357228
-Ref: redum57228
-Ref: 2657327
-Ref: lncs10257327
-Ref: 3357426
-Ref: symsac8157426
-Node: Index57597
-Ref: index57673
+Node: Examples by Topic21520
+Ref: examples by topic21619
+Ref: 2221619
+Ref: examples-by-topic21619
+Node: Differentiation23063
+Ref: differentiation23157
+Ref: 2423157
+Node: Integration24146
+Ref: integration24270
+Ref: 2524270
+Node: Length Map and Select25855
+Ref: length map and select25981
+Ref: 2725981
+Ref: length-map-and-select25981
+Node: Partial Fractions29881
+Ref: partial fractions30003
+Ref: 2830003
+Ref: partial-fractions30003
+Node: Solving30636
+Ref: solving30759
+Ref: 2930759
+Node: Even and Odd Operators32363
+Ref: even and odd operators32485
+Ref: 2a32485
+Ref: even-and-odd-operators32485
+Node: Linear Operators32879
+Ref: linear operators33017
+Ref: 2b33017
+Ref: linear-operators33017
+Node: Non-commuting Operators33418
+Ref: non-commuting operators33571
+Ref: 2c33571
+Ref: non-commuting-operators33571
+Node: Symmetric and Antisymmetric Operators33905
+Ref: symmetric and antisymmetric operators34081
+Ref: 2d34081
+Ref: symmetric-and-antisymmetric-operators34081
+Node: Creating/Removing Variable Dependencies34616
+Ref: creating/removing variable dependencies34796
+Ref: 2e34796
+Ref: creating-removing-variable-dependencies34796
+Node: Internal Order of Variables35706
+Ref: internal order of variables35879
+Ref: 2f35879
+Ref: internal-order-of-variables35879
+Node: Parts of Algebraic Expressions36389
+Ref: parts of algebraic expressions36548
+Ref: 3036548
+Ref: parts-of-algebraic-expressions36548
+Node: Polynomials and Rationals37516
+Ref: polynomials and rationals37660
+Ref: 3237660
+Ref: polynomials-and-rationals37660
+Node: Substitution41172
+Ref: substitution41296
+Ref: 3441296
+Node: Assignment41846
+Ref: assignment41964
+Ref: 3141964
+Node: Matrix Calculations42745
+Ref: matrix calculations42857
+Ref: 3542857
+Ref: matrix-calculations42857
+Node: Limits44964
+Ref: limits45104
+Ref: 3645104
+Node: Ordinary differential equations solver45639
+Ref: ordinary differential equations solver45789
+Ref: 3745789
+Ref: ordinary-differential-equations-solver45789
+Node: Series Summation and Products46336
+Ref: series summation and products46493
+Ref: 3846493
+Ref: series-summation-and-products46493
+Node: Taylor Series47233
+Ref: taylor series47371
+Ref: 3947371
+Ref: taylor-series47371
+Node: Boolean Expressions48380
+Ref: boolean expressions48511
+Ref: 3a48511
+Ref: boolean-expressions48511
+Node: Mathematical Functions50060
+Ref: mathematical functions50196
+Ref: 3b50196
+Ref: mathematical-functions50196
+Node: Definite Integrals52865
+Ref: definite integrals53015
+Ref: 3c53015
+Ref: definite-integrals53015
+Node: Declarations Switches and Loading54590
+Ref: declarations switches and loading54726
+Ref: 3d54726
+Ref: declarations-switches-and-loading54726
+Node: Plotting56934
+Ref: plotting57062
+Ref: 3e57062
+Node: References57840
+Ref: references57926
+Ref: 3f57926
+Ref: 2357959
+Ref: redum57959
+Ref: 2658058
+Ref: lncs10258058
+Ref: 3358157
+Ref: symsac8158157
+Node: Index58328
+Ref: index58404
 
 End Tag Table
 

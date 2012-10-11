@@ -400,9 +400,7 @@ the Pure side).</p>
 <p>The <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function can be used to execute Lisp code in the CSL
 interpreter hosting the Reduce system. Here are some basic examples. Note
 that, to be on the safe side, we just always quote the argument to
-<a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> here to prevent its evaluation on the Pure side. This isn&#8217;t
-always necessary but won&#8217;t hurt either, unless you specifically want to
-evaluate a computed expression.</p>
+<a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> here to prevent its evaluation on the Pure side.</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (&#39;plus <span class="mi">2</span> <span class="mi">3</span>)<span class="p">;</span>
 <span class="mi">5</span>
 <span class="gp">&gt; </span>lisp (&#39;car (list a b c d e))<span class="p">;</span>
@@ -447,10 +445,9 @@ Reduce declarations that might be needed:</p>
 </pre></div>
 </div>
 <p>For basic Pure-based usage of Reduce, it&#8217;s convenient to have a simple
-read-eval-print loop which lets you just type some declarations and
-expressions to be simplified (in Pure syntax), and takes care of all the
-quoting and invoking <a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> for you. Here&#8217;s a little Pure script
-which does that:</p>
+read-eval-print loop which lets you type some declarations and expressions to
+be simplified (in Pure syntax), and takes care of all the quoting and invoking
+<a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> for you. Here&#8217;s a little Pure script which does that:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="kr">using</span> math, reduce, system<span class="p">;</span>
 
 <span class="cm">/* You might want to replace this with the real readline if you have the</span>
@@ -502,9 +499,8 @@ e^(<span class="mi">2</span>*x)/<span class="mi">2</span>
 </pre></div>
 </div>
 <p>Note that we barely scratched the surface here; Reduce is a very complex
-system with lots of capabilities. Many more examples can be found in the
-reduce_examp.pure and tests.pure scripts included in the distribution, and in
-the <a class="reference internal" href="#examples-by-topic">Examples by Topic</a> section below.</p>
+system with lots of capabilities. The following section explores some of these
+areas in more detail.</p>
 </div>
 <div class="section" id="examples-by-topic">
 <h2>Examples by Topic<a class="headerlink" href="#examples-by-topic" title="Permalink to this headline">¶</a></h2>
@@ -691,11 +687,39 @@ and Pure&#8217;s <a class="reference internal" href="purelib.html#filter" title=
 </div>
 <p>Note that REDUCE is now being called inside the predicate function, the rest
 of the processing is done in Pure.</p>
-<p>Whether to prefer the calculation of maps and filters in REDUCE or in Pure is
-largely a matter of taste and which environment you feel most comfortable
-with. However, Pure offers a comprehensive collection of list processing
-functions for various purposes, which can at times be easier to use than the
-corresponding REDUCE facilities.</p>
+<p>Of course, if you want to apply <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a>, <a class="reference internal" href="purelib.html#filter" title="filter"><tt class="xref pure pure-func docutils literal"><span class="pre">filter</span></tt></a> and similar Pure
+functions to an algebraic expression, you&#8217;ll first have to extract its
+components as a list. Here&#8217;s a little Pure function which mimics the way in
+which <tt class="docutils literal"><span class="pre">MAP</span></tt> and <tt class="docutils literal"><span class="pre">SELECT</span></tt> decompose an expression:</p>
+<div class="highlight-pure"><div class="highlight"><pre>terms x = <span class="kr">case</span> x <span class="kr">of</span>
+  f<span class="p">@</span>_ u v = collect f x <span class="kr">with</span>
+    <span class="c1">// Collect the operands of variadic Reduce operators.</span>
+    collect f (f<span class="p">@</span>_ u v) = collect f u+collect f v<span class="p">;</span>
+    collect f x = [x] <span class="kr">otherwise</span><span class="p">;</span>
+  <span class="kr">end</span> <span class="kr">if</span> any (===f) (vals reduce<span class="p">::</span>variadic_syms)<span class="p">;</span>
+  = [u,v] <span class="kr">if</span> arity f == <span class="mi">2</span><span class="p">;</span>
+  _ = [x] <span class="kr">otherwise</span><span class="p">;</span>
+<span class="kr">end</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>For instance, consider:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ &#39;map (w=&gt;w+<span class="mi">1</span>) (df ((x+y)^<span class="mi">3</span>) x)<span class="p">;</span>
+<span class="mi">3</span>*x^<span class="mi">2</span>+<span class="mi">6</span>*x*y+<span class="mi">3</span>*y^<span class="mi">2</span>+<span class="mi">3</span>
+</pre></div>
+</div>
+<p>With the help of <tt class="docutils literal"><span class="pre">terms</span></tt> we can also do this using Pure&#8217;s <a class="reference internal" href="purelib.html#map" title="map"><tt class="xref pure pure-func docutils literal"><span class="pre">map</span></tt></a> as
+follows:</p>
+<div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>map (+<span class="mi">1</span>) $ terms (simplify (df ((x+y)^<span class="mi">3</span>) x))<span class="p">;</span>
+[<span class="mi">3</span>*x^<span class="mi">2</span>+<span class="mi">1</span>,<span class="mi">6</span>*x*y+<span class="mi">1</span>,<span class="mi">3</span>*y^<span class="mi">2</span>+<span class="mi">1</span>]
+<span class="gp">&gt; </span>simplify $ foldl (+) <span class="mi">0</span> ans<span class="p">;</span>
+<span class="mi">3</span>*x^<span class="mi">2</span>+<span class="mi">6</span>*x*y+<span class="mi">3</span>*y^<span class="mi">2</span>+<span class="mi">3</span>
+</pre></div>
+</div>
+<p>While the REDUCE version is shorter and only involves a single call to
+<a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a>, with a little bit of programming the Pure solution can be
+made just as convenient. More importantly, this method easily generalizes to
+other list operations. This makes it possible to apply Pure&#8217;s full arsenal of
+generic list functions which goes beyond what&#8217;s available in REDUCE.</p>
 </div>
 <div class="section" id="partial-fractions">
 <h3>Partial Fractions<a class="headerlink" href="#partial-fractions" title="Permalink to this headline">¶</a></h3>

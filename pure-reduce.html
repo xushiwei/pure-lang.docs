@@ -57,7 +57,7 @@
             
   <div class="section" id="module-reduce">
 <span id="computer-algebra-with-pure-a-reduce-interface"></span><h1>Computer Algebra with Pure: A Reduce Interface<a class="headerlink" href="#module-reduce" title="Permalink to this headline">¶</a></h1>
-<p>Version 0.1, October 11, 2012</p>
+<p>Version 0.1, October 22, 2012</p>
 <div class="line-block">
 <div class="line">Albert Graef &lt;<a class="reference external" href="mailto:Dr&#46;Graef&#37;&#52;&#48;t-online&#46;de">Dr<span>&#46;</span>Graef<span>&#64;</span>t-online<span>&#46;</span>de</a>&gt;</div>
 <div class="line">Kurt Pagani &lt;<a class="reference external" href="mailto:kp&#37;&#52;&#48;scios&#46;ch">kp<span>&#64;</span>scios<span>&#46;</span>ch</a>&gt;</div>
@@ -275,6 +275,21 @@ atomic value.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="lispval">
+<tt class="descname">lispval</tt> x<a class="headerlink" href="#lispval" title="Permalink to this definition">¶</a></dt>
+<dd><p>This converts a Pure expression to its Reduce equivalent, like
+<a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a> does, but without actually simplifying it. As with the
+other functions, you need to quote <tt class="docutils literal"><span class="pre">x</span></tt> if you want to prevent it from
+being evaluated on the Pure side. The result is the Pure representation
+of a Lisp form which can be passed as a value to other Lisp routines by
+employing the <a class="reference internal" href="#lisp" title="lisp"><tt class="xref pure pure-func docutils literal"><span class="pre">lisp</span></tt></a> function. (Normally this requires that you
+double-quote the expression so that it doesn&#8217;t get evaluated by the Lisp
+interpreter.) This function isn&#8217;t for casual usage, but may be useful
+if you need to pass a Reduce expression to some Lisp function which
+cannot be called through <a class="reference internal" href="#simplify" title="simplify"><tt class="xref pure pure-func docutils literal"><span class="pre">simplify</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="lispsym">
 <tt class="descname">lispsym</tt> s::string<a class="headerlink" href="#lispsym" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function creates a special Pure identifier for any symbol given as
@@ -335,13 +350,15 @@ and <tt class="docutils literal"><span class="pre">:=</span></tt> infix operator
 rules, ranges and assignments in Reduce, respectively. (Note that you may
 have to quote these in some cases so that they don&#8217;t get evaluated on the
 Pure side.) Also, Reduce&#8217;s <tt class="docutils literal"><span class="pre">arbconst</span> <span class="pre">n</span></tt>, <tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">n</span></tt> and <tt class="docutils literal"><span class="pre">arbcomplex</span>
-<span class="pre">n</span></tt> terms are mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>, <tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the Pure
-side. For debugging purposes, all these automatic conversions can also be
-turned off on the output side with the &#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216;
-compilation pragma; this needs to be placed <em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span>
-<span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a number of other
-conditional compilation options which may be used to selectively turn off
-some of the conversions; please check the module source for details.</p>
+<span class="pre">n</span></tt> terms can be mapped to Greek symbols <tt class="docutils literal"><span class="pre">αn</span></tt>, <tt class="docutils literal"><span class="pre">βn</span></tt> and <tt class="docutils literal"><span class="pre">ζn</span></tt> on the
+Pure side. (This may cause issues in environments without proper Unicode
+support, so it&#8217;s disabled by default.) For debugging purposes, all these
+automatic conversions can also be turned off on the output side with the
+&#8216;<tt class="docutils literal"><span class="pre">#!</span>&nbsp; <span class="pre">--disable</span> <span class="pre">mapped</span></tt>&#8216; compilation pragma; this needs to be placed
+<em>before</em> the &#8216;<tt class="docutils literal"><span class="pre">using</span> <span class="pre">reduce;</span></tt>&#8216; import clause to take effect. There are a
+number of other conditional compilation options which may be used to
+selectively turn off some of the conversions; please check the module
+source for details.</p>
 <p>Lisp expressions are handled in a similar fashion, but here only a few
 basic Pure data types (integers, doubles, strings and lists) are converted
 to and from corresponding Lisp data. Function applications in Pure&#8217;s
@@ -779,7 +796,7 @@ there?</p>
 </div>
 <p>The first one is:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>sol1!<span class="mi">0</span><span class="p">;</span>
-x==<span class="mi">2</span>*β<span class="mi">5</span>*pi+asin (e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*cos (<span class="mi">2</span>*pi/<span class="mi">5</span>))/e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*sin (<span class="mi">2</span>*pi/<span class="mi">5</span>)*i))-<span class="mi">3</span>
+x==<span class="mi">2</span>*arbint <span class="mi">5</span>*pi+asin (e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*cos (<span class="mi">2</span>*pi/<span class="mi">5</span>))/e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*sin (<span class="mi">2</span>*pi/<span class="mi">5</span>)*i))-<span class="mi">3</span>
 </pre></div>
 </div>
 <div class="math">
@@ -799,12 +816,12 @@ x==<span class="mi">2</span>*β<span class="mi">5</span>*pi+asin (e^(<span class
           \cdot i}}
 )
 -3"/></p>
-</div><p>where <tt class="docutils literal"><span class="pre">n</span></tt> is an arbitrary integer constant (shown as <tt class="docutils literal"><span class="pre">β5</span></tt> in the result of
-<tt class="docutils literal"><span class="pre">simplify</span></tt>).</p>
+</div><p>where <tt class="docutils literal"><span class="pre">n</span></tt> is an arbitrary integer constant (shown as <tt class="docutils literal"><span class="pre">arbint</span> <span class="pre">5</span></tt> in the
+result of <tt class="docutils literal"><span class="pre">simplify</span></tt>).</p>
 <p>It is also possible to obtain the right-hand side of any solution in the list
 via REDUCE commands:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ rhs $ first $ solve eqn1 x<span class="p">;</span>
-<span class="mi">2</span>*β<span class="mi">10</span>*pi+asin (e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*cos (<span class="mi">2</span>*pi/<span class="mi">5</span>))/e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*sin (<span class="mi">2</span>*pi/<span class="mi">5</span>)*i))-<span class="mi">3</span>
+<span class="mi">2</span>*arbint <span class="mi">10</span>*pi+asin (e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*cos (<span class="mi">2</span>*pi/<span class="mi">5</span>))/e^(<span class="mi">2</span>^(<span class="mi">3</span>/<span class="mi">5</span>)*sin (<span class="mi">2</span>*pi/<span class="mi">5</span>)*i))-<span class="mi">3</span>
 </pre></div>
 </div>
 <p>where <tt class="docutils literal"><span class="pre">first</span></tt> gets the first solution in the list and <tt class="docutils literal"><span class="pre">rhs</span></tt> obtains the
@@ -1422,16 +1439,14 @@ x^<span class="mi">2</span>*y^<span class="mi">2</span>+x^<span class="mi">2</sp
 </div>
 <div class="section" id="boolean-expressions">
 <h3>Boolean Expressions<a class="headerlink" href="#boolean-expressions" title="Permalink to this headline">¶</a></h3>
-<p>The truth values within REDUCE are <tt class="docutils literal"><span class="pre">t</span></tt> and <tt class="docutils literal"><span class="pre">nil</span> <span class="pre">=</span> <span class="pre">()</span></tt> but are mapped to
-<tt class="docutils literal"><span class="pre">1</span></tt> and <tt class="docutils literal"><span class="pre">0</span></tt> respectively when interchanging results using <tt class="docutils literal"><span class="pre">simplify</span></tt>.
-Not all predicates (functions returning a truth value), however, can be called
-by <tt class="docutils literal"><span class="pre">simplify</span></tt>, so one has to use the <tt class="docutils literal"><span class="pre">lisp</span></tt> function in some
-circumstances.</p>
+<p>The truth values within REDUCE are <tt class="docutils literal"><span class="pre">t</span></tt> and <tt class="docutils literal"><span class="pre">nil</span> <span class="pre">=</span> <span class="pre">()</span></tt>. Not all predicates
+(functions returning a truth value) can be called by <tt class="docutils literal"><span class="pre">simplify</span></tt>, however,
+so one has to use the <tt class="docutils literal"><span class="pre">lisp</span></tt> function in some circumstances.</p>
 <p>Some examples:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>simplify $ evenp <span class="mi">200</span> <span class="p">;</span>
-<span class="mi">1</span>
+t
 <span class="gp">&gt; </span>simplify $ evenp <span class="mi">201</span> <span class="p">;</span>
-<span class="mi">0</span>
+[]
 
 <span class="gp">&gt; </span>lisp (fixp <span class="mi">200</span>) <span class="p">;</span>
 t
@@ -1443,10 +1458,11 @@ in both Pure and REDUCE, the function needs to be quoted to make the
 expression go through to REDUCE:</p>
 <div class="highlight-pure"><div class="highlight"><pre><span class="gp">&gt; </span>lisp (numberp x) <span class="p">;</span>
 <span class="mi">0</span>
+<span class="gp">&gt; </span>lisp (numberp <span class="mi">111</span>) <span class="p">;</span>
+<span class="mi">1</span>
 
 <span class="gp">&gt; </span>lisp (&#39;numberp x) <span class="p">;</span>
 []
-
 <span class="gp">&gt; </span>lisp (&#39;numberp <span class="mi">111</span>) <span class="p">;</span>
 t
 </pre></div>

@@ -230,6 +230,19 @@ For convenience, the following operations are in the default namespace:
    result as ``lisp (''(a b c))``). The result is always a Pure list or an
    atomic value.
 
+.. function:: lispval x
+
+   This converts a Pure expression to its Reduce equivalent, like
+   :func:`simplify` does, but without actually simplifying it. As with the
+   other functions, you need to quote ``x`` if you want to prevent it from
+   being evaluated on the Pure side. The result is the Pure representation
+   of a Lisp form which can be passed as a value to other Lisp routines by
+   employing the :func:`lisp` function. (Normally this requires that you
+   double-quote the expression so that it doesn't get evaluated by the Lisp
+   interpreter.) This function isn't for casual usage, but may be useful
+   if you need to pass a Reduce expression to some Lisp function which
+   cannot be called through :func:`simplify`.
+
 .. function:: lispsym s::string
 
    This function creates a special Pure identifier for any symbol given as
@@ -286,13 +299,15 @@ and ``:=`` infix operators can be used to denote equations, replacement
 rules, ranges and assignments in Reduce, respectively. (Note that you may
 have to quote these in some cases so that they don't get evaluated on the
 Pure side.) Also, Reduce's ``arbconst n``, ``arbint n`` and ``arbcomplex
-n`` terms are mapped to Greek symbols ``αn``, ``βn`` and ``ζn`` on the Pure
-side. For debugging purposes, all these automatic conversions can also be
-turned off on the output side with the '``#!  --disable mapped``'
-compilation pragma; this needs to be placed *before* the '``using
-reduce;``' import clause to take effect. There are a number of other
-conditional compilation options which may be used to selectively turn off
-some of the conversions; please check the module source for details.
+n`` terms can be mapped to Greek symbols ``αn``, ``βn`` and ``ζn`` on the
+Pure side. (This may cause issues in environments without proper Unicode
+support, so it's disabled by default.) For debugging purposes, all these
+automatic conversions can also be turned off on the output side with the
+'``#!  --disable mapped``' compilation pragma; this needs to be placed
+*before* the '``using reduce;``' import clause to take effect. There are a
+number of other conditional compilation options which may be used to
+selectively turn off some of the conversions; please check the module
+source for details.
 
 Lisp expressions are handled in a similar fashion, but here only a few
 basic Pure data types (integers, doubles, strings and lists) are converted
@@ -787,7 +802,7 @@ The first one is:
 .. code-block:: pure
 
   > sol1!0;
-  x==2*β5*pi+asin (e^(2^(3/5)*cos (2*pi/5))/e^(2^(3/5)*sin (2*pi/5)*i))-3
+  x==2*arbint 5*pi+asin (e^(2^(3/5)*cos (2*pi/5))/e^(2^(3/5)*sin (2*pi/5)*i))-3
 
 .. math:: x=
    2\cdot n \cdot \pi +{\tt asin}
@@ -806,8 +821,8 @@ The first one is:
    )
    -3
 
-where ``n`` is an arbitrary integer constant (shown as ``β5`` in the result of
-``simplify``).
+where ``n`` is an arbitrary integer constant (shown as ``arbint 5`` in the
+result of ``simplify``).
 
 It is also possible to obtain the right-hand side of any solution in the list
 via REDUCE commands:
@@ -815,7 +830,7 @@ via REDUCE commands:
 .. code-block:: pure
 
   > simplify $ rhs $ first $ solve eqn1 x;
-  2*β10*pi+asin (e^(2^(3/5)*cos (2*pi/5))/e^(2^(3/5)*sin (2*pi/5)*i))-3
+  2*arbint 10*pi+asin (e^(2^(3/5)*cos (2*pi/5))/e^(2^(3/5)*sin (2*pi/5)*i))-3
 
 where ``first`` gets the first solution in the list and ``rhs`` obtains the
 right-hand side. Hence there is a wealth of possibilities to process the
@@ -1507,20 +1522,18 @@ Note that the "big O" residual terms are omitted in the results returned by
 Boolean Expressions
 -------------------
 
-The truth values within REDUCE are ``t`` and ``nil = ()`` but are mapped to
-``1`` and ``0`` respectively when interchanging results using ``simplify``.
-Not all predicates (functions returning a truth value), however, can be called
-by ``simplify``, so one has to use the ``lisp`` function in some
-circumstances.
+The truth values within REDUCE are ``t`` and ``nil = ()``. Not all predicates
+(functions returning a truth value) can be called by ``simplify``, however,
+so one has to use the ``lisp`` function in some circumstances.
 
 Some examples:
 
 .. code-block:: pure
 
   > simplify $ evenp 200 ;
-  1
+  t
   > simplify $ evenp 201 ;
-  0
+  []
 
   > lisp (fixp 200) ;
   t
@@ -1535,10 +1548,11 @@ expression go through to REDUCE:
 
   > lisp (numberp x) ;
   0
+  > lisp (numberp 111) ;
+  1
 
   > lisp ('numberp x) ;
   []
-
   > lisp ('numberp 111) ;
   t
 

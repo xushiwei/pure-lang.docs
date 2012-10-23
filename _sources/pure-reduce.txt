@@ -208,6 +208,8 @@ Maintenance Operations
 Evaluation
 ----------
 
+.. _TeXmacs: http://www.texmacs.org
+
 For convenience, the following operations are in the default namespace:
 
 .. function:: simplify x
@@ -216,6 +218,16 @@ For convenience, the following operations are in the default namespace:
    format and tries to simplify it using Reduce. The result is then
    converted back to Pure format. Note that you need to quote ``x`` if you
    want to prevent it from being evaluated on the Pure side.
+
+.. function:: simplifyd x
+
+   A variation of :func:`simplify` which takes care of customary
+   mathematical notation for limits, integrals and differentials, so that
+   you can write stuff like ``d f/d x`` and ``lim n inf (1/n)`` and have
+   that expanded to the corresponding Reduce calls automatically. This also
+   tries to support most of the idioms and variations of notation which can
+   be seen in output of the Reduce ``tmprint`` module and which are
+   commonly used in TeXmacs_ documents.
 
 .. function:: lisp x
 
@@ -260,14 +272,18 @@ For convenience, the following operations are in the default namespace:
    be a singleton symbol. In the present implementation, ``declsym`` must
    be one of:
 
-   * ``operator`` (declares an operator symbol);
+   * ``operator``: declares an operator symbol;
+
+   * ``precedence``: declares an infix operator and optionally
+     specifies its precedence (giving the symbol priority over a second
+     given symbol);
 
    * ``antisymmetric``, ``symmetric``, ``even``, ``odd``, ``linear``,
-     ``noncom`` and ``nonzero`` (declares properties of already declared
-     operator symbols);
+     ``noncom`` and ``nonzero``: declares properties of already declared
+     operator symbols;
 
    * ``depend``, ``nodepend``, ``factor``, ``remfac``, ``order``,
-     ``korder`` (declares kernel dependencies and orders). These take both
+     ``korder``: declares kernel dependencies and orders. These take both
      symbols and "kernels" as arguments (the latter are simple prefix
      expressions which denote irreducible subterms such as ``cos x``;
      Reduce treats these more or less like variables in algebraic

@@ -10,7 +10,7 @@
 
   <section*|Installing Pure (and LLVM)<label|installing-pure-and-llvm>>
 
-  Version 0.56, October 23, 2012
+  Version 0.56, November 06, 2012
 
   Albert Graef \<less\>Dr.Graef at t-online.de\<gtr\>
 
@@ -129,11 +129,15 @@
     $ sudo make install-docs
   </verbatim>
 
-  This needs the <verbatim|wget> program. You can also download the pure-docs
-  tarball manually and then install it from a local file, e.g.:
+  This needs the <verbatim|wget> program. You can also download and install
+  the pure-docs tarball manually in the usual way, e.g.:
 
   <\verbatim>
-    $ sudo make install-docs docs=pure-docs-0.56.tar.gz
+    $ tar xfvz pure-docs-0.56.tar.gz
+
+    $ cd pure-docs-0.56
+
+    $ sudo make install
   </verbatim>
 
   That's it, Pure should be ready to go now:
@@ -513,18 +517,31 @@
   w3m (a text-based browser), you can change this by setting the
   <verbatim|BROWSER> or the <verbatim|PURE_HELP> variable accordingly.
 
-  By default, the <verbatim|install-docs> target requires a working Internet
-  connection and the wget command. Instead, you can also download the
+  The <verbatim|install-docs> target requires a working Internet connection
+  and the wget command. Instead, you can also download the
   pure-docs-x.y.tar.gz tarball manually and then install the documentation
-  from the downloaded tarball (the x.y version number of the documentation
-  tarball should correspond to your interpreter version):
+  from the downloaded tarball in the usual way (the x.y version number of the
+  documentation tarball should correspond to your interpreter version):
 
   <\verbatim>
-    $ sudo make install-docs docs=pure-docs-x.y.tar.gz
+    $ tar xfvz pure-docs-x.y.tar.gz
+
+    $ cd pure-docs-x.y
+
+    $ sudo make install
   </verbatim>
 
   As a bonus, downloading the package manually also gives you the
-  documentation in pdf format, so that you can print it if you like.
+  documentation in pdf format, so that you can print it if you like. In
+  addition, as of version 0.56 the tarball also contains the documentation in
+  TeXmacs format so that you can read it inside TeXmacs (see <hlink|TeXmacs
+  Plugin|#texmacs-plugin> below). After unpacking the tarball and
+  installing the html documentation, you can install the TeXmacs-formatted
+  documentation as follows:
+
+  <\verbatim>
+    $ sudo make install-tm
+  </verbatim>
 
   <with|font-series|bold|Step 7.> The Pure interpreter should be ready to go
   now.
@@ -668,8 +685,19 @@
   <math|\<sim\>>/.TeXmacs/plugins/pure/progs afterwards to tailor them to
   your needs.
 
+  The distributed plugin has support for reading the Pure online help in
+  TeXmacs format. See Step 6 under <hlink|Basic
+  Installation|#basic-installation> above for instructions on how you can
+  obtain the necessary TeXmacs files and install them in the Pure library
+  directory along with the html documentation. (The TeXmacs-formatted
+  documentation needs a little style file named puredoc.ts which is included
+  in the distribution and will be installed when doing <verbatim|make>
+  <verbatim|install> or <verbatim|make> <verbatim|install-tm>. You can also
+  just drop the file into your <math|\<sim\>>/.TeXmacs/packages folder to
+  make TeXmacs find it.)
+
   If the distributed plugin doesn't work for you, as a fallback option you
-  can try the following minimal setup instead. It lacks all the bells and
+  can try the following minimal setup instead. This lacks all the bells and
   whistles of the distributed plugin, but should be sufficient to run a basic
   Pure session in TeXmacs, and should hopefully work with any TeXmacs version
   which has plugin support at all.

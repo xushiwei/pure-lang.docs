@@ -6653,7 +6653,7 @@
 
     \<gtr\> loop n f x = x if n \<less\>= 0;
 
-    \<gtr\> \ = if abs (x-y) \<less\> dy then y else loop (n-1) f y when y
+    \<gtr\> \ \ = if abs (x-y) \<less\> dy then y else loop (n-1) f y when y
     = f x end;
 
     \<gtr\> loop 20 (improve dx f) 2;
@@ -10191,9 +10191,9 @@
 
     \<gtr\> interface baz with
 
-    \<gtr\> \ interface foo; interface bar;
+    \<gtr\> \ \ interface foo; interface bar;
 
-    \<gtr\> \ foo y::baz;
+    \<gtr\> \ \ foo y::baz;
 
     \<gtr\> end;
 
@@ -12587,7 +12587,7 @@
   <\verbatim>
     \<gtr\> fact n = 1 if n\<less\>=1;
 
-    \<gtr\> \ \ \ \ \ \ = n*fact (n-1) otherwise;
+    \<gtr\> \ \ \ \ \ \ \ = n*fact (n-1) otherwise;
 
     \<gtr\> get_fundef fact;
 
@@ -15382,11 +15382,11 @@
     <\verbatim>
       \<gtr\> interface stack with
 
-      \<gtr\> \ push xs::stack x;
+      \<gtr\> \ \ push xs::stack x;
 
-      \<gtr\> \ pop xs::stack;
+      \<gtr\> \ \ pop xs::stack;
 
-      \<gtr\> \ top xs::stack;
+      \<gtr\> \ \ top xs::stack;
 
       \<gtr\> end;
 
@@ -15827,9 +15827,9 @@
 
     ? expr \ evaluate expression
 
-    \<less\>cr\<gtr\> \ \ single step (same as 's')
+    \<less\>cr\<gtr\> \ \ \ single step (same as 's')
 
-    \<less\>eof\<gtr\> \ step through program, run unattended (same as 'a')
+    \<less\>eof\<gtr\> \ \ step through program, run unattended (same as 'a')
   </verbatim>
 
   <with|font-series|bold|Note:> If you specified an
@@ -16364,7 +16364,7 @@
   <\verbatim>
     \<gtr\> __show__ x::matrix =
 
-    \<gtr\> \ strcat [printd j (x!(i,j))\|i=0..n-1; j=0..m-1] + "\\n"
+    \<gtr\> \ \ strcat [printd j (x!(i,j))\|i=0..n-1; j=0..m-1] + "\\n"
 
     \<gtr\> with printd 0 = sprintf "\\n%10.5f"; printd _ = sprintf "%10.5f"
     end
@@ -16436,7 +16436,7 @@
 
     \<gtr\> echo s = join "\\n" args when
 
-    \<gtr\> \ args = [a \| a = split " " s; ~null a];
+    \<gtr\> \ \ args = [a \| a = split " " s; ~null a];
 
     \<gtr\> end;
 
@@ -16510,7 +16510,7 @@
 
     examples/poor.c \ examples/sort.c
 
-    \<gtr\> \ ls s = evalcmd $ "^ls -l "+s;
+    \<gtr\> \ \ ls s = evalcmd $ "^ls -l "+s;
 
     \<gtr\> ls examples/*.c
 
@@ -16559,7 +16559,7 @@
 
     \<gtr\> fact n = 1 if n\<less\>=0;
 
-    \<gtr\> \ \ \ \ \ \ = n*fact (n-1) otherwise;
+    \<gtr\> \ \ \ \ \ \ \ = n*fact (n-1) otherwise;
 
     \<gtr\> show fact
 
@@ -18261,7 +18261,7 @@
 
     \<gtr\> sum xs::rlist = sum xs with
 
-    \<gtr\> \ sum xs = if null xs then 0 else head xs+sum (tail xs);
+    \<gtr\> \ \ sum xs = if null xs then 0 else head xs+sum (tail xs);
 
     \<gtr\> end;
 

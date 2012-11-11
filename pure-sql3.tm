@@ -236,7 +236,7 @@
   Example:
 
   <\verbatim>
-    \<gtr\> let dbp2 = open "abc.db"; dbp2;
+    \<gtr\> \ let dbp2 = open "abc.db"; dbp2;
 
     #\<less\>pointer 0x992dff8\<gtr\>
   </verbatim>
@@ -765,9 +765,9 @@
 
       \<gtr\> when
 
-      \<gtr\> \ source = if ec \<gtr\> 0 then "SQLite" else "Sql3";
+      \<gtr\> \ \ source = if ec \<gtr\> 0 then "SQLite" else "Sql3";
 
-      \<gtr\> \ printf "%s db_error: ec %d, %s\\n" (source,ec,msg);
+      \<gtr\> \ \ printf "%s db_error: ec %d, %s\\n" (source,ec,msg);
 
       \<gtr\> end;
 
@@ -906,7 +906,7 @@
 
     \<gtr\> let sp4 = prep dbp "cii:"
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ "select p_fn('Hi ',name), age, p_fn(age,10)
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ "select p_fn('Hi ',name), age, p_fn(age,10)
     from RM";
 
     \;
@@ -921,7 +921,7 @@
   <\verbatim>
     \<gtr\> create_function dbp "p_qm" (-1) quasimodo with
 
-    \<gtr\> \ quasimodo xs = "quasimodo: "+join ":" [str x \| x=xs];
+    \<gtr\> \ \ quasimodo xs = "quasimodo: "+join ":" [str x \| x=xs];
 
     \<gtr\> end;
   </verbatim>
@@ -932,7 +932,7 @@
   <\verbatim>
     \<gtr\> create_function dbp "p_count" 0 counter with
 
-    \<gtr\> \ counter () = put r (get r+1);
+    \<gtr\> \ \ counter () = put r (get r+1);
 
     \<gtr\> end when r = ref 0 end;
   </verbatim>
@@ -992,9 +992,9 @@
   <\verbatim>
     \<gtr\> create_function dbp "p_avg" 1 (step,final,(0,0.0)) with
 
-    \<gtr\> \ step (n,a) x = n+1, a+x;
+    \<gtr\> \ \ step (n,a) x = n+1, a+x;
 
-    \<gtr\> \ final (n,a) = a/n;
+    \<gtr\> \ \ final (n,a) = a/n;
 
     \<gtr\> end;
 

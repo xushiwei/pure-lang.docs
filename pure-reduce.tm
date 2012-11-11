@@ -1399,15 +1399,15 @@
   part on the right-hand side.
 
   <\verbatim>
-    \<gtr\> simplify $ xx:=a+b;
+    \<gtr\> \ simplify $ xx:=a+b;
 
     a+b
 
-    \<gtr\> simplify $ part xx 2 := c ;
+    \<gtr\> \ simplify $ part xx 2 := c ;
 
     c
 
-    \<gtr\> simplify $ xx;
+    \<gtr\> \ simplify $ xx;
 
     a+c
   </verbatim>
@@ -1531,7 +1531,7 @@
   <\verbatim>
     \<gtr\> simplify $ decompose (x^8-88*x^7+2924*x^6-43912*x^5+263431*x^4-
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 218900*x^3+65690*x^2-7700*x+234)
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 218900*x^3+65690*x^2-7700*x+234)
     ;
 
     [u^2+35*u+234,u==v^2+10*v,v==x^2-22*x]
@@ -2375,7 +2375,7 @@
 
     \;
 
-    \<gtr\> simplify $ struveh_transform (exp(-a*x)) x ;
+    \<gtr\> \ simplify $ struveh_transform (exp(-a*x)) x ;
 
     2*s^((n+1)/2)*gamma ((n+3)/2)*hypergeometric [1,(n+3)/2] [(2*n+3)/2,3/2]
 

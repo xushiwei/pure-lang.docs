@@ -607,7 +607,7 @@
 
     \<gtr\> let name,descr,version,in,out,group =
 
-    \<gtr\> \ faustxml::info "examples/basic/freeverb.dsp.xml";
+    \<gtr\> \ \ faustxml::info "examples/basic/freeverb.dsp.xml";
 
     \<gtr\> name,descr,version,in,out;
 

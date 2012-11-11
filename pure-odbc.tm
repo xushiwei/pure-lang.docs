@@ -560,7 +560,7 @@
     \<gtr\> head [row \| row@(name:_) = tail $ odbc::lsql db "select * from
     pet" [];
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ name == "Claws"];
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ name == "Claws"];
 
     ["Claws","Gwen","cat","m","1994-03-17",odbc::SQLNULL]
   </verbatim>

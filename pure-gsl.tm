@@ -2486,7 +2486,7 @@
 
     \<gtr\> when
 
-    \<gtr\> \ a:b:_ = linear {1,2,3,4,5} {0.01,1.11,1.9,2.85,4.01}
+    \<gtr\> \ \ a:b:_ = linear {1,2,3,4,5} {0.01,1.11,1.9,2.85,4.01}
 
     \<gtr\> end;
 
@@ -2510,7 +2510,7 @@
   <\verbatim>
     \<gtr\> let c0:c1:cov00:cov01:cov11:_ = linear {1,2,3,4,5}
 
-    \<gtr\> \ {0.01,1.11,1.9,2.85,4.01};
+    \<gtr\> \ \ {0.01,1.11,1.9,2.85,4.01};
 
     \<gtr\> linear_est 1 c0 c1 cov00 cov01 cov11;
 
@@ -2534,11 +2534,11 @@
 
     \<gtr\> when
 
-    \<gtr\> \ a:b:_ = wlinear (matrix (1..5))
+    \<gtr\> \ \ a:b:_ = wlinear (matrix (1..5))
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ {0.1, 0.2, 0.3, 0.4, 0.5}
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ {0.1, 0.2, 0.3, 0.4, 0.5}
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ {0.01, 1.11, 1.9, 2.85, 4.01};
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ {0.01, 1.11, 1.9, 2.85, 4.01};
 
     \<gtr\> end;
 
@@ -3885,21 +3885,21 @@
 
     \<gtr\> test_discrete
 
-    \<gtr\> \ = v
+    \<gtr\> \ \ = v
 
-    \<gtr\> \ \ \ when
+    \<gtr\> \ \ \ \ when
 
-    \<gtr\> \ \ \ \ \ px = discrete_preproc {0.1,0.3,0.4};
+    \<gtr\> \ \ \ \ \ \ px = discrete_preproc {0.1,0.3,0.4};
 
-    \<gtr\> \ \ \ \ \ v = discrete_pdf 0 px +
+    \<gtr\> \ \ \ \ \ \ v = discrete_pdf 0 px +
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ discrete_pdf 1 px +
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ discrete_pdf 1 px +
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ discrete_pdf 2 px;
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ discrete_pdf 2 px;
 
-    \<gtr\> \ \ \ \ \ _ = discrete_free px
+    \<gtr\> \ \ \ \ \ \ _ = discrete_free px
 
-    \<gtr\> \ \ \ end;
+    \<gtr\> \ \ \ \ end;
 
     \<gtr\> test_discrete;
 

@@ -7652,13 +7652,13 @@
   <\verbatim>
     \<gtr\> let opts = [("--help", "-h", NOARG), \ \ \ \ \ \ // no argument
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ ("--version", "", NOARG), \ \ \ \ \ // no
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ ("--version", "", NOARG), \ \ \ \ \ // no
     short option
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ ("--filename", "-f", REQARG), \ //
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ ("--filename", "-f", REQARG), \ //
     required argument
 
-    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ ("--count", "-n", OPTARG)]; \ \ \ //
+    \<gtr\> \ \ \ \ \ \ \ \ \ \ \ \ ("--count", "-n", OPTARG)]; \ \ \ //
     optional argument
 
     \<gtr\> getopt opts ["foo", "-h", "--filename", "bar", "-n0", "baz"];

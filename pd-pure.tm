@@ -189,17 +189,19 @@
   symbols and lists. The following table summarizes the available
   conversions.
 
-  Message Type Pd Pure symbol <verbatim|foo> <verbatim|foo> string
-  <verbatim|a&b> <verbatim|"a&b"> float <verbatim|float> <verbatim|1.23>
-  <verbatim|1.23> list <verbatim|list> <verbatim|1> <verbatim|2> <verbatim|3>
-  <verbatim|[1.0,2.0,3.0]> other <verbatim|foo> <verbatim|a> <verbatim|2>
-  <verbatim|3> <verbatim|foo> <verbatim|a> <verbatim|2.0> <verbatim|3.0> Note
-  that Pd symbols which are no valid Pure symbols become strings in Pure.
-  Conversely, both symbols and strings in Pure are mapped to corresponding Pd
-  symbols. Pure (machine) integers and floating point values both become
-  <verbatim|float> messages in Pd. Pd list messages are translated to Pure
-  list values, while other aggregate messages are mapped to Pure applications
-  (and vice versa).
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Message
+  Type>|<cell|Pd>|<cell|Pure>>|<row|<cell|symbol>|<cell|<verbatim|foo>>|<cell|<verbatim|foo>>>|<row|<cell|string>|<cell|<verbatim|a&b>>|<cell|<verbatim|"a&b">>>|<row|<cell|float>|<cell|<verbatim|float>
+  <verbatim|1.23>>|<cell|<verbatim|1.23>>>|<row|<cell|list>|<cell|<verbatim|list>
+  <verbatim|1> <verbatim|2> <verbatim|3>>|<cell|<verbatim|[1.0,2.0,3.0]>>>|<row|<cell|other>|<cell|<verbatim|foo>
+  <verbatim|a> <verbatim|2> <verbatim|3>>|<cell|<verbatim|foo> <verbatim|a>
+  <verbatim|2.0> <verbatim|3.0>>>>>>
+
+  Note that Pd symbols which are no valid Pure symbols become strings in
+  Pure. Conversely, both symbols and strings in Pure are mapped to
+  corresponding Pd symbols. Pure (machine) integers and floating point values
+  both become <verbatim|float> messages in Pd. Pd list messages are
+  translated to Pure list values, while other aggregate messages are mapped
+  to Pure applications (and vice versa).
 
   <subsubsection|Simple Objects<label|simple-objects>>
 
@@ -1288,18 +1290,23 @@
   them; please see the pure-remote.el file for details. As shipped,
   pure-remote.el and Pure mode implement the following commands:
 
-  <verbatim|C-C> <verbatim|C-X> Quick Reload Sends a <verbatim|bang> message
-  to reload object scripts. <verbatim|C-C> <verbatim|M-X> Full Reload Sends a
-  <verbatim|reload> message to reload everything. <verbatim|C-C>
-  <verbatim|C-M> Message Prompts for a message and sends it to pure-remote.
-  <verbatim|C-C> <verbatim|C-S> Play Sends a <verbatim|play> <verbatim|1>
-  message. <verbatim|C-C> <verbatim|C-T> Stop Sends a <verbatim|play>
-  <verbatim|0> message. <verbatim|C-C> <verbatim|C-G> Restart Sends a
-  <verbatim|play> <verbatim|0> message followed by <verbatim|play>
-  <verbatim|1>. <verbatim|C-/> Dsp On Sends a <verbatim|pd> <verbatim|dsp>
-  <verbatim|1> (enable audio processing). <verbatim|C-.> Dsp Off Sends a
-  <verbatim|pd> <verbatim|dsp> <verbatim|0> (disable audio processing). Of
-  course you can easily add more like these, just have a look at how the
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<table|<row|<cell|<verbatim|C-C>
+  <verbatim|C-X>>|<cell|Quick Reload>|<cell|Sends a <verbatim|bang> message
+  to reload object scripts. >>|<row|<cell|<verbatim|C-C>
+  <verbatim|M-X>>|<cell|Full Reload>|<cell|Sends a <verbatim|reload> message
+  to reload everything. >>|<row|<cell|<verbatim|C-C>
+  <verbatim|C-M>>|<cell|Message>|<cell|Prompts for a message and sends it to
+  pure-remote.>>|<row|<cell|<verbatim|C-C> <verbatim|C-S>>|<cell|Play>|<cell|
+  Sends a <verbatim|play> <verbatim|1> message. >>|<row|<cell|<verbatim|C-C>
+  <verbatim|C-T>>|<cell|Stop>|<cell|Sends a <verbatim|play> <verbatim|0>
+  message. >>|<row|<cell|<verbatim|C-C> <verbatim|C-G>>|<cell|Restart>|<cell|
+  Sends a <verbatim|play> <verbatim|0> message followed by <verbatim|play>
+  <verbatim|1>. >>|<row|<cell|<verbatim|C-/>>|<cell|Dsp On>|<cell|Sends a
+  <verbatim|pd> <verbatim|dsp> <verbatim|1> (enable audio processing).
+  >>|<row|<cell|<verbatim|C-.>>|<cell|Dsp Off>|<cell|Sends a <verbatim|pd>
+  <verbatim|dsp> <verbatim|0> (disable audio processing).>>>>>
+
+  Of course you can easily add more like these, just have a look at how the
   keybindings are implemented in pure-remote.el or pure-mode.el and create
   your own in an analogous fashion. Together with Pure mode, this gives you a
   nice interactive environment for developing pd-pure applications.

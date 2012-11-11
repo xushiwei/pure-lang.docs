@@ -3187,23 +3187,30 @@
   <\quote-env>
     list of four tuples with five mebers (see GLPK reference manual):
 
-    Condition Member Comment (KKT.PE) pe_ae_max Largest absolute error <nbsp>
-    pe_ae_row Number of row with largest absolute error <nbsp> pe_re_max
-    Largest relative error <nbsp> pe_re_row Number of row with largest
-    relative error <nbsp> pe_quality Quality of primal solution (KKT.PB)
-    pb_ae_max Largest absolute error <nbsp> pb_ae_ind Number of variable with
-    largest absolute error <nbsp> pb_re_max Largest relative error <nbsp>
-    pb_re_ind Number of variable with largest relative error <nbsp>
-    pb_quality Quality of primal feasibility (KKT.DE) de_ae_max Largest
-    absolute error <nbsp> de_ae_col Number of column with largest absolute
-    error <nbsp> de_re_max Largest relative error <nbsp> de_re_col Number of
-    column with largest relative error <nbsp> de_quality Quality of dual
-    solution (KKT.DB) db_ae_max Largest absolute error <nbsp> db_ae_ind
-    Number of variable with largest absolute error <nbsp> db_re_max Largest
-    relative error <nbsp> db_re_ind Number of variable with largest relative
-    error <nbsp> db_quality Quality of dual feasibility where number of
-    variable is (1 \<less\>= k \<less\>= m) for auxiliary variable and (m+1
-    \<less\>= k \<less\>= m+n) for structural variable
+    <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Condition>|<cell|Member>|<cell|Comment>>|<row|<cell|(KKT.PE)>|<cell|pe_ae_max>|<cell|Largest
+    absolute error>>|<row|<cell|<nbsp>>|<cell|pe_ae_row>|<cell|Number of row
+    with largest absolute error>>|<row|<cell|<nbsp>>|<cell|pe_re_max>|<cell|Largest
+    relative error>>|<row|<cell|<nbsp>>|<cell|pe_re_row>|<cell|Number of row
+    with largest relative error>>|<row|<cell|<nbsp>>|<cell|pe_quality>|<cell|Quality
+    of primal solution>>|<row|<cell|(KKT.PB)>|<cell|pb_ae_max>|<cell|Largest
+    absolute error>>|<row|<cell|<nbsp>>|<cell|pb_ae_ind>|<cell|Number of
+    variable with largest absolute error>>|<row|<cell|<nbsp>>|<cell|pb_re_max>|<cell|Largest
+    relative error>>|<row|<cell|<nbsp>>|<cell|pb_re_ind>|<cell|Number of
+    variable with largest relative error>>|<row|<cell|<nbsp>>|<cell|pb_quality>|<cell|Quality
+    of primal feasibility>>|<row|<cell|(KKT.DE)>|<cell|de_ae_max>|<cell|Largest
+    absolute error>>|<row|<cell|<nbsp>>|<cell|de_ae_col>|<cell|Number of
+    column with largest absolute error>>|<row|<cell|<nbsp>>|<cell|de_re_max>|<cell|Largest
+    relative error>>|<row|<cell|<nbsp>>|<cell|de_re_col>|<cell|Number of
+    column with largest relative error>>|<row|<cell|<nbsp>>|<cell|de_quality>|<cell|Quality
+    of dual solution>>|<row|<cell|(KKT.DB)>|<cell|db_ae_max>|<cell|Largest
+    absolute error>>|<row|<cell|<nbsp>>|<cell|db_ae_ind>|<cell|Number of
+    variable with largest absolute error>>|<row|<cell|<nbsp>>|<cell|db_re_max>|<cell|Largest
+    relative error>>|<row|<cell|<nbsp>>|<cell|db_re_ind>|<cell|Number of
+    variable with largest relative error>>|<row|<cell|<nbsp>>|<cell|db_quality>|<cell|Quality
+    of dual feasibility>>>>>
+
+    where number of variable is (1 \<less\>= k \<less\>= m) for auxiliary
+    variable and (m+1 \<less\>= k \<less\>= m+n) for structural variable
   </quote-env>
 
   <with|font-series|bold|Example>:

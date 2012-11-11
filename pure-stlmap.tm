@@ -1280,7 +1280,7 @@
     <verbatim|map> this function throws <hlink|<with|font-family|tt|out_of_bounds>|purelib.tm#out-of-bounds>.
     If <verbatim|map> is a stlmap or stlhmap and (oldkey=\<gtr\>oldval) is an
     element of <verbatim|map>, where oldkey is equivalent to <verbatim|key>,
-    change the element to (oldkey=\<gtr\>``x'`). If <verbatim|map> is a
+    change the element to (oldkey=\<gtr\>``x``). If <verbatim|map> is a
     stlmmap and <verbatim|key> is stored in <verbatim|map>, change the values
     of elements with key eqivalent to <verbatim|key>, one by one, to the
     elements of <verbatim|x>. Add or delete elements as necessary so that,
@@ -1342,7 +1342,7 @@
     <verbatim|(),> <verbatim|where> <verbatim|dflt> <verbatim|is>
     <verbatim|``map>`s dflt value, (b) <hlink|<with|font-family|tt|replace>|#replace/stlmap>
     <verbatim|map> <verbatim|k> nv when nv = <verbatim|fun> <verbatim|v>
-    (<verbatim|map>!``k'`) end. Returns <verbatim|map>.
+    (<verbatim|map>!``k``) end. Returns <verbatim|map>.
   </description>
 
   Here is an example using <hlink|<with|font-family|tt|replace_with>|#replace-with/stlmap>
@@ -1407,7 +1407,7 @@
     <verbatim|acon> which can be any container provided by pure-stlmap. The
     second erases all elements in <verbatim|acon> with key equivalent to
     <verbatim|k>. The third erases the elements in the range
-    (<verbatim|acon>,``k1``,'`k2``). The third form only applys to the
+    (<verbatim|acon>,``k1``,``k2``). The third form only applys to the
     ordered containers (stlmap, stlmmap, stlset and stlmset), not stlhmap or
     stlhset (because ranges are not defined for stlhmaps or stlhsets).
     Returns the number of elements removed from the container.
@@ -1925,7 +1925,7 @@
     <item*|rng1 \<gtr\>= rng2<label|\<gtr\>=/stlmap>>The these three
     operators are the same as <verbatim|rng2> \<less\> <verbatim|rng1>,
     <math|\<sim\>>(<verbatim|rng1>\<gtr\>``rng2`) and
-    <math|\<sim\>>(<verbatim|rng1``\<less\>'`rng2>) respectively.
+    <math|\<sim\>>(<verbatim|rng1``\<less\>``rng2>) respectively.
   </description>
 
   You also have to be careful when using equivalence and comparison operators

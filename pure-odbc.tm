@@ -378,13 +378,18 @@
   The following SQL types of result and parameter values are recognized and
   converted to/from the corresponding Pure types:
 
-  SQL value/type Pure value/type SQL NULL (no value) <verbatim|odbc::SQLNULL>
-  integer types (INTEGER and friends) <verbatim|int> 64-bit integers
-  <verbatim|bigint> floating point types (REAL, FLOAT and friends)
-  <verbatim|double> binary data (BINARY, BLOB, etc.) <verbatim|(size,>
-  <verbatim|data)> character strings (CHAR, VARCHAR, TEXT, etc.)
-  <verbatim|string> Note the special constant (nonfix symbol)
-  <verbatim|odbc::SQLNULL> which is used to represent SQL NULL values.
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|SQL
+  value/type>|<cell|Pure value/type>>|<row|<cell|SQL NULL (no
+  value)>|<cell|<verbatim|odbc::SQLNULL>>>|<row|<cell|integer types (INTEGER
+  and friends)>|<cell|<verbatim|int>>>|<row|<cell|64-bit
+  integers>|<cell|<verbatim|bigint>>>|<row|<cell|floating point types (REAL,
+  FLOAT and friends)>|<cell|<verbatim|double>>>|<row|<cell|binary data
+  (BINARY, BLOB, etc.)>|<cell|<verbatim|(size,>
+  <verbatim|data)>>>|<row|<cell|character strings (CHAR, VARCHAR, TEXT,
+  etc.)>|<cell|<verbatim|string>>>>>>
+
+  Note the special constant (nonfix symbol) <verbatim|odbc::SQLNULL> which is
+  used to represent SQL NULL values.
 
   Also note that binary data is specified as a pair <verbatim|(size,>
   <verbatim|data)> consisting of an int or bigint <verbatim|size> which

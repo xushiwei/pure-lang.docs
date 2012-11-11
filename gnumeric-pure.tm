@@ -999,14 +999,17 @@
   Gnumeric numbers, strings and arrays, respectively. The following table
   summarizes the available conversions:
 
-  Pure Gnumeric <verbatim|gnm_error> <verbatim|"#N/A"> error <verbatim|4711>,
-  <verbatim|4711L>, <verbatim|4711.0> scalar (number) <verbatim|"Hello>
-  <verbatim|world"> string <verbatim|()> empty <verbatim|(1,2,3)> array
-  <verbatim|[1,2,3]> array <verbatim|{1,2,3;4,5,6}> array (or cell range)
-  <verbatim|"A1:B10"> cell range (<verbatim|"r"> conversion) These
-  conversions mostly work both ways. Note that on input, cell ranges are
-  usually passed as matrices to Pure functions (i.e., they are passed ``by
-  value''), unless the function signature specifies a <verbatim|"r">
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Pure>|<cell|Gnumeric>>|<row|<cell|<verbatim|gnm_error>
+  <verbatim|"#N/A">>|<cell|error>>|<row|<cell|<verbatim|4711>,
+  <verbatim|4711L>, <verbatim|4711.0>>|<cell|scalar
+  (number)>>|<row|<cell|<verbatim|"Hello>
+  <verbatim|world">>|<cell|string>>|<row|<cell|<verbatim|()>>|<cell|empty>>|<row|<cell|<verbatim|(1,2,3)>>|<cell|array>>|<row|<cell|<verbatim|[1,2,3]>>|<cell|array>>|<row|<cell|<verbatim|{1,2,3;4,5,6}>>|<cell|array
+  (or cell range)>>|<row|<cell|<verbatim|"A1:B10">>|<cell|cell range
+  (<verbatim|"r"> conversion)>>>>>
+
+  These conversions mostly work both ways. Note that on input, cell ranges
+  are usually passed as matrices to Pure functions (i.e., they are passed
+  ``by value''), unless the function signature specifies a <verbatim|"r">
   conversion in which case the cell ranges themselves are passed to the
   function in string form. (Such values can also be passed on to Gnumeric
   functions which expect a cell range (<verbatim|"r"> ) parameter, see

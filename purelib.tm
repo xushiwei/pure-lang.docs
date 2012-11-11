@@ -2589,19 +2589,26 @@
   The basic arithmetic and logic operations provided by this module are
   summarized in the following table:
 
-  Kind Operator Meaning Arithmetic <verbatim|+> <verbatim|-> addition,
-  subtraction (also unary minus) <verbatim|*> <verbatim|/> multiplication,
-  division (inexact) <verbatim|div> <verbatim|mod> exact int/bigint
-  division/modulus <verbatim|^> exponentiation (inexact) Comparisons
-  <verbatim|==> <verbatim|~=> equality, inequality <verbatim|\<less\>>
-  <verbatim|\<gtr\>> less than, greater than <verbatim|\<less\>=>
-  <verbatim|\<gtr\>=> less than or equal, greater than or equal Logic
-  <verbatim|~> logical not <verbatim|&&> <verbatim|\|\|> and, or
-  (short-circuit) Bitwise <verbatim|not> bitwise not <verbatim|and>
-  <verbatim|or> and, or <verbatim|\<less\>\<less\>> <verbatim|\<gtr\>\<gtr\>>
-  bit shifts Precedence and and associativity of the operators can be found
-  in the <hlink|<em|operators>|#operators> table at the beginning of this
-  section.
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Kind>|<cell|Operator>|<cell|Meaning>>|<row|<cell|Arithmetic>|<cell|<verbatim|+>
+  <verbatim|->>|<cell|addition, subtraction (also unary
+  minus)>>|<row|<cell|>|<cell|<verbatim|*>
+  <verbatim|/>>|<cell|multiplication, division
+  (inexact)>>|<row|<cell|>|<cell|<verbatim|div> <verbatim|mod>>|<cell|exact
+  int/bigint division/modulus>>|<row|<cell|>|<cell|<verbatim|^>>|<cell|exponentiation
+  (inexact)>>|<row|<cell|Comparisons>|<cell|<verbatim|==>
+  <verbatim|~=>>|<cell|equality, inequality>>|<row|<cell|>|<cell|<verbatim|\<less\>>
+  <verbatim|\<gtr\>>>|<cell|less than, greater
+  than>>|<row|<cell|>|<cell|<verbatim|\<less\>=>
+  <verbatim|\<gtr\>=>>|<cell|less than or equal, greater than or
+  equal>>|<row|<cell|Logic>|<cell|<verbatim|~>>|<cell|logical
+  not>>|<row|<cell|>|<cell|<verbatim|&&> <verbatim|\|\|>>|<cell|and, or
+  (short-circuit)>>|<row|<cell|Bitwise>|<cell|<verbatim|not>>|<cell|bitwise
+  not>>|<row|<cell|>|<cell|<verbatim|and> <verbatim|or>>|<cell|and,
+  or>>|<row|<cell|>|<cell|<verbatim|\<less\>\<less\>>
+  <verbatim|\<gtr\>\<gtr\>>>|<cell|bit shifts>>>>>
+
+  Precedence and and associativity of the operators can be found in the
+  <hlink|<em|operators>|#operators> table at the beginning of this section.
 
   The names of some operations are at odds with C. Note, in particular, that
   logical negation is denoted <verbatim|~> instead of <verbatim|!> (and,

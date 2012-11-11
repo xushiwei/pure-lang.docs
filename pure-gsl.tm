@@ -2064,7 +2064,7 @@
 
   <\description>
     <item*|gsl::matrix::izeros n :: int>creates an
-    <with|font-series|bold|n`x'n> integer matrix with all of its entries
+    <with|font-series|bold|n`x`n> integer matrix with all of its entries
     being zero.
   </description>
 

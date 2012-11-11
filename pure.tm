@@ -10,7 +10,7 @@
 
   <section*|The Pure Manual<label|the-pure-manual>>
 
-  Version 0.56, November 04, 2012
+  Version 0.56, November 11, 2012
 
   Albert Gräf \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -549,7 +549,7 @@
   filename specified with <hlink|<em|-o>|#cmdoption-pure-o>. If the output
   filename ends in the .ll extension, an LLVM assembler file is created which
   can then be processed with the LLVM toolchain. If the output filename is
-  just `-', the assembler file is written to standard output, which is useful
+  just `-`, the assembler file is written to standard output, which is useful
   if you want to pass the generated code to the LLVM tools in a pipeline. If
   the output filename ends in the .bc extension, an LLVM bitcode file is
   created instead.
@@ -1762,7 +1762,7 @@
   might either be the empty list <verbatim|[]> or a non-empty list of the
   from <verbatim|x:xs> where the variables <verbatim|x> and <verbatim|xs>
   refer to the head element and the rest of the list, respectively. (The
-  `<verbatim|:>' infix operator is Pure's way of writing Lisp's ``cons'';
+  `<verbatim|:>` infix operator is Pure's way of writing Lisp's ``cons'';
   this works the same as in other modern FPLs and is discussed in much more
   detail later.)
 
@@ -1839,7 +1839,7 @@
   </verbatim>
 
   This isn't possible in Haskell and ML either because it violates the
-  constructor discipline; since `<verbatim|:>' is a constructor it can't
+  constructor discipline; since `<verbatim|:>` is a constructor it can't
   simultaneously be a defined function in these languages. Pure gives you
   much more freedom there.
 
@@ -1919,27 +1919,35 @@
   Function application binds stronger than all operators. Parentheses can be
   used to group expressions and override default precedences as usual.
 
-  Type Example Description Block <verbatim|\\x> <verbatim|y-\<gtr\>2*x-y>
-  anonymous function (lambda) <verbatim|case> <verbatim|f> <verbatim|u>
-  <verbatim|of> <verbatim|x,y> <verbatim|=> <verbatim|x+y> <verbatim|end>
-  case expression <verbatim|x+y> <verbatim|when> <verbatim|x,y> <verbatim|=>
-  <verbatim|f> <verbatim|u> <verbatim|end> local variable definition
-  <verbatim|f> <verbatim|u> <verbatim|with> <verbatim|f> <verbatim|(x,y)>
-  <verbatim|=> <verbatim|x+y> <verbatim|end> local function definition
-  Conditional <verbatim|if> <verbatim|x\<gtr\>0> <verbatim|then> <verbatim|x>
-  <verbatim|else> <verbatim|-x> conditional expression Simple <verbatim|x+y>,
-  <verbatim|-x>, <verbatim|x> <verbatim|mod> <verbatim|y> operator
-  application <verbatim|sin> <verbatim|x>, <verbatim|max> <verbatim|a>
-  <verbatim|b> function application Primary <verbatim|4711>,
-  <verbatim|4711L>, <verbatim|1.2e-3> number <verbatim|"Hello,>
-  <verbatim|world!\\n"> string <verbatim|foo>, <verbatim|x>, <verbatim|(+)>
-  function or variable symbol <verbatim|[1,2,3]>, <verbatim|(1,2,3)> list and
-  tuple <verbatim|{1,2;3,4}> matrix <verbatim|[x,-y> <verbatim|\|>
-  <verbatim|x=1..n;> <verbatim|y=1..m;> <verbatim|x\<less\>y]> list
-  comprehension <verbatim|{i==j> <verbatim|\|> <verbatim|i=1..n;>
-  <verbatim|j=1..m}> matrix comprehension The formal syntax of expressions is
-  as follows. (Note that the <hlink|<with|font-family|tt|rule>|#grammar-token-rule>
-  and <hlink|<with|font-family|tt|simple_rule>|#grammar-token-simple-rule>
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Type>|<cell|Example>|<cell|Description>>|<row|<cell|Block>|<cell|<verbatim|\\x>
+  <verbatim|y-\<gtr\>2*x-y>>|<cell|anonymous function
+  (lambda)>>|<row|<cell|>|<cell|<verbatim|case> <verbatim|f> <verbatim|u>
+  <verbatim|of> <verbatim|x,y> <verbatim|=> <verbatim|x+y>
+  <verbatim|end>>|<cell|case expression>>|<row|<cell|>|<cell|<verbatim|x+y>
+  <verbatim|when> <verbatim|x,y> <verbatim|=> <verbatim|f> <verbatim|u>
+  <verbatim|end>>|<cell|local variable definition>>|<row|<cell|>|<cell|<verbatim|f>
+  <verbatim|u> <verbatim|with> <verbatim|f> <verbatim|(x,y)> <verbatim|=>
+  <verbatim|x+y> <verbatim|end>>|<cell|local function
+  definition>>|<row|<cell|Conditional>|<cell|<verbatim|if>
+  <verbatim|x\<gtr\>0> <verbatim|then> <verbatim|x> <verbatim|else>
+  <verbatim|-x>>|<cell|conditional expression>>|<row|<cell|Simple>|<cell|<verbatim|x+y>,
+  <verbatim|-x>, <verbatim|x> <verbatim|mod> <verbatim|y>>|<cell|operator
+  application>>|<row|<cell|>|<cell|<verbatim|sin> <verbatim|x>,
+  <verbatim|max> <verbatim|a> <verbatim|b>>|<cell|function
+  application>>|<row|<cell|Primary>|<cell|<verbatim|4711>, <verbatim|4711L>,
+  <verbatim|1.2e-3>>|<cell|number>>|<row|<cell|>|<cell|<verbatim|"Hello,>
+  <verbatim|world!\\n">>|<cell|string>>|<row|<cell|>|<cell|<verbatim|foo>,
+  <verbatim|x>, <verbatim|(+)>>|<cell|function or variable
+  symbol>>|<row|<cell|>|<cell|<verbatim|[1,2,3]>,
+  <verbatim|(1,2,3)>>|<cell|list and tuple>>|<row|<cell|>|<cell|<verbatim|{1,2;3,4}>>|<cell|matrix>>|<row|<cell|>|<cell|<verbatim|[x,-y>
+  <verbatim|\|> <verbatim|x=1..n;> <verbatim|y=1..m;>
+  <verbatim|x\<less\>y]>>|<cell|list comprehension>>|<row|<cell|>|<cell|<verbatim|{i==j>
+  <verbatim|\|> <verbatim|i=1..n;> <verbatim|j=1..m}>>|<cell|matrix
+  comprehension>>>>>
+
+  The formal syntax of expressions is as follows. (Note that the
+  <hlink|<with|font-family|tt|rule>|#grammar-token-rule> and
+  <hlink|<with|font-family|tt|simple_rule>|#grammar-token-simple-rule>
   elements are part of the definition syntax, which is explained in the
   <hlink|Rule Syntax|#rule-syntax> section.)
 
@@ -2059,7 +2067,7 @@
     consist of the usual sequence of letters (including the underscore) and
     digits, starting with a letter. Case is significant, thus <verbatim|foo>,
     <verbatim|Foo> and <verbatim|FOO> are distinct identifiers. The
-    `<verbatim|_>' symbol, when occurring on the left-hand side of an
+    `<verbatim|_>` symbol, when occurring on the left-hand side of an
     equation, is special; it denotes the <with|font-series|bold|anonymous
     variable> which matches any value without actually binding a variable.
     Identifiers can also be prefixed with a namespace identifier, like in
@@ -3162,7 +3170,7 @@
 
   <paragraph|The Anonymous Variable<label|the-anonymous-variable>>
 
-  The `<verbatim|_>' symbol is special in patterns; it denotes the
+  The `<verbatim|_>` symbol is special in patterns; it denotes the
   <with|font-series|bold|anonymous variable> which matches an arbitrary value
   (independently for all occurrences) without actually binding a variable.
   This is useful if you don't care about an argument or one of its
@@ -3761,7 +3769,7 @@
 
   Guards or multiple left-hand or right-hand sides are not permitted in these
   rules. However, it is possible to omit the left-hand side if it is just the
-  anonymous variable `<verbatim|_>' by itself, indicating that you don't care
+  anonymous variable `<verbatim|_>` by itself, indicating that you don't care
   about the result. The right-hand side is still evaluated, if only for its
   side-effects, which is handy, e.g., for adding debugging statements to your
   code. For instance, here is a variation of the quadratic equation solver
@@ -4666,7 +4674,7 @@
   <verbatim|.pure> in the current directory, which gets reloaded
   automatically if we later rerun the interpreter in the same directory. We
   can also print this file, e.g., with the Unix <verbatim|cat> command (note
-  that `<verbatim|!>' executes a shell command):
+  that `<verbatim|!>` executes a shell command):
 
   <\verbatim>
     \<gtr\> !cat .pure
@@ -5506,7 +5514,7 @@
 
   Here the right-hand sides of both rules are the same. Pure has a convenient
   shorthand notation for this case which lets you factor out the common
-  right-hand side using the `<verbatim|\|>' delimiter as follows:
+  right-hand side using the `<verbatim|\|>` delimiter as follows:
 
   <\verbatim>
     square x::int \| square x::double = x*x;
@@ -6061,7 +6069,7 @@
   still a bit paltry, but if we keep at it and define all the other functions
   that we need then we could turn it into a full-blown replacement for Pure's
   list data structure. In fact Pure's lists work in a very similar fashion,
-  using the infix `<verbatim|:>' constructor and the empty list <verbatim|[]>
+  using the infix `<verbatim|:>` constructor and the empty list <verbatim|[]>
   in lieu of <verbatim|cons> and <verbatim|nil>, respectively.
 
   If we want, we can define a new data type for the data structure we just
@@ -6214,7 +6222,7 @@
   types|#interface-types>. For instance, if we take another look at the
   operations defined on our list type, we may observe that the data structure
   is quite apparent from the patterns in the rules of operations such as
-  `<verbatim|#>' and `<verbatim|+>'. Pure lets us leverage that information
+  `<verbatim|#>` and `<verbatim|+>`. Pure lets us leverage that information
   by creating an algebraic type from a collection of operation patterns it
   supports. For instance, we may write:
 
@@ -6229,7 +6237,7 @@
   </verbatim>
 
   This defines a generic type consisting of all terms which may be passed as
-  an argument to both `<verbatim|#>' and `<verbatim|+>'. We can ask the
+  an argument to both `<verbatim|#>` and `<verbatim|+>`. We can ask the
   interpreter about the patterns actually matched by the type as follows:
 
   <\verbatim>
@@ -6247,10 +6255,10 @@
   </verbatim>
 
   Note that the <verbatim|list_alike> type not only includes our own list
-  type, but also any other data structure providing the `<verbatim|#>' and
-  `<verbatim|+>' operations. This also comprises the standard list and string
-  types for which there are definitions of the `<verbatim|#>' and
-  `<verbatim|+>' operations in the prelude.
+  type, but also any other data structure providing the `<verbatim|#>` and
+  `<verbatim|+>` operations. This also comprises the standard list and string
+  types for which there are definitions of the `<verbatim|#>` and
+  `<verbatim|+>` operations in the prelude.
 
   Pure's interface types are a first attempt at formalizing the notion of
   <hlink|Duck typing|http://en.wikipedia.org/wiki/Duck-typing> in Pure.
@@ -7460,9 +7468,9 @@
     [10,9,8,7,6,5,4,3,2,1]
   </verbatim>
 
-  Note that we have to flip the arguments of the `<verbatim|:>' constructor
+  Note that we have to flip the arguments of the `<verbatim|:>` constructor
   here, since <verbatim|foldl> passes the accumulated list in the left
-  argument, but `<verbatim|:>' wants it on the right. Conversely, we have
+  argument, but `<verbatim|:>` wants it on the right. Conversely, we have
   that:
 
   <\verbatim>
@@ -7669,7 +7677,7 @@
     [(1,"a"),(2,"b"),(3,"c"),(4,"d"),(5,"e")]
   </verbatim>
 
-  Also note that since tuples are formed by just applying the `<verbatim|,>'
+  Also note that since tuples are formed by just applying the `<verbatim|,>`
   operator repeatedly, you can use multiple calls of <verbatim|zip> to piece
   together tuples of any length:
 
@@ -9248,7 +9256,7 @@
   prelude, see the <hlink|<em|Hash Pairs>|purelib.tm#hash-pairs> section in
   the <hlink|<em|Pure Library Manual>|purelib.tm> for details. There's one
   caveat here, however. Since neither `<verbatim|=\<gtr\>>` nor
-  `<verbatim|!>' treat their key operand in a special way, you'll have to
+  `<verbatim|!>` treat their key operand in a special way, you'll have to
   take care that the key symbols do not evaluate to something else, as might
   be the case if they are bound to a global or local variable or
   parameterless function:
@@ -9947,7 +9955,7 @@
   Examples for all types of symbol declarations can be found in the
   <hlink|<em|prelude>|purelib.tm#prelude> which declares a bunch of
   standard (arithmetic, relational, logical) operator symbols as well as the
-  list and pair constructors `<verbatim|:>' and `<verbatim|,>', and a few
+  list and pair constructors `<verbatim|:>` and `<verbatim|,>`, and a few
   nonfix symbols (<hlink|<with|font-family|tt|true>|purelib.tm#true> and
   <hlink|<with|font-family|tt|false>|purelib.tm#false>, as well as different
   kinds of exceptions).
@@ -10492,12 +10500,12 @@
 
   Script identifiers are translated to the corresponding filenames by
   replacing the `<verbatim|::>` symbol with the pathname separator
-  `<verbatim|/>' and tacking on the `<verbatim|.pure>` suffix. The following
+  `<verbatim|/>` and tacking on the `<verbatim|.pure>` suffix. The following
   table illustrates this with a few examples.
 
-  Script identifier Filename <verbatim|math> <verbatim|"math.pure">
-  <verbatim|examples::libor::bits> <verbatim|"examples/libor/bits.pure">
-  <verbatim|::pure::examples::hello> <verbatim|"/pure/examples/hello.pure">
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|2|2|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Script
+  identifier>|<cell|Filename>>|<row|<cell|<verbatim|math>>|<cell|<verbatim|"math.pure">>>|<row|<cell|<verbatim|examples::libor::bits>>|<cell|<verbatim|"examples/libor/bits.pure">>>|<row|<cell|<verbatim|::pure::examples::hello>>|<cell|<verbatim|"/pure/examples/hello.pure">>>>>>
+
   Note the last example, which shows how an absolute pathname can be denoted
   using a qualifier starting with `<verbatim|::>`.
 
@@ -10948,11 +10956,11 @@
   <hlink|<with|font-family|tt|let>|#let> definition. Hence these symbols
   are created as new symbols in the namespace <verbatim|foo>. On the other
   hand, the other occurrences of <verbatim|bar> in the first rule, as well as
-  the `<verbatim|,>' symbol on the left-hand side of the
+  the `<verbatim|,>` symbol on the left-hand side of the
   <hlink|<with|font-family|tt|let>|#let> definition are <em|referring>
   occurrences. In the former case, <verbatim|bar> refers to the
   <verbatim|bar> symbol defined by the rule, while in the latter case the
-  `<verbatim|,>' operator is actually declared in the prelude and thus
+  `<verbatim|,>` operator is actually declared in the prelude and thus
   imported from the global namespace.
 
   The same rules of lookup also apply to type tags on the left-hand side of
@@ -11739,7 +11747,7 @@
   runtime.)
 
   If we want, we can also add some syntactic sugar for Lisp weenies. (Note
-  that we cannot have `<verbatim|,>' for unquoting, so we use `<verbatim|,$>`
+  that we cannot have `<verbatim|,>` for unquoting, so we use `<verbatim|,$>`
   instead.)
 
   <\verbatim>
@@ -14746,7 +14754,7 @@
   can just set the <label|index-27><hlink|<with|font-family|tt|PURE_ESCAPE>|#envvar-PURE-ESCAPE>
   variable in your environment to enable escape mode by default.
 
-  For example, to set the escape character to `<verbatim|:>' you'll invoke
+  For example, to set the escape character to `<verbatim|:>` you'll invoke
   the interpreter as follows:
 
   <\verbatim>
@@ -14786,20 +14794,20 @@
     \<gtr\> show foldl
   </verbatim>
 
-  and you are using `<verbatim|:>' as the command prefix, then you will have
+  and you are using `<verbatim|:>` as the command prefix, then you will have
   to type this in escape mode instead:
 
   <\verbatim>
     \<gtr\> :show foldl
   </verbatim>
 
-  Note that in this case `<verbatim|!>' continues to serve as a shell escape:
+  Note that in this case `<verbatim|!>` continues to serve as a shell escape:
 
   <\verbatim>
     \<gtr\> ! find . '*.pure'
   </verbatim>
 
-  This will not work, however, if you use `<verbatim|!>' as your command
+  This will not work, however, if you use `<verbatim|!>` as your command
   prefix. In this case you will have to type <em|two> exclamation marks
   instead (the same caveat applies if you escape a shell command in the
   debugger, cf. <hlink|Debugging|#debugging>):
@@ -15777,7 +15785,7 @@
   optional in Pure and not recorded anywhere), so it will display the generic
   names <verbatim|x1>, <verbatim|x2> etc. instead.
 
-  At the debugger prompt `<verbatim|:>' you can enter various special
+  At the debugger prompt `<verbatim|:>` you can enter various special
   debugger commands, or just keep on hitting the carriage return key to walk
   through an evaluation step by step, as we did in the example above.
   (Command line editing works as usual at the debugger prompt, if it is
@@ -15826,7 +15834,7 @@
 
   <with|font-series|bold|Note:> If you specified an
   <hlink|<em|--escape>|#cmdoption-pure--escape> prefix other than
-  `<verbatim|!>' (cf. <hlink|Command Syntax|#command-syntax>), that prefix
+  `<verbatim|!>` (cf. <hlink|Command Syntax|#command-syntax>), that prefix
   will be used to execute interpreter commands instead, see below. The help
   message will tell you which command prefix is in effect.
 
@@ -15835,9 +15843,9 @@
   <verbatim|text>) which will just be ignored. Extra arguments on commands
   which don't expect any will generally be ignored as well. The single letter
   commands all have to be separated from any additional parameters with
-  whitespace, whereas the `<verbatim|!>', `<verbatim|?>' and `<verbatim|.>'
+  whitespace, whereas the `<verbatim|!>`, `<verbatim|?>` and `<verbatim|.>`
   commands count as word delimiters and can thus be followed immediately by
-  an argument. For convenience, the `<verbatim|?>' command can also be
+  an argument. For convenience, the `<verbatim|?>` command can also be
   omitted if the expression to be evaluated doesn't start with a single
   letter or one of the special punctuation commands.
 
@@ -15975,7 +15983,7 @@
   </verbatim>
 
   If you ever get lost, you can reprint the current rule with the
-  `<verbatim|.>' command:
+  `<verbatim|.>` command:
 
   <\verbatim>
     : .
@@ -16490,7 +16498,7 @@
 
   You can also override a built-in command in order to provide custom
   functionality. In this case, the original builtin can still be executed by
-  escaping the command name with a leading `<verbatim|^>'. The same syntax
+  escaping the command name with a leading `<verbatim|^>`. The same syntax
   works with the <hlink|<with|font-family|tt|evalcmd>|purelib.tm#evalcmd>
   function, so that a custom command can be defined in terms of the builtin
   that it replaces. E.g., if we always want to invoke the <verbatim|ls>
@@ -17384,7 +17392,7 @@
   comprehension are now separated with <verbatim|\|> instead of <verbatim|;>.
   Moreover, arithmetic sequences with arbitrary stepsize are now written
   <verbatim|x:y..z> instead of <verbatim|x,y..z>, and the `<verbatim|..>`
-  operator now has a higher precedence than the `<verbatim|,>' operator. This
+  operator now has a higher precedence than the `<verbatim|,>` operator. This
   makes writing matrix slices like <verbatim|x!!(i..j,k..l)> much more
   convenient.
 
@@ -18870,19 +18878,19 @@
 
   <subsection|Copying<label|copying>>
 
+  (The following explanations are not legal advice. Please read the full text
+  of the licenses and consult qualified professional counsel for an
+  interpretation of the license terms as they apply to you.)
+
   Pure comes with a fairly liberal license which lets you distribute your own
   Pure programs and extensions under a license of your choice and permits
   linking of commercial applications against the Pure runtime and the Pure
-  standard library without requiring special permission. Moreover, the Pure
-  interpreter (the <verbatim|pure> main program), the Pure runtime library
+  standard library without requiring special permission. The Pure interpreter
+  (the <verbatim|pure> main program), the Pure runtime library
   (<verbatim|libpure>) and the Pure standard library (the Pure scripts in the
   <verbatim|lib> folder distributed with the software) are distributed as
   free software, and you are welcome to modify and redistribute them under
   the appropriate license terms, as detailed below.
-
-  (The above explanations are not legal advice. Please read the full text of
-  the licenses and consult qualified professional counsel for an
-  interpretation of the license terms as they apply to you.)
 
   The <em|Pure interpreter> is free software: you can redistribute it and/or
   modify it under the terms of the GNU General Public License as published by
@@ -18899,6 +18907,18 @@
   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE.
 
+  One thing to note here is that the interpreter program is distributed under
+  the <hlink|GNU General Public License|http://www.gnu.org/copyleft/gpl.html>
+  and is thus subject to stricter license terms than the runtime library
+  and the standard library which are licensed under the <hlink|GNU Lesser
+  General Public License|http://www.gnu.org/copyleft/lgpl.html>. The main
+  reason for these conditions is that the interpreter program includes
+  support for the readline library which is GPL-licensed software. If this is
+  a problem for your application then you're welcome to use pure_norl.cc
+  instead. This is a readline-free replacement for the interpreter main
+  program included in the distribution, which is licensed under a 3-clause
+  BSD-style license.
+
   Please see the <hlink|GNU General Public
   License|http://www.gnu.org/copyleft/gpl.html> and the <hlink|GNU Lesser
   General Public License|http://www.gnu.org/copyleft/lgpl.html> for the
@@ -18906,6 +18926,8 @@
   COPYING and COPYING.LESSER files accompanying the software. Also, please
   see the source code for the copyright and license notes pertaining to
   individual source files which are part of this software.
+
+  Third party software licensing notes:
 
   Pure uses <hlink|LLVM|#llvm> as its compiler backend. LLVM is under
   Copyright (c) 2003-2012 by the University of Illinois at Urbana-Champaign,
@@ -19022,8 +19044,8 @@
   </description>
 
   <\description>
-    <item*|TeXmacs<label|texmacs>>A powerful editor for scientific documents,
-    with the appropriate plugin (inluded in the Pure distribution as of Pure
+    <item*|TeXmacs<label|texmacs>>A powerful editor for scientific documents.
+    With the appropriate plugin (inluded in the Pure distribution as of Pure
     0.56) it can also run Pure sessions. See
     <hlink|http://www.texmacs.org|http://www.texmacs.org>.
   </description>

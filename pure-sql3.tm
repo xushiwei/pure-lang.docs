@@ -450,15 +450,19 @@
 
   Sql3 provides the following set of ``core'' binding types:
 
-  Type Pure Argument SQLite Type b (int, pointer) blob c string text (utf8) d
-  double float i int int k int or bigint int64 l bigint blob n Sql3::SQLNULL
-  NULL x expression blob v variant variant The ``<with|font-series|bold|b>''
-  or blob type is different from the rest in that the Pure argument is
-  specified as a pair. The first element of the pair indicates the length in
-  bytes of the object to be stored and the second element indicates its
-  location in memory. The ``<with|font-series|bold|c>'' type stands for
-  string (as in ``char*''), ``<with|font-series|bold|d>'' stands for double
-  and ``<with|font-series|bold|i>'' stands for int. The
+  <tabular*|<tformat|<cwith|1|-1|1|1|cell-halign|l>|<cwith|1|-1|1|1|cell-lborder|0ln>|<cwith|1|-1|2|2|cell-halign|l>|<cwith|1|-1|3|3|cell-halign|l>|<cwith|1|-1|3|3|cell-rborder|0ln>|<cwith|1|-1|1|-1|cell-valign|c>|<cwith|1|1|1|-1|cell-bborder|1ln>|<table|<row|<cell|Type>|<cell|Pure
+  Argument>|<cell|SQLite Type>>|<row|<cell|b>|<cell|(int,
+  pointer)>|<cell|blob>>|<row|<cell|c>|<cell|string>|<cell|text
+  (utf8)>>|<row|<cell|d>|<cell|double>|<cell|float>>|<row|<cell|i>|<cell|int>|<cell|int>>|<row|<cell|k>|<cell|int
+  or bigint>|<cell|int64>>|<row|<cell|l>|<cell|bigint>|<cell|blob>>|<row|<cell|n>|<cell|Sql3::SQLNULL>|<cell|NULL>>|<row|<cell|x>|<cell|expression>|<cell|blob>>|<row|<cell|v>|<cell|variant>|<cell|variant>>>>>
+
+  The ``<with|font-series|bold|b>'' or blob type is different from the rest
+  in that the Pure argument is specified as a pair. The first element of the
+  pair indicates the length in bytes of the object to be stored and the
+  second element indicates its location in memory. The
+  ``<with|font-series|bold|c>'' type stands for string (as in ``char*''),
+  ``<with|font-series|bold|d>'' stands for double and
+  ``<with|font-series|bold|i>'' stands for int. The
   ``<with|font-series|bold|k>'' type stands for ``key'' and maps Pure ints
   and bigints (within the range of int64) to int64 values in the database.
   This type is useful when dealing with SQLite's ``integer primary keys'' and

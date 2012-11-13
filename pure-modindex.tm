@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 

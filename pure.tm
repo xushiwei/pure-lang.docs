@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 
@@ -10,7 +10,7 @@
 
   <section*|The Pure Manual<label|the-pure-manual>>
 
-  Version 0.56, November 11, 2012
+  Version 0.56, November 13, 2012
 
   Albert Gräf \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -539,7 +539,7 @@
 
   It is also possible to compile your scripts to native code beforehand,
   using the <hlink|<em|-c>|#cmdoption-pure-c> batch compilation option.
-  This options forces the interpreter to non-interactive mode (unless
+  This option forces the interpreter to non-interactive mode (unless
   <hlink|<em|-i>|#cmdoption-pure-i> is specified as well, which overrides
   <hlink|<em|-c>|#cmdoption-pure-c>). Any scripts specified on the command
   line are then executed as usual, but after execution the interpreter takes

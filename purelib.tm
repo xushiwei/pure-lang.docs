@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 
@@ -10,7 +10,7 @@
 
   <section*|Pure Library Manual<label|pure-library-manual>>
 
-  Version 0.56, October 10, 2012
+  Version 0.56, November 13, 2012
 
   Albert Gräf \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -1952,12 +1952,10 @@
       {1.0,2.0,3.0;4.0,5.0,6.0}
     </verbatim>
 
-    The <hlink|<with|font-family|tt|dmatrix>|#dmatrix>,
-    <hlink|<with|font-family|tt|cmatrix>|#cmatrix> and
-    <hlink|<with|font-family|tt|imatrix>|#imatrix> functions can also be
-    invoked with either an int <verbatim|n> or a pair <verbatim|(n,m)> of
-    ints as argument, in which case they construct a zero rowvector or matrix
-    with the corresponding dimensions.
+    In addition, these functions can also be invoked with either an int
+    <verbatim|n> or a pair <verbatim|(n,m)> of ints as argument, in which
+    case they construct a zero rowvector or matrix with the corresponding
+    dimensions.
 
     <\verbatim>
       \<gtr\> imatrix 3;
@@ -2636,7 +2634,13 @@
   and the thunking operator <verbatim|&> so that they may be used as function
   values and in partial applications, but when used in this manner they lose
   all their special call-by-name properties; see <hlink|<em|Special
-  Forms>|pure.tm#special-forms> in the Pure Manual for details.
+  Forms>|pure.tm#special-forms> in the Pure Manual for details. The rules
+  for the logical connectives are actually slightly more general than the
+  built-in rules so that an expression of the form <verbatim|x&&y> or
+  <verbatim|x\|\|y> will always be simplified in a sensible way if at least
+  one of the operands is a machine int; e.g., both <verbatim|x&&1> and
+  <verbatim|1&&x> will reduce to just <verbatim|x> if <verbatim|x> is not a
+  machine int.
 
   A detailed listing of the basic arithmetic and logical operations follows
   below.
@@ -2689,7 +2693,8 @@
 
     <item*|x \|\| y<label|\|\|>>Logical negation, conjunction and
     disjunction. These work with machine ints only and are evaluated in
-    short-circuit mode.
+    short-circuit mode, unless they are invoked as higher-order functions or
+    with operands which aren't machine ints. See the explanations above.
   </description>
 
   <\description>

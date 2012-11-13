@@ -1512,10 +1512,10 @@ Matrix Construction and Conversions
      > dmatrix {1,2,3;4,5,6};
      {1.0,2.0,3.0;4.0,5.0,6.0}
 
-   The :func:`dmatrix`, :func:`cmatrix` and :func:`imatrix` functions can
-   also be invoked with either an int ``n`` or a pair ``(n,m)`` of ints as
-   argument, in which case they construct a zero rowvector or matrix with
-   the corresponding dimensions. ::
+   In addition, these functions can also be invoked with either an int
+   ``n`` or a pair ``(n,m)`` of ints as argument, in which case they
+   construct a zero rowvector or matrix with the corresponding
+   dimensions. ::
 
      > imatrix 3;
      {0,0,0}
@@ -2033,7 +2033,11 @@ definitions for these, as well as other special forms like ``quote`` and
 the thunking operator ``&`` so that they may be used as function values and
 in partial applications, but when used in this manner they lose all their
 special call-by-name properties; see :ref:`Special Forms` in the Pure
-Manual for details.
+Manual for details. The rules for the logical connectives are actually
+slightly more general than the built-in rules so that an expression of the
+form ``x&&y`` or ``x||y`` will always be simplified in a sensible way if at
+least one of the operands is a machine int; e.g., both ``x&&1`` and
+``1&&x`` will reduce to just ``x`` if ``x`` is not a machine int.
 
 A detailed listing of the basic arithmetic and logical operations follows
 below.
@@ -2074,7 +2078,9 @@ below.
               infix || x y
 
    Logical negation, conjunction and disjunction. These work with machine
-   ints only and are evaluated in short-circuit mode.
+   ints only and are evaluated in short-circuit mode, unless they are
+   invoked as higher-order functions or with operands which aren't machine
+   ints. See the explanations above.
 
 .. function:: prefix not x
               infix and x y

@@ -4248,6 +4248,29 @@ with the desired substitutions given as hash pairs in the first argument:
 
 @noindent
 
+@cartouche
+@quotation Note
+If the call to @pxref{187,,reduce} (or @pxref{186,,__locals__}) is inside a
+local function then that local function will itself be in the
+constructed environment. This causes trouble (infinite recursion) if
+that function is parameterless (which is a common idiom). This isn't
+easy to fix in the current implementation, since the @pxref{186,,__locals__}
+macro isn't aware of which function it is being called in.
+
+You can avoid this mishap by calling @pxref{187,,reduce} in a global
+function, as shown in the @code{factor} and @code{expand} examples above, or,
+if you have to call it from a local function, by making sure that this
+function takes at least one argument.
+
+It is always a good idea to confine calls to @pxref{187,,reduce} to global
+functions if possible, since this gives you better control over which
+local functions are in scope at the point of the call. Otherwise it
+might be necessary to call @pxref{186,,__locals__} manually and filter the
+resulting list before submitting it to the @pxref{1ab,,reduce_with} function.
+@end quotation
+@end cartouche
+
+
 @node Expression Serialization,Other Special Primitives,Eval and Friends,Primitives
 @anchor{expression serialization}@anchor{1a5}@anchor{expression-serialization}
 @subsection Expression Serialization

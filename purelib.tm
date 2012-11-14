@@ -3741,6 +3741,28 @@
     [u+v,(u+v)^2,(u+v)^3]
   </verbatim>
 
+  <with|font-series|bold|Note:> If the call to
+  <hlink|<with|font-family|tt|reduce>|#reduce> (or
+  <hlink|<with|font-family|tt|__locals__>|#--locals-->) is inside a local
+  function then that local function will itself be in the constructed
+  environment. This causes trouble (infinite recursion) if that function is
+  parameterless (which is a common idiom). This isn't easy to fix in the
+  current implementation, since the <hlink|<with|font-family|tt|__locals__>|#--locals-->
+  macro isn't aware of which function it is being called in.
+
+  You can avoid this mishap by calling <hlink|<with|font-family|tt|reduce>|#reduce>
+  in a global function, as shown in the <verbatim|factor> and
+  <verbatim|expand> examples above, or, if you have to call it from a local
+  function, by making sure that this function takes at least one argument.
+
+  It is always a good idea to confine calls to
+  <hlink|<with|font-family|tt|reduce>|#reduce> to global functions if
+  possible, since this gives you better control over which local functions
+  are in scope at the point of the call. Otherwise it might be necessary to
+  call <hlink|<with|font-family|tt|__locals__>|#--locals--> manually and
+  filter the resulting list before submitting it to the
+  <hlink|<with|font-family|tt|reduce_with>|#reduce-with> function.
+
   <paragraph|Expression Serialization<label|expression-serialization>>
 
   Like <hlink|<with|font-family|tt|str>|#str> and

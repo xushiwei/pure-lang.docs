@@ -10,7 +10,7 @@
 
   <section*|The Pure Manual<label|the-pure-manual>>
 
-  Version 0.56, November 13, 2012
+  Version 0.56, November 14, 2012
 
   Albert Gräf \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -8327,7 +8327,9 @@
     1987
   </verbatim>
 
-  You can also just print the entire stream. This will run forever, so hit
+  You can also just print the entire stream. Note that this sieve algorithm
+  isn't tail-recursive, so the following will eventually result in a stack
+  overflow. But this will take a while, so you may want to hit
   <verbatim|Ctrl-c> when you get bored:
 
   <\verbatim>

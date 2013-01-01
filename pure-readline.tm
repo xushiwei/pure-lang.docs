@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 
@@ -10,11 +10,11 @@
 
   <section*|pure-readline<label|module-readline>>
 
-  Version 0.1, October 12, 2012
+  Version 0.2, January 01, 2013
 
   Albert Graef \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
-  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-readline-0.1.tar.gz|http://pure-lang.googlecode.com/files/pure-readline-0.1.tar.gz>.
+  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-readline-0.2.tar.gz|http://pure-lang.googlecode.com/files/pure-readline-0.2.tar.gz>.
 
   This is a trivial wrapper around GNU readline, which gives Pure scripts
   access to the most important facilities of the readline interface. This

@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 
@@ -11,7 +11,7 @@
   <section*|Computer Algebra with Pure: A Reduce
   Interface<label|module-reduce>>
 
-  Version 0.1, November 03, 2012
+  Version 0.2, January 01, 2013
 
   Albert Graef \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -66,7 +66,7 @@
 
   <subsection|Installation<label|installation>>
 
-  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz|http://pure-lang.googlecode.com/files/pure-reduce-0.1.tar.gz>.
+  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-reduce-0.2.tar.gz|http://pure-lang.googlecode.com/files/pure-reduce-0.2.tar.gz>.
 
   You'll need both the Reduce library (named reduce.so, reduce.dylib or
   reduce.dll, depending on the system you have) and a Reduce image file

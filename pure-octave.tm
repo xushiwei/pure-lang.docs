@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.16>
+<TeXmacs|1.0.7.17>
 
 <style|<tuple|generic|puredoc>>
 
@@ -10,7 +10,7 @@
 
   <section*|pure-octave<label|module-octave>>
 
-  Version 0.2, October 30, 2012
+  Version 0.3, January 01, 2013
 
   Albert Graef \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -39,7 +39,7 @@
 
   <subsection|Installation<label|installation>>
 
-  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-octave-0.2.tar.gz|http://pure-lang.googlecode.com/files/pure-octave-0.2.tar.gz>.
+  Get the latest source from <hlink|http://pure-lang.googlecode.com/files/pure-octave-0.3.tar.gz|http://pure-lang.googlecode.com/files/pure-octave-0.3.tar.gz>.
 
   Run <verbatim|make> to compile the module and <verbatim|make>
   <verbatim|install> (as root) to install it in the Pure library directory.

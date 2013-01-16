@@ -11,7 +11,7 @@
   <section*|Computer Algebra with Pure: A Reduce
   Interface<label|module-reduce>>
 
-  Version 0.2, January 01, 2013
+  Version 0.2, January 16, 2013
 
   Albert Graef \<less\><hlink|Dr.Graef@t-online.de|mailto:Dr.Graef@t-online.de>\<gtr\>
 
@@ -93,12 +93,15 @@
   interface works ok (this can be done without installing the package, but
   needs the Reduce image and library).
 
-  In case the above procedure doesn't work for you, there are more detailed
-  instructions on how to compile the relevant parts of Reduce in the
-  pure_reduce.txt file included in the distribution. Also note that the
-  pure-reduce module requires neither a full Reduce installation nor a full
-  build of the Reduce package; just the Reduce library and image. Thus the
-  additional items discussed below are all completely optional.
+  <with|font-series|bold|Note:> On some 64 bit systems (this has been
+  reported for Debian-based systems), you may have to install the
+  libc6-dev-i386 package or similar to make the compile go through; the CSL
+  Makefiles included in the Reduce sources require this for some reason.
+
+  Also note that the pure-reduce module requires neither a full Reduce
+  installation nor a full build of the Reduce package; just the Reduce
+  library and image. Thus the additional items discussed below are all
+  completely optional.
 
   For convenience, the Makefile also has a <verbatim|make> <verbatim|reduce>
   target which builds a minimal Reduce executable. If you use that option,
